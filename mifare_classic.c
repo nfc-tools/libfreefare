@@ -17,6 +17,18 @@
  * $Id$
  */
 
+/*
+ * This implementation was written based on information provided by the
+ * following documents:
+ *
+ * MF1ICS50 Functional specification
+ * Rev. 5.3 — 29 January 2008
+ *
+ * Making the Best of Mifare Classic
+ * Wouter Teepe (Radboud University Nijmegen)
+ * October 6, 2008
+ */
+
 #define _BSD_SOURCE
 #include <endian.h>
 #include <errno.h>
