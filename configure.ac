@@ -27,4 +27,7 @@ AC_FUNC_REALLOC
 # Checks for pkg-config modules.
 PKG_CHECK_MODULES([LIBNFC], [libnfc], [], [AC_MSG_ERROR([libnfc is mandatory.])])
 
-AC_OUTPUT([Makefile])
+PKG_CONFIG_REQUIRES="libnfc"
+AC_SUBST([PKG_CONFIG_REQUIRES])
+
+AC_OUTPUT([Makefile libfreefare.pc])

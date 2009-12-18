@@ -9,3 +9,6 @@ lib_LTLIBRARIES = libfreefare.la
 libfreefare_la_SOURCES = mifare_classic.c
 libfreefare_la_HEADERS = mifare_classic.h
 libfreefare_ladir = $(includedir)
+
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libfreefare.pc
