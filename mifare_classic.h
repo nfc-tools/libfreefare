@@ -53,6 +53,7 @@ int	 mifare_classic_decrement (MifareClassicTag tag, MifareClassicBlockNumber bl
 int	 mifare_classic_restore (MifareClassicTag tag, MifareClassicBlockNumber block);
 int	 mifare_classic_transfer (MifareClassicTag tag, MifareClassicBlockNumber block);
 
+int	 mifare_classic_format_sector (MifareClassicTag tag, MifareClassicBlockNumber block);
 
 /* MIFARE Classic Access Bits */
 #define MCAB_R 0x8

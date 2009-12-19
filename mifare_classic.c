@@ -44,6 +44,8 @@ struct mifare_classic_tag {
     nfc_iso14443a_info_t info;
     int active;
 
+    MifareClassicKeyType last_authentication_key_type;
+
     /*
      * The following block numbers are on 2 bytes in order to use invalid
      * address and avoid false cache hit with inconsistent data.
@@ -85,7 +87,7 @@ unsigned char mifare_data_access_permissions[] = {
  *   |,---- C2     |||| ||,---------------------- d
  *   ||,--- C1     |||| |||,--------------------- i
  *   |||           |||| ||||
- * 0b000	0b 1111 1111 */	0xff,
+ * 0b000	0b 1111 1111 */	0xff, /* Default (blank card) */
 /* 0b001 	0b 1000 1100 */	0x8c,
 /* 0b010	0b 1000 1000 */	0x88,
 /* 0b011	0b 1010 1111 */	0xaf,
@@ -118,7 +120,7 @@ uint16_t mifare_trailer_access_permissions[] = {
 /* 0b001 	0b 0001 1100 0000*/	0x1c0,
 /* 0b010	0b 0000 1000 1000*/	0x088,
 /* 0b011	0b 0000 1100 0000*/	0x0c0,
-/* 0b100	0b 0010 1010 1010*/	0x2aa,
+/* 0b100	0b 0010 1010 1010*/	0x2aa, /* Default (blank card) */
 /* 0b101	0b 0000 1101 0000*/	0x0d0,
 /* 0b110	0b 0001 1101 0001*/	0x1d1,
 /* 0b111	0b 0000 1100 0000*/	0x0c0
@@ -296,6 +298,7 @@ mifare_classic_authenticate (MifareClassicTag tag, MifareClassicBlockNumber bloc
 
     tag->cached_access_bits.sector_trailer_block_number = -1;
     tag->cached_access_bits.sector_access_bits = 0x00;
+    tag->last_authentication_key_type = key_type;
 
     // No result.  The MIFARE tag just ACKed.
     return 0;
@@ -627,4 +630,50 @@ mifare_classic_get_data_block_permission (MifareClassicTag tag, MifareClassicBlo
 	errno = EINVAL;
 	return -1;
     }
+}
+
+
+/*
+ * Miscellaneous functions
+ */
+
+/*
+ * Reset a MIFARE target sector to factory default.
+ */
+int
+mifare_classic_format_sector (MifareClassicTag tag, MifareClassicBlockNumber block)
+{
+    MifareClassicBlockNumber first_sector_block = (block / 4) * 4;
+    /* 
+     * Check that the current key allow us to rewrite data and trailer blocks.
+     */
+    if ((mifare_classic_get_data_block_permission(tag, first_sector_block, MCAB_W, tag->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_data_block_permission(tag, first_sector_block + 1, MCAB_W, tag->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_data_block_permission(tag, first_sector_block + 2, MCAB_W, tag->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_KEYA, tag->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_ACCESS_BITS, tag->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_KEYB, tag->last_authentication_key_type) != 1)) {
+	errno = EPERM;
+	return -1;
+    }
+
+    MifareClassicBlock empty_data_block;
+    memset (empty_data_block, '\x00', sizeof (empty_data_block));
+
+    MifareClassicBlock default_trailer_block = {
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  /* Key A */
+	0xff, 0x07, 0x80,                    /* Access bits */
+	0x69,                                /* GPB */
+	0xff, 0xff, 0xff, 0xff, 0xff, 0xff   /* Key B */
+    };
+
+    if ((mifare_classic_write (tag, first_sector_block, empty_data_block) < 0) ||
+	(mifare_classic_write (tag, first_sector_block + 1, empty_data_block) < 0) ||
+	(mifare_classic_write (tag, first_sector_block + 2, empty_data_block) < 0) ||
+	(mifare_classic_write (tag, first_sector_block + 3, default_trailer_block) < 0)) {
+	errno = EIO;
+	return -1;
+    }
+
+    return 0;
 }
