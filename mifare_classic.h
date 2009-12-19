@@ -20,6 +20,9 @@
 #ifndef __MIFARE_CLASSIC_H__
 #define __MIFARE_CLASSIC_H__
 
+#include <nfc/nfc.h>
+#include <sys/types.h>
+
 struct mifare_classic_tag;
 typedef struct mifare_classic_tag *MifareClassicTag;
 
@@ -32,27 +35,25 @@ typedef unsigned char MifareClassicKey[6];
 
 MifareClassicTag *mifare_classic_get_tags (nfc_device_t *device);
 void	 mifare_classic_free_tags (MifareClassicTag *tags);
-
 int	 mifare_classic_connect (MifareClassicTag tag);
 int	 mifare_classic_disconnect (MifareClassicTag tag);
 
-int	 mifare_classic_authenticate (MifareClassicTag tag, MifareClassicBlockNumber block, MifareClassicKey key, MifareClassicKeyType key_type);
+int	 mifare_classic_authenticate (MifareClassicTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type);
+int	 mifare_classic_read (MifareClassicTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data);
+int	 mifare_classic_init_value (MifareClassicTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr);
+int	 mifare_classic_read_value (MifareClassicTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr);
+int	 mifare_classic_write (MifareClassicTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data);
 
-int	 mifare_classic_read (MifareClassicTag tag, MifareClassicBlockNumber block, MifareClassicBlock *data);
-int	 mifare_classic_init_value (MifareClassicTag tag, MifareClassicBlockNumber block, int32_t value, MifareClassicBlockNumber adr);
-int	 mifare_classic_read_value (MifareClassicTag tag, MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr);
-int	 mifare_classic_write (MifareClassicTag tag, MifareClassicBlockNumber block, MifareClassicBlock data);
+int	 mifare_classic_increment (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
+int	 mifare_classic_decrement (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
+int	 mifare_classic_restore (MifareClassicTag tag, const MifareClassicBlockNumber block);
+int	 mifare_classic_transfer (MifareClassicTag tag, const MifareClassicBlockNumber block);
 
+int 	 mifare_classic_get_trailer_block_permission (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
+int	 mifare_classic_get_data_block_permission (MifareClassicTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
-int 	 mifare_classic_get_trailer_block_permission (MifareClassicTag tag, MifareClassicBlockNumber block, uint16_t permission, MifareClassicKeyType key_type);
-int	 mifare_classic_get_data_block_permission (MifareClassicTag tag, MifareClassicBlockNumber block, unsigned char permission, MifareClassicKeyType key_type);
-int	 mifare_classic_increment (MifareClassicTag tag, MifareClassicBlockNumber block, uint32_t amount);
-int	 mifare_classic_decrement (MifareClassicTag tag, MifareClassicBlockNumber block, uint32_t amount);
-int	 mifare_classic_restore (MifareClassicTag tag, MifareClassicBlockNumber block);
-int	 mifare_classic_transfer (MifareClassicTag tag, MifareClassicBlockNumber block);
-
-int	 mifare_classic_format_sector (MifareClassicTag tag, MifareClassicBlockNumber block);
-void	 mifare_classic_trailer_block (MifareClassicBlock *block, MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, uint8_t gpb, MifareClassicKey key_b);
+int	 mifare_classic_format_sector (MifareClassicTag tag, const MifareClassicBlockNumber block);
+void	 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, const uint8_t ab_0, const uint8_t ab_1, const uint8_t ab_2, const uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 
 /* MIFARE Classic Access Bits */
 #define MCAB_R 0x8

@@ -23,6 +23,7 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
+AC_CHECK_FUNCS([memset])
 
 # Checks for pkg-config modules.
 PKG_CHECK_MODULES([LIBNFC], [libnfc], [], [AC_MSG_ERROR([libnfc is mandatory.])])
