@@ -8,7 +8,8 @@ TESTS=		test_read_sector_0.c \
 		test_authenticate.c \
 		test_value_block.c \
 		test_access_bits.c \
-		test_format.c
+		test_format.c \
+		test_create_trailer_block.c
 
 SRCS=		${LMF_SRCS} \
 		${TESTS} \
@@ -35,7 +36,7 @@ check test: libfreefare_test
 
 # list.h is just a list of all tests, as indicated by DEFINE_TEST macro lines
 list.h: ${TESTS} Makefile
-	(cd ${.CURDIR}; cat test_*.c) | grep DEFINE_TEST > list.h
+	(cd ${.CURDIR}; cat ${TESTS}) | grep DEFINE_TEST > list.h
 
 CLEANFILES+=	list.h
 

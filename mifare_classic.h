@@ -23,8 +23,6 @@
 struct mifare_classic_tag;
 typedef struct mifare_classic_tag *MifareClassicTag;
 
-// struct mifare_block;
-// typedef struct mifare_block *MifareClassicBlock;
 typedef unsigned char MifareClassicBlock[16];
 
 typedef unsigned char MifareClassicBlockNumber;
@@ -54,6 +52,7 @@ int	 mifare_classic_restore (MifareClassicTag tag, MifareClassicBlockNumber bloc
 int	 mifare_classic_transfer (MifareClassicTag tag, MifareClassicBlockNumber block);
 
 int	 mifare_classic_format_sector (MifareClassicTag tag, MifareClassicBlockNumber block);
+void	 mifare_classic_trailer_block (MifareClassicBlock *block, MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, uint8_t gpb, MifareClassicKey key_b);
 
 /* MIFARE Classic Access Bits */
 #define MCAB_R 0x8

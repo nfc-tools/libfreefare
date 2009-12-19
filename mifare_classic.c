@@ -69,6 +69,12 @@ union mifare_classic_block {
 	MifareClassicBlockNumber address__;
 	MifareClassicBlockNumber address___;
     } value;
+    struct {
+	MifareClassicKey key_a;
+	uint8_t access_bits[3];
+	uint8_t gpb;
+	MifareClassicKey key_b;
+    } trailer;
 };
 
 typedef unsigned char MifareClassicAccessBits;
@@ -676,4 +682,28 @@ mifare_classic_format_sector (MifareClassicTag tag, MifareClassicBlockNumber blo
     }
 
     return 0;
+}
+
+/*
+ * Generates a MIFARE trailer block.
+ */
+void
+mifare_classic_trailer_block (MifareClassicBlock *block, MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, uint8_t gpb, MifareClassicKey key_b)
+{
+    union mifare_classic_block *b = (union mifare_classic_block *)block; // *((union mifare_classic_block *)(&block));
+
+    memcpy (b->trailer.key_a, key_a, sizeof (MifareClassicKey));
+
+    uint32_t access_bits = ((((( ab_0  & 0x4) >> 2) << 8) | (((ab_0  & 0x2) >> 1) << 4) | (ab_0  & 0x1)) |
+			    (((((ab_1  & 0x4) >> 2) << 8) | (((ab_1  & 0x2) >> 1) << 4) | (ab_1  & 0x1)) << 1) |
+			    (((((ab_2  & 0x4) >> 2) << 8) | (((ab_2  & 0x2) >> 1) << 4) | (ab_2  & 0x1)) << 2) |
+			    (((((ab_tb & 0x4) >> 2) << 8) | (((ab_tb & 0x2) >> 1) << 4) | (ab_tb & 0x1)) << 3));
+
+    uint32_t access_bits_ = ((~access_bits) & 0x00000fff);
+
+    uint32_t ab = htole32(((access_bits << 12) | access_bits_));
+    memcpy (&(b->trailer.access_bits), &ab, 3);
+    b->trailer.gpb = gpb;
+
+    memcpy (b->trailer.key_b, key_b, sizeof (MifareClassicKey));
 }
