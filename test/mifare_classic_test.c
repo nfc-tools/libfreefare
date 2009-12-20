@@ -1,12 +1,14 @@
 #include "test.h"
 
-static nfc_device_t *device;
-static MifareClassicTag *tags;
+static nfc_device_t *device = NULL;
+static MifareClassicTag *tags = NULL;
 
 int
 mifare_classic_test_setup (MifareClassicTag *tag)
 {
     int res = 0;
+
+    *tag = NULL;
 
     device = nfc_connect (NULL);
     if (!device)
@@ -14,9 +16,20 @@ mifare_classic_test_setup (MifareClassicTag *tag)
 
     if (0 == res) {
 	tags = mifare_classic_get_tags (device);
-	if (!tags || !(tags[0])) {
+	if (!tags) {
 	    nfc_disconnect (device);
+	    device = NULL;
 	    res = -2;
+	}
+    }
+
+    if (0 == res) {
+	if (!tags[0]) {
+	    mifare_classic_free_tags (tags);
+	    tags = NULL;
+	    nfc_disconnect (device);
+	    device = NULL;
+	    res = -4;
 	}
     }
 
@@ -27,6 +40,8 @@ mifare_classic_test_setup (MifareClassicTag *tag)
 	if (res != 0) {
 	    mifare_classic_disconnect (*tag);
 	    nfc_disconnect (device);
+	    *tag = NULL;
+	    device = NULL;
 	    res = -3;
 	}
     }
@@ -39,12 +54,15 @@ mifare_classic_test_teardown (MifareClassicTag tag)
 {
     int res;
 
-    res = mifare_classic_disconnect (tag);
+    if (tag)
+	res = mifare_classic_disconnect (tag);
 
     if (0 == res) {
-	mifare_classic_free_tags (tags);
+	if (tags)
+	    mifare_classic_free_tags (tags);
 
-	nfc_disconnect (device);
+	if (device)
+	    nfc_disconnect (device);
     }
 
     return res;
