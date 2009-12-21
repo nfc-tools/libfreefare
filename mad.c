@@ -286,7 +286,7 @@ mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps)
 int
 mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid)
 {
-    if (sector > 0x27) {
+    if ((sector < 1) || (sector == 0x10) || (sector > 0x27)) {
 	errno = EINVAL;
 	return -1;
     }
@@ -297,8 +297,8 @@ mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid)
 	    return -1;
 	}
 
-	aid->function_cluster_code = mad->sector_0x10.aids[sector - 0x0f - 1].function_cluster_code;
-	aid->application_code      = mad->sector_0x10.aids[sector - 0x0f - 1].application_code;
+	aid->function_cluster_code = mad->sector_0x10.aids[sector - 0x0f - 2].function_cluster_code;
+	aid->application_code      = mad->sector_0x10.aids[sector - 0x0f - 2].application_code;
     } else {
 	aid->function_cluster_code = mad->sector_0x00.aids[sector - 1].function_cluster_code;
 	aid->application_code      = mad->sector_0x00.aids[sector - 1].application_code;
