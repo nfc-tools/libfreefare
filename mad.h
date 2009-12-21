@@ -23,6 +23,12 @@
 
 typedef uint8_t MifareSectorNumber;
 
+struct mad_aid {
+    uint8_t function_cluster_code;
+    uint8_t application_code;
+};
+typedef struct mad_aid MadAid;
+
 struct mad;
 typedef struct mad *Mad;
 
@@ -33,8 +39,8 @@ int	 mad_get_version (Mad mad);
 void	 mad_set_version (Mad mad, uint8_t version);
 MifareSectorNumber mad_get_card_publisher_sector(Mad mad);
 int	 mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps);
-int	 mad_get_aid(Mad mad, MifareSectorNumber sector, uint8_t *function_cluster_code, uint8_t *application_code);
-int	 mad_set_aid(Mad mad, MifareSectorNumber sector, uint8_t function_cluster_code, uint8_t application_code);
+int	 mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid);
+int	 mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid);
 void	 mad_free (Mad mad);
 
 #endif /* !__MIFARE_APPLICATION_DIRECTORY_H__ */

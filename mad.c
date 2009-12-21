@@ -32,21 +32,16 @@
 
 #include <mad.h>
 
-struct aid {
-    uint8_t function_cluster_code;
-    uint8_t application_code;
-};
-
 struct mad_sector_0x00 {
     uint8_t crc;
     uint8_t info;
-    struct aid aids[15];
+    MadAid aids[15];
 };
 
 struct mad_sector_0x10 {
     uint8_t crc;
     uint8_t info;
-    struct aid aids[23];
+    MadAid aids[23];
 };
 
 struct mad {
@@ -289,7 +284,7 @@ mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps)
  * Get the provided sector's application identifier.
  */
 int
-mad_get_aid(Mad mad, MifareSectorNumber sector, uint8_t *function_cluster_code, uint8_t *application_code)
+mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid)
 {
     if (sector > 0x27) {
 	errno = EINVAL;
@@ -302,11 +297,11 @@ mad_get_aid(Mad mad, MifareSectorNumber sector, uint8_t *function_cluster_code, 
 	    return -1;
 	}
 
-	*function_cluster_code = mad->sector_0x10.aids[sector - 0x0f - 1].function_cluster_code;
-	*application_code      = mad->sector_0x10.aids[sector - 0x0f - 1].application_code;
+	aid->function_cluster_code = mad->sector_0x10.aids[sector - 0x0f - 1].function_cluster_code;
+	aid->application_code      = mad->sector_0x10.aids[sector - 0x0f - 1].application_code;
     } else {
-	*function_cluster_code = mad->sector_0x00.aids[sector - 1].function_cluster_code;
-	*application_code      = mad->sector_0x00.aids[sector - 1].application_code;
+	aid->function_cluster_code = mad->sector_0x00.aids[sector - 1].function_cluster_code;
+	aid->application_code      = mad->sector_0x00.aids[sector - 1].application_code;
     }
 
     return 0;
@@ -316,7 +311,7 @@ mad_get_aid(Mad mad, MifareSectorNumber sector, uint8_t *function_cluster_code, 
  * Set the provided sector's application identifier.
  */
 int
-mad_set_aid(Mad mad, MifareSectorNumber sector, uint8_t function_cluster_code, uint8_t application_code)
+mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid)
 {
     if (sector > 0x27) {
 	errno = EINVAL;
@@ -328,11 +323,11 @@ mad_set_aid(Mad mad, MifareSectorNumber sector, uint8_t function_cluster_code, u
 	    errno = EINVAL;
 	    return -1;
 	}
-	mad->sector_0x00.aids[sector - 0x0f - 1].function_cluster_code = function_cluster_code;
-	mad->sector_0x00.aids[sector - 0x0f - 1].application_code      = application_code;
+	mad->sector_0x00.aids[sector - 0x0f - 1].function_cluster_code = aid.function_cluster_code;
+	mad->sector_0x00.aids[sector - 0x0f - 1].application_code      = aid.application_code;
     } else {
-	mad->sector_0x00.aids[sector - 1].function_cluster_code = function_cluster_code;
-	mad->sector_0x00.aids[sector - 1].application_code      = application_code;
+	mad->sector_0x00.aids[sector - 1].function_cluster_code = aid.function_cluster_code;
+	mad->sector_0x00.aids[sector - 1].application_code      = aid.application_code;
     }
 
     return 0;

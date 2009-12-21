@@ -23,19 +23,25 @@ DEFINE_TEST(mad)
 	    assertEqualInt (res, -1);
 	    assertEqualInt (13, mad_get_card_publisher_sector (mad));
 
-	    uint8_t fcc, ac;
-	    res = mad_get_aid (mad, 3, &fcc, &ac);
-	    assertEqualInt (res, 0);
-	    assertEqualInt (fcc, 0);
-	    assertEqualInt (ac, 0);
+	    MadAid aid = {
+		.function_cluster_code = 0,
+		.application_code = 0
+	    };
 
-	    res = mad_set_aid (mad, 3, 0xc0, 0x42);
+	    res = mad_get_aid (mad, 3, &aid);
+	    assertEqualInt (res, 0);
+	    assertEqualInt (aid.function_cluster_code, 0);
+	    assertEqualInt (aid.application_code, 0);
+
+	    aid.function_cluster_code = 0xc0;
+	    aid.application_code = 0x42;
+	    res = mad_set_aid (mad, 3, aid);
 	    assertEqualInt (res, 0);
 
-	    res = mad_get_aid (mad, 3, &fcc, &ac);
+	    res = mad_get_aid (mad, 3, &aid);
 	    assertEqualInt (res, 0);
-	    assertEqualInt (fcc, 0xc0);
-	    assertEqualInt (ac, 0x42);
+	    assertEqualInt (aid.function_cluster_code, 0xc0);
+	    assertEqualInt (aid.application_code, 0x42);
 
 	    mad_free (mad);
 	}
