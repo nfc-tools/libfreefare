@@ -2,14 +2,15 @@ LMF_SRCDIR=	${.CURDIR}/..
 .PATH:		${LMF_SRCDIR}
 
 #LMF_SRCS!=	${MAKE} -f ${LMF_SRCDIR}/Makefile -V SRCS
-LMF_SRCS=	../mifare_classic.c
+LMF_SRCS=	../mifare_classic.c ../mifare_application_directory.c
 
 TESTS=		test_read_sector_0.c \
 		test_authenticate.c \
 		test_value_block.c \
 		test_access_bits.c \
 		test_format.c \
-		test_create_trailer_block.c
+		test_create_trailer_block.c \
+		test_mad.c
 
 SRCS=		${LMF_SRCS} \
 		${TESTS} \

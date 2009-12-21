@@ -205,6 +205,7 @@ int read_open_memory2(struct archive *, void *, size_t, size_t);
 
 #include <nfc/nfc.h>
 #include <mifare_classic.h>
+#include <mifare_application_directory.h>
 
 int	 mifare_classic_test_setup (MifareClassicTag *tag);
 int	 mifare_classic_test_teardown (MifareClassicTag tag);
