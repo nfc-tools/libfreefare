@@ -6,8 +6,8 @@ AM_LDFLAGS = @LIBNFC_LIBS@
 
 lib_LTLIBRARIES = libfreefare.la
 
-libfreefare_la_SOURCES = mifare_classic.c mad.c
-libfreefare_la_HEADERS = mifare_classic.h mad.h
+libfreefare_la_SOURCES = mifare_classic.c mad.c mifare_application.c
+libfreefare_la_HEADERS = mifare_classic.h mad.h mifare_application.h
 libfreefare_ladir = $(includedir)
 
 pkgconfigdir = $(libdir)/pkgconfig
