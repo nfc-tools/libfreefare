@@ -30,7 +30,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "mad.h"
+#include <mad.h>
 
 struct aid {
     uint8_t function_cluster_code;
@@ -264,7 +264,7 @@ mad_set_version (Mad mad, uint8_t version)
 /*
  * Return the MAD card publisher sector.
  */
-MifareSector
+MifareSectorNumber
 mad_get_card_publisher_sector(Mad mad)
 {
     return (mad->sector_0x00.info & 0x3f);
@@ -274,7 +274,7 @@ mad_get_card_publisher_sector(Mad mad)
  * Set the MAD card publisher sector.
  */
 int
-mad_set_card_publisher_sector(Mad mad, MifareSector cps)
+mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps)
 {
     if (((mad->version == 2) && (cps > 0x27)) | (mad->version == 1) && (cps > 0x0f)) {
 	errno = EINVAL;
@@ -289,7 +289,7 @@ mad_set_card_publisher_sector(Mad mad, MifareSector cps)
  * Get the provided sector's application identifier.
  */
 int
-mad_get_aid(Mad mad, MifareSector sector, uint8_t *function_cluster_code, uint8_t *application_code)
+mad_get_aid(Mad mad, MifareSectorNumber sector, uint8_t *function_cluster_code, uint8_t *application_code)
 {
     if (sector > 0x27) {
 	errno = EINVAL;
@@ -316,7 +316,7 @@ mad_get_aid(Mad mad, MifareSector sector, uint8_t *function_cluster_code, uint8_
  * Set the provided sector's application identifier.
  */
 int
-mad_set_aid(Mad mad, MifareSector sector, uint8_t function_cluster_code, uint8_t application_code)
+mad_set_aid(Mad mad, MifareSectorNumber sector, uint8_t function_cluster_code, uint8_t application_code)
 {
     if (sector > 0x27) {
 	errno = EINVAL;

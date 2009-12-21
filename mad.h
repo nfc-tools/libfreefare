@@ -19,9 +19,9 @@
 #ifndef __MIFARE_APPLICATION_DIRECTORY_H__
 #define __MIFARE_APPLICATION_DIRECTORY_H__
 
-#include "mifare_classic.h"
+#include <mifare_classic.h>
 
-typedef uint8_t MifareSector;
+typedef uint8_t MifareSectorNumber;
 
 struct mad;
 typedef struct mad *Mad;
@@ -31,10 +31,10 @@ Mad	 mad_read (MifareClassicTag tag);
 int	 mad_write (MifareClassicTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);
 int	 mad_get_version (Mad mad);
 void	 mad_set_version (Mad mad, uint8_t version);
-MifareSector mad_get_card_publisher_sector(Mad mad);
-int	 mad_set_card_publisher_sector(Mad mad, MifareSector cps);
-int	 mad_get_aid(Mad mad, MifareSector sector, uint8_t *function_cluster_code, uint8_t *application_code);
-int	 mad_set_aid(Mad mad, MifareSector sector, uint8_t function_cluster_code, uint8_t application_code);
+MifareSectorNumber mad_get_card_publisher_sector(Mad mad);
+int	 mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps);
+int	 mad_get_aid(Mad mad, MifareSectorNumber sector, uint8_t *function_cluster_code, uint8_t *application_code);
+int	 mad_set_aid(Mad mad, MifareSectorNumber sector, uint8_t function_cluster_code, uint8_t application_code);
 void	 mad_free (Mad mad);
 
 #endif /* !__MIFARE_APPLICATION_DIRECTORY_H__ */
