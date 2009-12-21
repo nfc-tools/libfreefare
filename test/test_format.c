@@ -9,7 +9,7 @@
 
 #include "mifare_classic.h"
 
-DEFINE_TEST(format)
+DEFINE_TEST(test_format)
 {
     int res;
     MifareClassicTag tag;

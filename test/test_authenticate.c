@@ -9,7 +9,7 @@
 
 #include "mifare_classic.h"
 
-DEFINE_TEST(authenticate)
+DEFINE_TEST(test_authenticate)
 {
     int res;
     MifareClassicTag tag;

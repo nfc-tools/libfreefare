@@ -9,7 +9,7 @@
 
 #include "mifare_classic.h"
 
-DEFINE_TEST(read_sector_0)
+DEFINE_TEST(test_read_sector_0)
 {
     MifareClassicTag tag;
     int res ;

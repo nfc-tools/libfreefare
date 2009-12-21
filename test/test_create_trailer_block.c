@@ -2,7 +2,7 @@
 
 #include "mifare_classic.h"
 
-DEFINE_TEST(create_trailer_block)
+DEFINE_TEST(test_create_trailer_block)
 {
     do {
 	MifareClassicBlock data;

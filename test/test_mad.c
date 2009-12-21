@@ -1,6 +1,6 @@
 #include "test.h"
 
-DEFINE_TEST(mad)
+DEFINE_TEST(test_mad)
 {
     int res;
 

@@ -1,6 +1,6 @@
 #include "test.h"
 
-DEFINE_TEST(access_bit_read_data_block)
+DEFINE_TEST(test_access_bit_read_data_block)
 {
     int res;
     MifareClassicTag tag;
@@ -40,7 +40,7 @@ DEFINE_TEST(access_bit_read_data_block)
     mifare_classic_test_teardown (tag);
 }
 
-DEFINE_TEST(access_bit_read_trailer_block)
+DEFINE_TEST(test_access_bit_read_trailer_block)
 {
     int res;
     MifareClassicTag tag;

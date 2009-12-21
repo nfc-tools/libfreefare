@@ -1,6 +1,6 @@
 #include "test.h"
 
-DEFINE_TEST(value_block_increment)
+DEFINE_TEST(test_value_block_increment)
 {
     int res;
     MifareClassicTag tag;
@@ -56,7 +56,7 @@ DEFINE_TEST(value_block_increment)
     mifare_classic_test_teardown (tag);
 }
 
-DEFINE_TEST(value_block_decrement)
+DEFINE_TEST(test_value_block_decrement)
 {
     int res;
     MifareClassicTag tag;
@@ -111,7 +111,7 @@ DEFINE_TEST(value_block_decrement)
     mifare_classic_test_teardown (tag);
 }
 
-DEFINE_TEST(value_block_restore)
+DEFINE_TEST(test_value_block_restore)
 {
     int res;
     MifareClassicTag tag;
