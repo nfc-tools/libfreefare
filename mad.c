@@ -30,7 +30,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include "mifare_application_directory.h"
+#include "mad.h"
 
 struct aid {
     uint8_t function_cluster_code;
