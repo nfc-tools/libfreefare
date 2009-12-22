@@ -25,6 +25,7 @@
  * MIFARE Application Directory (MAD)
  * Rev. 04 - 5 March 2009
  */
+#include "config.h"
 
 #include <stdlib.h>
 #include <errno.h>

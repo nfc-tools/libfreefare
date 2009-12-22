@@ -23,6 +23,8 @@
  *
  * /dev/brain
  */
+#include "config.h"
+
 #include <stdlib.h>
 
 #include <mifare_application.h>
