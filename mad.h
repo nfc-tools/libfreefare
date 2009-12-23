@@ -19,9 +19,8 @@
 #ifndef __MIFARE_APPLICATION_DIRECTORY_H__
 #define __MIFARE_APPLICATION_DIRECTORY_H__
 
+#include <mifare_common.h>
 #include <mifare_classic.h>
-
-typedef uint8_t MifareSectorNumber;
 
 struct mad_aid {
     uint8_t function_cluster_code;

@@ -30,8 +30,10 @@ AC_CHECK_FUNCS([memset])
 
 AC_CHECK_HEADERS([endian.h sys/endian.h])
 if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no"; then
-  AC_MSG_ERROR([Can't locate header endian.h.]);
+  AC_MSG_ERROR(["Can't locate header endian.h."]);
 fi
+
+CFLAGS="$CFLAGS -std=c99"
 
 # Checks for pkg-config modules.
 PKG_CHECK_MODULES([LIBNFC], [libnfc], [], [AC_MSG_ERROR([libnfc is mandatory.])])

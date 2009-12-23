@@ -655,9 +655,9 @@ mifare_classic_get_data_block_permission (MifareClassicTag tag, const MifareClas
  * Reset a MIFARE target sector to factory default.
  */
 int
-mifare_classic_format_sector (MifareClassicTag tag, const MifareClassicBlockNumber block)
+mifare_classic_format_sector (MifareClassicTag tag, const MifareSectorNumber sector)
 {
-    MifareClassicBlockNumber first_sector_block = (block / 4) * 4;
+    MifareClassicBlockNumber first_sector_block = sector * 4;
     /* 
      * Check that the current key allow us to rewrite data and trailer blocks.
      */
