@@ -27,7 +27,7 @@
 
 #include <stdlib.h>
 
-#include <mifare_application.h>
+#include <freefare.h>
 
 #define FIRST_SECTOR 1
 

@@ -1,7 +1,5 @@
 #include "test.h"
 
-#include "mifare_classic.h"
-
 DEFINE_TEST(test_create_trailer_block)
 {
     do {

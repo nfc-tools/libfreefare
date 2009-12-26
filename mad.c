@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include <mad.h>
+#include <freefare.h>
 
 struct mad_sector_0x00 {
     uint8_t crc;

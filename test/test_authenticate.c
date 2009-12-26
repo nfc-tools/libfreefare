@@ -7,8 +7,6 @@
 
 #include <nfc/nfc.h>
 
-#include "mifare_classic.h"
-
 DEFINE_TEST(test_authenticate)
 {
     int res;

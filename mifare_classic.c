@@ -45,7 +45,7 @@
 
 #include <nfc/nfc.h>
 
-#include <mifare_classic.h>
+#include <freefare.h>
 
 struct mifare_classic_tag {
     nfc_device_t *device;
