@@ -306,6 +306,7 @@ mifare_classic_authenticate (MifareClassicTag tag, const MifareClassicBlockNumbe
     // Send command
     size_t n;
     if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
+	tag->active = false; /* Tag is no more active if authentication failed. */
 	errno = EIO;
 	return -1;
     }
