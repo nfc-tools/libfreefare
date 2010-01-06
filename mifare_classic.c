@@ -694,6 +694,24 @@ mifare_classic_format_sector (MifareClassicTag tag, const MifareSectorNumber sec
 }
 
 /*
+ * UID accessor
+ */
+char*
+mifare_classic_get_uid(MifareClassicTag tag)
+{
+  char* uid = malloc((4 * 2) + 1);
+  for( uint8_t i = 0; i < 4; i++) {
+    unsigned char msb = (tag->info.abtUid[i] | 0xf0) >> 4;
+    unsigned char lsb = (tag->info.abtUid[i] | 0x0f);
+
+    uid[i] = msb < 9 ? msb + '0' : msb + 'a';
+    uid[i+1] = lsb < 9 ? lsb + '0' : lsb + 'a';
+  }
+  uid[8] = '\0';
+  return uid;
+}
+
+/*
  * Generates a MIFARE trailer block.
  */
 void
