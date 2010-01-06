@@ -26,6 +26,10 @@
 
 #include <nfc/nfc.h>
 
+#ifdef __cplusplus
+    extern "C" {
+#endif // __cplusplus
+
 struct mifare_classic_tag;
 typedef struct mifare_classic_tag *MifareClassicTag;
 
@@ -96,5 +100,10 @@ MifareSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);
 void		 mifare_application_free (Mad mad, MadAid aid);
 
 MifareSectorNumber *mifare_application_find (Mad mad, MadAid aid);
+
+#ifdef __cplusplus
+    }
+#endif // __cplusplus
+
 
 #endif /* !__FREEFARE_H__ */
