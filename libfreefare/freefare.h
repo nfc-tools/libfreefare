@@ -79,8 +79,8 @@ void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClas
 #define MCAB_WRITE_KEYB        0x001
 
 struct mad_aid {
-    uint8_t function_cluster_code;
     uint8_t application_code;
+    uint8_t function_cluster_code;
 };
 typedef struct mad_aid MadAid;
 

@@ -268,7 +268,7 @@ DEFINE_TEST (test_mad_sector_0x00_crc8)
 	    res = mad_set_card_publisher_sector (mad, 0x01);
 
 	    /* Block 1 */
-	    MadAid aid1 = { 0x08, 0x01 };
+	    MadAid aid1 = { 0x01, 0x08 };
 	    mad_set_aid (mad, 1, aid1);
 	    mad_set_aid (mad, 2, aid1);
 	    mad_set_aid (mad, 3, aid1);
@@ -278,21 +278,21 @@ DEFINE_TEST (test_mad_sector_0x00_crc8)
 	    mad_set_aid (mad, 4, empty_aid);
 	    mad_set_aid (mad, 5, empty_aid);
 	    mad_set_aid (mad, 6, empty_aid);
-	    MadAid aid2 = { 0x00, 0x04 };
+	    MadAid aid2 = { 0x04, 0x00 };
 	    mad_set_aid (mad, 7, aid2);
 
 	    /* Block 3 */
-	    MadAid aid3 = { 0x10, 0x03 };
+	    MadAid aid3 = { 0x03, 0x10 };
 	    mad_set_aid (mad, 8, aid3);
 	    mad_set_aid (mad, 9, aid3);
-	    MadAid aid4 = { 0x10, 0x02 };
+	    MadAid aid4 = { 0x02, 0x10 };
 	    mad_set_aid (mad, 10, aid4);
 	    mad_set_aid (mad, 11, aid4);
 
 	    mad_set_aid (mad, 12, empty_aid);
 	    mad_set_aid (mad, 13, empty_aid);
 	    mad_set_aid (mad, 14, empty_aid);
-	    MadAid aid5 = { 0x30, 0x11 };
+	    MadAid aid5 = { 0x11, 0x30 };
 	    mad_set_aid (mad, 15, aid5);
 
 	    res = sector_0x00_crc8 (mad);
@@ -302,4 +302,23 @@ DEFINE_TEST (test_mad_sector_0x00_crc8)
 	mad_free (mad);
 
     } while (0);
+}
+
+DEFINE_TEST (test_mad_read)
+{
+    int res;
+    MifareClassicTag tag;
+    do
+    {
+	res = mifare_classic_test_setup (&tag);
+	assertEqualInt (res, 0);
+
+	Mad mad = mad_read (tag);
+	if (!mad) {
+	    assertEqualInt (0, 1);
+	}
+
+    } while (0);
+
+    mifare_classic_test_teardown (tag);
 }
