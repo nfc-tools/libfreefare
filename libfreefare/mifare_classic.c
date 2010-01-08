@@ -185,6 +185,10 @@ mifare_classic_get_tags (nfc_device_t *device)
     // Poll for a ISO14443A (MIFARE) tag
     nfc_target_info_t target_info;
 
+    tags = malloc(sizeof (void *));
+    if(!tags) return NULL;
+    tags[0] = NULL;
+
     while (nfc_initiator_select_tag(device,NM_ISO14443A_106,NULL,0,&target_info)) {
 
 	// Ensure the target is a MIFARE classic tag.
@@ -202,17 +206,11 @@ mifare_classic_get_tags (nfc_device_t *device)
 	tag_count++;
 
 	/* (Re)Allocate memory for the found MIFARE classic array */
-	if (!tags) {
-	    if (!(tags = malloc ((tag_count) * sizeof (MifareClassicTag) + sizeof (void *)))) {
-	    	return NULL;
-	    }
-	} else {
-	    MifareClassicTag *p = realloc (tags, (tag_count) * sizeof (MifareClassicTag) + sizeof (void *));
-	    if (p)
-		tags = p;
-	    else
-		return p; // FAIL! Return what has been found so far.
-	}
+	MifareClassicTag *p = realloc (tags, (tag_count) * sizeof (MifareClassicTag) + sizeof (void *));
+	if (p)
+	    tags = p;
+	else
+	    return tags; // FAIL! Return what has been found so far.
 
 	/* Allocate memory for the found MIFARE classic tag */
 	if (!(tags[tag_count-1] = malloc (sizeof (struct mifare_classic_tag)))) {
