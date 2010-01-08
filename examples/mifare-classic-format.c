@@ -4,17 +4,16 @@
 
 #include <nfc/nfc.h>
 
-#include <mifare_common.h>
-#include <mifare_classic.h>
+#include <freefare.h>
 
-#define DEBUG 1
+#define DEBUG
 
 // Useful macros
 #ifdef DEBUG
 //   #define DBG(x, args...) printf("DBG %s:%d: " x "\n", __FILE__, __LINE__,## args )
   #define DBG(x, ...) fprintf(stderr, "DBG %s:%d: " x "\n", __FILE__, __LINE__, ## __VA_ARGS__ )
 #else
-  #define DBG(...) {}
+  #define DBG(...) do {} while (0)
 #endif
 
 static nfc_device_t *device = NULL;
