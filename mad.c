@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2009, Romain Tartiere, Romuald Conty.
+ * Copyright (C) 2009, 2010, Romain Tartiere, Romuald Conty.
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -27,22 +27,40 @@
  */
 #include "config.h"
 
+#include <sys/types.h>
+
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 
 #include <freefare.h>
 
+#include "mad.h"
+
+/*
+ * XXX The documentation says the preset is 0xE3, but the various card dumps
+ *     and the documentation example MAD CRC can be verified only with a CRC
+ *     preset of 0x67.
+ *
+ *     This is still under investigation:
+ *     http://www.libnfc.org/community/post/667/
+ *     http://discussion.forum.nokia.com/forum/showthread.php?t=181702#14
+ */
+#define CRC_PRESET 0x67
+
+#define SECTOR_0X00_AIDS 15
+#define SECTOR_0X10_AIDS 23
+
 struct mad_sector_0x00 {
     uint8_t crc;
     uint8_t info;
-    MadAid aids[15];
+    MadAid aids[SECTOR_0X00_AIDS];
 };
 
 struct mad_sector_0x10 {
     uint8_t crc;
     uint8_t info;
-    MadAid aids[23];
+    MadAid aids[SECTOR_0X10_AIDS];
 };
 
 struct mad {
@@ -72,6 +90,57 @@ mad_new (uint8_t version)
     memset (&(mad->sector_0x10), '\0', sizeof (mad->sector_0x10));
 
     return mad;
+}
+
+/*
+ * Compute CRC.
+ */
+void
+crc8 (uint8_t *crc, const uint8_t value)
+{
+    /* x^8 + x^4 + x^3 + x^2 + 1 => 0x11d */
+    const uint8_t poly = 0x1d;
+
+    for (int current_bit = 7; current_bit >= 0; current_bit--) {
+	int bit_out = (*crc) & 0x80;
+	*crc = ((*crc) << 1) | (( value >> (current_bit)) & 0x01);
+
+	if (bit_out)
+	    *crc ^= poly;
+
+    }
+}
+
+uint8_t
+sector_0x00_crc8 (Mad mad)
+{
+    uint8_t crc = CRC_PRESET;
+
+    crc8 (&crc, mad->sector_0x00.info);
+
+    for (int n = 0; n < SECTOR_0X00_AIDS; n++) {
+	crc8 (&crc, mad->sector_0x00.aids[n].application_code);
+	crc8 (&crc, mad->sector_0x00.aids[n].function_cluster_code);
+    }
+    crc8 (&crc, 0x00);
+
+    return crc;
+}
+
+uint8_t
+sector_0x10_crc8 (Mad mad)
+{
+    uint8_t crc = CRC_PRESET;
+
+    crc8 (&crc, mad->sector_0x10.info);
+
+    for (int n = 0; n < SECTOR_0X10_AIDS; n++) {
+	crc8 (&crc, mad->sector_0x10.aids[n].application_code);
+	crc8 (&crc, mad->sector_0x10.aids[n].function_cluster_code);
+    }
+    crc8 (&crc, 0x00);
+
+    return crc;
 }
 
 /*
@@ -125,6 +194,11 @@ mad_read (MifareClassicTag tag)
 	goto error;
     memcpy (&(mad->sector_0x00) + sizeof (data), data, sizeof (data));
 
+    uint8_t crc = mad->sector_0x00.crc;
+    uint8_t computed_crc = sector_0x00_crc8 (mad);
+    if (crc != computed_crc)
+	goto error;
+
     /* Read MAD data at 0x10 (MAD2) */
     if (mad->version == 2) {
 
@@ -144,12 +218,12 @@ mad_read (MifareClassicTag tag)
 	if (mifare_classic_read (tag, 0x42, &data) < 0)
 	    goto error;
 	memcpy (&(mad->sector_0x10) + sizeof (data) * 2, data, sizeof (data));
-    }
 
-    /*
-     * FIXME 3.7 CRC calculation states ``This code (CRC) should be checked
-     * whenever the MAD is read in order to ensure data integrity''.
-     */
+	crc = mad->sector_0x10.crc;
+	computed_crc = sector_0x10_crc8 (mad);
+	if (crc != computed_crc)
+	    goto error;
+    }
 
     return mad;
 
@@ -164,10 +238,6 @@ error:
 int
 mad_write (MifareClassicTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10)
 {
-    /*
-     * FIXME Since the CRC SHOULD be checked, it SHOULD be written, right?
-     */
-
     MifareClassicBlock data;
 
     if (mifare_classic_authenticate (tag, 0x00, key_b_sector_00, MFC_KEY_B) < 0)
@@ -211,6 +281,8 @@ mad_write (MifareClassicTag tag, Mad mad, MifareClassicKey key_b_sector_00, Mifa
 	    return -1;
 	}
 
+	mad->sector_0x10.crc = sector_0x10_crc8 (mad);
+
 	memcpy (data, &(mad->sector_0x10), sizeof (data));
 	if (mifare_classic_write (tag, 0x40, data) < 0) return -1;
 	memcpy (data, &(mad->sector_0x10) + sizeof (data), sizeof (data));
@@ -222,6 +294,8 @@ mad_write (MifareClassicTag tag, Mad mad, MifareClassicKey key_b_sector_00, Mifa
 	if (mifare_classic_write (tag, 0x42, data) < 0) return -1;
 
     }
+
+    mad->sector_0x00.crc = sector_0x00_crc8 (mad);
 
     if (mifare_classic_authenticate (tag, 0x00, key_b_sector_00, MFC_KEY_B) < 0) return -1;
     memcpy (data, &(mad->sector_0x00), sizeof (data));
