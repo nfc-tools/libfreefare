@@ -41,5 +41,5 @@ PKG_CHECK_MODULES([LIBNFC], [libnfc], [], [AC_MSG_ERROR([libnfc is mandatory.])]
 PKG_CONFIG_REQUIRES="libnfc"
 AC_SUBST([PKG_CONFIG_REQUIRES])
 
-AC_OUTPUT([Makefile libfreefare.pc])
+AC_OUTPUT([Makefile libfreefare/Makefile libfreefare.pc])
 

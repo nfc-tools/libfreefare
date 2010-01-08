@@ -11,6 +11,3 @@ libfreefare_la_HEADERS = freefare.h
 libfreefare_ladir = $(includedir)
 
 EXTRA_DIST = freefare_internal.h
-
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = libfreefare.pc

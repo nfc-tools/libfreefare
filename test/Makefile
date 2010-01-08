@@ -1,8 +1,10 @@
-LMF_SRCDIR=	${.CURDIR}/..
+LMF_SRCDIR=	${.CURDIR}/../libfreefare
 .PATH:		${LMF_SRCDIR}
 
 #LMF_SRCS!=	${MAKE} -f ${LMF_SRCDIR}/Makefile -V SRCS
-LMF_SRCS=	../mifare_classic.c ../mad.c ../mifare_application.c
+LMF_SRCS=	${LMF_SRCDIR}/mifare_classic.c \
+		${LMF_SRCDIR}/mad.c \
+		${LMF_SRCDIR}/mifare_application.c
 
 TESTS=		test_read_sector_0.c \
 		test_authenticate.c \
@@ -30,7 +32,7 @@ LDADD+=		-lnfc
 CFLAGS+=	-std=c99
 CFLAGS+=	-ggdb
 CFLAGS+=	-Wall -pedantic
-CFLAGS+=	-I${LMF_SRCDIR} -I.
+CFLAGS+=	-I${LMF_SRCDIR} -I. -I..
 
 .PHONY: check test
 check test: libfreefare_test

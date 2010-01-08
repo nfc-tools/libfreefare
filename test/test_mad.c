@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "../freefare_internal.h"
+#include "freefare_internal.h"
 
 DEFINE_TEST(test_mad)
 {
