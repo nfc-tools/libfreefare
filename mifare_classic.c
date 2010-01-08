@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2009, Romain Tartiere, Romuald Conty.
+ * Copyright (C) 2009, 2010, Romain Tartiere, Romuald Conty.
  * 
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -257,6 +257,9 @@ mifare_classic_connect (MifareClassicTag tag)
     nfc_target_info_t pnti;
     if (nfc_initiator_select_tag (tag->device, NM_ISO14443A_106, tag->info.abtUid, 4, &pnti)) {
 	tag->active = 1;
+    } else {
+	errno = EIO;
+	return -1;
     }
     return 0;
 }
@@ -274,6 +277,9 @@ mifare_classic_disconnect (MifareClassicTag tag)
 
     if (nfc_initiator_deselect_tag (tag->device)) {
 	tag->active = 0;
+    } else {
+	errno = EIO;
+	return -1;
     }
     return 0;
 }
