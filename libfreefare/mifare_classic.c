@@ -706,13 +706,7 @@ char*
 mifare_classic_get_uid(MifareClassicTag tag)
 {
   char* uid = malloc((4 * 2) + 1);
-  for( uint8_t i = 0; i < 4; i++) {
-    unsigned char msb = (tag->info.abtUid[i] | 0xf0) >> 4;
-    unsigned char lsb = (tag->info.abtUid[i] | 0x0f);
-
-    uid[i] = msb < 9 ? msb + '0' : msb + 'a';
-    uid[i+1] = lsb < 9 ? lsb + '0' : lsb + 'a';
-  }
+  snprintf(uid, 9, "%02x%02x%02x%02x", tag->info.abtUid[0], tag->info.abtUid[1], tag->info.abtUid[2], tag->info.abtUid[3]);
   uid[8] = '\0';
   return uid;
 }
