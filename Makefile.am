@@ -1,3 +1,6 @@
+
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS = libfreefare
 
 pkgconfigdir = $(libdir)/pkgconfig
