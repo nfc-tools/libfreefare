@@ -35,7 +35,7 @@
 
 #include <freefare.h>
 
-#include "mad.h"
+#include "freefare_internal.h"
 
 /*
  * XXX The documentation says the preset is 0xE3, but the various card dumps
