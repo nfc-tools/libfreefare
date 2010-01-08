@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
- * $Id: mifare_classic.h 88 2009-12-23 15:26:57Z rconty@il4p.fr $
+ * $Id$
  */
 
 #ifndef __FREEFARE_H__
