@@ -35,7 +35,7 @@ DEFINE_TEST(test_format)
 	res = mifare_classic_write (tag, 0x3e, data);
 	assertEqualInt (res, 0);
 
-	res = mifare_classic_format_sector (tag, 0x03c);
+	res = mifare_classic_format_sector (tag, 0x0f);
 	assertEqualInt (res, 0);
 
 	res = mifare_classic_read (tag, 0x3c, &data);
