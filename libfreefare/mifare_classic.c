@@ -666,7 +666,7 @@ mifare_classic_format_sector (MifareClassicTag tag, const MifareSectorNumber sec
     /* 
      * Check that the current key allow us to rewrite data and trailer blocks.
      */
-    if ((mifare_classic_get_data_block_permission(tag, first_sector_block, MCAB_W, tag->last_authentication_key_type) != 1) ||
+    if (((sector != 0) && (mifare_classic_get_data_block_permission(tag, first_sector_block, MCAB_W, tag->last_authentication_key_type) != 1)) ||
 	(mifare_classic_get_data_block_permission(tag, first_sector_block + 1, MCAB_W, tag->last_authentication_key_type) != 1) ||
 	(mifare_classic_get_data_block_permission(tag, first_sector_block + 2, MCAB_W, tag->last_authentication_key_type) != 1) ||
 	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_KEYA, tag->last_authentication_key_type) != 1) ||
@@ -686,7 +686,7 @@ mifare_classic_format_sector (MifareClassicTag tag, const MifareSectorNumber sec
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff   /* Key B */
     };
 
-    if ((mifare_classic_write (tag, first_sector_block, empty_data_block) < 0) ||
+    if (((sector != 0) && (mifare_classic_write (tag, first_sector_block, empty_data_block) < 0)) ||
 	(mifare_classic_write (tag, first_sector_block + 1, empty_data_block) < 0) ||
 	(mifare_classic_write (tag, first_sector_block + 2, empty_data_block) < 0) ||
 	(mifare_classic_write (tag, first_sector_block + 3, default_trailer_block) < 0)) {
