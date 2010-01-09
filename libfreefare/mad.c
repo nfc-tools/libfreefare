@@ -188,11 +188,15 @@ mad_read (MifareClassicTag tag)
     /* Read MAD data at 0x00 (MAD1, MAD2) */
     if (mifare_classic_read (tag, 0x01, &data) < 0)
 	goto error;
-    memcpy (&(mad->sector_0x00), data, sizeof (data));
+
+    uint8_t *p = (uint8_t *) &(mad->sector_0x00);
+    memcpy (p, data, sizeof (data));
+
+    p+= sizeof (data);
 
     if (mifare_classic_read (tag, 0x02, &data) < 0)
 	goto error;
-    memcpy (&(mad->sector_0x00) + sizeof (data), data, sizeof (data));
+    memcpy (p, data, sizeof (data));
 
     uint8_t crc = mad->sector_0x00.crc;
     uint8_t computed_crc = sector_0x00_crc8 (mad);
@@ -207,17 +211,23 @@ mad_read (MifareClassicTag tag)
 	    goto error;
 	}
 
+	p = (uint8_t *) &(mad->sector_0x10);
+
 	if (mifare_classic_read (tag, 0x40, &data) < 0)
 	    goto error;
-	memcpy (&(mad->sector_0x10), data, sizeof (data));
+	memcpy (p, data, sizeof (data));
+
+	p += sizeof (data);
 
 	if (mifare_classic_read (tag, 0x41, &data) < 0)
 	    goto error;
-	memcpy (&(mad->sector_0x10) + sizeof (data), data, sizeof (data));
+	memcpy (p, data, sizeof (data));
+
+	p += sizeof (data);
 
 	if (mifare_classic_read (tag, 0x42, &data) < 0)
 	    goto error;
-	memcpy (&(mad->sector_0x10) + sizeof (data) * 2, data, sizeof (data));
+	memcpy (p, data, sizeof (data));
 
 	crc = mad->sector_0x10.crc;
 	computed_crc = sector_0x10_crc8 (mad);
