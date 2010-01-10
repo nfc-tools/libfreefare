@@ -1,4 +1,4 @@
-AM_CFLAGS = -I. @LIBNFC_CFLAGS@
+AM_CFLAGS = -I. -I$(top_builddir)/libfreefare @LIBNFC_CFLAGS@
 AM_LDFLAGS = @LIBNFC_LIBS@
 
 bin_PROGRAMS = mifare-classic-format
