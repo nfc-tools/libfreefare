@@ -1,5 +1,10 @@
 # $Id$
 
+INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
+LIBS = $(CUTTER_LIBS)
+
+if WITH_CUTTER
+
 TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE=yes CUTTER="$(CUTTER)"
 
@@ -8,9 +13,6 @@ noinst_LTLIBRARIES = \
 		     test_mifare_classic.la \
 		     test_mifare_classic_create_trailer_block.la \
 		     test_mifare_classic_application.la
-
-INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
-LIBS = $(CUTTER_LIBS)
 
 AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
@@ -29,3 +31,5 @@ test_mifare_classic_application_la_LIBADD = $(top_srcdir)/libfreefare/libfreefar
 
 echo-cutter:
 	@echo $(CUTTER)
+
+endif
