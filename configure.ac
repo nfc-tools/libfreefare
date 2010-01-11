@@ -41,5 +41,14 @@ PKG_CHECK_MODULES([LIBNFC], [libnfc], [], [AC_MSG_ERROR([libnfc is mandatory.])]
 PKG_CONFIG_REQUIRES="libnfc"
 AC_SUBST([PKG_CONFIG_REQUIRES])
 
-AC_OUTPUT([Makefile examples/Makefile libfreefare/Makefile libfreefare.pc])
+m4_ifdef([AC_CHECK_CUTTER], [AC_CHECK_CUTTER], [ac_cv_use_cutter="no"])
+AM_CONDITIONAL([WITH_CUTTER], [test "$ac_cv_use_cutter" != "no"])
+
+m4_ifdef([AC_CHECK_COVERAGE], [AC_CHECK_COVERAGE])
+
+if test x$ac_cv_enable_coverage = xyes; then
+    CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
+fi
+
+AC_OUTPUT([Makefile examples/Makefile libfreefare/Makefile libfreefare.pc test/Makefile])
 
