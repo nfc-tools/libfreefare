@@ -16,7 +16,7 @@ setup ()
     tags = mifare_classic_get_tags (device);
     cut_assert_not_null (tags ,"Error enumerating NFC tags");
 
-    cut_assert_not_null (tags[0], "No tag on NFC device");
+    cut_assert_not_null (tags[0], "No MIFARE CLassic tag on NFC device");
 
     tag = tags[0];
 

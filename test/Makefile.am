@@ -3,6 +3,9 @@
 INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
 LIBS = $(CUTTER_LIBS)
 
+
+AM_CFLAGS = @LIBNFC_CFLAGS@
+
 if WITH_CUTTER
 
 TESTS = run-test.sh
