@@ -33,6 +33,8 @@ if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no"; then
   AC_MSG_ERROR(["Can't locate header endian.h."]);
 fi
 
+AC_DEFINE([_XOPEN_SOURCE], [600], [Define to 500 if Single Unix conformance is wanted, 600 for sixth revision.])
+
 CFLAGS="$CFLAGS -std=c99"
 
 # Checks for pkg-config modules.
