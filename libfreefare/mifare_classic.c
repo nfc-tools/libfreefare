@@ -46,6 +46,7 @@
 #include <nfc/nfc.h>
 
 #include <freefare.h>
+#include "freefare_internal.h"
 
 struct mifare_classic_tag {
     nfc_device_t *device;
@@ -247,10 +248,7 @@ mifare_classic_free_tags (MifareClassicTag *tags)
 int
 mifare_classic_connect (MifareClassicTag tag)
 {
-    if (tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_INACTIVE (tag);
 
     nfc_target_info_t pnti;
     if (nfc_initiator_select_tag (tag->device, NM_ISO14443A_106, tag->info.abtUid, 4, &pnti)) {
@@ -268,10 +266,7 @@ mifare_classic_connect (MifareClassicTag tag)
 int
 mifare_classic_disconnect (MifareClassicTag tag)
 {
-    if (!(tag->active)) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     if (nfc_initiator_deselect_tag (tag->device)) {
 	tag->active = 0;
@@ -296,10 +291,7 @@ mifare_classic_disconnect (MifareClassicTag tag)
 int
 mifare_classic_authenticate (MifareClassicTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[12];
     command[0] = (key_type == MFC_KEY_A) ? MC_AUTH_A : MC_AUTH_B;
@@ -329,10 +321,7 @@ mifare_classic_authenticate (MifareClassicTag tag, const MifareClassicBlockNumbe
 int
 mifare_classic_read (MifareClassicTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[2];
     command[0] = MC_READ;
@@ -403,10 +392,7 @@ mifare_classic_read_value (MifareClassicTag tag, const MifareClassicBlockNumber 
 int
 mifare_classic_write (MifareClassicTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[2 + sizeof (MifareClassicBlock)];
     command[0] = MC_WRITE;
@@ -431,10 +417,7 @@ mifare_classic_write (MifareClassicTag tag, const MifareClassicBlockNumber block
 int
 mifare_classic_increment (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[6];
     command[0] = MC_INCREMENT;
@@ -460,10 +443,7 @@ mifare_classic_increment (MifareClassicTag tag, const MifareClassicBlockNumber b
 int
 mifare_classic_decrement (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[6];
     command[0] = MC_DECREMENT;
@@ -488,10 +468,7 @@ mifare_classic_decrement (MifareClassicTag tag, const MifareClassicBlockNumber b
 int
 mifare_classic_restore (MifareClassicTag tag, const MifareClassicBlockNumber block)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[2];
     /* XXX Should be MC_RESTORE according to the MIFARE documentation. */
@@ -515,10 +492,7 @@ mifare_classic_restore (MifareClassicTag tag, const MifareClassicBlockNumber blo
 int
 mifare_classic_transfer (MifareClassicTag tag, const MifareClassicBlockNumber block)
 {
-    if (!tag->active) {
-	errno = EINVAL;
-	return -1;
-    }
+    ASSERT_ACTIVE (tag);
 
     unsigned char command[2];
     command[0] = MC_TRANSFER;
