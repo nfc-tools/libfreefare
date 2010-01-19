@@ -27,4 +27,19 @@ void		 crc8 (uint8_t *crc, const uint8_t value);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
 
+#define MIFARE_ULTRALIGHT_PAGE_COUNT 16
+
+struct mifare_ultralight_tag {
+    nfc_device_t *device;
+    nfc_iso14443a_info_t info;
+    int active;
+
+    /* mifare_ultralight_read() reads 4 pages at a time (wrapping) */
+    MifareUltralightPage cache[MIFARE_ULTRALIGHT_PAGE_COUNT + 3];
+    uint8_t cached_pages[MIFARE_ULTRALIGHT_PAGE_COUNT];
+};
+
+#define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
+#define ASSERT_INACTIVE(tag) do  { if (tag->active) return errno = ENXIO, -1; } while (0)
+
 #endif /* !__FREEFARE_INTERNAL_H__ */

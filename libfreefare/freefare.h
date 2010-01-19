@@ -30,6 +30,21 @@
     extern "C" {
 #endif // __cplusplus
 
+struct mifare_ultralight_tag;
+typedef struct mifare_ultralight_tag *MifareUltralightTag;
+typedef uint8_t MifareUltralightPageNumber;
+typedef unsigned char MifareUltralightPage[4];
+
+MifareUltralightTag *mifare_ultralight_get_tags (nfc_device_t *device);
+void		 mifare_ultralight_free_tags (MifareUltralightTag *tags);
+int		 mifare_ultralight_connect (MifareUltralightTag tag);
+int		 mifare_ultralight_disconnect (MifareUltralightTag tag);
+
+int		 mifare_ultralight_read (MifareUltralightTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
+int		 mifare_ultralight_write (MifareUltralightTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
+
+char		*mifare_ultralight_get_uid (MifareUltralightTag tag);
+
 struct mifare_classic_tag;
 typedef struct mifare_classic_tag *MifareClassicTag;
 
