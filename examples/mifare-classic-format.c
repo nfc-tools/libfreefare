@@ -83,7 +83,7 @@ main(int argc, char *argv[])
 
 	for (size_t n = 0; n < sector_count; n++) {
 	    if (try_format_sector (*tag, n) < 0) {
-		warnx ("%s: Can't format sector %d (0x%02x)", tag_uid,  n, n);
+		warnx ("%s: Can't format sector %ld (0x%02lx)", tag_uid,  n, n);
 		error = 1;
 	    }
 	}

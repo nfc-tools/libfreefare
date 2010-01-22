@@ -103,7 +103,7 @@ void
 test_mifare_classic_read_mad (void)
 {
     Mad mad = mad_read (tag);
-    cut_assert_not_null (tag);
+    cut_assert_not_null (mad);
 }
 
 void
@@ -169,7 +169,7 @@ test_mifare_classic_value_block_increment (void)
     int32_t value;
     MifareClassicBlockNumber adr;
     res = mifare_classic_read_value (tag, block, &value, &adr);
-    cut_assert_equal_int (0, res, 0);
+    cut_assert_equal_int (0, res);
     cut_assert_equal_int (1000, value);
     cut_assert_equal_int (0x00, adr);
 
