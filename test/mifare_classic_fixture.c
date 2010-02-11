@@ -14,14 +14,14 @@ setup ()
     cut_assert_not_null (device, cut_message ("No device found"));
 
     tags = mifare_classic_get_tags (device);
-    cut_assert_not_null (tags, cut_message ("Error enumerating NFC tags"));
+    cut_assert_not_null (tags, cut_message ("mifare_classic_get_tags() failed"));
 
-    cut_assert_not_null (tags[0], cut_message ("No MIFARE CLassic tag on NFC device"));
+    cut_assert_not_null (tags[0], cut_message ("No MIFARE Classic tag on NFC device"));
 
     tag = tags[0];
 
     res = mifare_classic_connect (tag);
-    cut_assert_equal_int (0, res);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_connect() failed"));
 }
 
 void

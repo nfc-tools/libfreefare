@@ -12,6 +12,6 @@ test_mifare_classic_create_trailer_block (void)
 
     mifare_classic_trailer_block (&data, key_a, 0, 0, 0, 4, 0x42, key_b);
 
-    cut_assert_equal_memory (data, sizeof (data), "\xff\xff\xff\xff\xff\xff\xff\x07\x80\x42\xde\xad\xbe\xef\xff\xff", sizeof (data));
+    cut_assert_equal_memory (data, sizeof (data), "\xff\xff\xff\xff\xff\xff\xff\x07\x80\x42\xde\xad\xbe\xef\xff\xff", sizeof (data), cut_message ("Wrong generated block"));
 }
 
