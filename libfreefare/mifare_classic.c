@@ -470,7 +470,12 @@ mifare_classic_restore (MifareClassicTag tag, const MifareClassicBlockNumber blo
 {
     ASSERT_ACTIVE (tag);
 
-    unsigned char command[2];
+    /*
+     * Same length as the increment and decrement commands but only the first
+     * two bytes are actually used.  The 4 bytes after the block number are
+     * meaningless but required (thus left uninitialized).
+     */
+    unsigned char command[6];
     /* XXX Should be MC_RESTORE according to the MIFARE documentation. */
     command[0] = MC_STORE;
     command[1] = block;
