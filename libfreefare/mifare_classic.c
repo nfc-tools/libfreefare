@@ -500,12 +500,13 @@ mifare_classic_transfer (MifareClassicTag tag, const MifareClassicBlockNumber bl
 
     // Send command
     size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
+    unsigned char buffer[1];
+    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), buffer, &n))) {
 	errno = EIO;
 	return -1;
     }
 
-    // No result.  The MIFARE tag just ACKed.
+    // FIXME: The receive command returns data. Should be checked.
     return 0;
 }
 
