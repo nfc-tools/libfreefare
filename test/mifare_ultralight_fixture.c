@@ -30,17 +30,17 @@ setup ()
     int res;
 
     device = nfc_connect (NULL);
-    cut_assert_not_null (device, "No device found");
+    cut_assert_not_null (device, cut_message ("No device found"));
 
     tags = mifare_ultralight_get_tags (device);
-    cut_assert_not_null (tags ,"Error enumerating NFC tags");
+    cut_assert_not_null (tags, cut_message ("Error enumerating NFC tags"));
 
-    cut_assert_not_null (tags[0], "No MIFARE CLassic tag on NFC device");
+    cut_assert_not_null (tags[0], cut_message ("No MIFARE CLassic tag on NFC device"));
 
     tag = tags[0];
 
     res = mifare_ultralight_connect (tag);
-    cut_assert_equal_int (0, res);
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_connect() failed"));
 }
 
 void

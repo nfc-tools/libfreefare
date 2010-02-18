@@ -42,34 +42,34 @@ test_mifare_ultralight_write (void)
 
     /* Read and save current value (should be { 0x00 0x00 0x00 0x00 }) */
     res = mifare_ultralight_read (tag, n, &initial);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
 
     /* Write payload1 */
     res = mifare_ultralight_write (tag, n, payload1);
-    cut_assert_equal_int (0, res, "mifare_ultralight_write failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_write() failed"));
 
     /* Check it */
     res = mifare_ultralight_read (tag, n, &page);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read failed");
-    cut_assert_equal_memory (payload1, sizeof (payload1), page, sizeof (page));
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
+    cut_assert_equal_memory (payload1, sizeof (payload1), page, sizeof (page), cut_message ("Wrong data"));
 
     /* Write payload2 */
     res = mifare_ultralight_write (tag, n, payload2);
-    cut_assert_equal_int (0, res, "mifare_ultralight_write failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_write() failed"));
 
     /* Check it */
     res = mifare_ultralight_read (tag, n, &page);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read failed");
-    cut_assert_equal_memory (payload2, sizeof (payload2), page, sizeof (page));
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
+    cut_assert_equal_memory (payload2, sizeof (payload2), page, sizeof (page), cut_message ("Wrong data"));
 
     /* Write initial data */
     res = mifare_ultralight_write (tag, n, initial);
-    cut_assert_equal_int (0, res, "mifare_ultralight_write failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_write() failed"));
 
     /* While here check it (no reason to fail since the rest of the test passed) */
     res = mifare_ultralight_read (tag, n, &page);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read failed");
-    cut_assert_equal_memory (initial, sizeof (initial), page, sizeof (page));
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
+    cut_assert_equal_memory (initial, sizeof (initial), page, sizeof (page), cut_message ("Wrong data"));
 }
 
 void
@@ -79,12 +79,12 @@ test_mifare_ultralight_invalid_page (void)
     MifareUltralightPage page = { 0x00, 0x00, 0x00, 0x00 };
 
     res = mifare_ultralight_read (tag, 16, &page);
-    cut_assert_equal_int (-1, res);
-    cut_assert_equal_int (EINVAL, errno);
+    cut_assert_equal_int (-1, res, cut_message ("mifare_ultralight_read() succeeded"));
+    cut_assert_equal_int (EINVAL, errno, cut_message ("Wrong errno value"));
 
     res = mifare_ultralight_write (tag, 16, page);
-    cut_assert_equal_int (-1, res);
-    cut_assert_equal_int (EINVAL, errno);
+    cut_assert_equal_int (-1, res, cut_message ("mifare_ultralight_write() succeeded"));
+    cut_assert_equal_int (EINVAL, errno, cut_message ("Wrong errno value"));
 }
 
 void
@@ -94,7 +94,7 @@ test_mifare_ultralight_cache (void)
     MifareUltralightPage page;
 
     res = mifare_ultralight_read (tag, 0, &page);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read() failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
 
     /* Check cached pages consistency */
     for (int i = 0; i <= 3; i++) {
@@ -114,11 +114,11 @@ test_mifare_ultralight_cache_hit (void)
     MifareUltralightPage page2;
 
     res = mifare_ultralight_read (tag, 0, &page1);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read() failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
 
     res = mifare_ultralight_read (tag, 0, &page2);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read() failed");
-    cut_assert_equal_memory (page1, sizeof (page1), page2, sizeof (page2));
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
+    cut_assert_equal_memory (page1, sizeof (page1), page2, sizeof (page2), cut_message ("Wrong cached data"));
 }
 
 
@@ -129,7 +129,7 @@ test_mifare_ultralight_cache_wrap (void)
     MifareUltralightPage page;
 
     res = mifare_ultralight_read (tag, 15, &page);
-    cut_assert_equal_int (0, res, "mifare_ultralight_read() failed");
+    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
 
     /* Check cached pages consistency */
     for (int i = 0; i <= 2; i++) {
@@ -150,8 +150,8 @@ test_mifare_ultralight_get_uid (void)
 
     uid = mifare_ultralight_get_uid (tag);
 
-    cut_assert_not_null (uid);
-    cut_assert_equal_int (14, strlen (uid));
+    cut_assert_not_null (uid, cut_message ("mifare_ultralight_get_uid() failed"));
+    cut_assert_equal_int (14, strlen (uid), cut_message ("Wrong UID length"));
 
     free (uid);
 }
