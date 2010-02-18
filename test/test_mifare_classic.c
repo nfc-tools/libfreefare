@@ -87,16 +87,16 @@ test_mifare_classic_get_trailer_permission (void)
 
     cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_KEYA, MFC_KEY_A), cut_message ("Wrong permission"));
     cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_KEYA, MFC_KEY_B), cut_message ("Wrong permission"));
-    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYA, MFC_KEY_A), cut_message ("Wrong permission"));
-    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYA, MFC_KEY_B), cut_message ("Wrong permission"));
+    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYA, MFC_KEY_A), cut_message ("Wrong permission"));
+    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYA, MFC_KEY_B), cut_message ("Wrong permission"));
     cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_ACCESS_BITS, MFC_KEY_A), cut_message ("Wrong permission"));
-    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_ACCESS_BITS, MFC_KEY_B), cut_message ("Wrong permission"));
-    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A), cut_message ("Wrong permission"));
-    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_ACCESS_BITS, MFC_KEY_B), cut_message ("Wrong permission"));
-    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_KEYB, MFC_KEY_A), cut_message ("Wrong permission"));
+    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_ACCESS_BITS, MFC_KEY_B), cut_message ("Wrong permission"));
+    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A), cut_message ("Wrong permission"));
+    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_ACCESS_BITS, MFC_KEY_B), cut_message ("Wrong permission"));
+    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_KEYB, MFC_KEY_A), cut_message ("Wrong permission"));
     cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_READ_KEYB, MFC_KEY_B), cut_message ("Wrong permission"));
-    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYB, MFC_KEY_A), cut_message ("Wrong permission"));
-    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYB, MFC_KEY_B), cut_message ("Wrong permission"));
+    cut_assert_equal_int (1, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYB, MFC_KEY_A), cut_message ("Wrong permission"));
+    cut_assert_equal_int (0, mifare_classic_get_trailer_block_permission(tag, 0x07, MCAB_WRITE_KEYB, MFC_KEY_B), cut_message ("Wrong permission"));
 }
 
 void
