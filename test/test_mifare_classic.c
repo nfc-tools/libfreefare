@@ -9,7 +9,7 @@ void
 test_mifare_classic_authenticate (void)
 {
     int res;
-    MifareClassicKey k = { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, 0x00, k, MFC_KEY_A);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
 }
@@ -21,7 +21,7 @@ test_mifare_classic_read_sector_0 (void)
 
     cut_omit ("Requires a particular NFC tag");
 
-    MifareClassicKey k = { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, 0x00, k, MFC_KEY_A);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
 
@@ -40,7 +40,7 @@ test_mifare_classic_get_data_block_permission (void)
 {
     int res;
 
-    MifareClassicKey k = { 0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, 0x04, k, MFC_KEY_A);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
 
@@ -72,7 +72,7 @@ test_mifare_classic_get_trailer_permission (void)
 {
     int res;
 
-    MifareClassicKey k = { 0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, 0x07, k, MFC_KEY_A);
     cut_assert_equal_int (res, 0, cut_message ("mifare_classic_authenticate() failed"));
 
@@ -158,7 +158,7 @@ test_mifare_classic_value_block_increment (void)
     int res;
 
     MifareClassicBlockNumber block = 0x04;
-    MifareClassicKey k = { 0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, block, k, MFC_KEY_A);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
 
@@ -207,10 +207,9 @@ test_mifare_classic_value_block_decrement (void)
     int res;
 
     MifareClassicBlockNumber block = 0x04;
-    MifareClassicKey k = { 0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, block, k, MFC_KEY_A);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
-
     res = mifare_classic_init_value (tag, block, 1000, 0x00);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_init_value() failed"));
 
@@ -254,7 +253,7 @@ test_mifare_classic_value_block_restore (void)
     int res;
 
     MifareClassicBlockNumber block = 0x04;
-    MifareClassicKey k = { 0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7 };
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
     res = mifare_classic_authenticate (tag, block, k, MFC_KEY_A);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
 
