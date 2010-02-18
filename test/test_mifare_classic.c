@@ -102,6 +102,7 @@ test_mifare_classic_get_trailer_permission (void)
 void
 test_mifare_classic_read_mad (void)
 {
+    cut_pend ("A blank MIFARE Classic does not have a MAD.  This test has to be moved in an appropriate test case.");
     Mad mad = mad_read (tag);
     cut_assert_not_null (mad, cut_message ("mad_read() failed"));
 }
