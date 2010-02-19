@@ -51,98 +51,28 @@
  */
 
 /*
- * Get a list of the MIFARE card near to the provided NFC initiator.
- *
- * The list can be freed using the mifare_ultralight_free_tags() function.
- */
-MifareUltralightTag *
-mifare_ultralight_get_tags (nfc_device_t *device)
-{
-    MifareUltralightTag *tags = NULL;
-    int tag_count = 0;
-
-    nfc_initiator_init(device);
-
-    // Drop the field for a while
-    nfc_configure(device,NDO_ACTIVATE_FIELD,false);
-
-    // Let the reader only try once to find a tag
-    nfc_configure(device,NDO_INFINITE_SELECT,false);
-
-    // Configure the CRC and Parity settings
-    nfc_configure(device,NDO_HANDLE_CRC,true);
-    nfc_configure(device,NDO_HANDLE_PARITY,true);
-
-    // Enable field so more power consuming cards can power themselves up
-    nfc_configure(device,NDO_ACTIVATE_FIELD,true);
-
-    // Poll for a ISO14443A (MIFARE) tag
-    nfc_target_info_t target_info;
-
-    tags = malloc(sizeof (void *));
-    if(!tags) return NULL;
-    tags[0] = NULL;
-
-    while (nfc_initiator_select_tag(device,NM_ISO14443A_106,NULL,0,&target_info)) {
-
-	// Ensure the target is a MIFARE UltraLight tag.
-	if (!((target_info.nai.abtAtqa[0] == 0x00) &&
-		    (target_info.nai.abtAtqa[1] == 0x44) &&
-		    (target_info.nai.btSak == 0x00))) /* NXP MIFARE UltraLight */
-	    continue;
-
-	tag_count++;
-
-	/* (Re)Allocate memory for the found MIFARE UltraLight array */
-	MifareUltralightTag *p = realloc (tags, (tag_count) * sizeof (MifareUltralightTag) + sizeof (void *));
-	if (p)
-	    tags = p;
-	else
-	    return tags; // FAIL! Return what has been found so far.
-
-	/* Allocate memory for the found MIFARE UltraLight tag */
-	if (!(tags[tag_count-1] = malloc (sizeof (struct mifare_ultralight_tag)))) {
-	    return tags; // FAIL! Return what has been found before.
-	}
-	(tags[tag_count-1])->device = device;
-	(tags[tag_count-1])->info = target_info.nai;
-	(tags[tag_count-1])->active = 0;
-	for (int i = 0; i < MIFARE_ULTRALIGHT_PAGE_COUNT; i++) {
-	    tags[tag_count-1]->cached_pages[i] = 0;
-	}
-	tags[tag_count] = NULL;
-
-	nfc_initiator_deselect_tag (device);
-    }
-
-    return tags;
-}
-
-/*
  * Free the provided tag list.
  */
 void
-mifare_ultralight_free_tags (MifareUltralightTag *tags)
+mifare_ultralight_free_tag (MifareTag tag)
 {
-    if (tags) {
-    	for (int i=0; tags[i]; i++) {
-	    free (tags[i]);
-	}
-	free (tags);
-    }
+    free (tag);
 }
 
 /*
  * Establish connection to the provided tag.
  */
 int
-mifare_ultralight_connect (MifareUltralightTag tag)
+mifare_ultralight_connect (MifareTag tag)
 {
     ASSERT_INACTIVE (tag);
+    ASSERT_MIFARE_ULTRALIGHT (tag);
 
     nfc_target_info_t pnti;
     if (nfc_initiator_select_tag (tag->device, NM_ISO14443A_106, tag->info.abtUid, 8, &pnti)) {
 	tag->active = 1;
+	for (int i = 0; i < MIFARE_ULTRALIGHT_PAGE_COUNT; i++)
+	    MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
     } else {
 	errno = EIO;
 	return -1;
@@ -154,9 +84,10 @@ mifare_ultralight_connect (MifareUltralightTag tag)
  * Terminate connection with the provided tag.
  */
 int
-mifare_ultralight_disconnect (MifareUltralightTag tag)
+mifare_ultralight_disconnect (MifareTag tag)
 {
     ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_ULTRALIGHT (tag);
 
     if (nfc_initiator_deselect_tag (tag->device)) {
 	tag->active = 0;
@@ -179,34 +110,35 @@ mifare_ultralight_disconnect (MifareUltralightTag tag)
  * Read data from the provided MIFARE tag.
  */
 int
-mifare_ultralight_read (MifareUltralightTag tag, MifareUltralightPageNumber page, MifareUltralightPage *data)
+mifare_ultralight_read (MifareTag tag, MifareUltralightPageNumber page, MifareUltralightPage *data)
 {
     ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_ULTRALIGHT (tag);
     ASSERT_VALID_PAGE (page);
 
-    if (!tag->cached_pages[page]) {
+    if (!MIFARE_ULTRALIGHT(tag)->cached_pages[page]) {
 	uint8_t cmd[2];
 	cmd[0] = 0x30;
 	cmd[1] = page;
 
 	size_t n;
-	if (!(nfc_initiator_transceive_dep_bytes (tag->device, cmd, sizeof (cmd), tag->cache[page], &n))) {
+	if (!(nfc_initiator_transceive_dep_bytes (tag->device, cmd, sizeof (cmd), MIFARE_ULTRALIGHT(tag)->cache[page], &n))) {
 	    errno = EIO;
 	    return -1;
 	}
 
 	/* Handle wrapped pages */
 	for (int i = MIFARE_ULTRALIGHT_PAGE_COUNT; i <= page + 3; i++) {
-	    memcpy (tag->cache[i % MIFARE_ULTRALIGHT_PAGE_COUNT], tag->cache[i], sizeof (MifareUltralightPage));
+	    memcpy (MIFARE_ULTRALIGHT(tag)->cache[i % MIFARE_ULTRALIGHT_PAGE_COUNT], MIFARE_ULTRALIGHT(tag)->cache[i], sizeof (MifareUltralightPage));
 	}
 
 	/* Mark pages as cached */
 	for (int i = page; i <= page + 3; i++) {
-	    tag->cached_pages[i % MIFARE_ULTRALIGHT_PAGE_COUNT] = 1;
+	    MIFARE_ULTRALIGHT(tag)->cached_pages[i % MIFARE_ULTRALIGHT_PAGE_COUNT] = 1;
 	}
     }
 
-    memcpy (data, tag->cache[page], sizeof (*data));
+    memcpy (data, MIFARE_ULTRALIGHT(tag)->cache[page], sizeof (*data));
     return 0;
 }
 
@@ -214,9 +146,10 @@ mifare_ultralight_read (MifareUltralightTag tag, MifareUltralightPageNumber page
  * Read data to the provided MIFARE tag.
  */
 int
-mifare_ultralight_write (MifareUltralightTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data)
+mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data)
 {
     ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_ULTRALIGHT (tag);
     ASSERT_VALID_PAGE (page);
 
     uint8_t cmd[6];
@@ -231,7 +164,7 @@ mifare_ultralight_write (MifareUltralightTag tag, const MifareUltralightPageNumb
     }
 
     /* Invalidate page in cache */
-    tag->cached_pages[page] = 0;
+    MIFARE_ULTRALIGHT(tag)->cached_pages[page] = 0;
 
     return 0;
 }
@@ -242,7 +175,7 @@ mifare_ultralight_write (MifareUltralightTag tag, const MifareUltralightPageNumb
  * Miscellaneous functions
  */
 char *
-mifare_ultralight_get_uid (MifareUltralightTag tag)
+mifare_ultralight_get_uid (MifareTag tag)
 {
     char *uid = malloc (2 * 7 + 1);
     MifareUltralightPage p0, p1;

@@ -147,7 +147,7 @@ sector_0x10_crc8 (Mad mad)
  * Read a MAD from the provided MIFARE tag.
  */
 Mad
-mad_read (MifareClassicTag tag)
+mad_read (MifareTag tag)
 {
     Mad mad = malloc (sizeof (*mad));
 
@@ -246,7 +246,7 @@ error:
  * Write the mad to the provided MIFARE tad using the provided Key-B keys.
  */
 int
-mad_write (MifareClassicTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10)
+mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10)
 {
     MifareClassicBlock data;
 

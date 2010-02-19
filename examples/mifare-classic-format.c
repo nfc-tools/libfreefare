@@ -40,7 +40,7 @@ MifareClassicKey default_keys[] = {
 };
 
 int
-try_format_sector (MifareClassicTag tag, MifareSectorNumber sector)
+try_format_sector (MifareTag tag, MifareSectorNumber sector)
 {
     for (int i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
 	printf (" s=%d i=%d \n", sector, i);
@@ -73,26 +73,31 @@ main(int argc, char *argv[])
 {
     int error = 0;
     nfc_device_t *device = NULL;
-    MifareClassicTag *tags = NULL;
-    MifareClassicTag *tag = NULL;
+    MifareTag *tags = NULL;
+    MifareTag *tag = NULL;
 
     device = nfc_connect (NULL);
     if (!device)
 	errx (EXIT_FAILURE, "No NFC device found.");
 
-    tags = mifare_classic_get_tags (device);
+    tags = freefare_get_tags (device);
     if (!tags) {
 	nfc_disconnect (device);
 	errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
     }
 
     if (!tags[0]) {
-	mifare_classic_free_tags (tags);
+	freefare_free_tags (tags);
 	nfc_disconnect (device);
-	errx (EXIT_FAILURE, "No MIFARE classic tag on NFC device.");
+	errx (EXIT_FAILURE, "No MIFARE tag on NFC device.");
     }
 
     tag = tags;
+
+    if ((freefare_get_tag_type (*tag) != CLASSIC_1K) &&
+	(freefare_get_tag_type (*tag) != CLASSIC_4K)) {
+	errx (EXIT_FAILURE, "Not a MIFARE Classic tag.");
+    }
 
     while (*tag) {
 	char *tag_uid = mifare_classic_get_uid (*tag);
@@ -111,7 +116,7 @@ main(int argc, char *argv[])
 	tag++;
     }
 
-    mifare_classic_free_tags (tags);
+    freefare_free_tags (tags);
     nfc_disconnect (device);
 
     exit (error);

@@ -21,8 +21,8 @@
 #include <freefare.h>
 
 static nfc_device_t *device = NULL;
-static MifareClassicTag *tags = NULL;
-MifareClassicTag tag = NULL;
+static MifareTag *tags = NULL;
+MifareTag tag = NULL;
 
 void
 setup ()
@@ -32,12 +32,19 @@ setup ()
     device = nfc_connect (NULL);
     cut_assert_not_null (device, cut_message ("No device found"));
 
-    tags = mifare_classic_get_tags (device);
-    cut_assert_not_null (tags, cut_message ("mifare_classic_get_tags() failed"));
+    tags = freefare_get_tags (device);
+    cut_assert_not_null (tags, cut_message ("freefare_get_tags() failed"));
 
-    cut_assert_not_null (tags[0], cut_message ("No MIFARE Classic tag on NFC device"));
+    tag = NULL;
+    for (int i=0; tags[i]; i++) {
+	if ((freefare_get_tag_type(tags[i]) == CLASSIC_1K) ||
+	     (freefare_get_tag_type(tags[i]) == CLASSIC_4K)) {
+	    tag = tags[i];
+	    break;
+	}
+    }
 
-    tag = tags[0];
+    cut_assert_not_null (tag, cut_message ("No MIFARE Classic tag on NFC device"));
 
     res = mifare_classic_connect (tag);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_connect() failed"));
@@ -50,7 +57,7 @@ teardown ()
 	mifare_classic_disconnect (tag);
 
     if (tags)
-	mifare_classic_free_tags (tags);
+	freefare_free_tags (tags);
 
     if (device)
 	nfc_disconnect (device);

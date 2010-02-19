@@ -17,4 +17,4 @@
  * $Id$
  */
 
-extern MifareClassicTag tag;
+extern MifareTag tag;

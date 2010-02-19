@@ -17,4 +17,4 @@
  * $Id$
  */
 
-extern MifareUltralightTag tag;
+extern MifareTag tag;

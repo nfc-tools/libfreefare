@@ -98,10 +98,10 @@ test_mifare_ultralight_cache (void)
 
     /* Check cached pages consistency */
     for (int i = 0; i <= 3; i++) {
-	cut_assert_equal_int (1, tag->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
+	cut_assert_equal_int (1, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
     for (int i = 4; i < MIFARE_ULTRALIGHT_PAGE_COUNT; i++) {
-	cut_assert_equal_int (0, tag->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
+	cut_assert_equal_int (0, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
 }
 
@@ -133,13 +133,13 @@ test_mifare_ultralight_cache_wrap (void)
 
     /* Check cached pages consistency */
     for (int i = 0; i <= 2; i++) {
-	cut_assert_equal_int (1, tag->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
+	cut_assert_equal_int (1, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
     for (int i = 3; i <= 14; i++) {
-	cut_assert_equal_int (0, tag->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
+	cut_assert_equal_int (0, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
     for (int i = 15; i < MIFARE_ULTRALIGHT_PAGE_COUNT; i++) {
-	cut_assert_equal_int (1, tag->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
+	cut_assert_equal_int (1, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
 }
 

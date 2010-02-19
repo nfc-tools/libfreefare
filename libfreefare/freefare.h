@@ -30,23 +30,38 @@
     extern "C" {
 #endif // __cplusplus
 
-struct mifare_ultralight_tag;
-typedef struct mifare_ultralight_tag *MifareUltralightTag;
+enum mifare_tag_type {
+    ULTRALIGHT,
+//    ULTRALIGHT_C,
+//    MINI,
+    CLASSIC_1K,
+    CLASSIC_4K,
+//    PLUS_S2K,
+//    PLUS_S4K,
+//    PLUS_X2K,
+//    PLUS_X4K,
+//    DESFIRE_2K,
+//    DESFIRE_4K,
+//    DESFIRE_8K
+};
+
+struct mifare_tag;
+typedef struct mifare_tag *MifareTag;
+
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
-MifareUltralightTag *mifare_ultralight_get_tags (nfc_device_t *device);
-void		 mifare_ultralight_free_tags (MifareUltralightTag *tags);
-int		 mifare_ultralight_connect (MifareUltralightTag tag);
-int		 mifare_ultralight_disconnect (MifareUltralightTag tag);
+MifareTag	*freefare_get_tags (nfc_device_t *device);
+enum mifare_tag_type freefare_get_tag_type (MifareTag tag);
+void		 freefare_free_tags (MifareTag *tags);
 
-int		 mifare_ultralight_read (MifareUltralightTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
-int		 mifare_ultralight_write (MifareUltralightTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
+int		 mifare_ultralight_connect (MifareTag tag);
+int		 mifare_ultralight_disconnect (MifareTag tag);
 
-char		*mifare_ultralight_get_uid (MifareUltralightTag tag);
+int		 mifare_ultralight_read (MifareTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
+int		 mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
 
-struct mifare_classic_tag;
-typedef struct mifare_classic_tag *MifareClassicTag;
+char		*mifare_ultralight_get_uid (MifareTag tag);
 
 typedef unsigned char MifareClassicBlock[16];
 
@@ -56,27 +71,25 @@ typedef unsigned char MifareClassicBlockNumber;
 typedef enum { MFC_KEY_A, MFC_KEY_B } MifareClassicKeyType;
 typedef unsigned char MifareClassicKey[6];
 
-MifareClassicTag *mifare_classic_get_tags (nfc_device_t *device);
-void		 mifare_classic_free_tags (MifareClassicTag *tags);
-int		 mifare_classic_connect (MifareClassicTag tag);
-int		 mifare_classic_disconnect (MifareClassicTag tag);
+int		 mifare_classic_connect (MifareTag tag);
+int		 mifare_classic_disconnect (MifareTag tag);
 
-int		 mifare_classic_authenticate (MifareClassicTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type);
-int		 mifare_classic_read (MifareClassicTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data);
-int		 mifare_classic_init_value (MifareClassicTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr);
-int		 mifare_classic_read_value (MifareClassicTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr);
-int		 mifare_classic_write (MifareClassicTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data);
+int		 mifare_classic_authenticate (MifareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type);
+int		 mifare_classic_read (MifareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data);
+int		 mifare_classic_init_value (MifareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr);
+int		 mifare_classic_read_value (MifareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr);
+int		 mifare_classic_write (MifareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data);
 
-int		 mifare_classic_increment (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
-int		 mifare_classic_decrement (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
-int		 mifare_classic_restore (MifareClassicTag tag, const MifareClassicBlockNumber block);
-int		 mifare_classic_transfer (MifareClassicTag tag, const MifareClassicBlockNumber block);
+int		 mifare_classic_increment (MifareTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
+int		 mifare_classic_decrement (MifareTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
+int		 mifare_classic_restore (MifareTag tag, const MifareClassicBlockNumber block);
+int		 mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber block);
 
-int 		 mifare_classic_get_trailer_block_permission (MifareClassicTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
-int		 mifare_classic_get_data_block_permission (MifareClassicTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
+int 		 mifare_classic_get_trailer_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
+int		 mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
-int		 mifare_classic_format_sector (MifareClassicTag tag, const MifareSectorNumber sector);
-char*		 mifare_classic_get_uid(MifareClassicTag tag);
+int		 mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector);
+char*		 mifare_classic_get_uid(MifareTag tag);
 
 void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, const uint8_t ab_0, const uint8_t ab_1, const uint8_t ab_2, const uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 
@@ -103,8 +116,8 @@ struct mad;
 typedef struct mad *Mad;
 
 Mad		 mad_new (uint8_t version);
-Mad		 mad_read (MifareClassicTag tag);
-int		 mad_write (MifareClassicTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);
+Mad		 mad_read (MifareTag tag);
+int		 mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);
 int		 mad_get_version (Mad mad);
 void		 mad_set_version (Mad mad, uint8_t version);
 MifareSectorNumber mad_get_card_publisher_sector(Mad mad);

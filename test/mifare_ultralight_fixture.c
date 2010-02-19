@@ -21,8 +21,8 @@
 #include <freefare.h>
 
 static nfc_device_t *device = NULL;
-static MifareUltralightTag *tags = NULL;
-MifareUltralightTag tag = NULL;
+static MifareTag *tags = NULL;
+MifareTag tag = NULL;
 
 void
 setup ()
@@ -32,12 +32,18 @@ setup ()
     device = nfc_connect (NULL);
     cut_assert_not_null (device, cut_message ("No device found"));
 
-    tags = mifare_ultralight_get_tags (device);
-    cut_assert_not_null (tags, cut_message ("Error enumerating NFC tags"));
+    tags = freefare_get_tags (device);
+    cut_assert_not_null (tags, cut_message ("freefare_get_tags() failed"));
 
-    cut_assert_not_null (tags[0], cut_message ("No MIFARE CLassic tag on NFC device"));
+    tag = NULL;
+    for (int i=0; tags[i]; i++) {
+	if (freefare_get_tag_type(tags[i]) == ULTRALIGHT) {
+	    tag = tags[i];
+	    break;
+	}
+    }
 
-    tag = tags[0];
+    cut_assert_not_null (tag, cut_message ("No MIFARE UltraLight tag on NFC device"));
 
     res = mifare_ultralight_connect (tag);
     cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_connect() failed"));
@@ -50,7 +56,7 @@ teardown ()
 	mifare_ultralight_disconnect (tag);
 
     if (tags)
-	mifare_ultralight_free_tags (tags);
+	freefare_free_tags (tags);
 
     if (device)
 	nfc_disconnect (device);
