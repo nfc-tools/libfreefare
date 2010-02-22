@@ -21,8 +21,6 @@
 #include <errno.h>
 #include <string.h>
 
-#include <sys/limits.h>
-
 #include <freefare.h>
 #include "freefare_internal.h"
 
