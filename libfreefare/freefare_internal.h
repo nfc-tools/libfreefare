@@ -24,8 +24,10 @@ struct mad_sector_0x00;
 struct mad_sector_0x10;
 
 void		 crc8 (uint8_t *crc, const uint8_t value);
-void		 mifare_classic_free_tag (MifareTag tag);
-void		 mifare_ultralight_free_tag (MifareTag tag);
+MifareTag	 mifare_classic_tag_new (void);
+void		 mifare_classic_tag_free (MifareTag tag);
+MifareTag	 mifare_ultralight_tag_new (void);
+void		 mifare_ultralight_tag_free (MifareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
 

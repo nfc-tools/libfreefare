@@ -109,10 +109,10 @@ freefare_get_tags (nfc_device_t *device)
 	switch (type) {
 	    case CLASSIC_1K:
 	    case CLASSIC_4K:
-		tags[tag_count-1] = malloc (sizeof (struct mifare_classic_tag));
+		tags[tag_count-1] = mifare_classic_tag_new ();
 		break;
 	    case ULTRALIGHT:
-		tags[tag_count-1] = malloc (sizeof (struct mifare_ultralight_tag));
+		tags[tag_count-1] = mifare_ultralight_tag_new ();
 		break;
 	}
 
@@ -121,7 +121,7 @@ freefare_get_tags (nfc_device_t *device)
 
 	/*
 	 * Initialize common fields
-	 * (Target specific fields are initialized in mifare_*_connect())
+	 * (Target specific fields are initialized in mifare_*_tag_new())
 	 */
 	(tags[tag_count-1])->device = device;
 	(tags[tag_count-1])->info = target_info.nai;
@@ -155,10 +155,10 @@ freefare_free_tags (MifareTag *tags)
 	    switch (tags[i]->type) {
 		case CLASSIC_1K:
 		case CLASSIC_4K:
-		    mifare_classic_free_tag (tags[i]);
+		    mifare_classic_tag_free (tags[i]);
 		    break;
 		case ULTRALIGHT:
-		    mifare_ultralight_free_tag (tags[i]);
+		    mifare_ultralight_tag_free (tags[i]);
 		    break;
 	    }
 	}

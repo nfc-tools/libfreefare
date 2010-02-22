@@ -131,21 +131,36 @@ int	 get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block,
 
 
 /*
- * MIFARE card communication preparation functions
- *
- * The following functions send NFC commands to the initiator to prepare
- * communication with a MIFARE card, and perform required cleannups after using
- * the target.
+ * Memory management functions.
  */
 
 /*
- * Free the provided tag list.
+ * Allocates and initialize a MIFARE Classic tag.
+ */
+
+MifareTag
+mifare_classic_tag_new (void)
+{
+    return malloc (sizeof (struct mifare_classic_tag));
+}
+
+/*
+ * Free the provided tag.
  */
 void
-mifare_classic_free_tag (MifareTag tag)
+mifare_classic_tag_free (MifareTag tag)
 {
     free (tag);
 }
+
+
+/*
+ * MIFARE card communication preparation functions
+ *
+ * The following functions send NFC commands to the initiator to prepare
+ * communication with a MIFARE card, and perform required cleanups after using
+ * the target.
+ */
 
 /*
  * Establish connection to the provided tag.
