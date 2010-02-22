@@ -324,3 +324,16 @@ test_mifare_classic_value_block_restore (void)
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
     cut_assert_equal_memory (sample, sizeof (sample), data, sizeof (data), cut_message ("Wrong value block contents"));
 }
+
+void
+test_mifare_classic_get_uid (void)
+{
+    char *uid;
+
+    uid = mifare_classic_get_uid (tag);
+
+    cut_assert_not_null (uid, cut_message ("mifare_classic_get_uid() failed"));
+    cut_assert_equal_int (8, strlen (uid), cut_message ("Wrong UID length"));
+
+    free (uid);
+}
