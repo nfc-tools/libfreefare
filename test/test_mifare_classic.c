@@ -151,7 +151,7 @@ test_mifare_classic_format (void)
     res = mifare_classic_write (tag, 0x3e, data);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_write() failed"));
 
-    res = mifare_classic_format_sector (tag, 0x0f);
+    res = mifare_classic_format_sector (tag, 0x3c);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_format_sector() failed"));
 
     res = mifare_classic_read (tag, 0x3c, &data);
