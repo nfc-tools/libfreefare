@@ -472,7 +472,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 
     uint16_t sector_access_bits, sector_access_bits_;
 
-    MifareClassicBlockNumber trailer = ((block) / 4) * 4 + 3;
+    MifareClassicBlockNumber trailer = mifare_classic_last_sector_block (block);
 
     if (MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number == trailer) {
 	/* cache hit! */
@@ -504,9 +504,9 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 	*block_access_bits = 0;
 	/*                                   ,-------C3
 	 *                                   |,------C2
-	 *                                   ||,---- C1  
+	 *                                   ||,---- C1
 	 *                                   |||                     */
-	uint16_t block_access_bits_mask = 0x0111 << (block % 4);
+	uint16_t block_access_bits_mask = 0x0111 << ((block == trailer) ? 3 : ((block < 128) ? block : ((block - 128) % 16) / 5) % 4);
 	/*                                   |||
 	 *                                   ||`---------------.
 	 *                                   |`---------------.|
@@ -570,20 +570,29 @@ mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBloc
  * Reset a MIFARE target sector to factory default.
  */
 int
-mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector)
+mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber block)
 {
-    MifareClassicBlockNumber first_sector_block = sector * 4;
+    MifareClassicBlockNumber first_sector_block = mifare_classic_first_sector_block (block);
+    MifareClassicBlockNumber last_sector_block = mifare_classic_last_sector_block (block);
+
     /* 
      * Check that the current key allow us to rewrite data and trailer blocks.
      */
-    if (((sector != 0) && (mifare_classic_get_data_block_permission(tag, first_sector_block, MCAB_W, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1)) ||
-	(mifare_classic_get_data_block_permission(tag, first_sector_block + 1, MCAB_W, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) ||
-	(mifare_classic_get_data_block_permission(tag, first_sector_block + 2, MCAB_W, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) ||
-	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_KEYA, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) ||
-	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_ACCESS_BITS, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) ||
-	(mifare_classic_get_trailer_block_permission(tag, first_sector_block + 3, MCAB_WRITE_KEYB, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1)) {
-	errno = EPERM;
-	return -1;
+
+    if (first_sector_block == 0) {
+	/* First block is read-only */
+	first_sector_block = 1;
+    }
+
+    for (int n = first_sector_block; n < last_sector_block; n++) {
+	if (mifare_classic_get_data_block_permission(tag, n, MCAB_W, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) {
+	    return errno = EPERM, -1;
+	}
+    }
+    if ((mifare_classic_get_trailer_block_permission(tag, last_sector_block, MCAB_WRITE_KEYA, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_trailer_block_permission(tag, last_sector_block, MCAB_WRITE_ACCESS_BITS, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1) ||
+	(mifare_classic_get_trailer_block_permission(tag, last_sector_block, MCAB_WRITE_KEYB, MIFARE_CLASSIC(tag)->last_authentication_key_type) != 1)) {
+	return errno = EPERM, -1;
     }
 
     MifareClassicBlock empty_data_block;
@@ -596,12 +605,13 @@ mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector)
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff   /* Key B */
     };
 
-    if (((sector != 0) && (mifare_classic_write (tag, first_sector_block, empty_data_block) < 0)) ||
-	(mifare_classic_write (tag, first_sector_block + 1, empty_data_block) < 0) ||
-	(mifare_classic_write (tag, first_sector_block + 2, empty_data_block) < 0) ||
-	(mifare_classic_write (tag, first_sector_block + 3, default_trailer_block) < 0)) {
-	errno = EIO;
-	return -1;
+    for (int n = first_sector_block; n < last_sector_block; n++) {
+	if (mifare_classic_write (tag, n, empty_data_block) < 0) {
+	    return errno = EIO,  -1;
+	}
+    }
+    if (mifare_classic_write (tag, last_sector_block, default_trailer_block) < 0) {
+	return errno = EIO,  -1;
     }
 
     return 0;
@@ -617,6 +627,39 @@ mifare_classic_get_uid(MifareTag tag)
   snprintf(uid, 9, "%02x%02x%02x%02x", tag->info.abtUid[0], tag->info.abtUid[1], tag->info.abtUid[2], tag->info.abtUid[3]);
   uid[8] = '\0';
   return uid;
+}
+
+/*
+ * Get the sector's first block number in the provided block's sector.
+ */
+MifareClassicBlockNumber
+mifare_classic_first_sector_block (MifareClassicBlockNumber block)
+{
+    int res;
+    if (block < 128) {
+	res = (block / 4) * 4;
+    } else {
+	res = ((block - 128) / 16) * 16 + 128;
+    }
+
+    return res;
+}
+
+/*
+ * Get the sector's last block number (aka trailer block) in the provided
+ * block's sector.
+ */
+MifareClassicBlockNumber
+mifare_classic_last_sector_block (MifareClassicBlockNumber block)
+{
+    int res;
+    if (block < 128) {
+	res = (block / 4) * 4 + 3;
+    } else {
+	res = ((block - 128) / 16) * 16 + 15 + 128;
+    }
+
+    return res;
 }
 
 /*

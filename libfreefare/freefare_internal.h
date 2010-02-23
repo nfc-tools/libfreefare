@@ -30,6 +30,8 @@ MifareTag	 mifare_ultralight_tag_new (void);
 void		 mifare_ultralight_tag_free (MifareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
+MifareClassicBlockNumber  mifare_classic_first_sector_block (MifareClassicBlockNumber block);
+MifareClassicBlockNumber  mifare_classic_last_sector_block (MifareClassicBlockNumber block);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT 16
 
@@ -83,7 +85,7 @@ struct mifare_ultralight_tag {
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
 #define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_CLASSIC(tag) do { if (tag->type != CLASSIC_1K) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->type != CLASSIC_1K) && (tag->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
 
 /* 
  * MifareTag cast macros 

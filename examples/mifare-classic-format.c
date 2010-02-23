@@ -26,8 +26,6 @@
 
 #include <freefare.h>
 
-#define block_address(sector, block) ((sector * 4) + block)
-
 MifareClassicKey default_keys[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
     { 0xd3,0xf7,0xd3,0xf7,0xd3,0xf7 },
@@ -38,34 +36,61 @@ MifareClassicKey default_keys[] = {
     { 0xaa,0xbb,0xcc,0xdd,0xee,0xff },
     { 0x00,0x00,0x00,0x00,0x00,0x00 }
 };
+int		 format_mifare_classic_1k (MifareTag tag);
+int		 format_mifare_classic_4k (MifareTag tag);
+int		 try_format_sector (MifareTag tag, MifareClassicBlockNumber block);
 
 int
-try_format_sector (MifareTag tag, MifareSectorNumber sector)
+format_mifare_classic_1k (MifareTag tag)
+{
+    for (int sector = 0; sector < 16; sector++) {
+	if (!try_format_sector (tag, sector * 4))
+	    return 0;
+    }
+    return 1;
+}
+
+int
+format_mifare_classic_4k (MifareTag tag)
+{
+    for (int sector = 0; sector < 32; sector++) {
+	if (!try_format_sector (tag, sector * 4))
+	    return 0;
+    }
+    for (int sector = 0; sector < 8; sector++) {
+	if (!try_format_sector (tag, 128 + sector * 16))
+	    return 0;
+    }
+    return 1;
+}
+
+int
+try_format_sector (MifareTag tag, MifareClassicBlockNumber block)
 {
     for (int i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
-	printf (" s=%d i=%d \n", sector, i);
-	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block_address (sector, 0), default_keys[i], MFC_KEY_A))) {
-	    if (0 == mifare_classic_format_sector (tag, sector)) {
+	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
+	    if (0 == mifare_classic_format_sector (tag, block)) {
 		mifare_classic_disconnect (tag);
-		return 0;
+		return 1;
 	    } else if (EIO == errno) {
-		err (EXIT_FAILURE, "sector %d", sector);
+		err (EXIT_FAILURE, "block %d", block);
 	    }
 	    mifare_classic_disconnect (tag);
 	}
 
-	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block_address (sector, 0), default_keys[i], MFC_KEY_B))) {
-	    if (0 == mifare_classic_format_sector (tag, sector)) {
+	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_B))) {
+	    if (0 == mifare_classic_format_sector (tag, block)) {
 		mifare_classic_disconnect (tag);
-		return 0;
+		return 1;
 	    } else if (EIO == errno) {
-		err (EXIT_FAILURE, "sector %d", sector);
+		err (EXIT_FAILURE, "block %d", block);
 	    }
 	    mifare_classic_disconnect (tag);
 	}
     }
 
-    return -1;
+    warnx ("No known authentication key for block %d", block);
+    return 0;
 }
 
 int
@@ -74,7 +99,6 @@ main(int argc, char *argv[])
     int error = 0;
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
-    MifareTag *tag = NULL;
 
     device = nfc_connect (NULL);
     if (!device)
@@ -86,34 +110,39 @@ main(int argc, char *argv[])
 	errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
     }
 
-    if (!tags[0]) {
-	freefare_free_tags (tags);
-	nfc_disconnect (device);
-	errx (EXIT_FAILURE, "No MIFARE tag on NFC device.");
-    }
+    for (int i = 0; (!error) && tags[i]; i++) {
+	switch (freefare_get_tag_type (tags[i])) {
+	    case CLASSIC_1K:
+	    case CLASSIC_4K:
+		break;
+	    default:
+		continue;
+	}
 
-    tag = tags;
+	char *tag_uid = mifare_classic_get_uid (tags[i]);
+	char buffer[BUFSIZ];
 
-    if ((freefare_get_tag_type (*tag) != CLASSIC_1K) &&
-	(freefare_get_tag_type (*tag) != CLASSIC_4K)) {
-	errx (EXIT_FAILURE, "Not a MIFARE Classic tag.");
-    }
+	printf ("Found MIFARE Classic %s.  Format [yN] ", tag_uid);
+	fgets (buffer, BUFSIZ, stdin);
+	bool format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 
-    while (*tag) {
-	char *tag_uid = mifare_classic_get_uid (*tag);
-
-	/* FIXME get the tag size */
-	size_t sector_count = 15;
-
-	for (size_t n = 0; n < sector_count; n++) {
-	    if (try_format_sector (*tag, n) < 0) {
-		warnx ("%s: Can't format sector %ld (0x%02lx)", tag_uid,  n, n);
-		error = 1;
+	if (format) {
+	    switch (freefare_get_tag_type (tags[i])) {
+		case CLASSIC_1K:
+		    if (!format_mifare_classic_1k (tags[i]))
+			error = 1;
+		    break;
+		case CLASSIC_4K:
+		    if (!format_mifare_classic_4k (tags[i]))
+			error = 1;
+		    break;
+		default:
+		    /* Keep compiler quiet */
+		    break;
 	    }
 	}
 
-	free(tag_uid);
-	tag++;
+	free (tag_uid);
     }
 
     freefare_free_tags (tags);
