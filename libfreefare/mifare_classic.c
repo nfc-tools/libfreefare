@@ -127,7 +127,8 @@ uint16_t mifare_trailer_access_permissions[] = {
  * Private functions
  */
 
-int	 get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits);
+int		 get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockNumber trailer);
+int		 get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits);
 
 
 /*
@@ -451,8 +452,37 @@ mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber block)
  * The following functions provide a convenient API for reading MIFARE card
  * access bits.  A cache system makes these functions query a single time the
  * MIFARE card regardless of the number of information requested between two
- * authentifications (i.e. for the current sector).
+ * authentications (i.e. for the current sector).
  */
+
+/*
+ * Given a block, determine the rank of applicable access bits in the trailer
+ * block.
+ *
+ * For 4 blocks sectors, each access bit applies to a single block; but for 16
+ * blocks sectors (second part of MIFARE Classic 4k),  the first 3 access bits
+ * apply to 5 blocks, and the last access bits apply to the trailer block:
+ *
+ *                               Sector | Access bits  | Shift
+ * -------------------------------------+--------------+-------
+ *      4, 128, 129, 130, 131, 132, 144 | ---x---x---x | 0
+ *   1, 5, 133, 134, 135, 136, 137      | --x---x---x- | 1
+ *   2, 6, 138, 138, 140, 141, 142      | -x---x---x-- | 2
+ *   3, 7, 143                          | x---x---x--- | 3
+ *
+ */
+int
+get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockNumber trailer)
+{
+    if (block == trailer) {
+	return 3;
+    } else {
+	if (block < 128)
+	    return block % 4;
+	else
+	    return ((block - 128) % 16) / 5;
+    }
+}
 
 /*
  * Fetch access bits for a given block from the block's sector's trailing
@@ -474,6 +504,15 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 
     MifareClassicBlockNumber trailer = mifare_classic_last_sector_block (block);
 
+    /*
+     * The trailer block contains access bits for the whole sector in a 3 bytes
+     * structure that holds 2 times the permissions (once inverted, once
+     * not-inverted).
+     *
+     * First we get these bytes, and check the inverted and non-inverted
+     * permissions match.  A cache mechanism prevents many read access to the
+     * NFC target if the function is called multiple times on the same block.
+     */
     if (MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number == trailer) {
 	/* cache hit! */
     	sector_access_bits = MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits;
@@ -497,6 +536,10 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
     	MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits = sector_access_bits;
     }
 
+    /*
+     * To ease permissions lookup, related permission bits which are not
+     * contiguous are assembled in a quartet.
+     */
     if (MIFARE_CLASSIC(tag)->cached_access_bits.block_number == block) {
 	/* cache hit! */
 	*block_access_bits = MIFARE_CLASSIC(tag)->cached_access_bits.block_access_bits;
@@ -506,7 +549,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 	 *                                   |,------C2
 	 *                                   ||,---- C1
 	 *                                   |||                     */
-	uint16_t block_access_bits_mask = 0x0111 << ((block == trailer) ? 3 : ((block < 128) ? block : ((block - 128) % 16) / 5) % 4);
+	uint16_t block_access_bits_mask = 0x0111 << get_block_access_bits_shift (block, trailer);
 	/*                                   |||
 	 *                                   ||`---------------.
 	 *                                   |`---------------.|
