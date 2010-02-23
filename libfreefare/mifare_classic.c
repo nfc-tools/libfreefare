@@ -516,6 +516,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 	if (sector_access_bits & block_access_bits_mask & 0x00f0) *block_access_bits |= 0x02;  /* C2 */
 	if (sector_access_bits & block_access_bits_mask & 0x0f00) *block_access_bits |= 0x04;  /* C3 */
 
+	MIFARE_CLASSIC(tag)->cached_access_bits.block_number = block;
 	MIFARE_CLASSIC(tag)->cached_access_bits.block_access_bits = *block_access_bits;
     }
 
