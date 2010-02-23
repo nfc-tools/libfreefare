@@ -31,7 +31,7 @@ struct supported_tag {
 struct supported_tag supported_tags[] = {
     { { 0x00, 0x44 }, 0x00, ULTRALIGHT },
     { { 0x00, 0x04 }, 0x08, CLASSIC_1K },
-    { { 0x00, 0x02 }, 0x08, CLASSIC_4K },
+    { { 0x00, 0x02 }, 0x18, CLASSIC_4K },
     { { 0x00, 0x02 }, 0x38, CLASSIC_4K },  /* Emulated */
 };
 
