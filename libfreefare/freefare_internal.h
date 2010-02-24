@@ -20,6 +20,18 @@
 #ifndef __FREEFARE_INTERNAL_H__
 #define __FREEFARE_INTERNAL_H__
 
+#if !defined(le32toh) || !defined(htole32)
+  #include <byteswap.h>
+  #if BYTE_ORDER == LITTLE_ENDIAN
+    #define le32toh(x) (x)
+    #define htole32(x) bswap_32(x)
+  #else
+    #define le32toh(x) bswap_32(x)
+    #define htole32(x) (x)
+  #endif
+#endif
+
+
 struct mad_sector_0x00;
 struct mad_sector_0x10;
 
