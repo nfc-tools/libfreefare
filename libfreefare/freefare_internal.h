@@ -20,8 +20,11 @@
 #ifndef __FREEFARE_INTERNAL_H__
 #define __FREEFARE_INTERNAL_H__
 
+#include "config.h"
+
+#if defined(HAVE_BYTESWAP_H)
+#include <byteswap.h>
 #if !defined(le32toh) || !defined(htole32)
-  #include <byteswap.h>
   #if BYTE_ORDER == LITTLE_ENDIAN
     #define le32toh(x) (x)
     #define htole32(x) bswap_32(x)
@@ -29,6 +32,7 @@
     #define le32toh(x) bswap_32(x)
     #define htole32(x) (x)
   #endif
+#endif
 #endif
 
 
