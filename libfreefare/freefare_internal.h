@@ -51,6 +51,12 @@ MifareClassicBlockNumber  mifare_classic_last_sector_block (MifareClassicBlockNu
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT 16
 
+struct supported_tag {
+    uint8_t ATQA[2], SAK;
+    enum mifare_tag_type type;
+    const char *friendly_name;
+};
+
 /*
  * This structure is common to all supported MIFARE targets but shall not be
  * used directly (it's some kind of abstract class).  All members in this
@@ -62,8 +68,7 @@ MifareClassicBlockNumber  mifare_classic_last_sector_block (MifareClassicBlockNu
 struct mifare_tag {
     nfc_device_t *device;
     nfc_iso14443a_info_t info;
-    enum mifare_tag_type type;
-    const char *friendly_name;
+    const struct supported_tag *tag_info;
     int active;
 };
 
@@ -101,8 +106,8 @@ struct mifare_ultralight_tag {
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
-#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->type != CLASSIC_1K) && (tag->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->tag_info->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != CLASSIC_1K) && (tag->tag_info->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
 
 /* 
  * MifareTag cast macros 

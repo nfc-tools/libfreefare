@@ -23,12 +23,6 @@
 
 #include "freefare_internal.h"
 
-struct supported_tag {
-    uint8_t ATQA[2], SAK;
-    enum mifare_tag_type type;
-    const char *friendly_name;
-};
-
 struct supported_tag supported_tags[] = {
     { { 0x00, 0x44 }, 0x00, ULTRALIGHT, "Mifare UltraLight" },
     { { 0x00, 0x04 }, 0x08, CLASSIC_1K, "Mifare Classic 1k" },
@@ -81,16 +75,14 @@ freefare_get_tags (nfc_device_t *device)
     while (nfc_initiator_select_tag(device,NM_ISO14443A_106,NULL,0,&target_info)) {
 
 	bool found = false;
-	enum mifare_tag_type type;
-	const char *friendly_name;
+	struct supported_tag *tag_info;
 
 	for (int i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
 	    if ((target_info.nai.abtAtqa[0] == supported_tags[i].ATQA[0]) &&
 		(target_info.nai.abtAtqa[1] == supported_tags[i].ATQA[1]) &&
 		(target_info.nai.btSak == supported_tags[i].SAK)) {
 
-		type = supported_tags[i].type;
-		friendly_name = supported_tags[i].friendly_name;
+		tag_info = &(supported_tags[i]);
 		found = true;
 		break;
 	    }
@@ -109,7 +101,7 @@ freefare_get_tags (nfc_device_t *device)
 	    return tags; // FAIL! Return what has been found so far.
 
 	/* Allocate memory for the found MIFARE target */
-	switch (type) {
+	switch (tag_info->type) {
 	    case CLASSIC_1K:
 	    case CLASSIC_4K:
 		tags[tag_count-1] = mifare_classic_tag_new ();
@@ -129,8 +121,7 @@ freefare_get_tags (nfc_device_t *device)
 	(tags[tag_count-1])->device = device;
 	(tags[tag_count-1])->info = target_info.nai;
 	(tags[tag_count-1])->active = 0;
-	(tags[tag_count-1])->type = type;
-	(tags[tag_count-1])->friendly_name = friendly_name;
+	(tags[tag_count-1])->tag_info = tag_info;
 	tags[tag_count] = NULL;
 
 	nfc_initiator_deselect_tag (device);
@@ -145,7 +136,7 @@ freefare_get_tags (nfc_device_t *device)
 enum mifare_tag_type
 freefare_get_tag_type (MifareTag tag)
 {
-    return tag->type;
+    return tag->tag_info->type;
 }
 
 /*
@@ -154,7 +145,7 @@ freefare_get_tag_type (MifareTag tag)
 const char *
 freefare_get_tag_friendly_name (MifareTag tag)
 {
-    return tag->friendly_name;
+    return tag->tag_info->friendly_name;
 }
 
 /*
@@ -165,7 +156,7 @@ freefare_free_tags (MifareTag *tags)
 {
     if (tags) {
 	for (int i=0; tags[i]; i++) {
-	    switch (tags[i]->type) {
+	    switch (tags[i]->tag_info->type) {
 		case CLASSIC_1K:
 		case CLASSIC_4K:
 		    mifare_classic_tag_free (tags[i]);
