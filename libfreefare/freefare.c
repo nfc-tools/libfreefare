@@ -26,13 +26,14 @@
 struct supported_tag {
     uint8_t ATQA[2], SAK;
     enum mifare_tag_type type;
+    const char *friendly_name;
 };
 
 struct supported_tag supported_tags[] = {
-    { { 0x00, 0x44 }, 0x00, ULTRALIGHT },
-    { { 0x00, 0x04 }, 0x08, CLASSIC_1K },
-    { { 0x00, 0x02 }, 0x18, CLASSIC_4K },
-    { { 0x00, 0x02 }, 0x38, CLASSIC_4K },  /* Emulated */
+    { { 0x00, 0x44 }, 0x00, ULTRALIGHT, "Mifare UltraLight" },
+    { { 0x00, 0x04 }, 0x08, CLASSIC_1K, "Mifare Classic 1k" },
+    { { 0x00, 0x02 }, 0x18, CLASSIC_4K, "Mifare Classic 4k" },
+    { { 0x00, 0x02 }, 0x38, CLASSIC_4K, "Mifare Classic 4k (Emulated)" },
 };
 
 
@@ -81,6 +82,7 @@ freefare_get_tags (nfc_device_t *device)
 
 	bool found = false;
 	enum mifare_tag_type type;
+	const char *friendly_name;
 
 	for (int i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
 	    if ((target_info.nai.abtAtqa[0] == supported_tags[i].ATQA[0]) &&
@@ -88,6 +90,7 @@ freefare_get_tags (nfc_device_t *device)
 		(target_info.nai.btSak == supported_tags[i].SAK)) {
 
 		type = supported_tags[i].type;
+		friendly_name = supported_tags[i].friendly_name;
 		found = true;
 		break;
 	    }
@@ -127,6 +130,7 @@ freefare_get_tags (nfc_device_t *device)
 	(tags[tag_count-1])->info = target_info.nai;
 	(tags[tag_count-1])->active = 0;
 	(tags[tag_count-1])->type = type;
+	(tags[tag_count-1])->friendly_name = friendly_name;
 	tags[tag_count] = NULL;
 
 	nfc_initiator_deselect_tag (device);
@@ -142,6 +146,15 @@ enum mifare_tag_type
 freefare_get_tag_type (MifareTag tag)
 {
     return tag->type;
+}
+
+/*
+ * Returns the friendly name of the provided tag.
+ */
+const char *
+freefare_get_tag_friendly_name (MifareTag tag)
+{
+    return tag->friendly_name;
 }
 
 /*

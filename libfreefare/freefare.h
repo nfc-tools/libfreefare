@@ -53,6 +53,7 @@ typedef unsigned char MifareUltralightPage[4];
 
 MifareTag	*freefare_get_tags (nfc_device_t *device);
 enum mifare_tag_type freefare_get_tag_type (MifareTag tag);
+const char	*freefare_get_tag_friendly_name (MifareTag tag);
 void		 freefare_free_tags (MifareTag *tags);
 
 int		 mifare_ultralight_connect (MifareTag tag);

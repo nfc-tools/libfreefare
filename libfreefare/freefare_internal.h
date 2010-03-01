@@ -63,6 +63,7 @@ struct mifare_tag {
     nfc_device_t *device;
     nfc_iso14443a_info_t info;
     enum mifare_tag_type type;
+    const char *friendly_name;
     int active;
 };
 
