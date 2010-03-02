@@ -90,7 +90,7 @@ int 		 mifare_classic_get_trailer_block_permission (MifareTag tag, const MifareC
 int		 mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
 int		 mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber block);
-char*		 mifare_classic_get_uid(MifareTag tag);
+char		*mifare_classic_get_uid (MifareTag tag);
 
 void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, const uint8_t ab_0, const uint8_t ab_1, const uint8_t ab_2, const uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 
@@ -121,10 +121,10 @@ Mad		 mad_read (MifareTag tag);
 int		 mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);
 int		 mad_get_version (Mad mad);
 void		 mad_set_version (Mad mad, uint8_t version);
-MifareSectorNumber mad_get_card_publisher_sector(Mad mad);
-int		 mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps);
-int		 mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid);
-int		 mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid);
+MifareSectorNumber mad_get_card_publisher_sector (Mad mad);
+int		 mad_set_card_publisher_sector (Mad mad, MifareSectorNumber cps);
+int		 mad_get_aid (Mad mad, MifareSectorNumber sector, MadAid *aid);
+int		 mad_set_aid (Mad mad, MifareSectorNumber sector, MadAid aid);
 void		 mad_free (Mad mad);
 
 MifareSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);
