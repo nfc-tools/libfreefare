@@ -39,7 +39,7 @@
 struct mad_sector_0x00;
 struct mad_sector_0x10;
 
-void		 crc8 (uint8_t *crc, const uint8_t value);
+void		 nxp_crc (uint8_t *crc, const uint8_t value);
 MifareTag	 mifare_classic_tag_new (void);
 void		 mifare_classic_tag_free (MifareTag tag);
 MifareTag	 mifare_ultralight_tag_new (void);

@@ -67,7 +67,7 @@ test_mad (void)
     mad_free (mad);
 }
 
-#define CRC_PRESET 0x67
+#define CRC_PRESET 0xc7
 
 void
 test_mad_crc8_basic (void)
@@ -75,30 +75,14 @@ test_mad_crc8_basic (void)
     uint8_t crc;
     const uint8_t crc_value = 0x42;
 
-    /* Insert data */
-    crc = 0x00;
-    crc8(&crc, crc_value);
-    cut_assert_equal_int (crc_value, crc, cut_message ("Initialization should not produce a CRC"));
-
-    /* Insert data with leading zeros */
-    crc = 0x00;
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, crc_value);
-    cut_assert_equal_int (crc_value, crc, cut_message ("Burst error should not be detected with uninitialized polies"));
-
     /* Check integrity */
     crc = CRC_PRESET;
-    crc8(&crc, crc_value);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, crc_value);
     uint8_t save = crc;
 
     crc = CRC_PRESET;
-    crc8(&crc, crc_value);
-    crc8(&crc, save);
+    nxp_crc(&crc, crc_value);
+    nxp_crc(&crc, save);
     cut_assert_equal_int (0x00, crc, cut_message ("CRC should verify crc(message + crc(message)) = 0"));
 }
 
@@ -112,46 +96,45 @@ test_mad_crc8_doc_example (void)
     uint8_t crc = CRC_PRESET;
 
     /* Block 1 -- 0x01 - 0x07 */
-    crc8(&crc, 0x01);
-    crc8(&crc, 0x01);
-    crc8(&crc, 0x08);
-    crc8(&crc, 0x01);
-    crc8(&crc, 0x08);
-    crc8(&crc, 0x01);
-    crc8(&crc, 0x08);
+    nxp_crc(&crc, 0x01);
+    nxp_crc(&crc, 0x01);
+    nxp_crc(&crc, 0x08);
+    nxp_crc(&crc, 0x01);
+    nxp_crc(&crc, 0x08);
+    nxp_crc(&crc, 0x01);
+    nxp_crc(&crc, 0x08);
 
     /* Block 2 -- 0x08 - 0x0f */
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x04);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x04);
+    nxp_crc(&crc, 0x00);
 
     /* Block 3 -- 0x00 - 0x07 */
-    crc8(&crc, 0x03);
-    crc8(&crc, 0x10);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0x10);
-    crc8(&crc, 0x02);
-    crc8(&crc, 0x10);
-    crc8(&crc, 0x02);
-    crc8(&crc, 0x10);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0x10);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0x10);
+    nxp_crc(&crc, 0x02);
+    nxp_crc(&crc, 0x10);
+    nxp_crc(&crc, 0x02);
+    nxp_crc(&crc, 0x10);
 
     /* Block 3 -- 0x08 - 0x0f */
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x11);
-    crc8(&crc, 0x30);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x11);
+    nxp_crc(&crc, 0x30);
 
     /* Append zeros of augmented message */
-    crc8(&crc, 0x00);
 
     cut_assert_equal_int (0x89, crc, cut_message ("Sample CRC should match"));
 }
@@ -166,46 +149,45 @@ test_mad_crc8_real_example_1 (void)
     uint8_t crc = CRC_PRESET;
 
     /* Block 1 -- 0x01 - 0x07 */
-    crc8(&crc, 0x01);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
+    nxp_crc(&crc, 0x01);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
 
     /* Block 2 -- 0x08 - 0x0f */
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
 
     /* Block 3 -- 0x00 - 0x07 */
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
 
     /* Block 3 -- 0x08 - 0x0f */
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
 
     /* Append zeros of augmented message */
-    crc8(&crc, 0x00);
 
     cut_assert_equal_int (0xc4, crc, cut_message ("Read example 1 CRC should match"));
 }
@@ -220,46 +202,45 @@ test_mad_crc8_real_example_2 (void)
     uint8_t crc = CRC_PRESET;
 
     /* Block 1 -- 0x01 - 0x07 */
-    crc8(&crc, 0x01);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
+    nxp_crc(&crc, 0x01);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
 
     /* Block 2 -- 0x08 - 0x0f */
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x03);
-    crc8(&crc, 0xe1);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x03);
+    nxp_crc(&crc, 0xe1);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
 
     /* Block 3 -- 0x00 - 0x07 */
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
 
     /* Block 3 -- 0x08 - 0x0f */
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
-    crc8(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
+    nxp_crc(&crc, 0x00);
 
     /* Append zeros of augmented message */
-    crc8(&crc, 0x00);
 
     cut_assert_equal_int (0xab, crc, cut_message ("Read example 1 CRC should match"));
 }

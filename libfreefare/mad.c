@@ -38,15 +38,10 @@
 #include "freefare_internal.h"
 
 /*
- * XXX The documentation says the preset is 0xE3, but the various card dumps
- *     and the documentation example MAD CRC can be verified only with a CRC
- *     preset of 0x67.
- *
- *     This is still under investigation:
- *     http://www.libnfc.org/community/post/667/
- *     http://discussion.forum.nokia.com/forum/showthread.php?t=181702#14
+ * The documentation says the preset is 0xE3 but the bits have to be mirrored:
+ * 0xe3 = 1110 0011 <=> 1100 0111 = 0xc7
  */
-#define CRC_PRESET 0x67
+#define CRC_PRESET 0xc7
 
 #define SECTOR_0X00_AIDS 15
 #define SECTOR_0X10_AIDS 23
@@ -96,15 +91,15 @@ mad_new (uint8_t version)
  * Compute CRC.
  */
 void
-crc8 (uint8_t *crc, const uint8_t value)
+nxp_crc (uint8_t *crc, const uint8_t value)
 {
     /* x^8 + x^4 + x^3 + x^2 + 1 => 0x11d */
     const uint8_t poly = 0x1d;
 
+    *crc ^= value;
     for (int current_bit = 7; current_bit >= 0; current_bit--) {
 	int bit_out = (*crc) & 0x80;
-	*crc = ((*crc) << 1) | (( value >> (current_bit)) & 0x01);
-
+	*crc <<= 1;
 	if (bit_out)
 	    *crc ^= poly;
 
@@ -116,13 +111,12 @@ sector_0x00_crc8 (Mad mad)
 {
     uint8_t crc = CRC_PRESET;
 
-    crc8 (&crc, mad->sector_0x00.info);
+    nxp_crc (&crc, mad->sector_0x00.info);
 
     for (int n = 0; n < SECTOR_0X00_AIDS; n++) {
-	crc8 (&crc, mad->sector_0x00.aids[n].application_code);
-	crc8 (&crc, mad->sector_0x00.aids[n].function_cluster_code);
+	nxp_crc (&crc, mad->sector_0x00.aids[n].application_code);
+	nxp_crc (&crc, mad->sector_0x00.aids[n].function_cluster_code);
     }
-    crc8 (&crc, 0x00);
 
     return crc;
 }
@@ -132,13 +126,12 @@ sector_0x10_crc8 (Mad mad)
 {
     uint8_t crc = CRC_PRESET;
 
-    crc8 (&crc, mad->sector_0x10.info);
+    nxp_crc (&crc, mad->sector_0x10.info);
 
     for (int n = 0; n < SECTOR_0X10_AIDS; n++) {
-	crc8 (&crc, mad->sector_0x10.aids[n].application_code);
-	crc8 (&crc, mad->sector_0x10.aids[n].function_cluster_code);
+	nxp_crc (&crc, mad->sector_0x10.aids[n].application_code);
+	nxp_crc (&crc, mad->sector_0x10.aids[n].function_cluster_code);
     }
-    crc8 (&crc, 0x00);
 
     return crc;
 }
