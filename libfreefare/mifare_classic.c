@@ -709,9 +709,14 @@ mifare_classic_last_sector_block (MifareClassicBlockNumber block)
  * Generates a MIFARE trailer block.
  */
 void
-mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, const uint8_t ab_0, const uint8_t ab_1, const uint8_t ab_2, const uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b)
+mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b)
 {
     union mifare_classic_block *b = (union mifare_classic_block *)block; // *((union mifare_classic_block *)(&block));
+
+    ab_0 = DB_AB(ab_0);
+    ab_1 = DB_AB(ab_1);
+    ab_2 = DB_AB(ab_2);
+    ab_tb = TB_AB(ab_tb);
 
     memcpy (b->trailer.key_a, key_a, sizeof (MifareClassicKey));
 

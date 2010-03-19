@@ -92,7 +92,17 @@ int		 mifare_classic_get_data_block_permission (MifareTag tag, const MifareClass
 int		 mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber block);
 char		*mifare_classic_get_uid (MifareTag tag);
 
-void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, const uint8_t ab_0, const uint8_t ab_1, const uint8_t ab_2, const uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
+void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
+
+#define C_000 0
+#define C_001 1
+#define C_010 2
+#define C_011 3
+#define C_100 4
+#define C_101 5
+#define C_110 6
+#define C_111 7
+#define C_DEFAULT 255
 
 /* MIFARE Classic Access Bits */
 #define MCAB_R 0x8

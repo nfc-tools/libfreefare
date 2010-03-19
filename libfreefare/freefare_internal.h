@@ -118,4 +118,10 @@ struct mifare_ultralight_tag {
 #define MIFARE_CLASSIC(tag) ((struct mifare_classic_tag *) tag)
 #define MIFARE_ULTRALIGHT(tag) ((struct mifare_ultralight_tag *) tag)
 
+/*
+ * Access bits manipulation macros
+ */
+#define DB_AB(ab) ((ab == C_DEFAULT) ? C_000 : ab)
+#define TB_AB(ab) ((ab == C_DEFAULT) ? C_100 : ab)
+
 #endif /* !__FREEFARE_INTERNAL_H__ */
