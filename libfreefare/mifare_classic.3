@@ -39,7 +39,6 @@
 .Nm mifare_classic_get_trailer_block_permission ,
 .Nm mifare_classic_get_data_block_permission ,
 .Nm mifare_classic_format_sector ,
-.Nm mifare_classic_get_uid ,
 .Nm mifare_classic_trailer_block
 .Nd Mifare Classic Manipulation Functions
 .\"  _     _ _
@@ -86,8 +85,6 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_classic_get_data_block_permission "MifareTag tag" "const MifareClassicBlockNumber block" "const unsigned char permission" "const MifareClassicKeyType key_type"
 .Ft int
 .Fn mifare_classic_format_sector "MifareTag tag" "const MifareClassicBlockNumber block"
-.Ft "char *"
-.Fn mifare_classic_get_uid "MifareTag tag"
 .Ft void
 .Fn mifare_classic_trailer_block "MifareClassicBlock *block" "const MifareClassicKey key_a" "const uint8_t ab_0" "const uint8_t ab_1" "const uint8_t ab_2" "const uint8_t ab_tb" "const uint8_t gpb" "const MifareClassicKey key_b"
 .\"  ____                      _       _   _
@@ -201,14 +198,6 @@ access bits for the blocks of the sector
 .Vt ab_2 ;
 and a B key
 .Vt key_b .
-.Pp
-The
-.Fn mifare_classic_get_uid
-function retrieves a text representation of the UID of a
-.Fn tag .
-It is not required for the
-.Vt tag
-to be active to use this function.
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|

@@ -331,7 +331,7 @@ test_mifare_classic_get_uid (void)
 {
     char *uid;
 
-    uid = mifare_classic_get_uid (tag);
+    uid = freefare_get_tag_uid (tag);
 
     cut_assert_not_null (uid, cut_message ("mifare_classic_get_uid() failed"));
     cut_assert_equal_int (8, strlen (uid), cut_message ("Wrong UID length"));
@@ -358,14 +358,3 @@ test_mifare_classic_sector_boundaries (void)
     }
 }
 
-void
-test_mifare_classic_get_uid_freefare_get_tag_uid (void)
-{
-    char *s1 = mifare_classic_get_uid (tag);
-    char *s2 = freefare_get_tag_uid (tag);
-
-    cut_assert_equal_string (s1, s2, cut_message ("UID don't match"));
-
-    free (s1);
-    free (s2);
-}

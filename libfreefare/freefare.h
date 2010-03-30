@@ -63,8 +63,6 @@ int		 mifare_ultralight_disconnect (MifareTag tag);
 int		 mifare_ultralight_read (MifareTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
 int		 mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
 
-char		*mifare_ultralight_get_uid (MifareTag tag);
-
 typedef unsigned char MifareClassicBlock[16];
 
 typedef uint8_t MifareSectorNumber;
@@ -91,7 +89,6 @@ int 		 mifare_classic_get_trailer_block_permission (MifareTag tag, const MifareC
 int		 mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
 int		 mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber block);
-char		*mifare_classic_get_uid (MifareTag tag);
 
 void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 

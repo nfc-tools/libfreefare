@@ -183,23 +183,3 @@ mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, c
 
     return 0;
 }
-
-
-
-/*
- * Miscellaneous functions
- */
-char *
-mifare_ultralight_get_uid (MifareTag tag)
-{
-    char *uid = malloc (2 * 7 + 1);
-    sprintf (uid, "%02x%02x%02x%02x%02x%02x%02x",
-	    tag->info.abtUid[0],
-	    tag->info.abtUid[1],
-	    tag->info.abtUid[2],
-	    tag->info.abtUid[3],
-	    tag->info.abtUid[4],
-	    tag->info.abtUid[5],
-	    tag->info.abtUid[6]);
-    return uid;
-}

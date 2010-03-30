@@ -661,18 +661,6 @@ mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber bloc
 }
 
 /*
- * UID accessor
- */
-char*
-mifare_classic_get_uid(MifareTag tag)
-{
-  char* uid = malloc((4 * 2) + 1);
-  snprintf(uid, 9, "%02x%02x%02x%02x", tag->info.abtUid[0], tag->info.abtUid[1], tag->info.abtUid[2], tag->info.abtUid[3]);
-  uid[8] = '\0';
-  return uid;
-}
-
-/*
  * Get the sector's first block number in the provided block's sector.
  */
 MifareClassicBlockNumber

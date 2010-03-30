@@ -119,7 +119,7 @@ main(int argc, char *argv[])
 		continue;
 	}
 
-	char *tag_uid = mifare_classic_get_uid (tags[i]);
+	char *tag_uid = freefare_get_tag_uid (tags[i]);
 	char buffer[BUFSIZ];
 
 	printf ("Found %s with UID %s.  Format [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
