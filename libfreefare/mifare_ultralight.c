@@ -193,16 +193,13 @@ char *
 mifare_ultralight_get_uid (MifareTag tag)
 {
     char *uid = malloc (2 * 7 + 1);
-    MifareUltralightPage p0, p1;
-    mifare_ultralight_read (tag, 0, &p0);
-    mifare_ultralight_read (tag, 1, &p1);
     sprintf (uid, "%02x%02x%02x%02x%02x%02x%02x",
-	    p0[0],
-	    p0[1],
-	    p0[2],
-	    p1[0],
-	    p1[1],
-	    p1[2],
-	    p1[3]);
+	    tag->info.abtUid[1],
+	    tag->info.abtUid[2],
+	    tag->info.abtUid[3],
+	    tag->info.abtUid[4],
+	    tag->info.abtUid[5],
+	    tag->info.abtUid[6],
+	    tag->info.abtUid[7]);
     return uid;
 }
