@@ -1,0 +1,241 @@
+.\" Copyright (C) 2010 Romain Tartiere
+.\"
+.\" This program is free software: you can redistribute it and/or modify it
+.\" under the terms of the GNU Lesser General Public License as published by the
+.\" Free Software Foundation, either version 3 of the License, or (at your
+.\" option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful, but WITHOUT
+.\" ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+.\" FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+.\" more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>
+.\"
+.\" $Id$
+.\"
+.Dd March 30, 2010
+.Dt MIFARE_CLASSIC 3
+.Os
+.\"  _   _
+.\" | \ | | __ _ _ __ ___   ___
+.\" |  \| |/ _` | '_ ` _ \ / _ \
+.\" | |\  | (_| | | | | | |  __/
+.\" |_| \_|\__,_|_| |_| |_|\___|
+.\"
+.Sh NAME
+.Nm mifare_classic_connect ,
+.Nm mifare_classic_disconnect ,
+.Nm mifare_classic_authenticate ,
+.Nm mifare_classic_read ,
+.Nm mifare_classic_init_value ,
+.Nm mifare_classic_read_value ,
+.Nm mifare_classic_write ,
+.Nm mifare_classic_increment ,
+.Nm mifare_classic_decrement ,
+.Nm mifare_classic_restore ,
+.Nm mifare_classic_transfer ,
+.Nm mifare_classic_get_trailer_block_permission ,
+.Nm mifare_classic_get_data_block_permission ,
+.Nm mifare_classic_format_sector ,
+.Nm mifare_classic_get_uid ,
+.Nm mifare_classic_trailer_block
+.Nd Mifare Classic Manipulation Functions
+.\"  _     _ _
+.\" | |   (_) |__  _ __ __ _ _ __ _   _
+.\" | |   | | '_ \| '__/ _` | '__| | | |
+.\" | |___| | |_) | | | (_| | |  | |_| |
+.\" |_____|_|_.__/|_|  \__,_|_|   \__, |
+.\"                               |___/
+.Sh LIBRARY
+Mifare card manipulation library (libfreefare, \-lfreefare)
+.\"  ____                              _
+.\" / ___| _   _ _ __   ___  _ __  ___(_)___
+.\" \___ \| | | | '_ \ / _ \| '_ \/ __| / __|
+.\"  ___) | |_| | | | | (_) | |_) \__ \ \__ \
+.\" |____/ \__, |_| |_|\___/| .__/|___/_|___/
+.\"        |___/            |_|
+.Sh SYNOPSIS
+.In freefare.h
+.Ft int
+.Fn mifare_classic_connect "MifareTag tag"
+.Ft int
+.Fn mifare_classic_disconnect "MifareTag tag"
+.Ft int
+.Fn mifare_classic_authenticate "MifareTag tag" "const MifareClassicBlockNumber block" "const MifareClassicKey key" "const MifareClassicKeyType key_type"
+.Ft int
+.Fn mifare_classic_read "MifareTag tag" "const MifareClassicBlockNumber block" "MifareClassicBlock *data"
+.Ft int
+.Fn mifare_classic_init_value "MifareTag tag" "const MifareClassicBlockNumber block" "const int32_t value" "const MifareClassicBlockNumber adr"
+.Ft int
+.Fn mifare_classic_read_value "MifareTag tag" "const MifareClassicBlockNumber block" "int32_t *value" "MifareClassicBlockNumber *adr"
+.Ft int
+.Fn mifare_classic_write "MifareTag tag" "const MifareClassicBlockNumber block" "const MifareClassicBlock data"
+.Ft int
+.Fn mifare_classic_increment "MifareTag tag" "const MifareClassicBlockNumber block" "const uint32_t amount"
+.Ft int
+.Fn mifare_classic_decrement "MifareTag tag" "const MifareClassicBlockNumber block" "const uint32_t amount"
+.Ft int
+.Fn mifare_classic_restore "MifareTag tag" "const MifareClassicBlockNumber block"
+.Ft int
+.Fn mifare_classic_transfer "MifareTag tag" "const MifareClassicBlockNumber block"
+.Ft int
+.Fn mifare_classic_get_trailer_block_permission "MifareTag tag" "const MifareClassicBlockNumber block" "const uint16_t permission" "const MifareClassicKeyType key_type"
+.Ft int
+.Fn mifare_classic_get_data_block_permission "MifareTag tag" "const MifareClassicBlockNumber block" "const unsigned char permission" "const MifareClassicKeyType key_type"
+.Ft int
+.Fn mifare_classic_format_sector "MifareTag tag" "const MifareClassicBlockNumber block"
+.Ft "char *"
+.Fn mifare_classic_get_uid "MifareTag tag"
+.Ft void
+.Fn mifare_classic_trailer_block "MifareClassicBlock *block" "const MifareClassicKey key_a" "const uint8_t ab_0" "const uint8_t ab_1" "const uint8_t ab_2" "const uint8_t ab_tb" "const uint8_t gpb" "const MifareClassicKey key_b"
+.\"  ____                      _       _   _
+.\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
+.\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
+.\" | |_| |  __/\__ \ (__| |  | | |_) | |_| | (_) | | | |
+.\" |____/ \___||___/\___|_|  |_| .__/ \__|_|\___/|_| |_|
+.\"                             |_|
+.Sh DESCRIPTION
+The
+.Fn mifare_classic_*
+set of functions allow manipulation of both Mifare Classic 1k and Mifare
+Classic 4k cards.
+.Pp
+A given
+.Vt tag
+is activated using
+.Fn mifare_classic_connect ,
+deactivation is performed with
+.Fn mifare_classic_disconnect .
+.Pp
+After a successful connection, an authentication for a
+.Vt block
+using a
+.Vt key
+of type
+.Vt key_type
+(either
+.Ar MFC_KEY_A
+or
+.Ar MFC_KEY_B )
+using
+.Fn mifare_classic_authenticate
+is required for further operation.
+.Pp
+Once successfuly authenticated,
+.Vt data
+of a
+.Vt block
+can be read using
+.Fn mifare_classic_read
+and written using
+.Fn mifare_classic_write .
+.Pp
+Value-blocks can be easily accessed using the
+.Fn mifare_classic_read_value
+and
+.Fn mifare_classic_init_value
+functions. Aditional functions are available for such
+.Vt blocks :
+.Fn mifare_classic_increment
+and
+.Fn mifare_classic_decrement
+increment or decrement the value of the provided
+.Vt block
+by
+.Vt amount
+and store the result in the target's internal data register.  The value in this
+register can also be loaded with the value from another
+.Vt block
+using
+.Fn mifare_classic_restore .
+Writing back the value of the target's internal data register to a
+.Vt block
+is requested using
+.Fn mifare_classic_transfer .
+.Pp
+Permissions for a data
+.Vt block
+can be fetched using
+.Fn mifare_classic_get_data_block_permission .
+The access
+.Vt permission
+to be checkf for key
+.Vt key_type
+is one of
+.Ar MCAB_R ,
+.Ar MCAB_W ,
+.Ar MCAB_I or
+.Ar MCAB_D ;
+respectively for read, write, increment and decrement permissions.
+.Pp
+.Fn mifare_classic_get_trailer_block_permission
+acts like
+.Fn mifare_classic_get_data_block_permission
+but the available
+.Vt permissions
+are
+.Ar MCAB_READ_KEYA ,
+.Ar MCAB_READ_KEYB ,
+.Ar MCAB_READ_ACCESS_BITS ,
+.Ar MCAB_WRITE_ACCESS_BITS ,
+.Ar MCAB_READ_KEYB and
+.Ar MCAB_WRITE_KEYB .
+.Pp
+A whole sector can be reset to factory defaults using
+.Fn mifare_classic_format_sector
+and providing any
+.Vt block
+in the sector.
+.Pp
+The
+.Fn mifare_classic_trailer_block
+is a convenience function for building a trailer block
+.Vt block
+given a A key
+.Vt key_a ;
+access bits for the blocks of the sector
+.Vt ab_0 ,
+.Vt ab_1 and
+.Vt ab_2 ;
+and a B key
+.Vt key_b .
+.Pp
+The
+.Fn mifare_classic_get_uid
+function retrieves a text representation of the UID of a
+.Fn tag .
+It is not required for the
+.Vt tag
+to be active to use this function.
+.\"  ____      _                                 _
+.\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
+.\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
+.\" |  _ <  __/ |_| |_| | |  | | | |  \ V / (_| | | |_| |  __/\__ \
+.\" |_| \_\___|\__|\__,_|_|  |_| |_|   \_/ \__,_|_|\__,_|\___||___/
+.\"
+.Sh RETURN VALUES
+Unless stated otherwise, all functions return a value greater than or equal to
+.Va 0
+on success or
+.Va -1
+on failure.
+.\"  ____                    _
+.\" / ___|  ___  ___    __ _| |___  ___
+.\" \___ \ / _ \/ _ \  / _` | / __|/ _ \
+.\"  ___) |  __/  __/ | (_| | \__ \ (_) |
+.\" |____/ \___|\___|  \__,_|_|___/\___/
+.\"
+.Sh SEE ALSO
+.Xr freefare 3 ,
+.Xr mad 3
+.\"     _         _   _
+.\"    / \  _   _| |_| |__   ___  _ __ ___
+.\"   / _ \| | | | __| '_ \ / _ \| '__/ __|
+.\"  / ___ \ |_| | |_| | | | (_) | |  \__ \
+.\" /_/   \_\__,_|\__|_| |_|\___/|_|  |___/
+.\"
+.Sh AUTHORS
+.An Romain Tartiere Aq romain@blogreen.org
+.An Romuald Conty Aq rconty@il4p.fr
