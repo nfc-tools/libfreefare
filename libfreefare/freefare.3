@@ -28,6 +28,7 @@
 .Nm freefare_get_tags ,
 .Nm freefare_get_tag_type ,
 .Nm freefare_get_tag_friendly_name ,
+.Nm freefare_get_tag_uid ,
 .Nm freefare_free_tags
 .Nd Generic target manipulation functions
 .\"  _     _ _
@@ -52,6 +53,8 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn freefare_get_tag_type "MifareTag tag"
 .Ft "const char *"
 .Fn freefare_get_tag_friendly_name "MifareTag tag"
+.Ft "char *"
+.Fn freefare_get_tag_uid "MifareTag tag"
 .Ft void
 .Fn freefare_free_tags "MifareTag *tags"
 .\"  ____                      _       _   _
@@ -78,7 +81,8 @@ This list has to be freed after usage using
 Information about a given
 .Vt MifareTag
 can be gathered using the
-.Fn freefare_get_tag_type
+.Fn freefare_get_tag_type ,
+.Fn freefare_get_tag_uid
 and
 .Fn freefare_get_tag_friendly_name
 functions.

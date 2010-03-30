@@ -173,7 +173,7 @@ mifare_classic_connect (MifareTag tag)
     ASSERT_MIFARE_CLASSIC (tag);
 
     nfc_target_info_t pnti;
-    if (nfc_initiator_select_tag (tag->device, NM_ISO14443A_106, tag->info.abtUid, 4, &pnti)) {
+    if (nfc_initiator_select_tag (tag->device, NM_ISO14443A_106, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
 	tag->active = 1;
     } else {
 	errno = EIO;

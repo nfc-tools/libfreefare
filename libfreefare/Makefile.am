@@ -21,6 +21,7 @@ man_MANS = freefare.3 \
 linkedman = \
 	    freefare.3 freefare_get_tags.3 \
 	    freefare.3 freefare_get_tag_type.3 \
+	    freefare.3 freefare_get_tag_uid.3 \
 	    freefare.3 freefare_get_tag_friendly_name.3 \
 	    freefare.3 freefare_free_tags.3 \
 	    mifare_ultralight.3 mifare_ultralight_connect.3 \

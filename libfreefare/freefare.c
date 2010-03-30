@@ -149,6 +149,18 @@ freefare_get_tag_friendly_name (MifareTag tag)
 }
 
 /*
+ * Returns the UID of the provided tag.
+ */
+char *
+freefare_get_tag_uid (MifareTag tag)
+{
+    char *res = malloc (2 * tag->info.szUidLen + 1);
+    for (int i =0; i < tag->info.szUidLen; i++)
+	snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
+    return res;
+}
+
+/*
  * Free the provided tag list.
  */
 void
