@@ -267,9 +267,11 @@ mifare_classic_init_value (MifareTag tag, const MifareClassicBlockNumber block, 
 {
     union mifare_classic_block b;
 
-    b.value.value = value;
-    b.value.value_ = ~value;
-    b.value.value__ = value;
+    uint32_t le_value = htole32 ((uint32_t)value);
+
+    b.value.value = le_value;
+    b.value.value_ = ~le_value;
+    b.value.value__ = le_value;
 
     b.value.address = adr;
     b.value.address_ = ~adr;
@@ -349,7 +351,7 @@ mifare_classic_increment (MifareTag tag, const MifareClassicBlockNumber block, c
     unsigned char command[6];
     command[0] = MC_INCREMENT;
     command[1] = block;
-    int32_t le_amount = htole32 (amount);
+    uint32_t le_amount = htole32 (amount);
     memcpy(&(command[2]), &le_amount, sizeof (le_amount));
 
     // Send command
@@ -376,7 +378,7 @@ mifare_classic_decrement (MifareTag tag, const MifareClassicBlockNumber block, c
     unsigned char command[6];
     command[0] = MC_DECREMENT;
     command[1] = block;
-    int32_t le_amount = htole32 (amount);
+    uint32_t le_amount = htole32 (amount);
     memcpy(&(command[2]), &le_amount, sizeof (le_amount));
 
     // Send command
