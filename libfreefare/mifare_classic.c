@@ -22,7 +22,7 @@
  * following documents:
  *
  * MF1ICS50 Functional specification
- * Rev. 5.3 — 29 January 2008
+ * Rev. 5.3 - 29 January 2008
  *
  * Making the Best of Mifare Classic
  * Wouter Teepe (Radboud University Nijmegen)
