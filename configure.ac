@@ -40,7 +40,8 @@ AC_DEFINE([_XOPEN_SOURCE], [600], [Define to 500 if Single Unix conformance is w
 CFLAGS="$CFLAGS -std=c99"
 
 # Checks for pkg-config modules.
-PKG_CHECK_MODULES([LIBNFC], [libnfc], [], [AC_MSG_ERROR([libnfc is mandatory.])])
+LIBNFC_REQUIRED_VERSION=1.3.4
+PKG_CHECK_MODULES([LIBNFC], [libnfc >= $LIBNFC_REQUIRED_VERSION], [], [AC_MSG_ERROR([libnfc >= $LIBNFC_REQUIRED_VERSION is mandatory.])])
 
 PKG_CONFIG_REQUIRES="libnfc"
 AC_SUBST([PKG_CONFIG_REQUIRES])
