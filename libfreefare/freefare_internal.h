@@ -22,6 +22,10 @@
 
 #include "config.h"
 
+#if !defined(le32toh) && defined(letoh32)
+#  define le32toh(x) letoh32(x)
+#endif
+
 #if defined(HAVE_BYTESWAP_H)
 #include <byteswap.h>
 #if !defined(le32toh) || !defined(htole32)
