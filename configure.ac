@@ -26,6 +26,8 @@ AC_TYPE_SIZE_T
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
+
+AC_CHECK_HEADERS([sys/types.h])
 AC_CHECK_FUNCS([memset letoh32 htole32])
 
 AC_CHECK_HEADERS([endian.h sys/endian.h])
@@ -36,6 +38,7 @@ fi
 AC_CHECK_HEADERS([byteswap.h])
 
 AC_DEFINE([_XOPEN_SOURCE], [600], [Define to 500 if Single Unix conformance is wanted, 600 for sixth revision.])
+AC_DEFINE([_BSD_SOURCE], [1], [Define on BSD to activate all library features])
 
 CFLAGS="$CFLAGS -std=c99"
 

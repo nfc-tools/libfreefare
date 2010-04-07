@@ -31,12 +31,15 @@
 
 #include "config.h"
 
+#if defined(HAVE_SYS_TYPES_H)
+#  include <sys/types.h>
+#endif
+
 #if defined(HAVE_SYS_ENDIAN_H)
 #  include <sys/endian.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)
-#  define _BSD_SOURCE
 #  include <endian.h>
 #endif
 #include <errno.h>
