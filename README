@@ -1,0 +1,11 @@
+The libfreefare project aims to provide a convenient API for Mifare card
+manipulations.
+
+Supported tags:
+  - Mifare Classic 1k
+  - Mifare Classic 4k
+  - Mifare Ultralight
+
+Supported features:
+  - Mifare Application Directory (MAD) v1
+  - Mifare Application Directory (MAD) v2
