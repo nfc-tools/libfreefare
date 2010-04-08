@@ -49,7 +49,11 @@ PKG_CHECK_MODULES([LIBNFC], [libnfc >= $LIBNFC_REQUIRED_VERSION], [], [AC_MSG_ER
 PKG_CONFIG_REQUIRES="libnfc"
 AC_SUBST([PKG_CONFIG_REQUIRES])
 
-m4_ifdef([AC_CHECK_CUTTER], [AC_CHECK_CUTTER], [ac_cv_use_cutter="no"])
+CUTTER_REQUIRED_VERSION=1.1.2
+m4_ifdef([AC_CHECK_CUTTER], [AC_CHECK_CUTTER([>= $CUTTER_REQUIRED_VERSION])], [ac_cv_use_cutter="no"])
+if test x$ac_cv_with_cutter = xyes -a x$ac_cv_use_cutter = xno; then
+    AC_MSG_ERROR([cutter >= $CUTTER_REQUIRED_VERSION is mandatory.])
+fi
 AM_CONDITIONAL([WITH_CUTTER], [test "$ac_cv_use_cutter" != "no"])
 
 m4_ifdef([AC_CHECK_COVERAGE], [AC_CHECK_COVERAGE])
