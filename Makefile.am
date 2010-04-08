@@ -19,3 +19,4 @@ dist-hook:
 	    echo "A svn checkout is required to generate a ChangeLog" >&2; \
 	fi
 
+EXTRA_DIST = HACKING
