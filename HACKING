@@ -1,0 +1,53 @@
+Hello hackers!
+
+General remarks about contributing
+----------------------------------
+
+Contributions to the libfreefare are welcome!  Here are some directions to get
+you started:
+
+  1. Install Cutter
+     Cutter is a cool unit test framework for C code.  You will need it to run
+     the regression tests suite (`make check') and ensure that your code does
+     not break other features.
+     http://cutter.sourceforge.net/
+
+  2. Follow style conventions
+     The source code of the library trend to follow some conventions so that it
+     is consistent in style and thus easier to read.  Basically, it follows
+     FreeBSD's style(9); adding 4-space indentation and 8-space tabs (which you
+     should configure in your editor, e.g. `:set sw=4 ts=8' in vim).  For more
+     details, please read the style(9) man page from FreeBSD's website:
+     http://www.freebsd.org/cgi/man.cgi?query=style
+
+  3. Write tests
+     I told you cutter is lovely in #1 so you really should use it!  If you
+     want to contribute code, write test: only code with appropriate tests will
+     be considered.  And remember that TDD (Test Driven Development) is cool
+     and writing all tests at the end deeply depressing, so test early, test
+     often!
+
+
+Adding support for a new type of card
+-------------------------------------
+
+Adding a new supported card to the libfreefare requires a few modification in
+multiple places.  Here is a list of the things to do in order to have the
+infrastructure ready for hacking the new card support:
+  - Edit libfreefare/freefare.h:
+      - Add your tag to the `mifare_tag_type' enum;
+      - Add a <tag>_connect() and a <tag>_disconnect() function prototype;
+  - Edit libfreefare/freefare_internal.h:
+      - Add a new <tag>_tag struct.  It's very first member shall be `struct
+	mifare_tag __tag';
+      - Add a <tag>_tag_new() and a <tag>_tag_free() function prototype;
+      - Add a ASSERT_<TAG>() macro to check the tag's type;
+      - Add a <TAG>() macro to cast a generic tag to your type.
+  - Edit libfreefare/freefare.c:
+      - Add your tag type to the supported_tags array;
+      - Edit the freefare_get_tags() function so that it calls <tag>_tag_new()
+	when it finds your tag;
+      - Edit the freefare_free_tags() function so that it calls
+	<tag>_tag_free() to free your tags;
+  - Create libfreefare/<tag>.c and implement all that's missing ;-)
+
