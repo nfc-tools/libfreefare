@@ -49,5 +49,17 @@ infrastructure ready for hacking the new card support:
 	when it finds your tag;
       - Edit the freefare_free_tags() function so that it calls
 	<tag>_tag_free() to free your tags;
-  - Create libfreefare/<tag>.c and implement all that's missing ;-)
-
+  - Create libfreefare/<tag>.c and implement all that's missing:
+      - <tag>_tag_new() SHALL allocate all data-structure the tag may need to
+	use during it's lifetime.  We do not want to have any function to fail
+	later because the running system is out of resources;
+      - <tag>_connect() SHOULD initialise data allocated by <tag>_tag_new().
+	Keep in mind that a single tag may be disconnected from and connected
+	to again, without being freed in the meantime.  Since all memory
+	allocations are done in <tag>_tag_new(), your code SHOULD only care
+	about initialising these data structures;
+      - <tag>_disconnect() MAY do more that just send a disconnect command to
+	the tag.  At time of writing I have no idea what it could be but who
+	knows...
+      - <tag>_tag_free() SHALL free all resources allocated for the tag
+	(surprising, isn't it?)
