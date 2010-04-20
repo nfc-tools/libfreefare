@@ -131,6 +131,32 @@ freefare_get_tags (nfc_device_t *device)
 }
 
 /*
+ * Duplicate a tag
+ */
+MifareTag
+freefare_duplicate_tag (MifareTag tag)
+{
+    MifareTag ret;
+
+    /* Allocate memory for the MIFARE target */
+    switch (tag->tag_info->type) {
+	case CLASSIC_1K:
+	case CLASSIC_4K:
+	    ret = mifare_classic_tag_new ();
+
+	    break;
+	case ULTRALIGHT:
+	    ret = mifare_ultralight_tag_new ();
+	    break;
+    }
+    ret->device = tag->device;
+    ret->info = tag->info;
+    ret->active = tag->active;
+    ret->tag_info = tag->tag_info;
+    return ret;
+}
+
+/*
  * Returns the type of the provided tag.
  */
 enum mifare_tag_type
@@ -161,6 +187,25 @@ freefare_get_tag_uid (MifareTag tag)
 }
 
 /*
+ * Free the provided tag.
+ */
+void
+freefare_free_tag (MifareTag tag)
+{
+    if (tag) {
+	switch (tag->tag_info->type) {
+	    case CLASSIC_1K:
+	    case CLASSIC_4K:
+		mifare_classic_tag_free (tag);
+		break;
+	    case ULTRALIGHT:
+		mifare_ultralight_tag_free (tag);
+		break;
+	}
+    }
+}
+
+/*
  * Free the provided tag list.
  */
 void
@@ -168,15 +213,7 @@ freefare_free_tags (MifareTag *tags)
 {
     if (tags) {
 	for (int i=0; tags[i]; i++) {
-	    switch (tags[i]->tag_info->type) {
-		case CLASSIC_1K:
-		case CLASSIC_4K:
-		    mifare_classic_tag_free (tags[i]);
-		    break;
-		case ULTRALIGHT:
-		    mifare_ultralight_tag_free (tags[i]);
-		    break;
-	    }
+	    freefare_free_tag(tags[i]);
 	}
 	free (tags);
     }
