@@ -29,6 +29,7 @@
 .Nm freefare_get_tag_type ,
 .Nm freefare_get_tag_friendly_name ,
 .Nm freefare_get_tag_uid ,
+.Nm freefare_free_tag ,
 .Nm freefare_free_tags
 .Nd Generic target manipulation functions
 .\"  _     _ _
@@ -56,6 +57,8 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Ft "char *"
 .Fn freefare_get_tag_uid "MifareTag tag"
 .Ft void
+.Fn freefare_free_tag "MifareTag tags"
+.Ft void
 .Fn freefare_free_tags "MifareTag *tags"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
@@ -75,8 +78,20 @@ returns a NULL-terminated list of
 .Vt MifareTag
 present on
 .Vt device .
-This list has to be freed after usage using
-.Fn freefare_free_tags .
+This list has to be freed after usage by either
+.Bl -hyphen
+.It
+Calling the
+.Fn freefare_free_tags
+function.  All tags in the list are automatically freed;
+.It
+Calling the
+.Fn freefare_free_tag
+function to free each tag in the list individually, and freeing the list itself
+using the
+.Fn free
+function.
+.El
 .Pp
 Information about a given
 .Vt MifareTag
@@ -105,6 +120,7 @@ on failure.
 .\" |____/ \___|\___|  \__,_|_|___/\___/
 .\"
 .Sh SEE ALSO
+.Xr free 3 ,
 .Xr mifare_classic 3 ,
 .Xr mifare_ultralight 3
 .\"     _         _   _
