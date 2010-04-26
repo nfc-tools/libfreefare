@@ -25,7 +25,7 @@ static MifareTag *tags = NULL;
 MifareTag tag = NULL;
 
 void
-setup ()
+cut_setup ()
 {
     int res;
 
@@ -52,7 +52,7 @@ setup ()
 }
 
 void
-teardown ()
+cut_teardown ()
 {
     if (tag)
 	mifare_ultralight_disconnect (tag);
