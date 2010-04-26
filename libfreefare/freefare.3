@@ -78,20 +78,27 @@ returns a NULL-terminated list of
 .Vt MifareTag
 present on
 .Vt device .
-This list has to be freed after usage by either
+This list has to be freed after usage by either:
 .Bl -hyphen
 .It
-Calling the
+calling the
 .Fn freefare_free_tags
 function.  All tags in the list are automatically freed;
 .It
-Calling the
+calling the
 .Fn freefare_free_tag
 function to free each tag in the list individually, and freeing the list itself
 using the
 .Fn free
 function.
 .El
+.Pp
+Because of the nature of the target detection process, any previously detected
+target will be in an inconsistent state after a call to
+.Fn freefare_get_tags .
+It is the programmer's responsibility to free these targets before calling the
+.Fn freefare_get_tags
+function.
 .Pp
 Information about a given
 .Vt MifareTag
