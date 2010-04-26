@@ -131,32 +131,6 @@ freefare_get_tags (nfc_device_t *device)
 }
 
 /*
- * Duplicate a tag
- */
-MifareTag
-freefare_duplicate_tag (MifareTag tag)
-{
-    MifareTag ret;
-
-    /* Allocate memory for the MIFARE target */
-    switch (tag->tag_info->type) {
-	case CLASSIC_1K:
-	case CLASSIC_4K:
-	    ret = mifare_classic_tag_new ();
-
-	    break;
-	case ULTRALIGHT:
-	    ret = mifare_ultralight_tag_new ();
-	    break;
-    }
-    ret->device = tag->device;
-    ret->info = tag->info;
-    ret->active = tag->active;
-    ret->tag_info = tag->tag_info;
-    return ret;
-}
-
-/*
  * Returns the type of the provided tag.
  */
 enum mifare_tag_type
