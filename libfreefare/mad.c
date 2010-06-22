@@ -294,7 +294,7 @@ mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClass
 	if (mifare_classic_write (tag, 0x42, data) < 0) return -1;
 
 	mifare_classic_trailer_block (&data, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, key_b_sector_10);
-	if (mifare_classic_write (tag, 0x42, data) < 0) return -1;
+	if (mifare_classic_write (tag, 0x43, data) < 0) return -1;
 
     }
 
