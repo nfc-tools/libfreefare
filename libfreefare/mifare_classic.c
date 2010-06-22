@@ -51,6 +51,15 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
+#define MC_AUTH_A         0x60
+#define MC_AUTH_B         0x61
+#define MC_READ           0x30
+#define MC_WRITE          0xA0
+#define MC_TRANSFER       0xB0
+#define MC_DECREMENT      0xC0
+#define MC_INCREMENT      0xC1
+#define MC_STORE          0xC2
+
 union mifare_classic_block {
     unsigned char data[16];
     struct {
