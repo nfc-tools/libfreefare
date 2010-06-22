@@ -148,7 +148,14 @@ for the given
 .\" |_| \_\___|\__|\__,_|_|  |_| |_|   \_/ \__,_|_|\__,_|\___||___/
 .\"
 .Sh RETURN VALUES
-Unless stated otherwise, all functions return a value greater than or equal to
+The
+.Fn mad_new
+function return
+.Va NULL
+on failure and allocates memory that has to be freed using
+.Xr free 3
+on success.
+Unless stated otherwise, all other functions return a value greater than or equal to
 .Va 0
 on success or
 .Va -1
