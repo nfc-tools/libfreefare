@@ -16,7 +16,8 @@ noinst_LTLIBRARIES = \
 		     test_mifare_classic.la \
 		     test_mifare_classic_create_trailer_block.la \
 		     test_mifare_classic_application.la \
-		     test_mifare_ultralight.la
+		     test_mifare_ultralight.la \
+		     test_tlv.la
 
 AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
@@ -38,6 +39,9 @@ test_mifare_ultralight_la_SOURCES = test_mifare_ultralight.c \
 				    mifare_ultralight_fixture.c \
 				    mifare_ultralight_fixture.h
 test_mifare_ultralight_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
+
+test_tlv_la_SOURCES = test_tlv.c
+test_tlv_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 echo-cutter:
 	@echo $(CUTTER)

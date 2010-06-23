@@ -8,7 +8,8 @@ libfreefare_la_SOURCES = freefare.c \
 			 mifare_classic.c \
 			 mifare_ultralight.c \
 			 mad.c \
-			 mifare_application.c
+			 mifare_application.c \
+			 tlv.c
 libfreefare_la_HEADERS = freefare.h
 libfreefare_ladir = $(includedir)
 
@@ -16,7 +17,8 @@ man_MANS = freefare.3 \
 	   mifare_ultralight.3 \
 	   mifare_classic.3 \
 	   mad.3 \
-	   mifare_application.3
+	   mifare_application.3 \
+	   tlv.3
 
 linkedman = \
 	    freefare.3 freefare_get_tags.3 \
@@ -57,7 +59,9 @@ linkedman = \
 	    mad.3 mad_free.3 \
 	    mifare_application.3 mifare_application_alloc.3 \
 	    mifare_application.3 mifare_application_free.3 \
-	    mifare_application.3 mifare_application_find.3
+	    mifare_application.3 mifare_application_find.3 \
+	    tlv.3 tlv_encode.3 \
+	    tlv.3 tlv_decode.3
 
 install-data-hook:
 	(cd $(DESTDIR)$(man3dir); for i in `echo $(linkedman) | xargs -n2 echo | awk '{print $$2}'`; do rm -f $$i; done; echo $(linkedman) | xargs -n2 $(LN_S))
