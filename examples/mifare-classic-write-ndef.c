@@ -26,6 +26,8 @@
 
 #include <freefare.h>
 
+#define MIN(a,b) ((a < b) ? a: b)
+
 MifareClassicKey default_keys[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
     { 0xd3,0xf7,0xd3,0xf7,0xd3,0xf7 },
@@ -44,9 +46,18 @@ const MifareClassicKey default_keyb = {
     0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7
 };
 
+const uint8_t ndef_msg[34] = {
+    0xd1, 0x02, 0x1c, 0x53, 0x70, 0x91, 0x01, 0x09,
+    0x54, 0x02, 0x65, 0x6e, 0x4c, 0x69, 0x62, 0x6e,
+    0x66, 0x63, 0x51, 0x01, 0x0b, 0x55, 0x03, 0x6c,
+    0x69, 0x62, 0x6e, 0x66, 0x63, 0x2e, 0x6f, 0x72,
+    0x67, 0xfe
+};
+
 int
 search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicKey *key, MifareClassicKeyType *key_type)
 {
+    mifare_classic_disconnect (tag);
     for (int i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
 	    if ((1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_KEYA, MFC_KEY_A)) &&
@@ -82,8 +93,8 @@ main(int argc, char *argv[])
     int error = 0;
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
-    MifareClassicKey key_00, key_10;
-    MifareClassicKeyType key_00_type, key_10_type;
+    MifareClassicKey key_00, key_01, key_10;
+    MifareClassicKeyType key_00_type, key_01_type, key_10_type;
     MifareClassicBlock block;
     Mad mad;
 
@@ -134,6 +145,11 @@ main(int argc, char *argv[])
 		    break;
 	    }
 
+	    if (!search_sector_key (tags[i], 0x04, &key_01, &key_01_type)) {
+		error = 1;
+		goto error;
+	    }
+
 	    if (!error) {
 		/* Ensure the auth key is always a B one. If not, change it! */
 		switch (freefare_get_tag_type (tags[i])) {
@@ -182,10 +198,48 @@ main(int argc, char *argv[])
 		goto error;
 	    }
 
+	    MadAid aid = {
+		.function_cluster_code = 0xe1,
+		.application_code = 0x03
+	    };
+
+	    mad_set_aid (mad, 1, aid);
+
 	    if (mad_write (tags[i], mad, key_00, key_10) < 0) {
 		perror ("mad_write");
 		error = 1;
+		goto error;
 	    }
+
+
+	    size_t encoded_size;
+	    off_t pos = 0;
+	    uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
+
+	    MifareClassicBlockNumber bn = 0x04;
+
+	    if (mifare_classic_authenticate (tags[i], bn, key_01, key_01_type) < 0) {
+		perror ("mifare_classic_authenticate");
+		error = 1;
+		goto error;
+	    }
+
+	    MifareClassicBlock data;
+
+	    while (pos < encoded_size) {
+		memset (&data, '\0', sizeof (MifareClassicBlock));
+		memcpy (&data, tlv_data + pos, MIN (encoded_size - pos, sizeof (MifareClassicBlock)));
+		pos += sizeof (MifareClassicBlock);
+		if (bn == 0x07)
+		    abort();
+		if (mifare_classic_write (tags[i], bn++, data) < 0) {
+		    perror ("mifare_classic_write");
+		    error = 1;
+		    goto error;
+		}
+	    }
+
+	    free (tlv_data);
 
 	    free (mad);
 	}
