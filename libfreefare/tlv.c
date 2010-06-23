@@ -17,6 +17,15 @@
  * $Id$
  */
 
+/*
+ * This implementation was written based on information provided by the
+ * following documents:
+ *
+ * NFC Forum - Type 1 Tag Operation Specification
+ *   NFCForum-TS-Type-1-Tag_1.0
+ *   2007-07-09
+ */
+
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +33,8 @@
 #include <endian.h>
 
 #include <freefare.h>
+
+#define TLV_TERMINATOR 0xFE
 
 /*
  * TLV (Type Length Value) Manipulation Functions.
@@ -44,7 +55,8 @@ tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *
     if (isize == 0xffff) /* RFU */
 	return NULL;
 
-    if ((res = malloc (1 + ((isize > 254) ? 3 : 1) + isize))) {
+    if ((res = malloc (1 + ((isize > 254) ? 3 : 1) + isize + 1))) {
+	               /* type + size + payload + terminator */
 	res[n++] = type;
 
 	if (isize > 254) {
@@ -57,8 +69,12 @@ tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *
 	}
 
 	memcpy (res + n, istream, isize);
+
+	n += isize;
+	res[n++] = TLV_TERMINATOR;
+
 	if (osize)
-	    *osize = isize + n;
+	    *osize = n;
     }
     return res;
 }
