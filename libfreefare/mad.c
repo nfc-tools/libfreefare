@@ -286,11 +286,11 @@ mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClass
 
 	mad->sector_0x10.crc = sector_0x10_crc8 (mad);
 
-	memcpy (data, &(mad->sector_0x10), sizeof (data));
+	memcpy (data, (uint8_t *)&(mad->sector_0x10), sizeof (data));
 	if (mifare_classic_write (tag, 0x40, data) < 0) return -1;
-	memcpy (data, &(mad->sector_0x10) + sizeof (data), sizeof (data));
+	memcpy (data, (uint8_t *)&(mad->sector_0x10) + sizeof (data), sizeof (data));
 	if (mifare_classic_write (tag, 0x41, data) < 0) return -1;
-	memcpy (data, &(mad->sector_0x10) + sizeof (data) * 2, sizeof (data));
+	memcpy (data, (uint8_t *)&(mad->sector_0x10) + sizeof (data) * 2, sizeof (data));
 	if (mifare_classic_write (tag, 0x42, data) < 0) return -1;
 
 	mifare_classic_trailer_block (&data, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, key_b_sector_10);
@@ -301,9 +301,9 @@ mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClass
     mad->sector_0x00.crc = sector_0x00_crc8 (mad);
 
     if (mifare_classic_authenticate (tag, 0x00, key_b_sector_00, MFC_KEY_B) < 0) return -1;
-    memcpy (data, &(mad->sector_0x00), sizeof (data));
+    memcpy (data, (uint8_t *)&(mad->sector_0x00), sizeof (data));
     if (mifare_classic_write (tag, 0x01, data) < 0) return -1;
-    memcpy (data, &(mad->sector_0x00) + sizeof (data), sizeof (data));
+    memcpy (data, (uint8_t *)&(mad->sector_0x00) + sizeof (data), sizeof (data));
     if (mifare_classic_write (tag, 0x02, data) < 0) return -1;
 
     mifare_classic_trailer_block (&data, mad_key_a, 0x0, 0x1, 0x1, 0x6, gpb, key_b_sector_00);
