@@ -68,6 +68,7 @@ search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicK
 		return 1;
 	    }
 	}
+	mifare_classic_disconnect (tag);
 
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_B))) {
 	    if (((block == 0) || (1 == mifare_classic_get_data_block_permission (tag, block + 0, MCAB_W, MFC_KEY_B))) &&
@@ -81,6 +82,7 @@ search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicK
 		return 1;
 	    }
 	}
+	mifare_classic_disconnect (tag);
     }
 
     warnx ("No known authentication key for block %d", block);
