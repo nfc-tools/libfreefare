@@ -149,11 +149,10 @@ tlv_record_length (const uint8_t *stream, size_t *field_length_size, size_t *fie
 /*
  * Get a pointer to the next record in the provided TLV sequence.
  *             | 0x03 | 0x02 | 0xbe | 0xef | 0x00 | 0x00 | 0xfe |
- * First call  ---'                    |      |      |
- * Second call ------------------------'      |      |
- * Third call  -------------------------------'      |
- * Fourth call --------------------------------------'
- * Fifth call  NULL
+ * First call  ---'                           |      |
+ * Second call -------------------------------'      |
+ * Third call  --------------------------------------'
+ * Fourth call NULL
  */
 uint8_t *
 tlv_next (uint8_t *stream)
