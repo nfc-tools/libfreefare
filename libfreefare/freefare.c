@@ -77,7 +77,7 @@ freefare_get_tags (nfc_device_t *device)
 	bool found = false;
 	struct supported_tag *tag_info;
 
-	for (int i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
+	for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
 	    if ((target_info.nai.abtAtqa[0] == supported_tags[i].ATQA[0]) &&
 		(target_info.nai.abtAtqa[1] == supported_tags[i].ATQA[1]) &&
 		(target_info.nai.btSak == supported_tags[i].SAK)) {
@@ -155,7 +155,7 @@ char *
 freefare_get_tag_uid (MifareTag tag)
 {
     char *res = malloc (2 * tag->info.szUidLen + 1);
-    for (int i =0; i < tag->info.szUidLen; i++)
+    for (size_t i =0; i < tag->info.szUidLen; i++)
 	snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
     return res;
 }

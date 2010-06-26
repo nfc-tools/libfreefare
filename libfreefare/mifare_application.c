@@ -97,7 +97,7 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 	return NULL;
 
 
-    for (int c = 0; c < size; c++) {
+    for (size_t c = 0; c < size; c++) {
 	if (free_aids[c]) {
 	    res[c] = free_aids[c];
 	} else {
@@ -111,7 +111,7 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 
     if (res) {
 	/* Update the MAD */
-	for (int c = 0; c < size; c++)
+	for (size_t c = 0; c < size; c++)
 	    mad_set_aid (mad, res[c], aid);
     }
 

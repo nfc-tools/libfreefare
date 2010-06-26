@@ -306,12 +306,12 @@ mifare_classic_read_value (MifareTag tag, const MifareClassicBlockNumber block, 
     union mifare_classic_block b = *((union mifare_classic_block *)(&data));
 
 
-    if ((b.value.value != (~b.value.value_)) || (b.value.value != b.value.value__)) {
+    if ((b.value.value ^ (uint32_t)~b.value.value_) || (b.value.value != b.value.value__)) {
 	errno = EIO;
 	return -1;
     }
 
-    if ((b.value.address != (unsigned char)(~b.value.address_)) || (b.value.address != b.value.address__) || (b.value.address_ != b.value.address___)) {
+    if ((b.value.address ^ (uint8_t)~b.value.address_) || (b.value.address != b.value.address__) || (b.value.address_ != b.value.address___)) {
 	errno = EIO;
 	return -1;
     }
@@ -540,7 +540,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 	sector_access_bits_ = trailer_data[6] | ((trailer_data[7] & 0x0f) << 8) | 0xf000;
 	sector_access_bits  = ((trailer_data[7] & 0xf0) >> 4) | (trailer_data[8] << 4);
 
-	if (sector_access_bits != (uint16_t) ~sector_access_bits_) {
+	if (sector_access_bits ^ (uint16_t)~sector_access_bits_) {
 	    /* Sector locked */
 	    errno = EIO;
 	    return -1;

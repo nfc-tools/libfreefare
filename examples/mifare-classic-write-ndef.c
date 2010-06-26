@@ -58,7 +58,7 @@ int
 search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicKey *key, MifareClassicKeyType *key_type)
 {
     mifare_classic_disconnect (tag);
-    for (int i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
+    for (size_t i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
 	    if ((1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_KEYA, MFC_KEY_A)) &&
 		(1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A)) &&
@@ -215,7 +215,7 @@ main(int argc, char *argv[])
 
 
 	    size_t encoded_size;
-	    off_t pos = 0;
+	    size_t pos = 0;
 	    uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
 
 	    MifareClassicBlockNumber bn = 0x04;

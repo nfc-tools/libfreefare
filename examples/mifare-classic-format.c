@@ -90,7 +90,7 @@ int
 try_format_sector (MifareTag tag, MifareClassicBlockNumber block)
 {
     display_progress ();
-    for (int i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
+    for (size_t i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
 	    if (0 == mifare_classic_format_sector (tag, block)) {
 		mifare_classic_disconnect (tag);
@@ -122,6 +122,8 @@ main(int argc, char *argv[])
     int error = 0;
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
+
+    (void)argc, (void)argv;
 
     device = nfc_connect (NULL);
     if (!device)
