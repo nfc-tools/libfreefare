@@ -27,10 +27,18 @@
  */
 
 #include "config.h"
+
+#if defined(HAVE_SYS_ENDIAN_H)
+#  include <sys/endian.h>
+#endif
+
+#if defined(HAVE_ENDIAN_H)
+#  include <endian.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <endian.h>
 
 #include <freefare.h>
 
