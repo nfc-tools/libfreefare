@@ -10,4 +10,8 @@ if test -z "$CUTTER"; then
     CUTTER="`make -s -C "$BASE_DIR" echo-cutter`"
 fi
 
-"$CUTTER" -s "$BASE_DIR" "$@" "$BASE_DIR"
+"$CUTTER" --keep-opening-modules -s "$BASE_DIR" "$@" "$BASE_DIR"
+#         ^^^^^^^^^^^^^^^^^^^^^^
+# FIXME: Remove this workaround once cutter has been fixed upstream.
+# Bug report:
+# http://sourceforge.net/mailarchive/forum.php?thread_name=20100626123941.GA258%40blogreen.org&forum_name=cutter-users-en
