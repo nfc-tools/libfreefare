@@ -26,6 +26,9 @@
 
 #include <freefare.h>
 
+#define START_FORMAT_N	"Formatting %d blocks"
+#define DONE_FORMAT	" done.\n"
+
 MifareClassicKey default_keys[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
     { 0xd3,0xf7,0xd3,0xf7,0xd3,0xf7 },
@@ -40,19 +43,37 @@ int		 format_mifare_classic_1k (MifareTag tag);
 int		 format_mifare_classic_4k (MifareTag tag);
 int		 try_format_sector (MifareTag tag, MifareClassicBlockNumber block);
 
+int at_block = 0;
+
+void
+display_progress ()
+{
+    at_block++;
+    if (0 == (at_block % 10)) {
+	printf ("%d", at_block);
+	fflush (stdout);
+    } else if (0 == (at_block % 2)) {
+	printf (".");
+	fflush (stdout);
+    }
+}
+
 int
 format_mifare_classic_1k (MifareTag tag)
 {
+    printf (START_FORMAT_N, 16);
     for (int sector = 0; sector < 16; sector++) {
 	if (!try_format_sector (tag, sector * 4))
 	    return 0;
     }
+    printf (DONE_FORMAT);
     return 1;
 }
 
 int
 format_mifare_classic_4k (MifareTag tag)
 {
+    printf (START_FORMAT_N, 32 + 8);
     for (int sector = 0; sector < 32; sector++) {
 	if (!try_format_sector (tag, sector * 4))
 	    return 0;
@@ -61,12 +82,14 @@ format_mifare_classic_4k (MifareTag tag)
 	if (!try_format_sector (tag, 128 + sector * 16))
 	    return 0;
     }
+    printf (DONE_FORMAT);
     return 1;
 }
 
 int
 try_format_sector (MifareTag tag, MifareClassicBlockNumber block)
 {
+    display_progress ();
     for (int i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
 	    if (0 == mifare_classic_format_sector (tag, block)) {
@@ -127,6 +150,7 @@ main(int argc, char *argv[])
 	bool format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 
 	if (format) {
+	    at_block = 0;
 	    switch (freefare_get_tag_type (tags[i])) {
 		case CLASSIC_1K:
 		    if (!format_mifare_classic_1k (tags[i]))
