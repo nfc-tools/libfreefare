@@ -26,8 +26,8 @@
 
 #include <freefare.h>
 
-#define START_FORMAT_N	"Formatting %d blocks"
-#define DONE_FORMAT	" done.\n"
+#define START_FORMAT_N	"Formatting %d blocks ["
+#define DONE_FORMAT	"] done.\n"
 
 MifareClassicKey default_keys[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
@@ -43,16 +43,17 @@ int		 format_mifare_classic_1k (MifareTag tag);
 int		 format_mifare_classic_4k (MifareTag tag);
 int		 try_format_sector (MifareTag tag, MifareClassicBlockNumber block);
 
-int at_block = 0;
+static int at_block = 0;
+static int mod_block = 10;
 
 void
 display_progress ()
 {
     at_block++;
-    if (0 == (at_block % 10)) {
+    if (0 == (at_block % mod_block)) {
 	printf ("%d", at_block);
 	fflush (stdout);
-    } else if (0 == (at_block % 2)) {
+    } else {
 	printf (".");
 	fflush (stdout);
     }
@@ -155,10 +156,12 @@ main(int argc, char *argv[])
 	    at_block = 0;
 	    switch (freefare_get_tag_type (tags[i])) {
 		case CLASSIC_1K:
+		    mod_block = 4;
 		    if (!format_mifare_classic_1k (tags[i]))
 			error = 1;
 		    break;
 		case CLASSIC_4K:
+		    mod_block = 16;
 		    if (!format_mifare_classic_4k (tags[i]))
 			error = 1;
 		    break;
