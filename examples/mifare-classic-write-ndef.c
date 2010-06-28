@@ -158,7 +158,7 @@ main(int argc, char *argv[])
 		    case CLASSIC_4K:
 			if (key_10_type != MFC_KEY_B) {
 			    mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
-			    if (mifare_classic_authenticate (tags[i], 0x10, key_10, key_10_type) < 0) {
+			    if (mifare_classic_authenticate (tags[i], 0x40, key_10, key_10_type) < 0) {
 				perror ("mifare_classic_authenticate");
 				error = 1;
 				goto error;
