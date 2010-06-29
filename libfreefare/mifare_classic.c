@@ -21,8 +21,13 @@
  * This implementation was written based on information provided by the
  * following documents:
  *
+ * MIFARE Standard Card IC
  * MF1ICS50 Functional specification
  * Rev. 5.3 - 29 January 2008
+ *
+ * MIFARE Standard 4kByte Card IC
+ * MF1ICS70 Functional specification
+ * Rev. 4.1 - 29 January 2008
  *
  * Making the Best of Mifare Classic
  * Wouter Teepe (Radboud University Nijmegen)
