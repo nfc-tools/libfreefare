@@ -28,6 +28,14 @@
 
 #define MIN(a,b) ((a < b) ? a: b)
 
+/*
+ * This define is used to convert ( SectorNumber, BlockOffset ) couple in
+ * BlockNumber
+ * e.g. If you want 4th block in sector 0x01 (trailer block of 0x01):
+ * BLOCK(0x01, 3) will return 0x07.
+ */
+#define BLOCK( S, B ) ( ( S < 32 )?( ( S * 4 ) + B ):( ( 32 * 4 ) + ( ( ( S - 32 ) * 16 ) + B ) ) )
+
 MifareClassicKey default_keys[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
     { 0xd3,0xf7,0xd3,0xf7,0xd3,0xf7 },
@@ -86,6 +94,27 @@ search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicK
     }
 
     warnx ("No known authentication key for block %d", block);
+    return 0;
+}
+
+int 
+fix_mad_trailer_block (MifareTag tag, MifareSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
+{
+    MifareClassicBlock block;
+    mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
+    if (mifare_classic_authenticate (tag, BLOCK( sector, 0 ), key, key_type) < 0) {
+	perror ("mifare_classic_authenticate");
+	return -1;
+    }
+    /*
+     * WARN: Using BLOCK( sector, 3 ) selects trailer block only for sector <
+     * 32.  In actual case, this is not a problem: we only call this function
+     * for sector 0x00 (0) and 0x10 (16).
+     */
+    if (mifare_classic_write (tag, BLOCK( sector, 3 ), block) < 0) {
+	perror ("mifare_classic_write");
+	return -1;
+    }
     return 0;
 }
 
@@ -157,14 +186,7 @@ main(int argc, char *argv[])
 		switch (freefare_get_tag_type (tags[i])) {
 		    case CLASSIC_4K:
 			if (key_10_type != MFC_KEY_B) {
-			    mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
-			    if (mifare_classic_authenticate (tags[i], 0x40, key_10, key_10_type) < 0) {
-				perror ("mifare_classic_authenticate");
-				error = 1;
-				goto error;
-			    }
-			    if (mifare_classic_write (tags[i], 0x43, block) < 0) {
-				perror ("mifare_classic_write");
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x40, key_10, key_10_type )) {
 				error = 1;
 				goto error;
 			    }
@@ -173,14 +195,7 @@ main(int argc, char *argv[])
 			}
 		    case CLASSIC_1K:
 			if (key_00_type != MFC_KEY_B) {
-			    mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
-			    if (mifare_classic_authenticate (tags[i], 0x00, key_00, key_00_type) < 0) {
-				perror ("mifare_classic_authenticate");
-				error = 1;
-				goto error;
-			    }
-			    if (mifare_classic_write (tags[i], 0x03, block) < 0) {
-				perror ("mifare_classic_write");
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x00, key_00, key_00_type )) {
 				error = 1;
 				goto error;
 			    }
