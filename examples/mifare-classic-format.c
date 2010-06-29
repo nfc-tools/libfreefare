@@ -161,7 +161,7 @@ main(int argc, char *argv[])
 			error = 1;
 		    break;
 		case CLASSIC_4K:
-		    mod_block = 16;
+		    mod_block = 10;
 		    if (!format_mifare_classic_4k (tags[i]))
 			error = 1;
 		    break;
