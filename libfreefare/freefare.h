@@ -137,6 +137,7 @@ MifareSectorNumber mad_get_card_publisher_sector (Mad mad);
 int		 mad_set_card_publisher_sector (Mad mad, MifareSectorNumber cps);
 int		 mad_get_aid (Mad mad, MifareSectorNumber sector, MadAid *aid);
 int		 mad_set_aid (Mad mad, MifareSectorNumber sector, MadAid aid);
+bool		 mad_sector_reserved (MifareSectorNumber sector);
 void		 mad_free (Mad mad);
 
 MifareSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);

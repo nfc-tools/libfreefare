@@ -4,4 +4,5 @@ Changes between 0.1.0 and x.x.x  [xx XXX xxxx]
      list.
   *) The mifare_application_alloc() size parameter is now expressed in bytes
      and not in sectors.
+  *) New API function mad_sector_reserved().
 

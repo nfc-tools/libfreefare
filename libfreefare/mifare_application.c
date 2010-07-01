@@ -114,6 +114,8 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
     sector = FIRST_SECTOR;
     MifareSectorNumber s_max = (mad_get_version (mad) == 1) ? 15 : 31;
     while ((s > 0) && (sector <= s_max)) {
+	if (mad_sector_reserved (sector))
+	    continue;
 	mad_get_aid (mad, sector, &sector_aid);
 	if (0 == aidcmp (sector_aid, free_aid)) {
 	    sector_map[sector] = 1;

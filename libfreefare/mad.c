@@ -391,7 +391,7 @@ mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid)
 int
 mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid)
 {
-    if (sector > 0x27) {
+    if ((sector < 1) || (sector == 0x10) || (sector > 0x27)) {
 	errno = EINVAL;
 	return -1;
     }
@@ -401,14 +401,20 @@ mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid)
 	    errno = EINVAL;
 	    return -1;
 	}
-	mad->sector_0x00.aids[sector - 0x0f - 1].function_cluster_code = aid.function_cluster_code;
-	mad->sector_0x00.aids[sector - 0x0f - 1].application_code      = aid.application_code;
+	mad->sector_0x10.aids[sector - 0x0f - 2].function_cluster_code = aid.function_cluster_code;
+	mad->sector_0x10.aids[sector - 0x0f - 2].application_code      = aid.application_code;
     } else {
 	mad->sector_0x00.aids[sector - 1].function_cluster_code = aid.function_cluster_code;
 	mad->sector_0x00.aids[sector - 1].application_code      = aid.application_code;
     }
 
     return 0;
+}
+
+bool
+mad_sector_reserved (MifareSectorNumber sector)
+{
+    return ((0x00 == sector) || (0x10 == sector));
 }
 
 /*
