@@ -125,6 +125,9 @@ typedef struct mad_aid MadAid;
 struct mad;
 typedef struct mad *Mad;
 
+/* MAD Public read key A */
+extern const MifareClassicKey mad_public_key_a;
+
 Mad		 mad_new (uint8_t version);
 Mad		 mad_read (MifareTag tag);
 int		 mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);

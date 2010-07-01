@@ -65,7 +65,7 @@ struct mad {
 };
 
 /* Read key A */
-const MifareClassicKey mad_key_a = {
+const MifareClassicKey mad_public_key_a = {
     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5
 };
 
@@ -148,7 +148,7 @@ mad_read (MifareTag tag)
 	goto error;
 
     /* Authenticate using MAD key A */
-    if (mifare_classic_authenticate (tag, 0x03, mad_key_a, MFC_KEY_A) < 0) {
+    if (mifare_classic_authenticate (tag, 0x03, mad_public_key_a, MFC_KEY_A) < 0) {
 	goto error;
     }
 
@@ -200,7 +200,7 @@ mad_read (MifareTag tag)
     if (mad->version == 2) {
 
 	/* Authenticate using MAD key A */
-	if (mifare_classic_authenticate (tag, 0x43, mad_key_a, MFC_KEY_A) < 0) {
+	if (mifare_classic_authenticate (tag, 0x43, mad_public_key_a, MFC_KEY_A) < 0) {
 	    goto error;
 	}
 
@@ -293,7 +293,7 @@ mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClass
 	memcpy (data, (uint8_t *)&(mad->sector_0x10) + sizeof (data) * 2, sizeof (data));
 	if (mifare_classic_write (tag, 0x42, data) < 0) return -1;
 
-	mifare_classic_trailer_block (&data, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, key_b_sector_10);
+	mifare_classic_trailer_block (&data, mad_public_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, key_b_sector_10);
 	if (mifare_classic_write (tag, 0x43, data) < 0) return -1;
 
     }
@@ -306,7 +306,7 @@ mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClass
     memcpy (data, (uint8_t *)&(mad->sector_0x00) + sizeof (data), sizeof (data));
     if (mifare_classic_write (tag, 0x02, data) < 0) return -1;
 
-    mifare_classic_trailer_block (&data, mad_key_a, 0x0, 0x1, 0x1, 0x6, gpb, key_b_sector_00);
+    mifare_classic_trailer_block (&data, mad_public_key_a, 0x0, 0x1, 0x1, 0x6, gpb, key_b_sector_00);
     if (mifare_classic_write (tag, 0x03, data) < 0) return -1;
 
     return 0;
