@@ -26,6 +26,7 @@ test_mad_la_SOURCES = test_mad.c
 test_mad_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_classic_la_SOURCES = test_mifare_classic.c \
+				 test_mifare_classic_mad.c \
 				 mifare_classic_fixture.c \
 				 mifare_classic_fixture.h
 test_mifare_classic_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
