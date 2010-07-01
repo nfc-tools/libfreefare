@@ -339,22 +339,3 @@ test_mifare_classic_get_uid (void)
     free (uid);
 }
 
-void
-test_mifare_classic_sector_boundaries (void)
-{
-    cut_notify ("No MIFARE Classic target is required for this test");
-    for (int i=0; i < 32; i++) {
-	for (int j=0; j < 4; j++) {
-	    cut_assert_equal_int (4 * i, mifare_classic_first_sector_block (4 * i), cut_message ("Wrong first block number for block %d", i));
-	    cut_assert_equal_int (4 * i + 3, mifare_classic_last_sector_block (4 * i + j), cut_message ("Wrong last block number for block %d", i));
-	}
-    }
-
-    for (int i=0; i < 8; i++) {
-	for (int j=0; j < 16; j++) {
-	    cut_assert_equal_int (128 + 16 * i, mifare_classic_first_sector_block (128 + 16 * i), cut_message ("Wrong last block number for block %d", i));
-	    cut_assert_equal_int (128 + 16 * i + 15, mifare_classic_last_sector_block (128 + 16 * i + j), cut_message ("Wrong last block number for block %d", i));
-	}
-    }
-}
-
