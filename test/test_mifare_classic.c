@@ -339,3 +339,11 @@ test_mifare_classic_get_uid (void)
     free (uid);
 }
 
+void
+test_mifare_classic_get_tag_friendly_name (void)
+{
+    const char *name = freefare_get_tag_friendly_name (tag);
+
+    cut_assert_not_null (name, cut_message ("freefare_get_tag_friendly_name() failed"));
+}
+
