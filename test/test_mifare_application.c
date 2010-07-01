@@ -21,7 +21,7 @@
 #include <freefare.h>
 
 void
-test_mifare_classic_application (void)
+test_mifare_application (void)
 {
     /* Card publisher part */
 
