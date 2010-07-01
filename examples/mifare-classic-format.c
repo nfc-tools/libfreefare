@@ -26,7 +26,7 @@
 
 #include <freefare.h>
 
-#define START_FORMAT_N	"Formatting %d blocks ["
+#define START_FORMAT_N	"Formatting %d sectors ["
 #define DONE_FORMAT	"] done.\n"
 
 MifareClassicKey default_keys[] = {
