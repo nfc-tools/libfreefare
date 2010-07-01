@@ -37,6 +37,8 @@ infrastructure ready for hacking the new card support:
   - Edit libfreefare/freefare.h:
       - Add your tag to the `mifare_tag_type' enum;
       - Add a <tag>_connect() and a <tag>_disconnect() function prototype;
+  - Edit libfreefare/freefare.3:
+      - Add your tag to the `mifare_tag_type' enum documentation;
   - Edit libfreefare/freefare_internal.h:
       - Add a new <tag>_tag struct.  It's very first member shall be `struct
 	mifare_tag __tag';
