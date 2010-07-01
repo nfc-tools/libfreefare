@@ -41,7 +41,7 @@ MifareClassicKey default_keys[] = {
 };
 int		 format_mifare_classic_1k (MifareTag tag);
 int		 format_mifare_classic_4k (MifareTag tag);
-int		 try_format_sector (MifareTag tag, MifareClassicBlockNumber block);
+int		 try_format_sector (MifareTag tag, MifareSectorNumber sector);
 
 static int at_block = 0;
 static int mod_block = 10;
@@ -64,7 +64,7 @@ format_mifare_classic_1k (MifareTag tag)
 {
     printf (START_FORMAT_N, 16);
     for (int sector = 0; sector < 16; sector++) {
-	if (!try_format_sector (tag, sector * 4))
+	if (!try_format_sector (tag, sector))
 	    return 0;
     }
     printf (DONE_FORMAT);
@@ -75,12 +75,8 @@ int
 format_mifare_classic_4k (MifareTag tag)
 {
     printf (START_FORMAT_N, 32 + 8);
-    for (int sector = 0; sector < 32; sector++) {
-	if (!try_format_sector (tag, sector * 4))
-	    return 0;
-    }
-    for (int sector = 0; sector < 8; sector++) {
-	if (!try_format_sector (tag, 128 + sector * 16))
+    for (int sector = 0; sector < (32 + 8); sector++) {
+	if (!try_format_sector (tag, sector))
 	    return 0;
     }
     printf (DONE_FORMAT);
@@ -88,32 +84,33 @@ format_mifare_classic_4k (MifareTag tag)
 }
 
 int
-try_format_sector (MifareTag tag, MifareClassicBlockNumber block)
+try_format_sector (MifareTag tag, MifareSectorNumber sector)
 {
     display_progress ();
     for (size_t i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
+	MifareClassicBlockNumber block = mifare_classic_sector_last_block (sector);
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
-	    if (0 == mifare_classic_format_sector (tag, block)) {
+	    if (0 == mifare_classic_format_sector (tag, sector)) {
 		mifare_classic_disconnect (tag);
 		return 1;
 	    } else if (EIO == errno) {
-		err (EXIT_FAILURE, "block %d", block);
+		err (EXIT_FAILURE, "sector %d", sector);
 	    }
 	    mifare_classic_disconnect (tag);
 	}
 
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_B))) {
-	    if (0 == mifare_classic_format_sector (tag, block)) {
+	    if (0 == mifare_classic_format_sector (tag, sector)) {
 		mifare_classic_disconnect (tag);
 		return 1;
 	    } else if (EIO == errno) {
-		err (EXIT_FAILURE, "block %d", block);
+		err (EXIT_FAILURE, "sector %d", sector);
 	    }
 	    mifare_classic_disconnect (tag);
 	}
     }
 
-    warnx ("No known authentication key for block %d", block);
+    warnx ("No known authentication key for sector %d", sector);
     return 0;
 }
 

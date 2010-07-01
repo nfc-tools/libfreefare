@@ -5,4 +5,9 @@ Changes between 0.1.0 and x.x.x  [xx XXX xxxx]
   *) The mifare_application_alloc() size parameter is now expressed in bytes
      and not in sectors.
   *) New API function mad_sector_reserved().
+  *) The mifare_classic_format_sector() functions now require a sector number
+     instead of a block number.
+  *) New API functions mifare_classic_block_sector(),
+     mifare_classic_sector_first_block(), mifare_classic_sector_block_count()
+     and mifare_classic_sector_last_block().
 

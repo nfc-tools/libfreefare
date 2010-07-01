@@ -172,7 +172,7 @@ test_mifare_classic_mad (void)
 
     res = mifare_classic_authenticate (tag, 0x40, key_b_sector_10, MFC_KEY_B);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
-    res = mifare_classic_format_sector (tag, 0x40);
+    res = mifare_classic_format_sector (tag, 0x10);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_format_sector() failed"));
 
 }

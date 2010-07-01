@@ -521,7 +521,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 
     uint16_t sector_access_bits, sector_access_bits_;
 
-    MifareClassicBlockNumber trailer = mifare_classic_last_sector_block (block);
+    MifareClassicBlockNumber trailer = mifare_classic_sector_last_block (mifare_classic_block_sector (block));
 
     /*
      * The trailer block contains access bits for the whole sector in a 3 bytes
@@ -632,10 +632,10 @@ mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBloc
  * Reset a MIFARE target sector to factory default.
  */
 int
-mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber block)
+mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector)
 {
-    MifareClassicBlockNumber first_sector_block = mifare_classic_first_sector_block (block);
-    MifareClassicBlockNumber last_sector_block = mifare_classic_last_sector_block (block);
+    MifareClassicBlockNumber first_sector_block = mifare_classic_sector_first_block (sector);
+    MifareClassicBlockNumber last_sector_block = mifare_classic_sector_last_block (sector);
 
     /* 
      * Check that the current key allow us to rewrite data and trailer blocks.
@@ -679,37 +679,49 @@ mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumber bloc
     return 0;
 }
 
-/*
- * Get the sector's first block number in the provided block's sector.
- */
-MifareClassicBlockNumber
-mifare_classic_first_sector_block (MifareClassicBlockNumber block)
+MifareSectorNumber
+mifare_classic_block_sector (MifareClassicBlockNumber block)
 {
-    int res;
-    if (block < 128) {
-	res = (block / 4) * 4;
-    } else {
-	res = ((block - 128) / 16) * 16 + 128;
-    }
+    MifareSectorNumber res;
+
+    if (block < 32 * 4)
+	res = block / 4;
+    else
+	res = 32 + ( (block - (32 * 4)) / 16 );
 
     return res;
 }
 
 /*
- * Get the sector's last block number (aka trailer block) in the provided
- * block's sector.
+ * Get the sector's first block number
  */
 MifareClassicBlockNumber
-mifare_classic_last_sector_block (MifareClassicBlockNumber block)
+mifare_classic_sector_first_block (MifareSectorNumber sector)
 {
     int res;
-    if (block < 128) {
-	res = (block / 4) * 4 + 3;
+    if (sector < 32) {
+	res = sector * 4;
     } else {
-	res = ((block - 128) / 16) * 16 + 15 + 128;
+	res = 32 * 4 + (sector - 32) * 16;
     }
 
     return res;
+}
+
+size_t
+mifare_classic_sector_block_count (MifareSectorNumber sector)
+{
+    return (sector < 32) ? 4 : 16 ;
+}
+
+/*
+ * Get the sector's last block number (aka trailer block)
+ */
+MifareClassicBlockNumber
+mifare_classic_sector_last_block (MifareSectorNumber sector)
+{
+    return mifare_classic_sector_first_block (sector) +
+	   mifare_classic_sector_block_count (sector) - 1;
 }
 
 /*

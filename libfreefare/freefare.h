@@ -93,6 +93,11 @@ int		 mifare_classic_format_sector (MifareTag tag, const MifareClassicBlockNumbe
 
 void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 
+MifareSectorNumber mifare_classic_block_sector (MifareClassicBlockNumber block);
+MifareClassicBlockNumber  mifare_classic_sector_first_block (MifareSectorNumber sector);
+size_t		 mifare_classic_sector_block_count (MifareSectorNumber sector);
+MifareClassicBlockNumber  mifare_classic_sector_last_block (MifareSectorNumber sector);
+
 #define C_000 0
 #define C_001 1
 #define C_010 2
