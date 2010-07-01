@@ -76,6 +76,12 @@ aidcmp (const MadAid left, const MadAid right)
 MifareSectorNumber *
 mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 {
+    uint8_t sector_map[40];
+    MifareSectorNumber sector;
+    MadAid sector_aid;
+    MifareSectorNumber *res = NULL;
+    ssize_t s = size;
+
     /*
      * Ensure the card does not already have the application registered.
      */
@@ -85,35 +91,60 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 	return NULL;
     }
 
-    MifareSectorNumber *res = malloc (sizeof (*res) * (size+1));
-    res[size] = 0;
+    for (size_t i = 0; i < sizeof (sector_map); i++)
+	sector_map[i] = 0;
+
+    /*
+     * Try to minimize lost space and allocate as many large pages as possible
+     * when the target is a Mifare Classic 4k.
+     */
+    MadAid free_aid = { 0x00, 0x00 };
+    if (mad_get_version (mad) == 2) {
+	sector = 32;
+	while ((s >= 12*16) && sector < 40) {
+	    mad_get_aid (mad, sector, &sector_aid);
+	    if (0 == aidcmp (sector_aid, free_aid)) {
+		sector_map[sector] = 1;
+		s -= 15*16;
+	    }
+	    sector++;
+	}
+    }
+
+    sector = FIRST_SECTOR;
+    MifareSectorNumber s_max = (mad_get_version (mad) == 1) ? 15 : 31;
+    while ((s > 0) && (sector <= s_max)) {
+	mad_get_aid (mad, sector, &sector_aid);
+	if (0 == aidcmp (sector_aid, free_aid)) {
+	    sector_map[sector] = 1;
+	    s -= 3*16;
+	}
+	sector++;
+    }
 
     /*
      * Ensure the remaining free space is suficient before destroying the MAD.
      */
-    MadAid free_aid = { 0x00, 0x00 };
-    MifareSectorNumber *free_aids = mifare_application_find (mad, free_aid);
-    if (!free_aids)
+    if (s > 0)
 	return NULL;
 
+    int n = 0;
+    for (size_t i = FIRST_SECTOR; i < sizeof (sector_map); i++)
+	if (sector_map[i])
+	    n++;
 
-    for (size_t c = 0; c < size; c++) {
-	if (free_aids[c]) {
-	    res[c] = free_aids[c];
-	} else {
-	    free (res);
-	    res = NULL;
-	    break;
+    if (!(res = malloc (n+1)))
+	return NULL;
+
+    n = 0;
+    for (size_t i = FIRST_SECTOR; i < sizeof (sector_map); i++)
+	if (sector_map[i]) {
+	    res[n] = i;
+	    mad_set_aid (mad, i, aid);
+	    n++;
 	}
-    }
 
-    free (free_aids);
-
-    if (res) {
-	/* Update the MAD */
-	for (size_t c = 0; c < size; c++)
-	    mad_set_aid (mad, res[c], aid);
-    }
+    res[n] = 0;
 
     /* Return the list of allocated sectors */
     return res;

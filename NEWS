@@ -2,4 +2,6 @@ Changes between 0.1.0 and x.x.x  [xx XXX xxxx]
 
   *) New function freefare_free_tag() to free individual tags from a MifareTag
      list.
+  *) The mifare_application_alloc() size parameter is now expressed in bytes
+     and not in sectors.
 
