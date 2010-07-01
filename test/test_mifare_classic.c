@@ -35,27 +35,6 @@ test_mifare_classic_authenticate (void)
 }
 
 void
-test_mifare_classic_read_sector_0 (void)
-{
-    int res;
-
-    cut_omit ("Requires a particular NFC tag");
-
-    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-    res = mifare_classic_authenticate (tag, 0x00, k, MFC_KEY_A);
-    cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
-
-
-    MifareClassicBlock r;
-    res = mifare_classic_read (tag, 0x00, &r);
-    cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
-
-    MifareClassicBlock e = { 0xba, 0xc7, 0x7a, 0xfc, 0xfb, 0x88, 0x04, 0x00 , 0x46, 0x5d, 0x55, 0x96, 0x41, 0x10, 0x19, 0x08 };
-
-    cut_assert_equal_memory (e, sizeof (e), r, sizeof (r), cut_message ("Unexpected sector 0 value"));
-}
-
-void
 test_mifare_classic_get_data_block_permission (void)
 {
     int res;
