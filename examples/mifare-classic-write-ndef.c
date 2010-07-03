@@ -98,7 +98,7 @@ search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicK
 }
 
 int 
-fix_mad_trailer_block (MifareTag tag, MifareSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
+fix_mad_trailer_block (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
 {
     MifareClassicBlock block;
     mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);

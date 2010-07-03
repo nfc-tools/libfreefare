@@ -66,7 +66,7 @@ int		 mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber p
 
 typedef unsigned char MifareClassicBlock[16];
 
-typedef uint8_t MifareSectorNumber;
+typedef uint8_t MifareClassicSectorNumber;
 typedef unsigned char MifareClassicBlockNumber;
 
 typedef enum { MFC_KEY_A, MFC_KEY_B } MifareClassicKeyType;
@@ -89,14 +89,14 @@ int		 mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber blo
 int 		 mifare_classic_get_trailer_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
 int		 mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
-int		 mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector);
+int		 mifare_classic_format_sector (MifareTag tag, const MifareClassicSectorNumber sector);
 
 void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 
-MifareSectorNumber mifare_classic_block_sector (MifareClassicBlockNumber block);
-MifareClassicBlockNumber  mifare_classic_sector_first_block (MifareSectorNumber sector);
-size_t		 mifare_classic_sector_block_count (MifareSectorNumber sector);
-MifareClassicBlockNumber  mifare_classic_sector_last_block (MifareSectorNumber sector);
+MifareClassicSectorNumber mifare_classic_block_sector (MifareClassicBlockNumber block);
+MifareClassicBlockNumber  mifare_classic_sector_first_block (MifareClassicSectorNumber sector);
+size_t		 mifare_classic_sector_block_count (MifareClassicSectorNumber sector);
+MifareClassicBlockNumber  mifare_classic_sector_last_block (MifareClassicSectorNumber sector);
 
 #define C_000 0
 #define C_001 1
@@ -138,17 +138,17 @@ Mad		 mad_read (MifareTag tag);
 int		 mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);
 int		 mad_get_version (Mad mad);
 void		 mad_set_version (Mad mad, uint8_t version);
-MifareSectorNumber mad_get_card_publisher_sector (Mad mad);
-int		 mad_set_card_publisher_sector (Mad mad, MifareSectorNumber cps);
-int		 mad_get_aid (Mad mad, MifareSectorNumber sector, MadAid *aid);
-int		 mad_set_aid (Mad mad, MifareSectorNumber sector, MadAid aid);
-bool		 mad_sector_reserved (MifareSectorNumber sector);
+MifareClassicSectorNumber mad_get_card_publisher_sector (Mad mad);
+int		 mad_set_card_publisher_sector (Mad mad, MifareClassicSectorNumber cps);
+int		 mad_get_aid (Mad mad, MifareClassicSectorNumber sector, MadAid *aid);
+int		 mad_set_aid (Mad mad, MifareClassicSectorNumber sector, MadAid aid);
+bool		 mad_sector_reserved (MifareClassicSectorNumber sector);
 void		 mad_free (Mad mad);
 
-MifareSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);
+MifareClassicSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);
 void		 mifare_application_free (Mad mad, MadAid aid);
 
-MifareSectorNumber *mifare_application_find (Mad mad, MadAid aid);
+MifareClassicSectorNumber *mifare_application_find (Mad mad, MadAid aid);
 
 
 uint8_t		*tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);

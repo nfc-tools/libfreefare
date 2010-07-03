@@ -29,10 +29,10 @@ test_mifare_application (void)
     Mad mad = mad_new (2);
     cut_assert_not_null (mad, cut_message ("mad_new() failed"));
 
-    MifareSectorNumber *s_alloc = mifare_application_alloc (mad, aid, 3*3*16);
+    MifareClassicSectorNumber *s_alloc = mifare_application_alloc (mad, aid, 3*3*16);
     cut_assert_not_null (s_alloc, cut_message ("mifare_application_alloc() failed"));
 
-    MifareSectorNumber *s_found = mifare_application_find (mad, aid);
+    MifareClassicSectorNumber *s_found = mifare_application_find (mad, aid);
     cut_assert_not_null (s_found, cut_message ("mifare_application_alloc() failed"));
 
     for (int i = 0; i < 3; i++) {

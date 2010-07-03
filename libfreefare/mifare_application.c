@@ -42,11 +42,11 @@ count_aids (const Mad mad, const MadAid aid)
 {
     size_t result = 0;
 
-    MifareSectorNumber s_max = (mad_get_version (mad) == 1) ? 0x0f : 0x27;
+    MifareClassicSectorNumber s_max = (mad_get_version (mad) == 1) ? 0x0f : 0x27;
 
     /* Count application sectors */
     MadAid c_aid;
-    for (MifareSectorNumber s = FIRST_SECTOR; s <= s_max; s++) {
+    for (MifareClassicSectorNumber s = FIRST_SECTOR; s <= s_max; s++) {
 	mad_get_aid (mad, s, &c_aid);
 	if (0 == aidcmp (aid, c_aid)) {
 	    result++;
@@ -73,19 +73,19 @@ aidcmp (const MadAid left, const MadAid right)
 /*
  * Allocates a new application into a MAD.
  */
-MifareSectorNumber *
+MifareClassicSectorNumber *
 mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 {
     uint8_t sector_map[40];
-    MifareSectorNumber sector;
+    MifareClassicSectorNumber sector;
     MadAid sector_aid;
-    MifareSectorNumber *res = NULL;
+    MifareClassicSectorNumber *res = NULL;
     ssize_t s = size;
 
     /*
      * Ensure the card does not already have the application registered.
      */
-    MifareSectorNumber *found;
+    MifareClassicSectorNumber *found;
     if ((found = mifare_application_find (mad, aid))) {
 	free (found);
 	return NULL;
@@ -112,7 +112,7 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
     }
 
     sector = FIRST_SECTOR;
-    MifareSectorNumber s_max = (mad_get_version (mad) == 1) ? 15 : 31;
+    MifareClassicSectorNumber s_max = (mad_get_version (mad) == 1) ? 15 : 31;
     while ((s > 0) && (sector <= s_max)) {
 	if (mad_sector_reserved (sector))
 	    continue;
@@ -158,8 +158,8 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 void
 mifare_application_free (Mad mad, MadAid aid)
 {
-    MifareSectorNumber *sectors = mifare_application_find (mad, aid);
-    MifareSectorNumber *p = sectors;
+    MifareClassicSectorNumber *sectors = mifare_application_find (mad, aid);
+    MifareClassicSectorNumber *p = sectors;
     MadAid free_aid = { 0x00, 0x00 };
     while (*p) {
 	mad_set_aid (mad, *p, free_aid);
@@ -177,10 +177,10 @@ mifare_application_free (Mad mad, MadAid aid)
 /*
  * Get all sector numbers of an application from the provided MAD.
  */
-MifareSectorNumber *
+MifareClassicSectorNumber *
 mifare_application_find (Mad mad, MadAid aid)
 {
-    MifareSectorNumber *res = NULL;
+    MifareClassicSectorNumber *res = NULL;
     size_t res_count = count_aids (mad, aid);
 
     if (res_count)

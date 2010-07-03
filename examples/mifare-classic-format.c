@@ -41,7 +41,7 @@ MifareClassicKey default_keys[] = {
 };
 int		 format_mifare_classic_1k (MifareTag tag);
 int		 format_mifare_classic_4k (MifareTag tag);
-int		 try_format_sector (MifareTag tag, MifareSectorNumber sector);
+int		 try_format_sector (MifareTag tag, MifareClassicSectorNumber sector);
 
 static int at_block = 0;
 static int mod_block = 10;
@@ -84,7 +84,7 @@ format_mifare_classic_4k (MifareTag tag)
 }
 
 int
-try_format_sector (MifareTag tag, MifareSectorNumber sector)
+try_format_sector (MifareTag tag, MifareClassicSectorNumber sector)
 {
     display_progress ();
     for (size_t i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {

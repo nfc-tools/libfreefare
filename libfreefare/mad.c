@@ -337,7 +337,7 @@ mad_set_version (Mad mad, uint8_t version)
 /*
  * Return the MAD card publisher sector.
  */
-MifareSectorNumber
+MifareClassicSectorNumber
 mad_get_card_publisher_sector(Mad mad)
 {
     return (mad->sector_0x00.info & 0x3f);
@@ -347,7 +347,7 @@ mad_get_card_publisher_sector(Mad mad)
  * Set the MAD card publisher sector.
  */
 int
-mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps)
+mad_set_card_publisher_sector(Mad mad, MifareClassicSectorNumber cps)
 {
     if (((mad->version == 2) && (cps > 0x27)) | (mad->version == 1) && (cps > 0x0f)) {
 	errno = EINVAL;
@@ -362,7 +362,7 @@ mad_set_card_publisher_sector(Mad mad, MifareSectorNumber cps)
  * Get the provided sector's application identifier.
  */
 int
-mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid)
+mad_get_aid(Mad mad, MifareClassicSectorNumber sector, MadAid *aid)
 {
     if ((sector < 1) || (sector == 0x10) || (sector > 0x27)) {
 	errno = EINVAL;
@@ -389,7 +389,7 @@ mad_get_aid(Mad mad, MifareSectorNumber sector, MadAid *aid)
  * Set the provided sector's application identifier.
  */
 int
-mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid)
+mad_set_aid(Mad mad, MifareClassicSectorNumber sector, MadAid aid)
 {
     if ((sector < 1) || (sector == 0x10) || (sector > 0x27)) {
 	errno = EINVAL;
@@ -412,7 +412,7 @@ mad_set_aid(Mad mad, MifareSectorNumber sector, MadAid aid)
 }
 
 bool
-mad_sector_reserved (MifareSectorNumber sector)
+mad_sector_reserved (MifareClassicSectorNumber sector)
 {
     return ((0x00 == sector) || (0x10 == sector));
 }

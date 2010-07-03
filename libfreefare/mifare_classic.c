@@ -632,7 +632,7 @@ mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBloc
  * Reset a MIFARE target sector to factory default.
  */
 int
-mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector)
+mifare_classic_format_sector (MifareTag tag, const MifareClassicSectorNumber sector)
 {
     MifareClassicBlockNumber first_sector_block = mifare_classic_sector_first_block (sector);
     MifareClassicBlockNumber last_sector_block = mifare_classic_sector_last_block (sector);
@@ -679,10 +679,10 @@ mifare_classic_format_sector (MifareTag tag, const MifareSectorNumber sector)
     return 0;
 }
 
-MifareSectorNumber
+MifareClassicSectorNumber
 mifare_classic_block_sector (MifareClassicBlockNumber block)
 {
-    MifareSectorNumber res;
+    MifareClassicSectorNumber res;
 
     if (block < 32 * 4)
 	res = block / 4;
@@ -696,7 +696,7 @@ mifare_classic_block_sector (MifareClassicBlockNumber block)
  * Get the sector's first block number
  */
 MifareClassicBlockNumber
-mifare_classic_sector_first_block (MifareSectorNumber sector)
+mifare_classic_sector_first_block (MifareClassicSectorNumber sector)
 {
     int res;
     if (sector < 32) {
@@ -709,7 +709,7 @@ mifare_classic_sector_first_block (MifareSectorNumber sector)
 }
 
 size_t
-mifare_classic_sector_block_count (MifareSectorNumber sector)
+mifare_classic_sector_block_count (MifareClassicSectorNumber sector)
 {
     return (sector < 32) ? 4 : 16 ;
 }
@@ -718,7 +718,7 @@ mifare_classic_sector_block_count (MifareSectorNumber sector)
  * Get the sector's last block number (aka trailer block)
  */
 MifareClassicBlockNumber
-mifare_classic_sector_last_block (MifareSectorNumber sector)
+mifare_classic_sector_last_block (MifareClassicSectorNumber sector)
 {
     return mifare_classic_sector_first_block (sector) +
 	   mifare_classic_sector_block_count (sector) - 1;
