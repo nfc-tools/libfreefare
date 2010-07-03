@@ -49,8 +49,10 @@ static int mod_block = 10;
 
 struct {
     bool fast;
+    bool interactive;
 } format_options = {
-    .fast = false
+    .fast        = false,
+    .interactive = true
 };
 
 void
@@ -124,9 +126,10 @@ try_format_sector (MifareTag tag, MifareClassicSectorNumber sector)
 void
 usage(char *progname)
 {
-    fprintf (stderr, "usage: %s [-f]\n", progname);
+    fprintf (stderr, "usage: %s [-fy]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -f     Fast format (only erase MAD)\n");
+    fprintf (stderr, "  -y     Do not ask for confirmation (dangerous)\n");
 }
 
 int
@@ -138,7 +141,7 @@ main(int argc, char *argv[])
     MifareTag *tags = NULL;
 
     (void)argc, (void)argv;
-    while ((ch = getopt (argc, argv, "fh")) != -1) {
+    while ((ch = getopt (argc, argv, "fhy")) != -1) {
 	switch (ch) {
 	    case 'f':
 		format_options.fast = true;
@@ -146,6 +149,10 @@ main(int argc, char *argv[])
 	    case 'h':
 		usage(argv[0]);
 		exit (EXIT_SUCCESS);
+		break;
+	    case 'y':
+		format_options.interactive = false;
+		break;
 	    default:
 		usage(argv[0]);
 		exit (EXIT_FAILURE);
@@ -176,9 +183,15 @@ main(int argc, char *argv[])
 	char *tag_uid = freefare_get_tag_uid (tags[i]);
 	char buffer[BUFSIZ];
 
-	printf ("Found %s with UID %s.  Format [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	fgets (buffer, BUFSIZ, stdin);
-	bool format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	printf ("Found %s with UID %s.", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	bool format = true;
+	if (format_options.interactive) {
+	    printf ("Format [yN] ");
+	    fgets (buffer, BUFSIZ, stdin);
+	    format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	} else {
+	    printf ("\n");
+	}
 
 	if (format) {
 	    enum mifare_tag_type tt = freefare_get_tag_type (tags[i]);
