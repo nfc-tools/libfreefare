@@ -82,6 +82,18 @@ An application can be removed from a
 .Vt mad
 using
 .Fn mifare_application_free .
+.\"  ___                 _                           _        _   _                           _            
+.\" |_ _|_ __ ___  _ __ | | ___ _ __ ___   ___ _ __ | |_ __ _| |_(_) ___  _ __    _ __   ___ | |_ ___  ___ 
+.\"  | || '_ ` _ \| '_ \| |/ _ \ '_ ` _ \ / _ \ '_ \| __/ _` | __| |/ _ \| '_ \  | '_ \ / _ \| __/ _ \/ __|
+.\"  | || | | | | | |_) | |  __/ | | | | |  __/ | | | || (_| | |_| | (_) | | | | | | | | (_) | ||  __/\__ \
+.\" |___|_| |_| |_| .__/|_|\___|_| |_| |_|\___|_| |_|\__\__,_|\__|_|\___/|_| |_| |_| |_|\___/ \__\___||___/
+.\"               |_|                                                                                      
+.Sh IMPLEMENTATION NOTES
+The
+.Fn mifare_application_alloc
+function will try to avoid wasting space and might not allocate sectors
+sequentially if a large amount of space is requested and the target has sectors
+of different size.
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
