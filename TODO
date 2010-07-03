@@ -1,0 +1,5 @@
+  - Enforce valid parameters.
+    Some functions will cause a crash when called with invalid parameters (e.g.
+    mifare_classic_authenticate() with a NULL key).
+  - MAD and MifareApplication functions are tied to mifare_clasic_* ones and
+    some refactoring is required to have a consistent API.
