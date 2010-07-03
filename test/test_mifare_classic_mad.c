@@ -78,6 +78,36 @@ test_mifare_classic_mad (void)
     cut_assert_not_null (mad2, cut_message ("mad_read() failed"));
     cut_assert_equal_memory (mad, sizeof (mad), mad2, sizeof (mad2), cut_message ("Wrong MAD"));
 
+    const char application_data[] = "APPLICATION DATA >> APPLICATION DATA >> APPLICATION DATA >> "
+				    "APPLICATION DATA >> APPLICATION DATA >> APPLICATION DATA >> "
+				    "APPLICATION DATA >> APPLICATION DATA >> APPLICATION DATA >> "
+				    "APPLICATION DATA >> APPLICATION DATA >> APPLICATION DATA >> "
+				    "APPLICATION DATA >> APPLICATION DATA >> APPLICATION DATA >> "
+				    "APPLICATION DATA >> APPLICATION DATA >> APPLICATION DATA >> ";
+
+    MadAid aid = {
+	.function_cluster_code = 0x01,
+	.application_code      = 0x12
+    };
+
+    // Write some data in the application
+    MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, aid, sizeof (application_data));
+    cut_assert_not_null (sectors, cut_message ("mifare_application_alloc() failed"));
+    free (sectors);
+
+    res = mad_write (tag, mad, key_b_sector_00, NULL);
+    cut_assert_equal_int (0, res, cut_message ("mad_write() failed"));
+
+    ssize_t s = mad_application_write (tag, mad, aid, &application_data, sizeof (application_data), key_a_transport, MFC_KEY_A);
+    cut_assert_equal_int (sizeof (application_data), s, cut_message ("mad_application_write() failed"));
+
+    char read_buf[500];
+
+    // Read it again
+    s = mad_application_read (tag, mad, aid, read_buf, sizeof (application_data), key_a_transport, MFC_KEY_A);
+    cut_assert_equal_int (sizeof (application_data), s, cut_message ("mad_application_read() failed"));
+    cut_assert_equal_memory (application_data, sizeof (application_data), read_buf, s, cut_message ("Wrong application data"));
+
     mad_free (mad);
     mad_free (mad2);
 
@@ -160,6 +190,22 @@ test_mifare_classic_mad (void)
     mad2 = mad_read (tag);
     cut_assert_not_null (mad2, cut_message ("mad_read() failed"));
     cut_assert_equal_memory (mad, sizeof (mad), mad2, sizeof (mad2), cut_message ("Wrong MAD"));
+
+    // Write some data in the application
+    sectors = mifare_application_alloc (mad, aid, sizeof (application_data));
+    cut_assert_not_null (sectors, cut_message ("mifare_application_alloc() failed"));
+    free (sectors);
+
+    res = mad_write (tag, mad, key_b_sector_00, key_b_sector_10);
+    cut_assert_equal_int (0, res, cut_message ("mad_write() failed"));
+
+    s = mad_application_write (tag, mad, aid, &application_data, sizeof (application_data), key_a_transport, MFC_KEY_A);
+    cut_assert_equal_int (sizeof (application_data), s, cut_message ("mad_application_write() failed"));
+
+    // Read it again
+    s = mad_application_read (tag, mad, aid, read_buf, sizeof (application_data), key_a_transport, MFC_KEY_A);
+    cut_assert_equal_int (sizeof (application_data), s, cut_message ("mad_application_read() failed"));
+    cut_assert_equal_memory (application_data, sizeof (application_data), read_buf, s, cut_message ("Wrong application data"));
 
     mad_free (mad);
     mad_free (mad2);

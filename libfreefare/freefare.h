@@ -144,6 +144,8 @@ int		 mad_get_aid (Mad mad, MifareClassicSectorNumber sector, MadAid *aid);
 int		 mad_set_aid (Mad mad, MifareClassicSectorNumber sector, MadAid aid);
 bool		 mad_sector_reserved (MifareClassicSectorNumber sector);
 void		 mad_free (Mad mad);
+ssize_t		 mad_application_read (MifareTag tag, Mad mad, MadAid aid, void *buf, size_t nbytes, MifareClassicKey key, MifareClassicKeyType key_type);
+ssize_t		 mad_application_write (MifareTag tag, Mad mad, MadAid aid, const void *buf, size_t nbytes, MifareClassicKey key, MifareClassicKeyType key_type);
 
 MifareClassicSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);
 void		 mifare_application_free (Mad mad, MadAid aid);

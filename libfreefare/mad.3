@@ -34,7 +34,9 @@
 .Nm mad_set_card_publisher_sector ,
 .Nm mad_get_aid ,
 .Nm mad_set_aid ,
-.Nm mad_free
+.Nm mad_free ,
+.Nm mad_application_read ,
+.Nm mad_application_write
 .Nd "Mifare Application Directory (MAD) Manipulation Functions"
 .\"  _     _ _
 .\" | |   (_) |__  _ __ __ _ _ __ _   _
@@ -72,6 +74,10 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mad_set_aid "Mad mad" "MifareSectorNumber sector" "MadAid aid"
 .Ft void
 .Fn mad_free "Mad mad"
+.Ft ssize_t
+.Fn mad_application_read "MifareTag tag" "Mad mad" "MadAid aid" "void *buf" "size_t nbytes" "MifareClassicKey key" "MifareClassicKeyType key_type"
+.Ft ssize_t
+.Fn mad_application_write "MifareTag tag" "Mad mad" "MadAid aid" "const void *buf" size_t nbytes" "MifareClassicKey key" "MifareClassicKeyType key_type"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
@@ -141,6 +147,48 @@ functions.  These functions fill-in or read the Application Identifier,
 .Vt aid
 for the given
 .Vt sector .
+.Pp
+The
+.Fn mad_application_read
+reads at most
+.Vt nbytes
+of the application identified by
+.Vt aid
+in the
+.Vt mad
+on the
+.Vt tag
+and copy them into
+.Vt buf.
+The function returns the amount of data it copied, or -1 on error.
+.Pp
+The
+.Fn mad_application_write
+functions writes at most
+.Vt nbytes
+of
+.Vt buf
+in the application identified by
+.Vt aid
+on the
+.Vt mad
+of the
+.Vt tag
+and returns the quantity of data written, or -1 on error.
+.\"  ___                 _                           _        _   _                           _            
+.\" |_ _|_ __ ___  _ __ | | ___ _ __ ___   ___ _ __ | |_ __ _| |_(_) ___  _ __    _ __   ___ | |_ ___  ___ 
+.\"  | || '_ ` _ \| '_ \| |/ _ \ '_ ` _ \ / _ \ '_ \| __/ _` | __| |/ _ \| '_ \  | '_ \ / _ \| __/ _ \/ __|
+.\"  | || | | | | | |_) | |  __/ | | | | |  __/ | | | || (_| | |_| | (_) | | | | | | | | (_) | ||  __/\__ \
+.\" |___|_| |_| |_| .__/|_|\___|_| |_| |_|\___|_| |_|\__\__,_|\__|_|\___/|_| |_| |_| |_|\___/ \__\___||___/
+.\"               |_|                                                                                      
+.Sh IMPLEMENTATION NOTES
+The
+.Vt nbytes
+argument of
+.Fn mad_application_read
+and
+.Fn mad_application_write
+does not need to be aligned on blocks not sectors.
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|

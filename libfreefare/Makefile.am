@@ -57,6 +57,8 @@ linkedman = \
 	    mad.3 mad_get_aid.3 \
 	    mad.3 mad_set_aid.3 \
 	    mad.3 mad_free.3 \
+	    mad.3 mad_application_read.3 \
+	    mad.3 mad_application_write.3 \
 	    mifare_application.3 mifare_application_alloc.3 \
 	    mifare_application.3 mifare_application_free.3 \
 	    mifare_application.3 mifare_application_find.3 \
