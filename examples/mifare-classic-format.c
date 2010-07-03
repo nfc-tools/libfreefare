@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <nfc/nfc.h>
 
@@ -45,6 +46,12 @@ int		 try_format_sector (MifareTag tag, MifareClassicSectorNumber sector);
 
 static int at_block = 0;
 static int mod_block = 10;
+
+struct {
+    bool fast;
+} format_options = {
+    .fast = false
+};
 
 void
 display_progress ()
@@ -114,14 +121,38 @@ try_format_sector (MifareTag tag, MifareClassicSectorNumber sector)
     return 0;
 }
 
+void
+usage(char *progname)
+{
+    fprintf (stderr, "usage: %s [-f]\n", progname);
+    fprintf (stderr, "\nOptions:\n");
+    fprintf (stderr, "  -f     Fast format (only erase MAD)\n");
+}
+
 int
 main(int argc, char *argv[])
 {
+    int ch;
     int error = 0;
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
 
     (void)argc, (void)argv;
+    while ((ch = getopt (argc, argv, "fh")) != -1) {
+	switch (ch) {
+	    case 'f':
+		format_options.fast = true;
+		break;
+	    case 'h':
+		usage(argv[0]);
+		exit (EXIT_SUCCESS);
+	    default:
+		usage(argv[0]);
+		exit (EXIT_FAILURE);
+	}
+    }
+    argc -= optind;
+    argv += optind;
 
     device = nfc_connect (NULL);
     if (!device)
@@ -150,8 +181,22 @@ main(int argc, char *argv[])
 	bool format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 
 	if (format) {
+	    enum mifare_tag_type tt = freefare_get_tag_type (tags[i]);
 	    at_block = 0;
-	    switch (freefare_get_tag_type (tags[i])) {
+
+	    if (format_options.fast) {
+		printf (START_FORMAT_N, (tt == CLASSIC_1K) ? 1 : 2);
+		if (!try_format_sector (tags[i], 0x00))
+		    break;
+
+		if (tt == CLASSIC_4K)
+		    if (!try_format_sector (tags[i], 0x10))
+			break;
+
+		printf (DONE_FORMAT);
+		continue;
+	    }
+	    switch (tt) {
 		case CLASSIC_1K:
 		    mod_block = 4;
 		    if (!format_mifare_classic_1k (tags[i]))
