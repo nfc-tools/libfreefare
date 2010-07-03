@@ -135,7 +135,7 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 	if (sector_map[i])
 	    n++;
 
-    if (!(res = malloc (n+1)))
+    if (!(res = malloc (sizeof (*res) * (n+1))))
 	return NULL;
 
     n = 0;
