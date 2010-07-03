@@ -184,7 +184,7 @@ mifare_application_find (Mad mad, MadAid aid)
     size_t res_count = count_aids (mad, aid);
 
     if (res_count)
-	res = malloc (sizeof (*res) * res_count + 1);
+	res = malloc (sizeof (*res) * (res_count + 1));
 
     size_t r = FIRST_SECTOR, w = 0;
     if (res) {
