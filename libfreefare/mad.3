@@ -64,14 +64,14 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mad_get_version "Mad mad"
 .Ft void
 .Fn mad_set_version "Mad mad" "uint8_t version"
-.Ft MifareSectorNumber
+.Ft MifareClassicSectorNumber
 .Fn mad_get_card_publisher_sector "Mad mad"
 .Ft int
-.Fn mad_set_card_publisher_sector "Mad mad" "MifareSectorNumber cps"
+.Fn mad_set_card_publisher_sector "Mad mad" "MifareClassicSectorNumber cps"
 .Ft int
-.Fn mad_get_aid "Mad mad" "MifareSectorNumber sector" "MadAid *aid"
+.Fn mad_get_aid "Mad mad" "MifareClassicSectorNumber sector" "MadAid *aid"
 .Ft int
-.Fn mad_set_aid "Mad mad" "MifareSectorNumber sector" "MadAid aid"
+.Fn mad_set_aid "Mad mad" "MifareClassicSectorNumber sector" "MadAid aid"
 .Ft void
 .Fn mad_free "Mad mad"
 .Ft ssize_t
