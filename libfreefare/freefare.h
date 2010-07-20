@@ -133,24 +133,24 @@ typedef struct mad *Mad;
 /* MAD Public read key A */
 extern const MifareClassicKey mad_public_key_a;
 
-Mad		 mad_new (uint8_t version);
+Mad		 mad_new (const uint8_t version);
 Mad		 mad_read (MifareTag tag);
-int		 mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10);
+int		 mad_write (MifareTag tag, Mad mad, const MifareClassicKey key_b_sector_00, const MifareClassicKey key_b_sector_10);
 int		 mad_get_version (Mad mad);
-void		 mad_set_version (Mad mad, uint8_t version);
+void		 mad_set_version (Mad mad, const uint8_t version);
 MifareClassicSectorNumber mad_get_card_publisher_sector (Mad mad);
-int		 mad_set_card_publisher_sector (Mad mad, MifareClassicSectorNumber cps);
-int		 mad_get_aid (Mad mad, MifareClassicSectorNumber sector, MadAid *aid);
-int		 mad_set_aid (Mad mad, MifareClassicSectorNumber sector, MadAid aid);
-bool		 mad_sector_reserved (MifareClassicSectorNumber sector);
+int		 mad_set_card_publisher_sector (Mad mad, const MifareClassicSectorNumber cps);
+int		 mad_get_aid (Mad mad, const MifareClassicSectorNumber sector, MadAid *aid);
+int		 mad_set_aid (Mad mad, const MifareClassicSectorNumber sector, MadAid aid);
+bool		 mad_sector_reserved (const MifareClassicSectorNumber sector);
 void		 mad_free (Mad mad);
-ssize_t		 mad_application_read (MifareTag tag, Mad mad, MadAid aid, void *buf, size_t nbytes, MifareClassicKey key, MifareClassicKeyType key_type);
-ssize_t		 mad_application_write (MifareTag tag, Mad mad, MadAid aid, const void *buf, size_t nbytes, MifareClassicKey key, MifareClassicKeyType key_type);
+ssize_t		 mad_application_read (MifareTag tag, Mad mad, const MadAid aid, void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
+ssize_t		 mad_application_write (MifareTag tag, Mad mad, const MadAid aid, const void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
 
-MifareClassicSectorNumber *mifare_application_alloc (Mad mad, MadAid aid, size_t size);
-void		 mifare_application_free (Mad mad, MadAid aid);
+MifareClassicSectorNumber *mifare_application_alloc (Mad mad, const MadAid aid, const size_t size);
+void		 mifare_application_free (Mad mad, const MadAid aid);
 
-MifareClassicSectorNumber *mifare_application_find (Mad mad, MadAid aid);
+MifareClassicSectorNumber *mifare_application_find (Mad mad, const MadAid aid);
 
 
 uint8_t		*tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);

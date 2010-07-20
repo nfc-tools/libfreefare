@@ -241,7 +241,7 @@ error:
  * Write the mad to the provided MIFARE tad using the provided Key-B keys.
  */
 int
-mad_write (MifareTag tag, Mad mad, MifareClassicKey key_b_sector_00, MifareClassicKey key_b_sector_10)
+mad_write (MifareTag tag, Mad mad, const MifareClassicKey key_b_sector_00, const MifareClassicKey key_b_sector_10)
 {
     MifareClassicBlock data;
 
@@ -327,7 +327,7 @@ mad_get_version (Mad mad)
  * Set a MAD version.
  */
 void
-mad_set_version (Mad mad, uint8_t version)
+mad_set_version (Mad mad, const uint8_t version)
 {
     if ((version == 2) && (mad->version == 1)) {
 	/* We use a larger MAD so initialise the new blocks */
@@ -349,7 +349,7 @@ mad_get_card_publisher_sector(Mad mad)
  * Set the MAD card publisher sector.
  */
 int
-mad_set_card_publisher_sector(Mad mad, MifareClassicSectorNumber cps)
+mad_set_card_publisher_sector(Mad mad, const MifareClassicSectorNumber cps)
 {
     if (((mad->version == 2) && (cps > 0x27)) | (mad->version == 1) && (cps > 0x0f)) {
 	errno = EINVAL;
@@ -364,7 +364,7 @@ mad_set_card_publisher_sector(Mad mad, MifareClassicSectorNumber cps)
  * Get the provided sector's application identifier.
  */
 int
-mad_get_aid(Mad mad, MifareClassicSectorNumber sector, MadAid *aid)
+mad_get_aid(Mad mad, const MifareClassicSectorNumber sector, MadAid *aid)
 {
     if ((sector < 1) || (sector == 0x10) || (sector > 0x27)) {
 	errno = EINVAL;
@@ -391,7 +391,7 @@ mad_get_aid(Mad mad, MifareClassicSectorNumber sector, MadAid *aid)
  * Set the provided sector's application identifier.
  */
 int
-mad_set_aid(Mad mad, MifareClassicSectorNumber sector, MadAid aid)
+mad_set_aid(Mad mad, const MifareClassicSectorNumber sector, MadAid aid)
 {
     if ((sector < 1) || (sector == 0x10) || (sector > 0x27)) {
 	errno = EINVAL;
@@ -414,7 +414,7 @@ mad_set_aid(Mad mad, MifareClassicSectorNumber sector, MadAid aid)
 }
 
 bool
-mad_sector_reserved (MifareClassicSectorNumber sector)
+mad_sector_reserved (const MifareClassicSectorNumber sector)
 {
     return ((0x00 == sector) || (0x10 == sector));
 }
@@ -429,7 +429,7 @@ mad_free (Mad mad)
 }
 
 ssize_t
-mad_application_read (MifareTag tag, Mad mad, MadAid aid, void *buf, size_t nbytes, MifareClassicKey key, MifareClassicKeyType key_type)
+mad_application_read (MifareTag tag, Mad mad, const MadAid aid, void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type)
 {
     ssize_t res = 0;
 
@@ -474,7 +474,7 @@ mad_application_read (MifareTag tag, Mad mad, MadAid aid, void *buf, size_t nbyt
 }
 
 ssize_t
-mad_application_write (MifareTag tag, Mad mad, MadAid aid, const void *buf, size_t nbytes, MifareClassicKey key, MifareClassicKeyType key_type)
+mad_application_write (MifareTag tag, Mad mad, const MadAid aid, const void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type)
 {
     ssize_t res = 0;
 
