@@ -72,7 +72,7 @@ freefare_get_tags (nfc_device_t *device)
     if(!tags) return NULL;
     tags[0] = NULL;
 
-    while (nfc_initiator_select_tag(device,NM_ISO14443A_106,NULL,0,&target_info)) {
+    while (nfc_initiator_select_passive_target(device,NM_ISO14443A_106,NULL,0,&target_info)) {
 
 	bool found = false;
 	struct supported_tag *tag_info;
@@ -124,7 +124,7 @@ freefare_get_tags (nfc_device_t *device)
 	(tags[tag_count-1])->tag_info = tag_info;
 	tags[tag_count] = NULL;
 
-	nfc_initiator_deselect_tag (device);
+	nfc_initiator_deselect_target (device);
     }
 
     return tags;

@@ -84,7 +84,7 @@ mifare_ultralight_connect (MifareTag tag)
     ASSERT_MIFARE_ULTRALIGHT (tag);
 
     nfc_target_info_t pnti;
-    if (nfc_initiator_select_tag (tag->device, NM_ISO14443A_106, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
+    if (nfc_initiator_select_passive_target (tag->device, NM_ISO14443A_106, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
 	tag->active = 1;
 	for (int i = 0; i < MIFARE_ULTRALIGHT_PAGE_COUNT; i++)
 	    MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
@@ -104,7 +104,7 @@ mifare_ultralight_disconnect (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
 
-    if (nfc_initiator_deselect_tag (tag->device)) {
+    if (nfc_initiator_deselect_target (tag->device)) {
 	tag->active = 0;
     } else {
 	errno = EIO;
