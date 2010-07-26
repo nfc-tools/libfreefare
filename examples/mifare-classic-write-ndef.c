@@ -174,7 +174,7 @@ main(int argc, char *argv[])
 		switch (freefare_get_tag_type (tags[i])) {
 		    case CLASSIC_4K:
 			if (key_10_type != MFC_KEY_B) {
-			    if( 0 != fix_mad_trailer_block( tags[i], 0x40, key_10, key_10_type )) {
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x10, key_10, key_10_type )) {
 				error = 1;
 				goto error;
 			    }
