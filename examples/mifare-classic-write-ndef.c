@@ -39,6 +39,11 @@ MifareClassicKey default_keys[] = {
     { 0x00,0x00,0x00,0x00,0x00,0x00 }
 };
 
+struct mifare_classic_key_and_type {
+    MifareClassicKey key;
+    MifareClassicKeyType type;
+};
+
 const MifareClassicKey mad_key_a = {
     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5
 };
@@ -55,14 +60,20 @@ const uint8_t ndef_msg[33] = {
 };
 
 int
-search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicKey *key, MifareClassicKeyType *key_type)
+search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey *key, MifareClassicKeyType *key_type)
 {
+    MifareClassicBlockNumber block = mifare_classic_sector_last_block (sector);
+
+    /*
+     * FIXME: We should not assume that if we have full access to trailer block
+     *        we also have a full access to data blocks.
+     */
     mifare_classic_disconnect (tag);
     for (size_t i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_A))) {
-	    if ((1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_KEYA, MFC_KEY_A)) &&
-		(1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A)) &&
-		(1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_KEYB, MFC_KEY_A))) {
+	    if ((1 == mifare_classic_get_trailer_block_permission (tag, block, MCAB_WRITE_KEYA, MFC_KEY_A)) &&
+		(1 == mifare_classic_get_trailer_block_permission (tag, block, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A)) &&
+		(1 == mifare_classic_get_trailer_block_permission (tag, block, MCAB_WRITE_KEYB, MFC_KEY_A))) {
 		memcpy (key, &default_keys[i], sizeof (MifareClassicKey));
 		*key_type = MFC_KEY_A;
 		return 1;
@@ -71,12 +82,9 @@ search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicK
 	mifare_classic_disconnect (tag);
 
 	if ((0 == mifare_classic_connect (tag)) && (0 == mifare_classic_authenticate (tag, block, default_keys[i], MFC_KEY_B))) {
-	    if (((block == 0) || (1 == mifare_classic_get_data_block_permission (tag, block + 0, MCAB_W, MFC_KEY_B))) &&
-		(1 == mifare_classic_get_data_block_permission (tag, block + 1, MCAB_W, MFC_KEY_B)) &&
-		(1 == mifare_classic_get_data_block_permission (tag, block + 2, MCAB_W, MFC_KEY_B)) &&
-		(1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_KEYA, MFC_KEY_B)) &&
-		(1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_ACCESS_BITS, MFC_KEY_B)) &&
-		(1 == mifare_classic_get_trailer_block_permission (tag, block + 3, MCAB_WRITE_KEYB, MFC_KEY_B))) {
+	    if ((1 == mifare_classic_get_trailer_block_permission (tag, block, MCAB_WRITE_KEYA, MFC_KEY_B)) &&
+		(1 == mifare_classic_get_trailer_block_permission (tag, block, MCAB_WRITE_ACCESS_BITS, MFC_KEY_B)) &&
+		(1 == mifare_classic_get_trailer_block_permission (tag, block, MCAB_WRITE_KEYB, MFC_KEY_B))) {
 		memcpy (key, &default_keys[i], sizeof (MifareClassicKey));
 		*key_type = MFC_KEY_B;
 		return 1;
@@ -85,11 +93,11 @@ search_sector_key (MifareTag tag, MifareClassicBlockNumber block, MifareClassicK
 	mifare_classic_disconnect (tag);
     }
 
-    warnx ("No known authentication key for block %d", block);
+    warnx ("No known authentication key for sector 0x%02x\n", sector);
     return 0;
 }
 
-int 
+int
 fix_mad_trailer_block (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
 {
     MifareClassicBlock block;
@@ -111,9 +119,6 @@ main(int argc, char *argv[])
     int error = 0;
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
-    MifareClassicKey key_00, key_01, key_10;
-    MifareClassicKeyType key_00_type, key_01_type, key_10_type;
-    MifareClassicBlock block;
     Mad mad;
 
     (void)argc;
@@ -127,6 +132,11 @@ main(int argc, char *argv[])
     if (!tags) {
 	nfc_disconnect (device);
 	errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
+    }
+
+    struct mifare_classic_key_and_type *card_write_keys;
+    if (!(card_write_keys = malloc (40 * sizeof (*card_write_keys)))) {
+	err (EXIT_FAILURE, "malloc");
     }
 
     for (int i = 0; (!error) && tags[i]; i++) {
@@ -148,13 +158,13 @@ main(int argc, char *argv[])
 	if (write_ndef) {
 	    switch (freefare_get_tag_type (tags[i])) {
 		case CLASSIC_4K:
-		    if (!search_sector_key (tags[i], 0x40, &key_10, &key_10_type)) {
+		    if (!search_sector_key (tags[i], 0x10, &(card_write_keys[0x10].key), &(card_write_keys[0x10].type))) {
 			error = 1;
 			goto error;
 		    }
 		    /* fallthrough */
 		case CLASSIC_1K:
-		    if (!search_sector_key (tags[i], 0x00, &key_00, &key_00_type)) {
+		    if (!search_sector_key (tags[i], 0x00, &(card_write_keys[0x00].key), &(card_write_keys[0x00].type))) {
 			error = 1;
 			goto error;
 		    }
@@ -164,32 +174,27 @@ main(int argc, char *argv[])
 		    break;
 	    }
 
-	    if (!search_sector_key (tags[i], 0x04, &key_01, &key_01_type)) {
-		error = 1;
-		goto error;
-	    }
-
 	    if (!error) {
 		/* Ensure the auth key is always a B one. If not, change it! */
 		switch (freefare_get_tag_type (tags[i])) {
 		    case CLASSIC_4K:
-			if (key_10_type != MFC_KEY_B) {
-			    if( 0 != fix_mad_trailer_block( tags[i], 0x10, key_10, key_10_type )) {
+			if (card_write_keys[0x10].type != MFC_KEY_B) {
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x10, card_write_keys[0x10].key, card_write_keys[0x10].type)) {
 				error = 1;
 				goto error;
 			    }
-			    memcpy (&key_10, &default_keyb, sizeof (MifareClassicKey));
-			    key_10_type = MFC_KEY_B;
+			    memcpy (&(card_write_keys[0x10].key), &default_keyb, sizeof (MifareClassicKey));
+			    card_write_keys[0x10].type = MFC_KEY_B;
 			}
 			/* fallthrough */
 		    case CLASSIC_1K:
-			if (key_00_type != MFC_KEY_B) {
-			    if( 0 != fix_mad_trailer_block( tags[i], 0x00, key_00, key_00_type )) {
+			if (card_write_keys[0x00].type != MFC_KEY_B) {
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x00, card_write_keys[0x00].key, card_write_keys[0x00].type)) {
 				error = 1;
 				goto error;
 			    }
-			    memcpy (&key_00, &default_keyb, sizeof (MifareClassicKey));
-			    key_00_type = MFC_KEY_B;
+			    memcpy (&(card_write_keys[0x00].key), &default_keyb, sizeof (MifareClassicKey));
+			    card_write_keys[0x00].type = MFC_KEY_B;
 			}
 			break;
 		    default:
@@ -198,10 +203,35 @@ main(int argc, char *argv[])
 		}
 	    }
 
+	    size_t encoded_size;
+	    uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
+
+	    /*
+	     * At his point, we should have collected all information needed to
+	     * succeed.  However, some sectors may be unaccessible if the card
+	     * is not blank, so mark them as used in the MAD.
+	     */
+
+	    /*
+	     * TODO Load and keep any existing MAD on the target.  In this
+	     *      case, only can free sectors for keys.
+	     */
+
 	    if (!(mad = mad_new ((freefare_get_tag_type (tags[i]) == CLASSIC_4K) ? 2 : 1))) {
 		perror ("mad_new");
 		error = 1;
 		goto error;
+	    }
+
+	    MadAid reserved = {
+		.application_code = 0xff,
+		.function_cluster_code = 0xff
+	    };
+	    for (size_t s = 40; s; s--) {
+		if (s == 0x10) continue;
+		if (!search_sector_key (tags[i], s, &(card_write_keys[s].key), &(card_write_keys[s].type))) {
+		    mad_set_aid (mad, s, reserved);
+		}
 	    }
 
 	    MadAid aid = {
@@ -209,48 +239,45 @@ main(int argc, char *argv[])
 		.application_code = 0x03
 	    };
 
-	    mad_set_aid (mad, 1, aid);
+	    MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, aid, encoded_size);
+	    if (!sectors) {
+		perror ("mifare_application_alloc");
+		error = EXIT_FAILURE;
+		goto error;
+	    }
 
-	    if (mad_write (tags[i], mad, key_00, key_10) < 0) {
+	    if (mad_write (tags[i], mad, card_write_keys[0x00].key, card_write_keys[0x10].key) < 0) {
 		perror ("mad_write");
-		error = 1;
+		error = EXIT_FAILURE;
 		goto error;
 	    }
 
-
-	    size_t encoded_size;
-	    size_t pos = 0;
-	    uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
-
-	    MifareClassicBlockNumber bn = 0x04;
-
-	    if (mifare_classic_authenticate (tags[i], bn, key_01, key_01_type) < 0) {
-		perror ("mifare_classic_authenticate");
-		error = 1;
+	    if ((ssize_t) encoded_size != mad_application_write (tags[i], mad, aid, tlv_data, encoded_size, card_write_keys[sectors[0]].key, card_write_keys[sectors[0]].type)) {
+		perror ("mad_application_write");
+		error = EXIT_FAILURE;
 		goto error;
 	    }
 
-	    MifareClassicBlock data;
+	    int s = 0;
 
-	    while (pos < encoded_size) {
-		memset (&data, '\0', sizeof (MifareClassicBlock));
-		memcpy (&data, tlv_data + pos, MIN (encoded_size - pos, sizeof (MifareClassicBlock)));
-		pos += sizeof (MifareClassicBlock);
-		if (bn == 0x07)
-		    abort();
-		if (mifare_classic_write (tags[i], bn++, data) < 0) {
-		    perror ("mifare_classic_write");
-		    error = 1;
+	    while (sectors[s]) {
+		MifareClassicBlockNumber block = mifare_classic_sector_last_block (sectors[s]);
+		MifareClassicBlock block_data;
+		mifare_classic_trailer_block (&block_data, default_keyb, 0x0, 0x0, 0x0, 0x6, 0x40, default_keyb);
+		if (mifare_classic_authenticate (tags[i], block, card_write_keys[sectors[s]].key, card_write_keys[sectors[s]].type) < 0) {
+		    perror ("mifare_classic_authenticate");
+		    error = EXIT_FAILURE;
 		    goto error;
 		}
+		if (mifare_classic_write (tags[i], block, block_data) < 0) {
+		    perror ("mifare_classic_write");
+		    error = EXIT_FAILURE;
+		    goto error;
+		}
+		s++;
 	    }
 
-	    mifare_classic_trailer_block (&block, default_keyb, 0x0, 0x0, 0x0, 0x6, 0x40, default_keyb);
-	    if (mifare_classic_write (tags[i], 0x07, block) < 0) {
-		perror ("mifare_classic_write");
-		error = 1;
-		goto error;
-	    }
+	    free (sectors);
 
 	    free (tlv_data);
 
@@ -263,6 +290,8 @@ error:
 
     freefare_free_tags (tags);
     nfc_disconnect (device);
+
+    free (card_write_keys);
 
     exit (error);
 }
