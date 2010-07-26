@@ -36,11 +36,16 @@
 #  include <endian.h>
 #endif
 
+#if defined(HAVE_BYTESWAP_H)
+#  include <byteswap.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
 #include <freefare.h>
+#include "freefare_internal.h"
 
 #define TLV_TERMINATOR 0xFE
 

@@ -47,6 +47,11 @@
 #if defined(HAVE_ENDIAN_H)
 #  include <endian.h>
 #endif
+
+#if defined(HAVE_BYTESWAP_H)
+#  include <byteswap.h>
+#endif
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>

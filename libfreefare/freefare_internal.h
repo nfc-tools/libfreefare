@@ -22,21 +22,53 @@
 
 #include "config.h"
 
+/*
+ * Endienness macros
+ *
+ * POSIX does not describe any API for endianness problems, and solutions are
+ * mostly vendor-dependant.  Some operating systems provide a complete
+ * framework for this (FreeBSD, OpenBSD), some provide nothing in the base
+ * system (Mac OS), GNU/Linux systems may or may not provide macros to do the
+ * conversion depending on the version of the libc.
+ *
+ * This is a PITA but unfortunately we have no other solution than doing all
+ * this gymnastic.  Depending of what is defined if one or more of endian.h,
+ * sys/endian.h and byteswap.h was included, define a set of macros to stick to
+ * the set of macros provided by FreeBSD (it's a historic choice: development
+ * was done on this operating system when endianness problems first had to be
+ * dealt with).
+ */
+
 #if !defined(le32toh) && defined(letoh32)
 #  define le32toh(x) letoh32(x)
 #endif
 
-#if defined(HAVE_BYTESWAP_H)
-#include <byteswap.h>
-#if !defined(le32toh) || !defined(htole32)
-  #if BYTE_ORDER == LITTLE_ENDIAN
-    #define le32toh(x) (x)
-    #define htole32(x) bswap_32(x)
-  #else
-    #define le32toh(x) bswap_32(x)
-    #define htole32(x) (x)
-  #endif
+#if !defined(le32toh) && defined(bswap_32)
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#    define be32toh(x) bswap_32(x)
+#    define htobe32(x) bswap_32(x)
+#    define le32toh(x) (x)
+#    define htole32(x) (x)
+#  else
+#    define be32toh(x) (x)
+#    define htobe32(x) (x)
+#    define le32toh(x) bswap_32(x)
+#    define htole32(x) bswap_32(x)
+#  endif
 #endif
+
+#if !defined(htole16) && defined(bswap_16)
+#  if BYTE_ORDER == LITTLE_ENDIAN
+#    define be16toh(x) (bswap_16(x))
+#    define htobe16(x) (bswap_16(x))
+#    define htole16(x) (x)
+#    define le16toh(x) (x)
+#  else
+#    define be16toh(x) (x)
+#    define htobe16(x) (x)
+#    define htole16(x) (bswap_16(x))
+#    define le16toh(x) (bswap_16(x))
+#  endif
 #endif
 
 
