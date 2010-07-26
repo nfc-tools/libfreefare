@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (C) 2010, Romain Tartiere, Romuald Conty.
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -22,6 +22,8 @@
 
 #include "config.h"
 
+#include <openssl/des.h>
+
 /*
  * Endienness macros
  *
@@ -38,10 +40,6 @@
  * was done on this operating system when endianness problems first had to be
  * dealt with).
  */
-
-#if !defined(le32toh) && defined(letoh32)
-#  define le32toh(x) letoh32(x)
-#endif
 
 #if !defined(le32toh) && defined(bswap_32)
 #  if BYTE_ORDER == LITTLE_ENDIAN
@@ -71,6 +69,8 @@
 #  endif
 #endif
 
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 struct mad_sector_0x00;
 struct mad_sector_0x10;
@@ -78,10 +78,23 @@ struct mad_sector_0x10;
 void		 nxp_crc (uint8_t *crc, const uint8_t value);
 MifareTag	 mifare_classic_tag_new (void);
 void		 mifare_classic_tag_free (MifareTag tag);
+MifareTag	 mifare_desfire_tag_new (void);
+void		 mifare_desfire_tag_free (MifareTag tags);
 MifareTag	 mifare_ultralight_tag_new (void);
 void		 mifare_ultralight_tag_free (MifareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
+
+typedef enum {
+    MD_SEND,
+    MD_RECEIVE
+} MifareDirection;
+
+void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int communication_settings);
+void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
+void		 mifare_cbc_des (MifareDESFireKey key, uint8_t *data, size_t data_size, MifareDirection direction, int mac);
+void		 rol8(uint8_t *data);
+void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT 16
 
@@ -123,6 +136,33 @@ struct mifare_classic_tag {
     } cached_access_bits;
 };
 
+struct mifare_desfire_aid {
+    uint8_t data[3];
+};
+
+struct mifare_desfire_key {
+    uint8_t data[16];
+    enum {
+	T_DES,
+	T_3DES
+    } type;
+    DES_key_schedule ks1;
+    DES_key_schedule ks2;
+};
+
+struct mifare_desfire_tag {
+    struct mifare_tag __tag;
+
+    uint8_t last_picc_error;
+    char *last_pcd_error;
+    MifareDESFireKey session_key;
+    uint8_t authenticated_key_no;
+    uint8_t *crypto_buffer;
+    size_t crypto_buffer_size;
+};
+
+MifareDESFireKey mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireKey authentication_key);
+
 struct mifare_ultralight_tag {
     struct mifare_tag __tag;
 
@@ -140,8 +180,9 @@ struct mifare_ultralight_tag {
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
-#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->tag_info->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
 #define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != CLASSIC_1K) && (tag->tag_info->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != DESFIRE_4K) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->tag_info->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
 
 /* 
  * MifareTag cast macros 
@@ -150,6 +191,7 @@ struct mifare_ultralight_tag {
  * MifareTag structures to concrete Tags (e.g. MIFARE Classic tag).
  */
 #define MIFARE_CLASSIC(tag) ((struct mifare_classic_tag *) tag)
+#define MIFARE_DESFIRE(tag) ((struct mifare_desfire_tag *) tag)
 #define MIFARE_ULTRALIGHT(tag) ((struct mifare_ultralight_tag *) tag)
 
 /*

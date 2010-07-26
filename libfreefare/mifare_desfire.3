@@ -1,0 +1,525 @@
+.\" Copyright (C) 2010 Romain Tartiere
+.\"
+.\" This program is free software: you can redistribute it and/or modify it
+.\" under the terms of the GNU Lesser General Public License as published by the
+.\" Free Software Foundation, either version 3 of the License, or (at your
+.\" option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful, but WITHOUT
+.\" ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+.\" FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+.\" more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>
+.\"
+.\" $Id$
+.\"
+.Dd July 11, 2010
+.Dt MIFARE_DESFIRE 3
+.Os
+.\"  _   _
+.\" | \ | | __ _ _ __ ___   ___
+.\" |  \| |/ _` | '_ ` _ \ / _ \
+.\" | |\  | (_| | | | | | |  __/
+.\" |_| \_|\__,_|_| |_| |_|\___|
+.\"
+.Sh NAME
+.Nm mifare_desfire_connect ,
+.Nm mifare_desfire_disconnect .
+.\"
+.Nm mifare_desfire_authenticate ,
+.Nm mifare_desfire_change_key_settings ,
+.Nm mifare_desfire_get_key_settings ,
+.Nm mifare_desfire_change_key ,
+.Nm mifare_desfire_get_key_version ,
+.\"
+.Nm mifare_desfire_create_application ,
+.Nm mifare_desfire_delete_application ,
+.Nm mifare_desfire_get_application_ids ,
+.Nm mifare_desfire_free_application_ids ,
+.Nm mifare_desfire_select_application ,
+.\"
+.Nm mifare_desfire_format_picc ,
+.\"
+.Nm mifare_desfire_get_version ,
+.\"
+.Nm mifare_desfire_get_file_ids ,
+.Nm mifare_desfire_get_file_settings ,
+.Nm mifare_desfire_change_file_settings ,
+.Nm mifare_desfire_create_std_data_file ,
+.Nm mifare_desfire_create_backup_data_file  ,
+.Nm mifare_desfire_create_value_file ,
+.Nm mifare_desfire_create_linear_record_file ,
+.Nm mifare_desfire_create_cyclic_record_file ,
+.Nm mifare_desfire_delete_file ,
+.\"
+.Nm mifare_desfire_read_data ,
+.Nm mifare_desfire_read_data_ex ,
+.Nm mifare_desfire_write_data ,
+.Nm mifare_desfire_write_data_ex ,
+.Nm mifare_desfire_get_value ,
+.Nm mifare_desfire_get_value_ex ,
+.Nm mifare_desfire_credit ,
+.Nm mifare_desfire_credit_ex ,
+.Nm mifare_desfire_debit ,
+.Nm mifare_desfire_debit_ex ,
+.Nm mifare_desfire_limited_credit ,
+.Nm mifare_desfire_limited_credit_ex ,
+.Nm mifare_desfire_write_record ,
+.Nm mifare_desfire_write_record_ex ,
+.Nm mifare_desfire_read_records ,
+.Nm mifare_desfire_read_records_ex ,
+.Nm mifare_desfire_clear_record_file ,
+.Nm mifare_desfire_commit_transaction ,
+.Nm mifare_desfire_abort_transaction ,
+.Nd Mifare DESFire Manipulation Functions
+.\"  _     _ _
+.\" | |   (_) |__  _ __ __ _ _ __ _   _
+.\" | |   | | '_ \| '__/ _` | '__| | | |
+.\" | |___| | |_) | | | (_| | |  | |_| |
+.\" |_____|_|_.__/|_|  \__,_|_|   \__, |
+.\"                               |___/
+.Sh LIBRARY
+Mifare card manipulation library (libfreefare, \-lfreefare)
+.\"  ____                              _
+.\" / ___| _   _ _ __   ___  _ __  ___(_)___
+.\" \___ \| | | | '_ \ / _ \| '_ \/ __| / __|
+.\"  ___) | |_| | | | | (_) | |_) \__ \ \__ \
+.\" |____/ \__, |_| |_|\___/| .__/|___/_|___/
+.\"        |___/            |_|
+.Sh SYNOPSIS
+.In freefare.h
+.Ft int
+.Fn mifare_desfire_connect "MifareTag tag"
+.Ft int
+.Fn mifare_desfire_disconnect "MifareTag tag"
+.\".Ft uint8_t
+.\".Fn mifare_desfire_get_last_error "MifareTag tag"
+.Ft int
+.Fn mifare_desfire_authenticate "MifareTag tag" "uint8_t key_no" "MifareDESFireKey key"
+.Ft int
+.Fn mifare_desfire_change_key_settings "MifareTag tag" "uint8_t settings"
+.Ft int
+.Fn mifare_desfire_get_key_settings "MifareTag tag" "uint8_t *settings" "uint8_t *max_keys"
+.Ft int
+.Fn mifare_desfire_change_key "MifareTag tag" "uint8_t key_no" "MifareDESFireKey new_key" "MifareDESFireKey old_key"
+.Ft int
+.Fn mifare_desfire_get_key_version "MifareTag tag" "uint8_t key_no" "uint8_t *version"
+.Ft int
+.Fn mifare_desfire_create_application "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no"
+.Ft int
+.Fn mifare_desfire_delete_application "MifareTag tag" "MifareDESFireAID aid"
+.Ft int
+.Fn mifare_desfire_get_application_ids "MifareTag tag" "MifareDESFireAID *aids[]" "size_t *count"
+.Ft void
+.Fn mifare_desfire_free_application_ids "MifareDESFireAID aids[]"
+.Ft int
+.Fn mifare_desfire_select_application "MifareTag tag" "MifareDESFireAID aid"
+.Ft int
+.Fn mifare_desfire_format_picc "MifareTag tag"
+.Ft int
+.Fn mifare_desfire_get_version "MifareTag tag" "struct mifare_desfire_version_info *version_info"
+.Ft int
+.Fn mifare_desfire_get_file_ids "MifareTag tag" "uint8_t *files[]" "size_t *count"
+.Ft int
+.Fn mifare_desfire_get_file_settings "MifareTag tag" "uint8_t file_no" "struct mifare_desfire_file_settings *settings"
+.Ft int
+.Fn mifare_desfire_change_file_settings "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights"
+.Ft int
+.Fn mifare_desfire_create_std_data_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t file_size"
+.Ft int
+.Fn mifare_desfire_create_backup_data_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t file_size"
+.Ft int
+.Fn mifare_desfire_create_value_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "int32_t lower_limit" "int32_t upper_limit" "int32_t value" "uint8_t limited_credit_enable"
+.Ft int
+.Fn mifare_desfire_create_linear_record_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records"
+.Ft int
+.Fn mifare_desfire_create_cyclic_record_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records"
+.Ft int
+.Fn mifare_desfire_delete_file "MifareTag tag" "uint8_t file_no"
+.Ft ssize_t
+.Fn mifare_desfire_read_data "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data"
+.Ft ssize_t
+.Fn mifare_desfire_read_data_ex "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data" "int cs"
+.Ft ssize_t
+.Fn mifare_desfire_write_data "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data"
+.Ft ssize_t
+.Fn mifare_desfire_write_data_ex "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data" "int cs"
+.Ft int
+.Fn mifare_desfire_get_value "MifareTag tag" "uint8_t file_no" "int32_t *value"
+.Ft int
+.Fn mifare_desfire_get_value_ex "MifareTag tag" "uint8_t file_no" "int32_t *value" "int cs"
+.Ft int
+.Fn mifare_desfire_credit "MifareTag tag" "uint8_t file_no" "int32_t amount"
+.Ft int
+.Fn mifare_desfire_credit_ex "MifareTag tag" "uint8_t file_no" "int32_t amount" "int cs"
+.Ft int
+.Fn mifare_desfire_debit "MifareTag tag" "uint8_t file_no" "int32_t amount"
+.Ft int
+.Fn mifare_desfire_debit_ex "MifareTag tag" "uint8_t file_no" "int32_t amount" "int cs"
+.Ft int
+.Fn mifare_desfire_limited_credit "MifareTag tag" "uint8_t file_no" "int32_t amount"
+.Ft int
+.Fn mifare_desfire_limited_credit_ex "MifareTag tag" "uint8_t file_no" "int32_t amount" "int cs"
+.Ft ssize_t
+.Fn mifare_desfire_write_record "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data"
+.Ft ssize_t
+.Fn mifare_desfire_write_record_ex "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data" "int cs"
+.Ft ssize_t
+.Fn mifare_desfire_read_records "MifareTag tag" "uint8_t file_no" "off_t offset" "size_t length" "void *data"
+.Ft ssize_t
+.Fn mifare_desfire_read_records_ex "MifareTag tag" "uint7_t file_no" "off_t offset" "size_t length" "void *data" "int cs"
+.Ft int
+.Fn mifare_desfire_clear_record_file "MifareTag tag" "uint8_t file_no"
+.Ft int
+.Fn mifare_desfire_commit_transaction "MifareTag tag"
+.Ft int
+.Fn mifare_desfire_abort_transaction "MifareTag tag"
+.\"  ____                      _       _   _
+.\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
+.\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
+.\" | |_| |  __/\__ \ (__| |  | | |_) | |_| | (_) | | | |
+.\" |____/ \___||___/\___|_|  |_| .__/ \__|_|\___/|_| |_|
+.\"                             |_|
+.Sh DESCRIPTION
+The
+.Fn mifare_desfire_*
+functions allows management of Mifare DESFire tags.
+.Pp
+.Ss Card-level operations
+The
+.Fn mifare_desfire_connect
+and
+.Fn mifare_desfire_disconnect
+functions activates and deactivates the provided
+.Vt tag .
+All
+.Fn mifare_desfire_*
+functions that operates on a
+.Vt tag
+require it to be on activated.
+.Pp
+After activation, the selected application is the master application.  It is
+possible to select another application using the
+.Fn mifare_desfire_select_application
+function (see bellow).
+.Pp
+The
+.Fn mifare_desfire_get_version
+function retrieve various information about the provided
+.Vt tag ,
+including UID, batch number, production date, and hardware and software
+information.  Refer to the freefare.h header file for details about the
+.Vt settings
+field.
+.Pp
+The
+.Fn mifare_desfire_format_picc
+function resets
+.Vt tag
+to factory defaults.  For this function to work, a previous authentication with
+the card master key is required.
+.Pp
+.Ss Application-level operations
+The
+.Fn mifare_desfire_select_application
+function makes the application identified by
+.Vt aid
+the active one.  Further file operations will be performed in the context of
+this application.  After a call to
+.Vt mifare_desfire_connect ,
+the default application is the card master application.  It can be selected
+again calling the
+.Fn mifare_desfire_select_application
+function either with an
+.Vt aid
+with all its fields set to 0, or by providing the NULL
+.Vt aid .
+.Pp
+The
+.Fn mifare_desfire_authenticate
+function performs an authentication using the key number
+.Vt key_no
+on the card and the
+.Vt key
+(3)DES key on
+.Vt tag .
+.Pp
+The
+.Fn mifare_desfire_get_key_settings
+function, returns the
+.Vt settings
+and the number of keys
+.Vt max_keys
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_change_key_settings
+function changes the selected application settings to
+.Vt settings .
+The application number of keys cannot be changed after the application has been
+created.
+.Pp
+The
+.Fn mifare_desfire_change_key
+changes the key
+.Vt key_no
+from
+.Vt old_key
+to
+.Vt new_key
+on
+.Vt tag .
+Depending on the application settings, a previous authentication with the same
+key or another key may be required.
+.Pp
+The
+.Fn mifare_desfire_get_key_version
+function retrieves the
+.Vt version
+of the key with number
+.Vt key_no
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_create_application
+function, creates an application with AID
+.Vt aid ,
+the
+.Vt settings
+key settings and
+.Vt key_no
+authentication keys.  Authentication keys are set to 0 after creation.
+.Pp
+The
+.Fn mifare_desfire_delete_application
+deletes the application identified by AID
+.Vt aid .
+.Pp
+The
+.Fn mifare_desfire_get_application_ids
+function returns a list of all applications of the card.  The
+.Vt aids
+array has to be freed after usage calling
+.Fn mifare_desfire_free_application_ids .
+.Pp
+.Ss File-level operations
+The
+.Fn mifare_desfire_get_file_ids
+function returns the list of
+.Vt count
+files in the selected application as
+.Vt files .
+The memory allocated for
+.Vt files
+has to be reclaimed using
+.Xr free 3 .
+.Pp
+The
+.Fn mifare_desfire_get_file_settings
+function retrieves the
+.Vt settings
+of the file
+.Vt file_no
+of the selected application of
+.Vt tag .
+.Pp
+The
+.Fn mifare_desfire_change_file_settings
+function change the
+.Vt communication_settings
+and
+.Vt access_rights
+of the file
+.Vt file_no
+of the selected application of
+.Vt tag .
+.Pp
+The
+.Fn mifare_desfire_create_*
+family of functions create a new file
+.Vt file_no
+with the provided
+.Vt communication_settings
+and
+.Vt access_rights
+on
+.Vt tag.
+.Bl -tag -width indent
+.It Fn mifare_desfire_create_std_data_file
+creates a standard data file of size
+.Vt file_size .
+.It Fn mifare_desfire_create_backup_data_file
+creates a backup data file of size
+.Vt file_size .
+.It Fn mifare_desfire_create_value_file
+creates a value file of value
+.Vt value
+constrained in the range
+.Vt lower_limit
+.Vt upper_limit ,
+and with the
+.Vt limited_credit_enable
+settings.
+.It Fn mifare_desfire_create_linear_record_file
+creates a linear record file that can hold
+.Vt max_number_of_records
+records of size
+.Vt record_size .
+.It Fn mifare_desfire_create_cyclic_record_file
+creates a cyclic record file that can hold
+.Vt max_number_of_records
+records of size
+.Vt record_size .
+.El
+.Pp
+The
+.Fn mifare_desfire_delete_file
+removes the file
+.Vt file_no
+from the selected application of
+.Vt tag .
+.Ss Data-level operations
+The
+.Fn mifare_desfire_read_data
+function reads
+.Vt length
+bytes of data from offset
+.Vt offset
+of the file
+.Vt file_no
+and copies it to
+.Vt data .
+If
+.Vt length
+is set to 0, the file is read to end. The function returns the number of bytes
+read.
+.Pp
+The
+.Fn mifare_desfire_write_data
+function writes
+.Vt length
+bytes of data from offset
+.Vt offset
+of the file
+.Vt file_no
+and copies it to
+.Vt data .
+The function returns the number of bytes written.
+.Pp
+The
+.Fn mifare_desfire_get_value
+reads the
+.Vt value
+of the file
+.Vt file_no
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_credit
+function adds
+.Vt amount
+to the value of the file
+.Vt file_no
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_debit
+function substracts
+.Vt amount
+to the value of the file
+.Vt file_no
+of the selected application.
+.Pp
+to the value of the file
+.Vt file_no
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_limited_credit
+function adds
+.Vt amount
+to the value of the file
+.Vt file_no
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_write_record
+function writes
+.Vt length
+records starting at record
+.Vt offset
+of
+.Vt data
+in the file
+.Vt file_no
+and returns the number of bytes written.
+.Pp
+The
+.Fn mifare_desfire_read_records
+function reads
+.Vt length
+records starting at record
+.Vt offset
+from the file
+.Vt file_no
+and copy them to
+.Vt data ,
+returning the number of bytes read.
+.Pp
+The
+.Fn mifare_desfire_clear_record_file
+function erase all records from the file
+.Vt file_no
+of the selected application.
+.Pp
+The
+.Fn mifare_desfire_commit_transaction
+validates the set of pending changes on the
+.Vt tag ,
+while the
+.Fn mifare_desfire_abort_transaction
+rollbacks the changes.
+.Pp
+All data-manipulation functions that read data from and write data to files
+come with an
+.Fn *_ex
+variant (e.g.
+.Fn mifare_desfire_read_data_ex )
+which accepts an extra parameter
+.Vt cs
+that defines the communication settings to use.  If not provided, the library
+will try to read-out this value from the file's configuration.  Because reading
+this information may be denied, the
+.Fn *_ex
+variant of functions still allows using the library for advanced usage.
+.\"  ____      _                                 _
+.\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
+.\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
+.\" |  _ <  __/ |_| |_| | |  | | | |  \ V / (_| | | |_| |  __/\__ \
+.\" |_| \_\___|\__|\__,_|_|  |_| |_|   \_/ \__,_|_|\__,_|\___||___/
+.\"
+.Sh RETURN VALUES
+Unless stated otherwise, all other functions return a value greater than or
+equal to
+.Va 0
+on success or
+.Va -1
+on failure.
+.\"  ____                    _
+.\" / ___|  ___  ___    __ _| |___  ___
+.\" \___ \ / _ \/ _ \  / _` | / __|/ _ \
+.\"  ___) |  __/  __/ | (_| | \__ \ (_) |
+.\" |____/ \___|\___|  \__,_|_|___/\___/
+.\"
+.Sh SEE ALSO
+.Xr freefare 3
+.\"     _         _   _
+.\"    / \  _   _| |_| |__   ___  _ __ ___
+.\"   / _ \| | | | __| '_ \ / _ \| '__/ __|
+.\"  / ___ \ |_| | |_| | | | (_) | |  \__ \
+.\" /_/   \_\__,_|\__|_| |_|\___/|_|  |___/
+.\"
+.Sh AUTHORS
+.An Romain Tartiere Aq romain@il4p.org

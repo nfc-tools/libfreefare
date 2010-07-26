@@ -28,27 +28,38 @@ void
 cut_setup ()
 {
     int res;
+    nfc_device_desc_t devices[8];
+    size_t device_count;
 
-    device = nfc_connect (NULL);
-    if (!device)
+    nfc_list_devices (devices, 8, &device_count);
+    if (!device_count)
 	cut_omit ("No device found");
 
-    tags = freefare_get_tags (device);
-    cut_assert_not_null (tags, cut_message ("freefare_get_tags() failed"));
+    for (size_t i = 0; i < device_count; i++) {
 
-    tag = NULL;
-    for (int i=0; tags[i]; i++) {
-	if (freefare_get_tag_type(tags[i]) == ULTRALIGHT) {
-	    tag = tags[i];
-	    break;
+	device = nfc_connect (&(devices[i]));
+	if (!device)
+	    cut_omit ("nfc_connect() failed");
+
+	tags = freefare_get_tags (device);
+	cut_assert_not_null (tags, cut_message ("freefare_get_tags() failed"));
+
+	tag = NULL;
+	for (int i=0; tags[i]; i++) {
+	    if (freefare_get_tag_type(tags[i]) == ULTRALIGHT) {
+		tag = tags[i];
+		res = mifare_ultralight_connect (tag);
+		cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_connect() failed"));
+		return;
+	    }
 	}
+	nfc_disconnect (device);
+	device = NULL;
+	freefare_free_tags (tags);
+	tags = NULL;
     }
 
-    if (!tag)
-	cut_omit ("No MIFARE UltraLight tag on NFC device");
-
-    res = mifare_ultralight_connect (tag);
-    cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_connect() failed"));
+    cut_omit ("No MIFARE UltraLight tag on NFC device");
 }
 
 void
@@ -57,8 +68,10 @@ cut_teardown ()
     if (tag)
 	mifare_ultralight_disconnect (tag);
 
-    if (tags)
+    if (tags) {
 	freefare_free_tags (tags);
+	tags = NULL;
+    }
 
     if (device)
 	nfc_disconnect (device);

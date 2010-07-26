@@ -18,17 +18,19 @@ AC_C_INLINE
 AC_HEADER_STDBOOL
 AC_TYPE_INT16_T
 AC_TYPE_INT32_T
+AC_TYPE_OFF_T
 AC_TYPE_UINT8_T
 AC_TYPE_UINT16_T
 AC_TYPE_UINT32_T
 AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 
 # Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 
 AC_CHECK_HEADERS([sys/types.h])
-AC_CHECK_FUNCS([memset letoh32 htole32])
+AC_CHECK_FUNCS([memset letoh32 htole32 pow strerror])
 
 AC_CHECK_HEADERS([endian.h sys/endian.h])
 if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no"; then
@@ -41,6 +43,10 @@ AC_DEFINE([_XOPEN_SOURCE], [600], [Define to 500 if Single Unix conformance is w
 AC_DEFINE([_BSD_SOURCE], [1], [Define on BSD to activate all library features])
 
 CFLAGS="$CFLAGS -std=c99"
+
+# Crypto functions for MIFARE DesFire support are provided by OpenSSL.
+AC_CHECK_LIB([ssl], [DES_ecb_encrypt], [], [AC_MSG_ERROR([Cannot find libssl.])])
+AC_CHECK_HEADER([openssl/des.h], [], [AC_MSG_ERROR([Cannot find libssl headers.])])
 
 # Checks for pkg-config modules.
 LIBNFC_REQUIRED_VERSION=1.3.4
@@ -62,5 +68,9 @@ if test x$ac_cv_enable_coverage = xyes; then
     CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
 fi
 
-AC_OUTPUT([Makefile examples/Makefile libfreefare/Makefile libfreefare.pc test/Makefile])
+AC_OUTPUT([Makefile
+	   examples/Makefile
+	   libfreefare/Makefile
+	   libfreefare.pc
+	   test/Makefile])
 

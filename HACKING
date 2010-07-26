@@ -40,7 +40,7 @@ infrastructure ready for hacking the new card support:
   - Edit libfreefare/freefare.3:
       - Add your tag to the `mifare_tag_type' enum documentation;
   - Edit libfreefare/freefare_internal.h:
-      - Add a new <tag>_tag struct.  It's very first member shall be `struct
+      - Add a new <tag>_tag struct.  It's very first member SHALL be `struct
 	mifare_tag __tag';
       - Add a <tag>_tag_new() and a <tag>_tag_free() function prototype;
       - Add a ASSERT_<TAG>() macro to check the tag's type;
@@ -52,9 +52,12 @@ infrastructure ready for hacking the new card support:
       - Edit the freefare_free_tags() function so that it calls
 	<tag>_tag_free() to free your tags;
   - Create libfreefare/<tag>.c and implement all that's missing:
-      - <tag>_tag_new() SHALL allocate all data-structure the tag may need to
+      - <tag>_tag_new() MUST allocate all data-structure the tag may need to
 	use during it's lifetime.  We do not want to have any function to fail
-	later because the running system is out of resources;
+	later because the running system is out of resources.  Buffers for
+	cryptographic operations on random amount of data MAY however be
+	(re)allocated on demand, in such case refrain from shrinking
+	unnecessarily the buffer size.
       - <tag>_connect() SHOULD initialise data allocated by <tag>_tag_new().
 	Keep in mind that a single tag may be disconnected from and connected
 	to again, without being freed in the meantime.  Since all memory

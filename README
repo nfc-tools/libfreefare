@@ -4,6 +4,7 @@ manipulations.
 Supported tags:
   - Mifare Classic 1k
   - Mifare Classic 4k
+  - Mifare DESFire 4K
   - Mifare Ultralight
 
 Supported features:

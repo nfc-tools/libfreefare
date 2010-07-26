@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
+#include <strings.h>
 
 #include <freefare.h>
 
@@ -45,8 +46,6 @@
 
 #define SECTOR_0X00_AIDS 15
 #define SECTOR_0X10_AIDS 23
-
-#define MIN(a, b) ( (a < b) ? a : b )
 
 struct mad_sector_0x00 {
     uint8_t crc;
@@ -83,8 +82,8 @@ mad_new (uint8_t version)
 	return NULL;
 
     mad->version = version;
-    memset (&(mad->sector_0x00), '\0', sizeof (mad->sector_0x00));
-    memset (&(mad->sector_0x10), '\0', sizeof (mad->sector_0x10));
+    bzero (&(mad->sector_0x00), sizeof (mad->sector_0x00));
+    bzero (&(mad->sector_0x10), sizeof (mad->sector_0x10));
 
     return mad;
 }
@@ -331,7 +330,7 @@ mad_set_version (Mad mad, const uint8_t version)
 {
     if ((version == 2) && (mad->version == 1)) {
 	/* We use a larger MAD so initialise the new blocks */
-	memset (&(mad->sector_0x10), '\0', sizeof (mad->sector_0x10));
+	bzero (&(mad->sector_0x10), sizeof (mad->sector_0x10));
     }
     mad->version = version;
 }

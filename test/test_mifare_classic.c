@@ -19,6 +19,7 @@
 
 #include <cutter.h>
 #include <string.h>
+#include <strings.h>
 
 #include <freefare.h>
 #include "freefare_internal.h"
@@ -113,7 +114,7 @@ test_mifare_classic_format (void)
     };
 
     MifareClassicBlock empty;
-    memset (empty, '\x00', sizeof (empty));
+    bzero (empty, sizeof (empty));
 
     res = mifare_classic_write (tag, 0x3c, data);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_write() failed"));

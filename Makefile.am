@@ -20,3 +20,8 @@ dist-hook:
 	fi
 
 EXTRA_DIST = HACKING
+CLEANFILES = coverage.info
+clean-local: clean-local-coverage
+.PHONY: clean-local-coverage
+clean-local-coverage:
+	-rm -rf coverage

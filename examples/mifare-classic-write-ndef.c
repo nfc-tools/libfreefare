@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <nfc/nfc.h>
 
@@ -124,19 +125,30 @@ main(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    device = nfc_connect (NULL);
-    if (!device)
-	errx (EXIT_FAILURE, "No NFC device found.");
+    struct mifare_classic_key_and_type *card_write_keys;
+    if (!(card_write_keys = malloc (40 * sizeof (*card_write_keys)))) {
+	err (EXIT_FAILURE, "malloc");
+    }
+
+    nfc_device_desc_t devices[8];
+    size_t device_count;
+
+    nfc_list_devices (devices, 8, &device_count);
+    if (!device_count)
+        errx (EXIT_FAILURE, "No NFC device found.");
+
+    for (size_t d = 0; d < device_count; d++) {
+	device = nfc_connect (&(devices[d]));
+	if (!device) {
+	    warnx ("nfc_connect() failed.");
+	    error = EXIT_FAILURE;
+	    continue;
+	}
 
     tags = freefare_get_tags (device);
     if (!tags) {
 	nfc_disconnect (device);
 	errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
-    }
-
-    struct mifare_classic_key_and_type *card_write_keys;
-    if (!(card_write_keys = malloc (40 * sizeof (*card_write_keys)))) {
-	err (EXIT_FAILURE, "malloc");
     }
 
     for (int i = 0; (!error) && tags[i]; i++) {
@@ -290,6 +302,7 @@ error:
 
     freefare_free_tags (tags);
     nfc_disconnect (device);
+    }
 
     free (card_write_keys);
 

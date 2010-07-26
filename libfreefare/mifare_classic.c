@@ -55,6 +55,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <nfc/nfc.h>
 
@@ -663,7 +664,7 @@ mifare_classic_format_sector (MifareTag tag, const MifareClassicSectorNumber sec
     }
 
     MifareClassicBlock empty_data_block;
-    memset (empty_data_block, '\x00', sizeof (empty_data_block));
+    bzero (empty_data_block, sizeof (empty_data_block));
 
     MifareClassicBlock default_trailer_block = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  /* Key A */

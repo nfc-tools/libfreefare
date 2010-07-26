@@ -1,4 +1,4 @@
-/*
+/*-
  * Copyright (C) 2010, Romain Tartiere, Romuald Conty.
  *
  * This program is free software: you can redistribute it and/or modify it
@@ -24,10 +24,11 @@
 #include "freefare_internal.h"
 
 struct supported_tag supported_tags[] = {
-    { { 0x00, 0x44 }, 0x00, ULTRALIGHT, "Mifare UltraLight" },
     { { 0x00, 0x04 }, 0x08, CLASSIC_1K, "Mifare Classic 1k" },
     { { 0x00, 0x02 }, 0x18, CLASSIC_4K, "Mifare Classic 4k" },
     { { 0x00, 0x02 }, 0x38, CLASSIC_4K, "Mifare Classic 4k (Emulated)" },
+    { { 0x03, 0x44 }, 0x20, DESFIRE_4K, "Mifare DESFire 4k" },
+    { { 0x00, 0x44 }, 0x00, ULTRALIGHT, "Mifare UltraLight" },
 };
 
 
@@ -106,6 +107,9 @@ freefare_get_tags (nfc_device_t *device)
 	    case CLASSIC_4K:
 		tags[tag_count-1] = mifare_classic_tag_new ();
 		break;
+	    case DESFIRE_4K:
+		tags[tag_count-1] = mifare_desfire_tag_new ();
+		break;
 	    case ULTRALIGHT:
 		tags[tag_count-1] = mifare_ultralight_tag_new ();
 		break;
@@ -171,6 +175,9 @@ freefare_free_tag (MifareTag tag)
 	    case CLASSIC_1K:
 	    case CLASSIC_4K:
 		mifare_classic_tag_free (tag);
+		break;
+	    case DESFIRE_4K:
+		mifare_desfire_tag_free (tag);
 		break;
 	    case ULTRALIGHT:
 		mifare_ultralight_tag_free (tag);

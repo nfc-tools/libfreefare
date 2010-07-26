@@ -138,11 +138,10 @@ int
 main(int argc, char *argv[])
 {
     int ch;
-    int error = 0;
+    int error = EXIT_SUCCESS;
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
 
-    (void)argc, (void)argv;
     while ((ch = getopt (argc, argv, "fhy")) != -1) {
 	switch (ch) {
 	    case 'f':
@@ -163,14 +162,25 @@ main(int argc, char *argv[])
     argc -= optind;
     argv += optind;
 
-    device = nfc_connect (NULL);
-    if (!device)
-	errx (EXIT_FAILURE, "No NFC device found.");
+    nfc_device_desc_t devices[8];
+    size_t device_count;
+
+    nfc_list_devices (devices, 8, &device_count);
+    if (!device_count)
+        errx (EXIT_FAILURE, "No NFC device found.");
+
+    for (size_t d = 0; d < device_count; d++) {
+	device = nfc_connect (&(devices[d]));
+	if (!device) {
+	    warnx ("nfc_connect() failed.");
+	    error = EXIT_FAILURE;
+	    continue;
+	}
 
     tags = freefare_get_tags (device);
     if (!tags) {
 	nfc_disconnect (device);
-	errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
+	errx (EXIT_FAILURE, "Error listing Mifare Classic tag.");
     }
 
     for (int i = 0; (!error) && tags[i]; i++) {
@@ -233,6 +243,7 @@ main(int argc, char *argv[])
 
     freefare_free_tags (tags);
     nfc_disconnect (device);
+    }
 
     exit (error);
 }
