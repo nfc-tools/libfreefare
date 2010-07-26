@@ -39,7 +39,11 @@
 .Nm mifare_classic_get_trailer_block_permission ,
 .Nm mifare_classic_get_data_block_permission ,
 .Nm mifare_classic_format_sector ,
-.Nm mifare_classic_trailer_block
+.Nm mifare_classic_trailer_block ,
+.Nm mifare_classic_block_sector ,
+.Nm mifare_classic_sector_first_block ,
+.Nm mifare_classic_sector_block_count ,
+.Nm mifare_classic_sector_last_block
 .Nd Mifare Classic Manipulation Functions
 .\"  _     _ _
 .\" | |   (_) |__  _ __ __ _ _ __ _   _
@@ -87,6 +91,14 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_classic_format_sector "MifareTag tag" "const MifareClassicSectorNumber sector"
 .Ft void
 .Fn mifare_classic_trailer_block "MifareClassicBlock *block" "const MifareClassicKey key_a" "const uint8_t ab_0" "const uint8_t ab_1" "const uint8_t ab_2" "const uint8_t ab_tb" "const uint8_t gpb" "const MifareClassicKey key_b"
+.Ft MifareClassicSectorNumber
+.Fn mifare_classic_block_sector "MifareClassicBlockNumber block"
+.Ft MifareClassicBlockNumber
+.Fn mifare_classic_sector_first_block "MifareClassicSectorNumber sector"
+.Ft size_t
+.Fn mifare_classic_sector_block_count "MifareClassicSectorNumber sector"
+.Ft MifareClassicBlockNumber
+.Fn mifare_classic_sector_last_block "MifareClassicSectorNumber sector"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
@@ -195,6 +207,20 @@ access bits for the blocks of the sector
 .Vt ab_2 ;
 and a B key
 .Vt key_b .
+.Pp
+The
+.Fn mifare_classic_block_sector ,
+function returns the number of the sector holding
+.Va block .
+.Pp
+The
+.Fn mifare_classic_sector_first_block ,
+.Fn mifare_classic_sector_block_count ,
+.Fn mifare_classic_sector_last_block
+or the complement of the
+.Fn mifare_classic_block_sector
+function and return various block-level information about the provided
+.Va sector .
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
