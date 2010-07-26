@@ -28,14 +28,6 @@
 
 #define MIN(a,b) ((a < b) ? a: b)
 
-/*
- * This define is used to convert ( SectorNumber, BlockOffset ) couple in
- * BlockNumber
- * e.g. If you want 4th block in sector 0x01 (trailer block of 0x01):
- * BLOCK(0x01, 3) will return 0x07.
- */
-#define BLOCK( S, B ) ( ( S < 32 )?( ( S * 4 ) + B ):( ( 32 * 4 ) + ( ( ( S - 32 ) * 16 ) + B ) ) )
-
 MifareClassicKey default_keys[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
     { 0xd3,0xf7,0xd3,0xf7,0xd3,0xf7 },
@@ -102,16 +94,11 @@ fix_mad_trailer_block (MifareTag tag, MifareClassicSectorNumber sector, MifareCl
 {
     MifareClassicBlock block;
     mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
-    if (mifare_classic_authenticate (tag, BLOCK( sector, 0 ), key, key_type) < 0) {
-	perror ("mifare_classic_authenticate");
+    if (mifare_classic_authenticate (tag, mifare_classic_sector_last_block (sector), key, key_type) < 0) {
+	perror ("fix_mad_trailer_block mifare_classic_authenticate");
 	return -1;
     }
-    /*
-     * WARN: Using BLOCK( sector, 3 ) selects trailer block only for sector <
-     * 32.  In actual case, this is not a problem: we only call this function
-     * for sector 0x00 (0) and 0x10 (16).
-     */
-    if (mifare_classic_write (tag, BLOCK( sector, 3 ), block) < 0) {
+    if (mifare_classic_write (tag, mifare_classic_sector_last_block (sector), block) < 0) {
 	perror ("mifare_classic_write");
 	return -1;
     }
@@ -165,6 +152,7 @@ main(int argc, char *argv[])
 			error = 1;
 			goto error;
 		    }
+		    /* fallthrough */
 		case CLASSIC_1K:
 		    if (!search_sector_key (tags[i], 0x00, &key_00, &key_00_type)) {
 			error = 1;
@@ -193,6 +181,7 @@ main(int argc, char *argv[])
 			    memcpy (&key_10, &default_keyb, sizeof (MifareClassicKey));
 			    key_10_type = MFC_KEY_B;
 			}
+			/* fallthrough */
 		    case CLASSIC_1K:
 			if (key_00_type != MFC_KEY_B) {
 			    if( 0 != fix_mad_trailer_block( tags[i], 0x00, key_00, key_00_type )) {
