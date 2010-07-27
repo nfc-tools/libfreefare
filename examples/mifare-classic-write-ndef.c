@@ -239,7 +239,20 @@ main(int argc, char *argv[])
 		.application_code = 0xff,
 		.function_cluster_code = 0xff
 	    };
-	    for (size_t s = 40; s; s--) {
+
+	    MifareClassicSectorNumber max_s;
+	    switch (freefare_get_tag_type (tags[i])) {
+		case CLASSIC_1K:
+		    max_s = 16;
+		    break;
+		case CLASSIC_4K:
+		    max_s = 40;
+		    break;
+		default:
+		    /* Keep compiler quiet */
+		    break;
+	    }
+	    for (size_t s = max_s; s; s--) {
 		if (s == 0x10) continue;
 		if (!search_sector_key (tags[i], s, &(card_write_keys[s].key), &(card_write_keys[s].type))) {
 		    mad_set_aid (mad, s, reserved);
