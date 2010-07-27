@@ -47,9 +47,6 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-// TODO Remove this
-#include <libutil.h>
-
 #pragma pack (push)
 #pragma pack (1)
 struct mifare_desfire_raw_file_settings {
@@ -152,15 +149,12 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  * BUFFER_APPEND_LE (buffer, data, 3, 4);
  */
 
-// FIXME: remove debugging stuff
 #if _BYTE_ORDER != _LITTLE_ENDIAN
 #define BUFFER_APPEND_LE(buffer, data, data_size, field_size) \
     do { \
-	printf ("append (%p, %lu, %p, %d (%d))\n", buffer, __##buffer##_n, (void *)(&data), (int) data_size, (int) field_size); \
 	size_t __data_size = data_size; \
 	size_t __field_size = field_size; \
 	while (__field_size--, __data_size--) { \
-	    printf ("  buffer[%lu] <- %02x\n", __##buffer##_n, ((uint8_t *)&data)[__field_size]); \
 	    buffer[__##buffer##_n++] = ((uint8_t *)&data)[__field_size]; \
 	} \
     } while (0)
@@ -181,15 +175,12 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  * Transmit the message msg to the NFC tag and receive the response res.  The
  * response buffer's size is set according to the quantity od data received.
  */
-// FIXME: remove debugging stuff
 #define DESFIRE_TRANSCEIVE(tag, msg, res) \
     do { \
 	errno = 0; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
-        hexdump (msg, __##msg##_n, "---> ", 0); \
 	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) \
 	    return errno = EIO, -1; \
-        hexdump (res, __##res##_n, "<--- ", 0); \
 	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) \
 	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
     } while (0)
