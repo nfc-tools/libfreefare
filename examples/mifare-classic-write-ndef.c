@@ -277,14 +277,7 @@ main(int argc, char *argv[])
 		goto error;
 	    }
 
-	    if ((ssize_t) encoded_size != mad_application_write (tags[i], mad, aid, tlv_data, encoded_size, card_write_keys[sectors[0]].key, card_write_keys[sectors[0]].type)) {
-		perror ("mad_application_write");
-		error = EXIT_FAILURE;
-		goto error;
-	    }
-
 	    int s = 0;
-
 	    while (sectors[s]) {
 		MifareClassicBlockNumber block = mifare_classic_sector_last_block (sectors[s]);
 		MifareClassicBlock block_data;
@@ -300,6 +293,12 @@ main(int argc, char *argv[])
 		    goto error;
 		}
 		s++;
+	    }
+
+	    if ((ssize_t) encoded_size != mad_application_write (tags[i], mad, aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
+		perror ("mad_application_write");
+		error = EXIT_FAILURE;
+		goto error;
 	    }
 
 	    free (sectors);
