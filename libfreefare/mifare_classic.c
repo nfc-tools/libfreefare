@@ -69,7 +69,7 @@
 #define MC_TRANSFER       0xB0
 #define MC_DECREMENT      0xC0
 #define MC_INCREMENT      0xC1
-#define MC_STORE          0xC2
+#define MC_RESTORE        0xC2
 
 union mifare_classic_block {
     unsigned char data[16];
@@ -430,8 +430,7 @@ mifare_classic_restore (MifareTag tag, const MifareClassicBlockNumber block)
      * meaningless but required (thus left uninitialized).
      */
     unsigned char command[6];
-    /* XXX Should be MC_RESTORE according to the MIFARE documentation. */
-    command[0] = MC_STORE;
+    command[0] = MC_RESTORE;
     command[1] = block;
 
     // Send command
