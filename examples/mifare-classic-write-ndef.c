@@ -243,10 +243,10 @@ main(int argc, char *argv[])
 	    MifareClassicSectorNumber max_s;
 	    switch (freefare_get_tag_type (tags[i])) {
 		case CLASSIC_1K:
-		    max_s = 16;
+		    max_s = 15;
 		    break;
 		case CLASSIC_4K:
-		    max_s = 40;
+		    max_s = 39;
 		    break;
 		default:
 		    /* Keep compiler quiet */
