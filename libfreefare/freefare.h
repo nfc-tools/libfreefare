@@ -40,9 +40,7 @@ enum mifare_tag_type {
 //    PLUS_S4K,
 //    PLUS_X2K,
 //    PLUS_X4K,
-//    DESFIRE_2K,
-    DESFIRE_4K,
-//    DESFIRE_8K
+    DESFIRE
 };
 
 struct mifare_tag;

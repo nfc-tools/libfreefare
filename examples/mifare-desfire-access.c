@@ -61,12 +61,8 @@ main(int argc, char *argv[])
     }
 
     for (int i = 0; (!error) && tags[i]; i++) {
-        switch (freefare_get_tag_type (tags[i])) {
-            case DESFIRE_4K:
-                break;
-            default:
-                continue;
-        }
+        if (DESFIRE != freefare_get_tag_type (tags[i]))
+	    continue;
 
 	int res;
         char *tag_uid = freefare_get_tag_uid (tags[i]);

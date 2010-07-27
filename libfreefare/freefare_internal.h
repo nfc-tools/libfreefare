@@ -181,7 +181,7 @@ struct mifare_ultralight_tag {
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
 #define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != CLASSIC_1K) && (tag->tag_info->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != DESFIRE_4K) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != DESFIRE) return errno = ENODEV, -1; } while (0)
 #define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->tag_info->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
 
 /* 
