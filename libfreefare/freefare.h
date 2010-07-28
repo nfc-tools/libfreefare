@@ -141,6 +141,9 @@ extern const MadAid mad_reserved_aid;
 extern const MadAid mad_card_holder_aid;
 extern const MadAid mad_not_applicable_aid;
 
+/* NFC Forum AID */
+extern const MadAid mad_nfcforum_aid;
+
 Mad		 mad_new (const uint8_t version);
 Mad		 mad_read (MifareTag tag);
 int		 mad_write (MifareTag tag, Mad mad, const MifareClassicKey key_b_sector_00, const MifareClassicKey key_b_sector_10);

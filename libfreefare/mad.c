@@ -24,6 +24,10 @@
  * AN10787
  * MIFARE Application Directory (MAD)
  * Rev. 04 - 5 March 2009
+ *
+ * NXP Type MF1K/4K Tag Operation
+ * Storing NFC Forum data in Mifare Standard 1k/4k
+ * Rev. 1.1 - 21 August 2007
  */
 #include "config.h"
 
@@ -65,7 +69,7 @@ struct mad {
     uint8_t version;
 };
 
-/* Read key A */
+/* Public Key A value of MAD sector(s) */
 const MifareClassicKey mad_public_key_a = {
     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5
 };
@@ -95,6 +99,12 @@ const MadAid mad_card_holder_aid = {
 const MadAid mad_not_applicable_aid = {
     .function_cluster_code = 0x00,
     .application_code = 0x05,
+};
+
+/* NFC Forum AID */
+const MadAid mad_nfcforum_aid = {
+    .function_cluster_code = 0xe1,
+    .application_code = 0x03,
 };
 
 /*
