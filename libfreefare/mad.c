@@ -70,6 +70,33 @@ const MifareClassicKey mad_public_key_a = {
     0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5
 };
 
+/* AID - Administration codes: */
+/* if sector is free */
+const MadAid mad_free_aid = {
+    .function_cluster_code = 0x00,
+    .application_code = 0x00,
+};
+/* if sector is defect, e.g. access keys are destroyed or unknown */
+const MadAid mad_defect_aid = {
+    .function_cluster_code = 0x00,
+    .application_code = 0x01,
+};
+/* if sector is reserved */
+const MadAid mad_reserved_aid = {
+    .function_cluster_code = 0x00,
+    .application_code = 0x02,
+};
+/* if sector contains card holder information in ASCII format. */
+const MadAid mad_card_holder_aid = {
+    .function_cluster_code = 0x00,
+    .application_code = 0x04,
+};
+/* if sector not applicable (above memory size) */
+const MadAid mad_not_applicable_aid = {
+    .function_cluster_code = 0x00,
+    .application_code = 0x05,
+};
+
 /*
  * Allocate an empty new MAD.
  */
