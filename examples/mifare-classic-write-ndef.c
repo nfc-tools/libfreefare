@@ -45,9 +45,6 @@ struct mifare_classic_key_and_type {
     MifareClassicKeyType type;
 };
 
-const MifareClassicKey mad_key_a = {
-    0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5
-};
 const MifareClassicKey default_keyb = {
     0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7
 };
@@ -102,7 +99,7 @@ int
 fix_mad_trailer_block (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
 {
     MifareClassicBlock block;
-    mifare_classic_trailer_block (&block, mad_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
+    mifare_classic_trailer_block (&block, mad_public_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
     if (mifare_classic_authenticate (tag, mifare_classic_sector_last_block (sector), key, key_type) < 0) {
 	perror ("fix_mad_trailer_block mifare_classic_authenticate");
 	return -1;
@@ -235,11 +232,6 @@ main(int argc, char *argv[])
 		goto error;
 	    }
 
-	    MadAid reserved = {
-		.application_code = 0xff,
-		.function_cluster_code = 0xff
-	    };
-
 	    MifareClassicSectorNumber max_s;
 	    switch (freefare_get_tag_type (tags[i])) {
 		case CLASSIC_1K:
@@ -255,16 +247,11 @@ main(int argc, char *argv[])
 	    for (size_t s = max_s; s; s--) {
 		if (s == 0x10) continue;
 		if (!search_sector_key (tags[i], s, &(card_write_keys[s].key), &(card_write_keys[s].type))) {
-		    mad_set_aid (mad, s, reserved);
+		    mad_set_aid (mad, s, mad_defect_aid);
 		}
 	    }
 
-	    MadAid aid = {
-		.function_cluster_code = 0xe1,
-		.application_code = 0x03
-	    };
-
-	    MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, aid, encoded_size);
+	    MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, mad_nfcforum_aid, encoded_size);
 	    if (!sectors) {
 		perror ("mifare_application_alloc");
 		error = EXIT_FAILURE;
@@ -281,7 +268,7 @@ main(int argc, char *argv[])
 	    while (sectors[s]) {
 		MifareClassicBlockNumber block = mifare_classic_sector_last_block (sectors[s]);
 		MifareClassicBlock block_data;
-		mifare_classic_trailer_block (&block_data, default_keyb, 0x0, 0x0, 0x0, 0x6, 0x40, default_keyb);
+		mifare_classic_trailer_block (&block_data, mifare_classic_nfcforum_public_key_a, 0x0, 0x0, 0x0, 0x6, 0x40, default_keyb);
 		if (mifare_classic_authenticate (tags[i], block, card_write_keys[sectors[s]].key, card_write_keys[sectors[s]].type) < 0) {
 		    perror ("mifare_classic_authenticate");
 		    error = EXIT_FAILURE;
@@ -295,7 +282,7 @@ main(int argc, char *argv[])
 		s++;
 	    }
 
-	    if ((ssize_t) encoded_size != mad_application_write (tags[i], mad, aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
+	    if ((ssize_t) encoded_size != mad_application_write (tags[i], mad, mad_nfcforum_aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
 		perror ("mad_application_write");
 		error = EXIT_FAILURE;
 		goto error;
