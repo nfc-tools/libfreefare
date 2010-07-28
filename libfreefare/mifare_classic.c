@@ -32,6 +32,10 @@
  * Making the Best of Mifare Classic
  * Wouter Teepe (Radboud University Nijmegen)
  * October 6, 2008
+ *
+ * Mifare Std as NFC Forum Enabled Tag
+ * Extensions for Mifare standard 1k/4k as NFC Forum Enable Tag
+ * Rev. 1.1 — 21 August 2007
  */
 
 #include "config.h"
@@ -70,6 +74,11 @@
 #define MC_DECREMENT      0xC0
 #define MC_INCREMENT      0xC1
 #define MC_RESTORE        0xC2
+
+/* Public Key A value of NFC Forum sectors */
+const MifareClassicKey mifare_classic_nfcforum_public_key_a = {
+    0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7
+};
 
 union mifare_classic_block {
     unsigned char data[16];
