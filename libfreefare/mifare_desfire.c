@@ -103,17 +103,40 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  */
 
 /*
+ * Since we will have to deal with a 1-byte headers for all transmissions,
+ * redefine the BUFFER_INIT macro.
+ */
+#undef BUFFER_INIT
+#define BUFFER_INIT(buffer_name, size) \
+    uint8_t __##buffer_name[size+1] = { 0x02 }; \
+    uint8_t *buffer_name = &(__##buffer_name[1]); \
+    size_t __##buffer_name##_n = 0
+
+/*
  * Transmit the message msg to the NFC tag and receive the response res.  The
- * response buffer's size is set according to the quantity od data received.
+ * response buffer's size is set according to the quantity of data received.
+ *
+ * This macro takes care of handling wait-time extension (WTX) requests defined
+ * by ISO-14443-4.
  */
 #define DESFIRE_TRANSCEIVE(tag, msg, res) \
     do { \
 	errno = 0; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
-	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) \
+	DEBUG_XFER (__##msg, __##msg##_n+1, "===> "); \
+	if (!(nfc_initiator_transceive_bytes (tag->device, __##msg, __##msg##_n+1, __##res, &__##res##_n))) \
 	    return errno = EIO, -1; \
-	DEBUG_XFER (res, __##res##_n, "<=== "); \
+	DEBUG_XFER (__##res, __##res##_n, "<=== "); \
+	__##res##_n -= 1; \
+	while (__##res[0] == 0xf2) { \
+	    uint8_t ack[2] = { 0xf2, 0x00 }; \
+	    ack[1] |= __##res[1] & 0x3f; \
+	    __##res##_n = 0; \
+	    DEBUG_XFER (ack, 2, "===> "); \
+	    nfc_initiator_transceive_bytes (tag->device, ack, 2, __##res, &__##res##_n); \
+	    DEBUG_XFER (__##res, __##res##_n, "<=== "); \
+	    __##res##_n -= 1; \
+	} \
 	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) \
 	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
     } while (0)
