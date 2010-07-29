@@ -15,6 +15,16 @@ libfreefare_la_SOURCES = freefare.c \
 			 desfire_error.c \
 			 mifare_application.c \
 			 tlv.c
+libfreefare_la_LIBADD =
+
+if WITH_DEBUG
+if HAS_LIBUTIL
+    libfreefare_la_LIBADD += -lutil
+else # HAS_LIBUTIL
+    libfreefare_la_LIBADD += $(top_builddir)/contrib/libutil/libutil.la
+    AM_CFLAGS += -I$(top_builddir)/contrib/libutil/ -DWITH_DEBUG
+endif # !HAS_LIBUTIL
+endif # WITH_DEBUG
 
 libfreefare_la_HEADERS = freefare.h
 libfreefare_ladir = $(includedir)

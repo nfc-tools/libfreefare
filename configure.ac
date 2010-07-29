@@ -13,6 +13,14 @@ AM_INIT_AUTOMAKE
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
+# Debug support (default:no)
+AC_ARG_ENABLE([debug],AS_HELP_STRING([--enable-debug],[Enable debug output]),[enable_debug=$enableval],[enable_debug="no"])
+if test x"$enable_debug" = xyes; then
+    AC_CHECK_LIB([util], [hexdump], [has_libutil=yes], [has_libutil=no])
+fi
+AM_CONDITIONAL(WITH_DEBUG, [test x"$enable_debug" = xyes])
+AM_CONDITIONAL(HAS_LIBUTIL, [test x"$has_libutil" = xyes])
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_INLINE
 AC_HEADER_STDBOOL
@@ -69,6 +77,8 @@ if test x$ac_cv_enable_coverage = xyes; then
 fi
 
 AC_OUTPUT([Makefile
+	   contrib/Makefile
+	   contrib/libutil/Makefile
 	   examples/Makefile
 	   libfreefare/Makefile
 	   libfreefare.pc

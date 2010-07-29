@@ -200,4 +200,10 @@ struct mifare_ultralight_tag {
 #define DB_AB(ab) ((ab == C_DEFAULT) ? C_000 : ab)
 #define TB_AB(ab) ((ab == C_DEFAULT) ? C_100 : ab)
 
+#ifdef WITH_DEBUG
+#define DEBUG_XFER(data, nbytes, hint) do { hexdump (data, nbytes, hint, 0); } while (0)
+#else
+#define DEBUG_XFER(data, nbytes, hint) do {} while (0)
+#endif
+
 #endif /* !__FREEFARE_INTERNAL_H__ */

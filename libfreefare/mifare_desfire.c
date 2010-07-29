@@ -44,6 +44,10 @@
 #include <string.h>
 #include <strings.h>
 
+#ifdef WITH_DEBUG
+#  include "libutil.h"
+#endif
+
 #include <freefare.h>
 #include "freefare_internal.h"
 
@@ -179,8 +183,10 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
     do { \
 	errno = 0; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
+	DEBUG_XFER (msg, __##msg##_n, "===> "); \
 	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) \
 	    return errno = EIO, -1; \
+	DEBUG_XFER (res, __##res##_n, "<=== "); \
 	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) \
 	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
     } while (0)
