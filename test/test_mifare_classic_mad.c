@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
- * $Id: mifare_ultralight_fixture.c 264 2010-04-26 09:11:28Z romain.tartiere $
+ * $Id$
  */
 
 #include <cutter.h>
