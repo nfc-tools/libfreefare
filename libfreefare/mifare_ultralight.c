@@ -30,16 +30,32 @@
 
 #include "config.h"
 
+#if defined(HAVE_SYS_TYPES_H)
+#  include <sys/types.h>
+#endif
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <nfc/nfc.h>
+#ifdef WITH_DEBUG
+#  include <libutil.h>
+#endif
 
 #include <freefare.h>
 #include "freefare_internal.h"
 
 #define ASSERT_VALID_PAGE(page) do { if (page >= MIFARE_ULTRALIGHT_PAGE_COUNT) return errno = EINVAL, -1; } while (0)
+
+#define ULTRALIGHT_TRANSCEIVE(tag, msg, res) \
+    do { \
+	errno = 0; \
+	DEBUG_XFER (msg, __##msg##_n, "===> "); \
+	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	    return errno = EIO, -1; \
+	} \
+	DEBUG_XFER (res, __##res##_n, "<=== "); \
+    } while (0)
 
 
 /*
@@ -132,15 +148,13 @@ mifare_ultralight_read (MifareTag tag, MifareUltralightPageNumber page, MifareUl
     ASSERT_VALID_PAGE (page);
 
     if (!MIFARE_ULTRALIGHT(tag)->cached_pages[page]) {
-	uint8_t cmd[2];
-	cmd[0] = 0x30;
-	cmd[1] = page;
+	BUFFER_INIT (cmd, 2);
+	BUFFER_ALIAS (res, MIFARE_ULTRALIGHT(tag)->cache[page]);
 
-	size_t n;
-	if (!(nfc_initiator_transceive_dep_bytes (tag->device, cmd, sizeof (cmd), MIFARE_ULTRALIGHT(tag)->cache[page], &n))) {
-	    errno = EIO;
-	    return -1;
-	}
+	BUFFER_APPEND (cmd, 0x30);
+	BUFFER_APPEND (cmd, page);
+
+	ULTRALIGHT_TRANSCEIVE (tag, cmd, res);
 
 	/* Handle wrapped pages */
 	for (int i = MIFARE_ULTRALIGHT_PAGE_COUNT; i <= page + 3; i++) {

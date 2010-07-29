@@ -61,7 +61,9 @@
 #include <string.h>
 #include <strings.h>
 
-#include <nfc/nfc.h>
+#ifdef WITH_DEBUG
+#  include <libutil.h>
+#endif
 
 #include <freefare.h>
 #include "freefare_internal.h"
@@ -74,6 +76,20 @@
 #define MC_DECREMENT      0xC0
 #define MC_INCREMENT      0xC1
 #define MC_RESTORE        0xC2
+
+#define CLASSIC_TRANSCEIVE(tag, msg, res) CLASSIC_TRANSCEIVE_EX(tag, msg, res, 0)
+
+#define CLASSIC_TRANSCEIVE_EX(tag, msg, res, disconnect) \
+    do { \
+	errno = 0; \
+	DEBUG_XFER (msg, __##msg##_n, "===> "); \
+	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	    if (disconnect) \
+		tag->active = false; \
+	    return errno = EIO, -1; \
+	} \
+	DEBUG_XFER (res, __##res##_n, "<=== "); \
+    } while (0)
 
 /* Public Key A value of NFC Forum sectors */
 const MifareClassicKey mifare_classic_nfcforum_public_key_a = {
@@ -249,19 +265,19 @@ mifare_classic_authenticate (MifareTag tag, const MifareClassicBlockNumber block
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    unsigned char command[12];
-    command[0] = (key_type == MFC_KEY_A) ? MC_AUTH_A : MC_AUTH_B;
-    command[1] = block;
-    memcpy (&(command[2]), key, 6);
-    memcpy (&(command[8]), tag->info.abtUid, 4);
+    BUFFER_INIT (cmd, 12);
+    BUFFER_INIT (res, 1);
 
-    // Send command
-    size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
-	tag->active = false; /* Tag is no more active if authentication failed. */
-	errno = EIO;
-	return -1;
-    }
+    if (key_type == MFC_KEY_A)
+	BUFFER_APPEND (cmd, MC_AUTH_A);
+    else
+	BUFFER_APPEND (cmd, MC_AUTH_B);
+
+    BUFFER_APPEND(cmd, block);
+    BUFFER_APPEND_BYTES (cmd, key, 6);
+    BUFFER_APPEND_BYTES (cmd, tag->info.abtUid, 4);
+
+    CLASSIC_TRANSCEIVE_EX (tag, cmd, res, 1);
 
     MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number = -1;
     MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits = 0x00;
@@ -280,16 +296,13 @@ mifare_classic_read (MifareTag tag, const MifareClassicBlockNumber block, Mifare
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    unsigned char command[2];
-    command[0] = MC_READ;
-    command[1] = block;
+    BUFFER_INIT (cmd, 2);
+    BUFFER_ALIAS (res, data);
 
-    // Send command
-    size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), *data, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, MC_READ);
+    BUFFER_APPEND (cmd, block);
+
+    CLASSIC_TRANSCEIVE (tag, cmd, res);
 
     return 0;
 }
@@ -354,17 +367,14 @@ mifare_classic_write (MifareTag tag, const MifareClassicBlockNumber block, const
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    unsigned char command[2 + sizeof (MifareClassicBlock)];
-    command[0] = MC_WRITE;
-    command[1] = block;
-    memcpy (&(command[2]), data, sizeof (MifareClassicBlock));
+    BUFFER_INIT (cmd, 2 + sizeof (MifareClassicBlock));
+    BUFFER_INIT (res, 1);
 
-    // Send command
-    size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, MC_WRITE);
+    BUFFER_APPEND (cmd, block);
+    BUFFER_APPEND_BYTES (cmd, data, sizeof (MifareClassicBlock));
+
+    CLASSIC_TRANSCEIVE (tag, cmd, res);
 
     // No result.  The MIFARE tag just ACKed.
     return 0;
@@ -380,18 +390,14 @@ mifare_classic_increment (MifareTag tag, const MifareClassicBlockNumber block, c
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    unsigned char command[6];
-    command[0] = MC_INCREMENT;
-    command[1] = block;
-    uint32_t le_amount = htole32 (amount);
-    memcpy(&(command[2]), &le_amount, sizeof (le_amount));
+    BUFFER_INIT (cmd, 6);
+    BUFFER_INIT (res, 1);
 
-    // Send command
-    size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, MC_INCREMENT);
+    BUFFER_APPEND (cmd, block);
+    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (amount));
+
+    CLASSIC_TRANSCEIVE (tag, cmd, res);
 
     // No result.  The MIFARE tag just ACKed.
     return 0;
@@ -407,18 +413,14 @@ mifare_classic_decrement (MifareTag tag, const MifareClassicBlockNumber block, c
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    unsigned char command[6];
-    command[0] = MC_DECREMENT;
-    command[1] = block;
-    uint32_t le_amount = htole32 (amount);
-    memcpy(&(command[2]), &le_amount, sizeof (le_amount));
+    BUFFER_INIT (cmd, 6);
+    BUFFER_INIT (res, 1);
 
-    // Send command
-    size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, MC_DECREMENT);
+    BUFFER_APPEND (cmd, block);
+    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (amount));
+
+    CLASSIC_TRANSCEIVE (tag, cmd, res);
 
     // No result.  The MIFARE tag just ACKed.
     return 0;
@@ -436,18 +438,19 @@ mifare_classic_restore (MifareTag tag, const MifareClassicBlockNumber block)
     /*
      * Same length as the increment and decrement commands but only the first
      * two bytes are actually used.  The 4 bytes after the block number are
-     * meaningless but required (thus left uninitialized).
+     * meaningless but required (NULL-filled).
      */
-    unsigned char command[6];
-    command[0] = MC_RESTORE;
-    command[1] = block;
+    BUFFER_INIT (cmd, 6);
+    BUFFER_INIT (res, 1);
 
-    // Send command
-    size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), NULL, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, MC_RESTORE);
+    BUFFER_APPEND (cmd, block);
+    BUFFER_APPEND (cmd, 0x00);
+    BUFFER_APPEND (cmd, 0x00);
+    BUFFER_APPEND (cmd, 0x00);
+    BUFFER_APPEND (cmd, 0x00);
+
+    CLASSIC_TRANSCEIVE (tag, cmd, res);
 
     // No result.  The MIFARE tag just ACKed.
     return 0;
@@ -462,17 +465,13 @@ mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber block)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    unsigned char command[2];
-    command[0] = MC_TRANSFER;
-    command[1] = block;
+    BUFFER_INIT (cmd, 2);
+    BUFFER_INIT (res, 1);
 
-    // Send command
-    size_t n;
-    unsigned char buffer[1];
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, command, sizeof (command), buffer, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, MC_TRANSFER);
+    BUFFER_APPEND (cmd, block);
+
+    CLASSIC_TRANSCEIVE (tag, cmd, res);
 
     // FIXME: The receive command returns data. Should be checked.
     return 0;
