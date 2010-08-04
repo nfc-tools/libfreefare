@@ -24,11 +24,11 @@
 #include "freefare_internal.h"
 
 struct supported_tag supported_tags[] = {
-    { { 0x00, 0x04 }, 0x08, CLASSIC_1K, "Mifare Classic 1k" },
-    { { 0x00, 0x02 }, 0x18, CLASSIC_4K, "Mifare Classic 4k" },
-    { { 0x00, 0x02 }, 0x38, CLASSIC_4K, "Mifare Classic 4k (Emulated)" },
-    { { 0x03, 0x44 }, 0x20, DESFIRE,    "Mifare DESFire 4k" },
-    { { 0x00, 0x44 }, 0x00, ULTRALIGHT, "Mifare UltraLight" },
+    { 0x08, CLASSIC_1K, "Mifare Classic 1k" },
+    { 0x18, CLASSIC_4K, "Mifare Classic 4k" },
+    { 0x38, CLASSIC_4K, "Mifare Classic 4k (Emulated)" },
+    { 0x20, DESFIRE,    "Mifare DESFire 4k" },
+    { 0x00, ULTRALIGHT, "Mifare UltraLight" },
 };
 
 
@@ -79,9 +79,7 @@ freefare_get_tags (nfc_device_t *device)
 	struct supported_tag *tag_info;
 
 	for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	    if ((target_info.nai.abtAtqa[0] == supported_tags[i].ATQA[0]) &&
-		(target_info.nai.abtAtqa[1] == supported_tags[i].ATQA[1]) &&
-		(target_info.nai.btSak == supported_tags[i].SAK)) {
+	    if (target_info.nai.btSak == supported_tags[i].SAK) {
 
 		tag_info = &(supported_tags[i]);
 		found = true;
