@@ -90,7 +90,7 @@ freefare_get_tags (nfc_device_t *device)
 	}
 
 	if (!found)
-	    continue;
+	    goto deselect;
 
 	tag_count++;
 
@@ -128,6 +128,7 @@ freefare_get_tags (nfc_device_t *device)
 	(tags[tag_count-1])->tag_info = tag_info;
 	tags[tag_count] = NULL;
 
+deselect:
 	nfc_initiator_deselect_target (device);
     }
 
