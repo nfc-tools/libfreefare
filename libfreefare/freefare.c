@@ -18,17 +18,18 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include <freefare.h>
 
 #include "freefare_internal.h"
 
 struct supported_tag supported_tags[] = {
-    { 0x08, CLASSIC_1K, "Mifare Classic 1k" },
-    { 0x18, CLASSIC_4K, "Mifare Classic 4k" },
-    { 0x38, CLASSIC_4K, "Mifare Classic 4k (Emulated)" },
-    { 0x20, DESFIRE,    "Mifare DESFire 4k" },
-    { 0x00, ULTRALIGHT, "Mifare UltraLight" },
+    { CLASSIC_1K, "Mifare Classic 1k",            0x08, 0, { 0x00 } },
+    { CLASSIC_4K, "Mifare Classic 4k",            0x18, 0, { 0x00 } },
+    { CLASSIC_4K, "Mifare Classic 4k (Emulated)", 0x38, 0, { 0x00 } },
+    { DESFIRE,    "Mifare DESFire 4k",            0x20, 5, { 0x75, 0x77, 0x81, 0x02, 0x80 }},
+    { ULTRALIGHT, "Mifare UltraLight",            0x00, 0, { 0x00 } },
 };
 
 
@@ -79,7 +80,9 @@ freefare_get_tags (nfc_device_t *device)
 	struct supported_tag *tag_info;
 
 	for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	    if (target_info.nai.btSak == supported_tags[i].SAK) {
+	    if ((target_info.nai.btSak == supported_tags[i].SAK) &&
+		(target_info.nai.szAtsLen == supported_tags[i].ATS_length) &&
+		(0 == memcmp (target_info.nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_length))) {
 
 		tag_info = &(supported_tags[i]);
 		found = true;

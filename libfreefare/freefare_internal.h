@@ -99,9 +99,11 @@ void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 #define MIFARE_ULTRALIGHT_PAGE_COUNT 16
 
 struct supported_tag {
-    uint8_t SAK;
     enum mifare_tag_type type;
     const char *friendly_name;
+    uint8_t SAK;
+    uint8_t ATS_length;
+    uint8_t ATS[5];
 };
 
 /*
