@@ -24,6 +24,8 @@
 
 #include "freefare_internal.h"
 
+#define NXP_MANUFACTURER_CODE 0x04
+
 struct supported_tag supported_tags[] = {
     { CLASSIC_1K, "Mifare Classic 1k",            0x08, 0, { 0x00 } },
     { CLASSIC_4K, "Mifare Classic 4k",            0x18, 0, { 0x00 } },
@@ -80,7 +82,8 @@ freefare_get_tags (nfc_device_t *device)
 	struct supported_tag *tag_info;
 
 	for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	    if ((target_info.nai.btSak == supported_tags[i].SAK) &&
+	    if (((target_info.nai.szUidLen == 4) || (target_info.nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
+		(target_info.nai.btSak == supported_tags[i].SAK) &&
 		(target_info.nai.szAtsLen == supported_tags[i].ATS_length) &&
 		(0 == memcmp (target_info.nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_length))) {
 
