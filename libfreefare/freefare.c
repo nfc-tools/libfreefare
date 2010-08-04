@@ -28,7 +28,7 @@ struct supported_tag supported_tags[] = {
     { CLASSIC_1K, "Mifare Classic 1k",            0x08, 0, { 0x00 } },
     { CLASSIC_4K, "Mifare Classic 4k",            0x18, 0, { 0x00 } },
     { CLASSIC_4K, "Mifare Classic 4k (Emulated)", 0x38, 0, { 0x00 } },
-    { DESFIRE,    "Mifare DESFire 4k",            0x20, 5, { 0x75, 0x77, 0x81, 0x02, 0x80 }},
+    { DESFIRE,    "Mifare DESFire",               0x20, 5, { 0x75, 0x77, 0x81, 0x02, 0x80 }},
     { ULTRALIGHT, "Mifare UltraLight",            0x00, 0, { 0x00 } },
 };
 
