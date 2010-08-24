@@ -36,6 +36,61 @@ struct supported_tag supported_tags[] = {
     { ULTRALIGHT, "Mifare UltraLight",            0x00, 0, { 0x00 } },
 };
 
+/*
+ * Automagically allocate a MifareTag given a device and target info.
+ */
+static MifareTag
+freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
+{
+    bool found = false;
+    struct supported_tag *tag_info;
+    MifareTag tag;
+
+    /* Ensure the target is supported */
+    for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
+	if (((nai.szUidLen == 4) || (nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
+		(nai.btSak == supported_tags[i].SAK) &&
+		(nai.szAtsLen == supported_tags[i].ATS_length) &&
+		(0 == memcmp (nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_length))) {
+
+	    tag_info = &(supported_tags[i]);
+	    found = true;
+	    break;
+	}
+    }
+
+    if (!found)
+	return NULL;
+
+    /* Allocate memory for the found MIFARE target */
+    switch (tag_info->type) {
+	case CLASSIC_1K:
+	case CLASSIC_4K:
+	    tag = mifare_classic_tag_new ();
+	    break;
+	case DESFIRE:
+	    tag = mifare_desfire_tag_new ();
+	    break;
+	case ULTRALIGHT:
+	    tag = mifare_ultralight_tag_new ();
+	    break;
+    }
+
+    if (!tag)
+	return NULL;
+
+    /*
+     * Initialize common fields
+     * (Target specific fields are initialized in mifare_*_tag_new())
+     */
+    tag->device = device;
+    tag->info = nai;
+    tag->active = 0;
+    tag->tag_info = tag_info;
+
+    return tag;
+}
+
 
 /*
  * MIFARE card common functions
@@ -79,62 +134,17 @@ freefare_get_tags (nfc_device_t *device)
     tags[0] = NULL;
 
     for (size_t c = 0; c < candidates_count; c++) {
-	bool found = false;
-	struct supported_tag *tag_info;
-
-	for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	    if (((candidates[c].nai.szUidLen == 4) || (candidates[c].nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
-		(candidates[c].nai.btSak == supported_tags[i].SAK) &&
-		(candidates[c].nai.szAtsLen == supported_tags[i].ATS_length) &&
-		(0 == memcmp (candidates[c].nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_length))) {
-
-		tag_info = &(supported_tags[i]);
-		found = true;
-		break;
-	    }
+	MifareTag t;
+	if ((t = freefare_tag_new(device, candidates[c].nai))) {
+	    /* (Re)Allocate memory for the found MIFARE targets array */
+	    MifareTag *p = realloc (tags, (tag_count + 2) * sizeof (MifareTag));
+	    if (p)
+		tags = p;
+	    else
+		return tags; // FAIL! Return what has been found so far.
+	    tags[tag_count++] = t;
+	    tags[tag_count] = NULL;
 	}
-
-	if (!found)
-	    goto deselect;
-
-	tag_count++;
-
-	/* (Re)Allocate memory for the found MIFARE targets array */
-	MifareTag *p = realloc (tags, (tag_count + 1) * sizeof (MifareTag));
-	if (p)
-	    tags = p;
-	else
-	    return tags; // FAIL! Return what has been found so far.
-
-	/* Allocate memory for the found MIFARE target */
-	switch (tag_info->type) {
-	    case CLASSIC_1K:
-	    case CLASSIC_4K:
-		tags[tag_count-1] = mifare_classic_tag_new ();
-		break;
-	    case DESFIRE:
-		tags[tag_count-1] = mifare_desfire_tag_new ();
-		break;
-	    case ULTRALIGHT:
-		tags[tag_count-1] = mifare_ultralight_tag_new ();
-		break;
-	}
-
-	if (!tags[tag_count-1])
-	    return tags; // FAIL! Return what has been found before.
-
-	/*
-	 * Initialize common fields
-	 * (Target specific fields are initialized in mifare_*_tag_new())
-	 */
-	(tags[tag_count-1])->device = device;
-	(tags[tag_count-1])->info = candidates[c].nai;
-	(tags[tag_count-1])->active = 0;
-	(tags[tag_count-1])->tag_info = tag_info;
-	tags[tag_count] = NULL;
-
-deselect:
-	nfc_initiator_deselect_target (device);
     }
 
     return tags;
