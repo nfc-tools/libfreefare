@@ -24,6 +24,8 @@
 
 #include "freefare_internal.h"
 
+#define MAX_CANDIDATES 16
+
 #define NXP_MANUFACTURER_CODE 0x04
 
 struct supported_tag supported_tags[] = {
@@ -59,9 +61,6 @@ freefare_get_tags (nfc_device_t *device)
     // Drop the field for a while
     nfc_configure(device,NDO_ACTIVATE_FIELD,false);
 
-    // Let the reader only try once to find a tag
-    nfc_configure(device,NDO_INFINITE_SELECT,false);
-
     // Configure the CRC and Parity settings
     nfc_configure(device,NDO_HANDLE_CRC,true);
     nfc_configure(device,NDO_HANDLE_PARITY,true);
@@ -70,22 +69,24 @@ freefare_get_tags (nfc_device_t *device)
     nfc_configure(device,NDO_ACTIVATE_FIELD,true);
 
     // Poll for a ISO14443A (MIFARE) tag
-    nfc_target_info_t target_info;
+    nfc_target_info_t candidates[MAX_CANDIDATES];
+    size_t candidates_count;
+    if (!nfc_initiator_list_passive_targets(device, NM_ISO14443A_106, candidates, MAX_CANDIDATES, &candidates_count))
+	return NULL;
 
     tags = malloc(sizeof (void *));
     if(!tags) return NULL;
     tags[0] = NULL;
 
-    while (nfc_initiator_select_passive_target(device,NM_ISO14443A_106,NULL,0,&target_info)) {
-
+    for (size_t c = 0; c < candidates_count; c++) {
 	bool found = false;
 	struct supported_tag *tag_info;
 
 	for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	    if (((target_info.nai.szUidLen == 4) || (target_info.nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
-		(target_info.nai.btSak == supported_tags[i].SAK) &&
-		(target_info.nai.szAtsLen == supported_tags[i].ATS_length) &&
-		(0 == memcmp (target_info.nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_length))) {
+	    if (((candidates[c].nai.szUidLen == 4) || (candidates[c].nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
+		(candidates[c].nai.btSak == supported_tags[i].SAK) &&
+		(candidates[c].nai.szAtsLen == supported_tags[i].ATS_length) &&
+		(0 == memcmp (candidates[c].nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_length))) {
 
 		tag_info = &(supported_tags[i]);
 		found = true;
@@ -127,7 +128,7 @@ freefare_get_tags (nfc_device_t *device)
 	 * (Target specific fields are initialized in mifare_*_tag_new())
 	 */
 	(tags[tag_count-1])->device = device;
-	(tags[tag_count-1])->info = target_info.nai;
+	(tags[tag_count-1])->info = candidates[c].nai;
 	(tags[tag_count-1])->active = 0;
 	(tags[tag_count-1])->tag_info = tag_info;
 	tags[tag_count] = NULL;
