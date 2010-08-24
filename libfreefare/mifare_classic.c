@@ -84,12 +84,14 @@
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
 	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	    nfc_perror (tag->device, __FUNCTION__); \
 	    if (disconnect) \
 		tag->active = false; \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
     } while (0)
+
 
 /* Public Key A value of NFC Forum sectors */
 const MifareClassicKey mifare_classic_nfcforum_public_key_a = {

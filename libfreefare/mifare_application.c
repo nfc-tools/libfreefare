@@ -25,9 +25,12 @@
  */
 #include "config.h"
 
+#include <errno.h>
+#include <string.h>
 #include <stdlib.h>
 
 #include <freefare.h>
+#include "freefare_internal.h"
 
 #define FIRST_SECTOR 1
 
@@ -203,3 +206,100 @@ mifare_application_find (Mad mad, MadAid aid)
     return res;
 }
 
+ssize_t
+mifare_application_read (MifareTag tag, Mad mad, const MadAid aid, void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type)
+{
+    ssize_t res = 0;
+
+    MifareClassicSectorNumber *sectors = mifare_application_find (mad, aid);
+    MifareClassicSectorNumber *s = sectors;
+
+    if (!sectors)
+	return errno = EBADF, -1;
+
+    while (*s && nbytes && (res >= 0)) {
+	MifareClassicBlockNumber first_block = mifare_classic_sector_first_block (*s);
+	MifareClassicBlockNumber last_block  = mifare_classic_sector_last_block (*s);
+
+	MifareClassicBlockNumber b = first_block;
+	MifareClassicBlock block;
+
+	if (mifare_classic_authenticate (tag, first_block, key, key_type) < 0) {
+	    res = -1;
+	    break;
+	}
+
+	while ((b < last_block) && nbytes) {
+	    size_t n = MIN (nbytes, 16);
+
+	    if (mifare_classic_read (tag, b, &block) < 0) {
+		res = -1;
+		break;
+	    }
+	    memcpy ((uint8_t *)buf + res, &block, n);
+
+	    nbytes -= n;
+	    res += n;
+
+	    b++;
+	}
+
+	s++;
+    }
+
+    free (sectors);
+    return res;
+}
+
+ssize_t
+mifare_application_write (MifareTag tag, Mad mad, const MadAid aid, const void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type)
+{
+    ssize_t res = 0;
+
+    MifareClassicSectorNumber *sectors = mifare_application_find (mad, aid);
+    MifareClassicSectorNumber *s = sectors;
+
+    if (!sectors)
+	return errno = EBADF, -1;
+
+    while (*s && nbytes && (res >= 0)) {
+	MifareClassicBlockNumber first_block = mifare_classic_sector_first_block (*s);
+	MifareClassicBlockNumber last_block  = mifare_classic_sector_last_block (*s);
+
+	MifareClassicBlockNumber b = first_block;
+	MifareClassicBlock block;
+
+	if (mifare_classic_authenticate (tag, first_block, key, key_type) < 0) {
+	    res = -1;
+	    break;
+	}
+
+	while ((b < last_block) && nbytes) {
+	    size_t n = MIN (nbytes, 16);
+	    // Avoid overwriting existing data with uninitialized memory.
+	    if (n < 16) {
+		if (mifare_classic_read (tag, b, &block) < 0) {
+		    res = -1;
+		    break;
+		}
+	    }
+
+	    memcpy (&block, (uint8_t *)buf + res, n);
+	    if (mifare_classic_write (tag, b, block) < 0) {
+		res = -1;
+		break;
+	    }
+
+	    nbytes -= n;
+	    res += n;
+
+	    b++;
+	}
+
+	s++;
+    }
+
+    free (sectors);
+    return res;
+
+}

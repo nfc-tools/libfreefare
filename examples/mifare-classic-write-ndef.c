@@ -282,8 +282,8 @@ main(int argc, char *argv[])
 		s++;
 	    }
 
-	    if ((ssize_t) encoded_size != mad_application_write (tags[i], mad, mad_nfcforum_aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
-		perror ("mad_application_write");
+	    if ((ssize_t) encoded_size != mifare_application_write (tags[i], mad, mad_nfcforum_aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
+		perror ("mifare_application_write");
 		error = EXIT_FAILURE;
 		goto error;
 	    }

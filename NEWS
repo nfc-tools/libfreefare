@@ -10,4 +10,4 @@ Changes between 0.1.0 and x.x.x  [xx XXX xxxx]
   *) New API functions mifare_classic_block_sector(),
      mifare_classic_sector_first_block(), mifare_classic_sector_block_count()
      and mifare_classic_sector_last_block().
-  *) New API functions mad_application_read(), mad_application_write().
+  *) New API functions mifare_application_read(), mifare_application_write().

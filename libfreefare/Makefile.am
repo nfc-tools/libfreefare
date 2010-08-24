@@ -46,8 +46,6 @@ linkedman = \
 	    freefare.3 freefare_get_tag_type.3 \
 	    freefare.3 freefare_get_tag_uid.3 \
 	    freefare.3 freefare_get_tags.3 \
-	    mad.3 mad_application_read.3 \
-	    mad.3 mad_application_write.3 \
 	    mad.3 mad_free.3 \
 	    mad.3 mad_get_aid.3 \
 	    mad.3 mad_get_card_publisher_sector.3 \
@@ -61,6 +59,8 @@ linkedman = \
 	    mifare_application.3 mifare_application_alloc.3 \
 	    mifare_application.3 mifare_application_find.3 \
 	    mifare_application.3 mifare_application_free.3 \
+	    mifare_application.3 mifare_application_read.3 \
+	    mifare_application.3 mifare_application_write.3 \
 	    mifare_classic.3 mifare_classic_authenticate.3 \
 	    mifare_classic.3 mifare_classic_connect.3 \
 	    mifare_classic.3 mifare_classic_decrement.3 \
