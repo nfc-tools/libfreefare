@@ -217,15 +217,16 @@ main(int argc, char *argv[])
 
 	    /*
 	     * At his point, we should have collected all information needed to
-	     * succeed.  However, some sectors may be unaccessible if the card
-	     * is not blank, so mark them as used in the MAD.
+	     * succeed.
 	     */
 
-	    /*
-	     * TODO Load and keep any existing MAD on the target.  In this
-	     *      case, only can free sectors for keys.
-	     */
+	    // If the card already has a MAD, load it.
+	    if ((mad = mad_read (tags[i]))) {
+		// If our application already exists, erase it.
+		mifare_application_free (mad, mad_nfcforum_aid);
+	    } else {
 
+		// Create a MAD and mark unaccessible sectors in the card
 	    if (!(mad = mad_new ((freefare_get_tag_type (tags[i]) == CLASSIC_4K) ? 2 : 1))) {
 		perror ("mad_new");
 		error = 1;
@@ -244,11 +245,24 @@ main(int argc, char *argv[])
 		    /* Keep compiler quiet */
 		    break;
 	    }
+
+	    MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
+	    // Mark unusable sectors as so
 	    for (size_t s = max_s; s; s--) {
 		if (s == 0x10) continue;
 		if (!search_sector_key (tags[i], s, &(card_write_keys[s].key), &(card_write_keys[s].type))) {
 		    mad_set_aid (mad, s, mad_defect_aid);
+		} else if ((memcmp (card_write_keys[s].key, transport_key, sizeof (transport_key)) != 0) &&
+			   (card_write_keys[s].type != MFC_KEY_A)) {
+		    // Revert to transport configuration
+		    if (mifare_classic_format_sector (tags[i], s) < 0) {
+			perror ("mifare_classic_format_sector");
+			error = 1;
+			goto error;
+		    }
 		}
+	    }
 	    }
 
 	    MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, mad_nfcforum_aid, encoded_size);
