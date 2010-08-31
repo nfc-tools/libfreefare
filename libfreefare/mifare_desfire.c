@@ -76,6 +76,12 @@ struct mifare_desfire_raw_file_settings {
 };
 #pragma pack (pop)
 
+#define MAX_APPLICATION_COUNT 28
+#define MAX_FILE_COUNT 16
+
+static struct mifare_desfire_file_settings cached_file_settings[MAX_FILE_COUNT];
+static bool cached_file_settings_current[MAX_FILE_COUNT];
+
 static int	 create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
 static int	 create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
 static ssize_t	 write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
@@ -604,6 +610,9 @@ mifare_desfire_select_application (MifareTag tag, MifareDESFireAID aid)
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
+    for (int n = 0; n < MAX_FILE_COUNT; n++)
+	cached_file_settings_current[n] = false;
+
     return 0;
 }
 
@@ -687,6 +696,11 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
+    if (cached_file_settings_current[file_no]) {
+	*settings = cached_file_settings[file_no];
+	return 0;
+    }
+
     BUFFER_INIT (cmd, 2);
     BUFFER_INIT (res, 18);
 
@@ -721,6 +735,9 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
 	    break;
     }
 
+    cached_file_settings[file_no] = *settings;
+    cached_file_settings_current[file_no] = true;
+
     return 0;
 }
 
@@ -730,11 +747,12 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    // TODO: Use a current application files settings cache.
     struct mifare_desfire_file_settings settings;
     int res = mifare_desfire_get_file_settings (tag, file_no, &settings);
     if (res < 0)
 	return res;
+
+    cached_file_settings_current[file_no] = false;
 
     if (MDAR_CHANGE_AR(settings.access_rights) == MDAR_FREE) {
     BUFFER_INIT (cmd, 5);
@@ -787,6 +805,8 @@ create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
+    cached_file_settings_current[file_no] = false;
+
     return 0;
 }
 
@@ -822,6 +842,8 @@ mifare_desfire_create_value_file (MifareTag tag, uint8_t file_no, uint8_t commun
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
+    cached_file_settings_current[file_no] = false;
+
     return 0;
 }
 
@@ -842,6 +864,8 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
     BUFFER_APPEND_LE (cmd, max_number_of_records, 3, sizeof (uint32_t));
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
+
+    cached_file_settings_current[file_no] = false;
 
     return 0;
 }
@@ -994,6 +1018,8 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 	bytes_send = -1;
     }
 
+    cached_file_settings_current[file_no] = false;
+
     return bytes_send;
 }
 
@@ -1077,6 +1103,8 @@ mifare_desfire_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
+    cached_file_settings_current[file_no] = false;
+
     return 0;
 }
 
@@ -1106,6 +1134,8 @@ mifare_desfire_debit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs)
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
+    cached_file_settings_current[file_no] = false;
+
     return 0;
 }
 
@@ -1134,6 +1164,8 @@ mifare_desfire_limited_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount
     BUFFER_APPEND_BYTES (cmd, d, n);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
+
+    cached_file_settings_current[file_no] = false;
 
     return 0;
 }
@@ -1174,6 +1206,8 @@ mifare_desfire_clear_record_file (MifareTag tag, uint8_t file_no)
     BUFFER_APPEND (cmd, file_no);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
+
+    cached_file_settings_current[file_no] = false;
 
     return 0;
 }
