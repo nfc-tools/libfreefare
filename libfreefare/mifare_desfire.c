@@ -435,7 +435,7 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 
     uint8_t data[24];
 
-    if ((MIFARE_DESFIRE (tag)->authenticated_key_no != key_no) /* FIXME && (ChangeKey key != 0x0E)*/) {
+    if (MIFARE_DESFIRE (tag)->authenticated_key_no != key_no) {
 	if (old_key) {
 	    memcpy (data, old_key->data, 16);
 	} else {
