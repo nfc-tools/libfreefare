@@ -91,6 +91,20 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	    return errno = EINVAL, -1;\
     } while (0);
 
+/*
+ * XXX: cs < 0 is a CommunicationSettings detection error. Other values are
+ * user erros. We may need to distinguish them.
+ */
+#define ASSERT_CS(cs) \
+    do { \
+	if (cs < 0) \
+	    return errno = EINVAL, -1; \
+	if (cs == 0x02) \
+	    return errno = EINVAL, -1; \
+	if (cs > 0x03) \
+	    return errno = EINVAL, -1; \
+    } while (0)
+
 #define ASSERT_NOT_NULL(argument) \
     do { \
 	if (!argument) \
@@ -152,7 +166,6 @@ static int32_t	 le24toh (uint8_t data[3]);
 int
 madame_soleil_get_read_communication_settings (MifareTag tag, uint8_t file_no)
 {
-    // FIXME: It might be forbiden to get file settings.
     struct mifare_desfire_file_settings settings;
     if (mifare_desfire_get_file_settings (tag, file_no, &settings))
 	return -1;
@@ -167,7 +180,6 @@ madame_soleil_get_read_communication_settings (MifareTag tag, uint8_t file_no)
 int
 madame_soleil_get_write_communication_settings (MifareTag tag, uint8_t file_no)
 {
-    // FIXME: It might be forbiden to get file settings.
     struct mifare_desfire_file_settings settings;
     if (mifare_desfire_get_file_settings (tag, file_no, &settings))
 	return -1;
@@ -877,6 +889,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
+    ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 8);
     BUFFER_INIT (res, MAX_FRAME_SIZE);
@@ -943,6 +956,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
+    ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, MAX_FRAME_SIZE);
     BUFFER_INIT (res, 1);
@@ -1010,6 +1024,7 @@ mifare_desfire_get_value_ex (MifareTag tag, uint8_t file_no, int32_t *value, int
 
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
+    ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 2);
     BUFFER_INIT (res, 9);
@@ -1046,6 +1061,7 @@ mifare_desfire_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
+    ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1);
@@ -1074,6 +1090,7 @@ mifare_desfire_debit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
+    ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1);
@@ -1102,6 +1119,7 @@ mifare_desfire_limited_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
+    ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1);
