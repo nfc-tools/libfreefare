@@ -126,12 +126,7 @@ test_mifare_desfire (void)
 
     MifareDESFireAID aid_a = mifare_desfire_aid_new (0xAA, 0xAA, 0xA);
     cut_assert_not_null (aid_a, cut_message ("Cannot allocate AID"));
-#ifdef SNAPPER
-    // FIXME: For some reason, 0xFF fails
-    res = mifare_desfire_create_application (tag, aid_a, 0xEF, 0);
-#else
     res = mifare_desfire_create_application (tag, aid_a, 0xFF, 0);
-#endif
     cut_assert_success ("mifare_desfire_create_application()");
 
     MifareDESFireAID aid_b = mifare_desfire_aid_new (0xBB, 0xBB, 0xB);
@@ -139,12 +134,7 @@ test_mifare_desfire (void)
     res = mifare_desfire_create_application (tag, aid_b, 0xEF, 6);
     cut_assert_success ("mifare_desfire_create_application()");
 
-#ifdef SNAPPER
-    // FIXME: For some reason 0xCC CC C fails when authenticating
-    MifareDESFireAID aid_c = mifare_desfire_aid_new (0x12, 0x34, 0x5);
-#else
     MifareDESFireAID aid_c = mifare_desfire_aid_new (0xCC, 0xCC, 0xC);
-#endif
     cut_assert_not_null (aid_c, cut_message ("Cannot allocate AID"));
     res = mifare_desfire_create_application (tag, aid_c, 0xC2, 14);
     cut_assert_success ("mifare_desfire_create_application()");
