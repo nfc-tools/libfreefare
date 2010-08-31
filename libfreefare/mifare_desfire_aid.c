@@ -19,17 +19,26 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <freefare.h>
 #include "freefare_internal.h"
 
+// FIXME Theorically, it should be an uint24_t ...
 MifareDESFireAID
-mifare_desfire_aid_new (uint8_t application_code, uint8_t function_cluster_code, uint8_t n)
+mifare_desfire_aid_new (uint32_t aid)
 {
-    MadAid mad_aid = { application_code, function_cluster_code };
-    return mifare_desfire_aid_new_with_mad_aid (mad_aid, n);
+    MifareDESFireAID res;
+
+    if ((res = malloc (sizeof (*res)))) {
+        // XXX We may take care of endianess
+        memcpy(res->data, ((uint8_t*)&aid), 3);
+    }
+
+    return res;
 }
 
+// XXX This function ease the MifareDESFireAID creation using a Mifare Classic AID (see MIFARE Application Directory document - section 3.10 MAD and MIFARE DESFire)
 MifareDESFireAID
 mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n)
 {

@@ -80,7 +80,8 @@ main(int argc, char *argv[])
 	if (res < 0)
 	    errx (EXIT_FAILURE, "Authentication on master application failed");
 
-	MifareDESFireAID aid = mifare_desfire_aid_new (0x12, 0x34, 0x5);
+	MadAid mad_aid = { 0x12, 0x34 };
+	MifareDESFireAID aid = mifare_desfire_aid_new_with_mad_aid (mad_aid, 0x5);
 	res = mifare_desfire_create_application (tags[i], aid, 0xFF, 0x1);
 	if (res < 0)
 	    errx (EXIT_FAILURE, "Application creation failed");
