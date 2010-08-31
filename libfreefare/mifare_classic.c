@@ -285,8 +285,7 @@ mifare_classic_authenticate (MifareTag tag, const MifareClassicBlockNumber block
     MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits = 0x00;
     MIFARE_CLASSIC(tag)->last_authentication_key_type = key_type;
 
-    // No result.  The MIFARE tag just ACKed.
-    return 0;
+    return (res[0] == 0) ? 0 : -1;
 }
 
 /*
@@ -378,8 +377,7 @@ mifare_classic_write (MifareTag tag, const MifareClassicBlockNumber block, const
 
     CLASSIC_TRANSCEIVE (tag, cmd, res);
 
-    // No result.  The MIFARE tag just ACKed.
-    return 0;
+    return (res[0] == 0) ? 0 : -1;
 }
 
 /*
@@ -401,8 +399,7 @@ mifare_classic_increment (MifareTag tag, const MifareClassicBlockNumber block, c
 
     CLASSIC_TRANSCEIVE (tag, cmd, res);
 
-    // No result.  The MIFARE tag just ACKed.
-    return 0;
+    return (res[0] == 0) ? 0 : -1;
 }
 
 /*
@@ -424,8 +421,7 @@ mifare_classic_decrement (MifareTag tag, const MifareClassicBlockNumber block, c
 
     CLASSIC_TRANSCEIVE (tag, cmd, res);
 
-    // No result.  The MIFARE tag just ACKed.
-    return 0;
+    return (res[0] == 0) ? 0 : -1;
 }
 
 /*
@@ -454,8 +450,7 @@ mifare_classic_restore (MifareTag tag, const MifareClassicBlockNumber block)
 
     CLASSIC_TRANSCEIVE (tag, cmd, res);
 
-    // No result.  The MIFARE tag just ACKed.
-    return 0;
+    return (res[0] == 0) ? 0 : -1;
 }
 
 /*
@@ -475,8 +470,7 @@ mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber block)
 
     CLASSIC_TRANSCEIVE (tag, cmd, res);
 
-    // FIXME: The receive command returns data. Should be checked.
-    return 0;
+    return (res[0] == 0) ? 0 : -1;
 }
 
 
