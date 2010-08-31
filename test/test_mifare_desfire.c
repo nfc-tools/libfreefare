@@ -36,7 +36,7 @@ uint8_t key_data_3des[16] = { 'C', 'a', 'r', 'd', ' ', 'M', 'a', 's', 't', 'e', 
 	if ((res < 0) || (MIFARE_DESFIRE (tag)->last_picc_error != OPERATION_OK)) { \
 	    cut_fail ("%s returned %d, error: %s, errno: %s\n", last_command, res, desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error), strerror (errno)); \
 	} \
-    } while (0);
+    } while (0)
 
 void
 test_mifare_desfire (void)

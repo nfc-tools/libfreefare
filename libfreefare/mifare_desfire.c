@@ -89,7 +89,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
     do { \
 	if (MIFARE_DESFIRE (tag)->authenticated_key_no == NOT_YET_AUTHENTICATED) \
 	    return errno = EINVAL, -1;\
-    } while (0);
+    } while (0)
 
 /*
  * XXX: cs < 0 is a CommunicationSettings detection error. Other values are
@@ -109,7 +109,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
     do { \
 	if (!argument) \
 	    return errno = EINVAL, -1; \
-    } while (0);
+    } while (0)
 
 
 /*
