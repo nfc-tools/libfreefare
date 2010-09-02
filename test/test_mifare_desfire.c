@@ -124,17 +124,17 @@ test_mifare_desfire (void)
     res = mifare_desfire_select_application (tag, NULL);
     cut_assert_success ("mifare_desfire_select_application()");
 
-    MifareDESFireAID aid_a = mifare_desfire_aid_new (0xAA, 0xAA, 0xA);
+    MifareDESFireAID aid_a = mifare_desfire_aid_new (0x00AAAAAA);
     cut_assert_not_null (aid_a, cut_message ("Cannot allocate AID"));
     res = mifare_desfire_create_application (tag, aid_a, 0xFF, 0);
     cut_assert_success ("mifare_desfire_create_application()");
 
-    MifareDESFireAID aid_b = mifare_desfire_aid_new (0xBB, 0xBB, 0xB);
+    MifareDESFireAID aid_b = mifare_desfire_aid_new (0x00BBBBBB);
     cut_assert_not_null (aid_b, cut_message ("Cannot allocate AID"));
     res = mifare_desfire_create_application (tag, aid_b, 0xEF, 6);
     cut_assert_success ("mifare_desfire_create_application()");
 
-    MifareDESFireAID aid_c = mifare_desfire_aid_new (0xCC, 0xCC, 0xC);
+    MifareDESFireAID aid_c = mifare_desfire_aid_new (0x00CCCCCC);
     cut_assert_not_null (aid_c, cut_message ("Cannot allocate AID"));
     res = mifare_desfire_create_application (tag, aid_c, 0xC2, 14);
     cut_assert_success ("mifare_desfire_create_application()");
@@ -806,7 +806,7 @@ test_mifare_desfire (void)
     cut_assert_equal_int (AUTHENTICATION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("Wrong PICC error"));
 
     /* Creating an application should also be forbidden */
-    MifareDESFireAID aid_d = mifare_desfire_aid_new (0xDD, 0xDD, 0xD);
+    MifareDESFireAID aid_d = mifare_desfire_aid_new (0x00DDDDDD);
     res = mifare_desfire_create_application (tag, aid_d, 0xEF, 0);
     cut_assert_equal_int (-1, res, cut_message ("Wrong return value"));
     cut_assert_equal_int (AUTHENTICATION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("Wrong PICC error"));
@@ -889,7 +889,8 @@ test_mifare_desfire_get_many_application_ids (void)
     cut_assert_success ("mifare_desfire_format_picc()");
 
     for (int i = 0; i < NAID; i++) {
-	MifareDESFireAID aid = mifare_desfire_aid_new (i, i, i % 0x10);
+	MadAid mad_aid = { i, i };
+	MifareDESFireAID aid = mifare_desfire_aid_new_with_mad_aid ( mad_aid, i % 0x10);
 
 	res = mifare_desfire_create_application (tag, aid, 0xff, 0);
 	cut_assert_success ("mifare_desfire_create_application()");
@@ -922,7 +923,7 @@ test_mifare_desfire_des_macing(void)
     res = mifare_desfire_authenticate (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate()");
 
-    MifareDESFireAID aid = mifare_desfire_aid_new (0x12, 0x34, 0x5);
+    MifareDESFireAID aid = mifare_desfire_aid_new (0x00123456);
     res = mifare_desfire_create_application (tag, aid, 0xFF, 1);
     cut_assert_success ("mifare_desfire_create_application()");
 
