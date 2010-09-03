@@ -36,6 +36,7 @@ man_MANS = freefare.3 \
 	   mifare_application.3 \
 	   mifare_classic.3 \
 	   mifare_desfire.3 \
+	   mifare_desfire_aid.3 \
 	   mifare_desfire_key.3 \
 	   mifare_ultralight.3 \
 	   tlv.3
@@ -119,6 +120,8 @@ linkedman = \
 	    mifare_desfire.3 mifare_desfire_write_data_ex.3 \
 	    mifare_desfire.3 mifare_desfire_write_record.3 \
 	    mifare_desfire.3 mifare_desfire_write_record_ex.3 \
+	    mifare_desfire_aid.3 mifare_desfire_aid_new.3 \
+	    mifare_desfire_aid.3 mifare_desfire_aid_new_with_mad_aid.3 \
 	    mifare_desfire_key.3 mifare_desfire_3des_key_new.3 \
 	    mifare_desfire_key.3 mifare_desfire_3des_key_new_with_version.3 \
 	    mifare_desfire_key.3 mifare_desfire_des_key_new.3 \
