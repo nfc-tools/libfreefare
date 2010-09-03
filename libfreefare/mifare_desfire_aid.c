@@ -16,6 +16,10 @@
  * 
  * $Id$
  */
+/*
+ * http://www.scnf.org.uk/smartstore/LASSeO%20docs/DESFIRE%20Specification%20V1%200.pdf
+ */
+
 #include "config.h"
 
 #if defined(HAVE_SYS_TYPES_H)
@@ -58,11 +62,11 @@ mifare_desfire_aid_new (uint32_t aid)
     return res;
 }
 
-// XXX This function ease the MifareDESFireAID creation using a Mifare Classic AID (see MIFARE Application Directory document - section 3.10 MAD and MIFARE DESFire)
+// This function ease the MifareDESFireAID creation using a Mifare Classic AID (see MIFARE Application Directory document - section 3.10 MAD and MIFARE DESFire)
 MifareDESFireAID
 mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n)
 {
-    if (n > 0xf)
+    if (n > 0x0f)
 	return errno = EINVAL, NULL;
 
     return mifare_desfire_aid_new (0xf00000 | (mad_aid.function_cluster_code << 12) | (mad_aid.application_code << 4) | n);
