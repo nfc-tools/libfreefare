@@ -7,7 +7,8 @@ bin_PROGRAMS = mifare-classic-format \
 	       mifare-classic-write-ndef \
 	       mifare-desfire-access \
 	       mifare-desfire-format \
-	       mifare-desfire-info
+	       mifare-desfire-info \
+	       mifare-desfire-write-ndef
 
 mifare_classic_format_SOURCES = mifare-classic-format.c
 mifare_classic_format_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la -lssl
@@ -23,5 +24,8 @@ mifare_desfire_format_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la -
 
 mifare_desfire_info_SOURCES = mifare-desfire-info.c
 mifare_desfire_info_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la -lssl -lm
+
+mifare_desfire_write_ndef_SOURCES = mifare-desfire-write-ndef.c
+mifare_desfire_write_ndef_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la
 
 CLEANFILES=	*.gcno
