@@ -16,8 +16,10 @@ you started:
      The source code of the library trend to follow some conventions so that it
      is consistent in style and thus easier to read.  Basically, it follows
      FreeBSD's style(9); adding 4-space indentation and 8-space tabs (which you
-     should configure in your editor, e.g. `:set sw=4 ts=8' in vim).  For more
-     details, please read the style(9) man page from FreeBSD's website:
+     should configure in your editor, e.g. `:set sw=4 ts=8' in vim).  You are
+     also advised to `:set cinoptions=t0(0:0` so that you don't have to care
+     about indentation anymore. For more details, please read the style(9) man
+     page from FreeBSD's website:
      http://www.freebsd.org/cgi/man.cgi?query=style
 
   3. Write tests
