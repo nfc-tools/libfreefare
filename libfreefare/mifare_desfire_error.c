@@ -56,7 +56,7 @@ static struct error_message {
 };
 
 const char *
-desfire_error_lookup (uint8_t code)
+mifare_desfire_error_lookup (uint8_t code)
 {
     struct error_message *e = error_messages;
     while (e->message) {
