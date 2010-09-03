@@ -347,7 +347,7 @@ uint8_t		 mifare_desfire_key_get_version (MifareDESFireKey key);
 void		 mifare_desfire_key_set_version (MifareDESFireKey key, uint8_t version);
 void		 mifare_desfire_key_free (MifareDESFireKey key);
 
-const char	*desfire_error_lookup (uint8_t error);
+const char	*mifare_desfire_error_lookup (uint8_t error);
 
 uint8_t		*tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
 uint8_t		*tlv_decode (const uint8_t *istream, uint8_t *type, uint16_t *size);

@@ -34,7 +34,7 @@ uint8_t key_data_3des[16] = { 'C', 'a', 'r', 'd', ' ', 'M', 'a', 's', 't', 'e', 
 #define cut_assert_success(last_command) \
     do { \
 	if ((res < 0) || (MIFARE_DESFIRE (tag)->last_picc_error != OPERATION_OK)) { \
-	    cut_fail ("%s returned %d, error: %s, errno: %s\n", last_command, res, desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error), strerror (errno)); \
+	    cut_fail ("%s returned %d, error: %s, errno: %s\n", last_command, res, mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error), strerror (errno)); \
 	} \
     } while (0)
 

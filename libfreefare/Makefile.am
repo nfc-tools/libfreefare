@@ -11,9 +11,9 @@ libfreefare_la_SOURCES = freefare.c \
 			 mifare_desfire.c \
 			 mifare_desfire_aid.c \
 			 mifare_desfire_authenticate.c \
+			 mifare_desfire_error.c \
 			 mifare_desfire_key.c \
 			 mad.c \
-			 desfire_error.c \
 			 mifare_application.c \
 			 tlv.c
 libfreefare_la_LIBADD =
