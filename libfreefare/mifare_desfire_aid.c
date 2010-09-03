@@ -16,6 +16,23 @@
  * 
  * $Id$
  */
+#include "config.h"
+
+#if defined(HAVE_SYS_TYPES_H)
+#  include <sys/types.h>
+#endif
+
+#if defined(HAVE_SYS_ENDIAN_H)
+#  include <sys/endian.h>
+#endif
+
+#if defined(HAVE_ENDIAN_H)
+#  include <endian.h>
+#endif
+
+#if defined(HAVE_BYTESWAP_H)
+#  include <byteswap.h>
+#endif
 
 #include <errno.h>
 #include <stdlib.h>
@@ -28,11 +45,14 @@
 MifareDESFireAID
 mifare_desfire_aid_new (uint32_t aid)
 {
+    if (aid > 0x00ffffff)
+	return errno = EINVAL, NULL;
+
     MifareDESFireAID res;
+    uint32_t aid_le = htole32 (aid);
 
     if ((res = malloc (sizeof (*res)))) {
-        // XXX We may take care of endianess
-        memcpy(res->data, ((uint8_t*)&aid), 3);
+        memcpy(res->data, ((uint8_t*)&aid_le), 3);
     }
 
     return res;
@@ -42,18 +62,9 @@ mifare_desfire_aid_new (uint32_t aid)
 MifareDESFireAID
 mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n)
 {
-
-    MifareDESFireAID res;
-
-    if (n & 0xf0)
+    if (n > 0xf)
 	return errno = EINVAL, NULL;
 
-    if ((res = malloc (sizeof (*res)))) {
-	res->data[0] = 0xf0 | (mad_aid.function_cluster_code >> 4);
-	res->data[1] = (uint8_t) (((mad_aid.function_cluster_code & 0x0f) << 4) | ((mad_aid.application_code & 0xf0) >> 4));
-	res->data[2] = ((mad_aid.application_code & 0x0f) << 4) | n;
-    }
-
-    return res;
+    return mifare_desfire_aid_new (0xf00000 | (mad_aid.function_cluster_code << 12) | (mad_aid.application_code << 4) | n);
 }
 
