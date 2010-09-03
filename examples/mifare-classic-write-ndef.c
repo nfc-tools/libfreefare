@@ -160,7 +160,7 @@ main(int argc, char *argv[])
 	char *tag_uid = freefare_get_tag_uid (tags[i]);
 	char buffer[BUFSIZ];
 
-	printf ("Found %s with UID %s.  Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	printf ("Found %s with UID %s. Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
 	fgets (buffer, BUFSIZ, stdin);
 	bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 
