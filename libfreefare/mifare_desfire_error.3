@@ -1,0 +1,84 @@
+.\" Copyright (C) 2010 Romain Tartiere
+.\"
+.\" This program is free software: you can redistribute it and/or modify it
+.\" under the terms of the GNU Lesser General Public License as published by the
+.\" Free Software Foundation, either version 3 of the License, or (at your
+.\" option) any later version.
+.\"
+.\" This program is distributed in the hope that it will be useful, but WITHOUT
+.\" ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+.\" FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+.\" more details.
+.\"
+.\" You should have received a copy of the GNU Lesser General Public License
+.\" along with this program.  If not, see <http://www.gnu.org/licenses/>
+.\"
+.\" $Id: mifare_desfire.3 495 2010-07-26 21:48:18Z rtartiere@il4p.fr $
+.\"
+.Dd September 3, 2010
+.Dt MIFARE_DESFIRE_ERROR 3
+.Os
+.\"  _   _
+.\" | \ | | __ _ _ __ ___   ___
+.\" |  \| |/ _` | '_ ` _ \ / _ \
+.\" | |\  | (_| | | | | | |  __/
+.\" |_| \_|\__,_|_| |_| |_|\___|
+.\"
+.Sh NAME
+.Nm mifare_desfire_error_lookup
+.Nd Mifare DESFire Error Management Functions.
+.\"  _     _ _
+.\" | |   (_) |__  _ __ __ _ _ __ _   _
+.\" | |   | | '_ \| '__/ _` | '__| | | |
+.\" | |___| | |_) | | | (_| | |  | |_| |
+.\" |_____|_|_.__/|_|  \__,_|_|   \__, |
+.\"                               |___/
+.Sh LIBRARY
+Mifare card manipulation library (libfreefare, \-lfreefare)
+.\"  ____                              _
+.\" / ___| _   _ _ __   ___  _ __  ___(_)___
+.\" \___ \| | | | '_ \ / _ \| '_ \/ __| / __|
+.\"  ___) | |_| | | | | (_) | |_) \__ \ \__ \
+.\" |____/ \__, |_| |_|\___/| .__/|___/_|___/
+.\"        |___/            |_|
+.Sh SYNOPSIS
+.In freefare.h
+.Ft "const char *"
+.Fn mifare_desfire_error_lookup "uint8_t code"
+.\"  ____                      _       _   _
+.\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
+.\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
+.\" | |_| |  __/\__ \ (__| |  | | |_) | |_| | (_) | | | |
+.\" |____/ \___||___/\___|_|  |_| .__/ \__|_|\___/|_| |_|
+.\"                             |_|
+.Sh DESCRIPTION
+The
+.Fn mifare_desfire_error_lookup
+functions returns the error string corresponding to the provided error
+.Vt code .
+.\"  ____      _                                 _
+.\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
+.\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
+.\" |  _ <  __/ |_| |_| | |  | | | |  \ V / (_| | | |_| |  __/\__ \
+.\" |_| \_\___|\__|\__,_|_|  |_| |_|   \_/ \__,_|_|\__,_|\___||___/
+.\"
+.Sh RETURN VALUES
+The functions always succeeds.  If an invalid error code is provided, a
+corresponding message is returned.
+.\"  ____                    _
+.\" / ___|  ___  ___    __ _| |___  ___
+.\" \___ \ / _ \/ _ \  / _` | / __|/ _ \
+.\"  ___) |  __/  __/ | (_| | \__ \ (_) |
+.\" |____/ \___|\___|  \__,_|_|___/\___/
+.\"
+.Sh SEE ALSO
+.Xr freefare 3 ,
+.Xr mifare_desfire 3
+.\"     _         _   _
+.\"    / \  _   _| |_| |__   ___  _ __ ___
+.\"   / _ \| | | | __| '_ \ / _ \| '__/ __|
+.\"  / ___ \ |_| | |_| | | | (_) | |  \__ \
+.\" /_/   \_\__,_|\__|_| |_|\___/|_|  |___/
+.\"
+.Sh AUTHORS
+.An Romain Tartiere Aq romain@il4p.org
