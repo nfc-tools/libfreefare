@@ -18,6 +18,7 @@ noinst_LTLIBRARIES = \
 		     test_mifare_classic_create_trailer_block.la \
 		     test_mifare_classic_sector_boundaries.la \
 		     test_mifare_desfire.la \
+		     test_mifare_desfire_aid.la \
 		     test_mifare_desfire_des.la \
 		     test_mifare_desfire_key.la \
 		     test_mifare_ultralight.la \
@@ -47,6 +48,9 @@ test_mifare_desfire_la_SOURCES = test_mifare_desfire.c \
 				 mifare_desfire_fixture.c \
 				 mifare_desfire_fixture.h
 test_mifare_desfire_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la -lutil
+
+test_mifare_desfire_aid_la_SOURCES = test_mifare_desfire_aid.c
+test_mifare_desfire_aid_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_desfire_des_la_SOURCES = test_mifare_desfire_des.c
 test_mifare_desfire_des_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la -lssl
