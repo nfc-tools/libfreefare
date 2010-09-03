@@ -85,8 +85,9 @@
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
 	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
 	    nfc_perror (tag->device, __FUNCTION__); \
-	    if (disconnect) \
+	    if (disconnect) { \
 		tag->active = false; \
+	    } \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
@@ -120,56 +121,56 @@ union mifare_classic_block {
 typedef unsigned char MifareClassicAccessBits;
 
 unsigned char mifare_data_access_permissions[] = {
-/*
- *                          [ Key A ]         [ Key B ]
- *                              |                 |
- *                 ,----------- r(ead)            |
- *                 |,---------- w(rite)           |
- *                 ||,--------- d(ecrement)       |
- *                 |||,-------- i(ncrement)       |
- *                 ||||                           |
- *                 |||| ,------------------------ r
- *   ,----- C3     |||| |,----------------------- w
- *   |,---- C2     |||| ||,---------------------- d
- *   ||,--- C1     |||| |||,--------------------- i
- *   |||           |||| ||||
- * 0b000	0b 1111 1111 */	0xff, /* Default (blank card) */
-/* 0b001 	0b 1000 1100 */	0x8c,
-/* 0b010	0b 1000 1000 */	0x88,
-/* 0b011	0b 1010 1111 */	0xaf,
-/* 0b100	0b 1010 1010 */	0xaa,
-/* 0b101	0b 0000 1000 */	0x08,
-/* 0b110	0b 0000 1100 */	0x0c,
-/* 0b111	0b 0000 0000 */	0x00
+    /*
+     *                          [ Key A ]         [ Key B ]
+     *                              |                 |
+     *                 ,----------- r(ead)            |
+     *                 |,---------- w(rite)           |
+     *                 ||,--------- d(ecrement)       |
+     *                 |||,-------- i(ncrement)       |
+     *                 ||||                           |
+     *                 |||| ,------------------------ r
+     *   ,----- C3     |||| |,----------------------- w
+     *   |,---- C2     |||| ||,---------------------- d
+     *   ||,--- C1     |||| |||,--------------------- i
+     *   |||           |||| ||||
+     * 0b000	0b 1111 1111 */	0xff, /* Default (blank card) */
+    /* 0b001 	0b 1000 1100 */	0x8c,
+    /* 0b010	0b 1000 1000 */	0x88,
+    /* 0b011	0b 1010 1111 */	0xaf,
+    /* 0b100	0b 1010 1010 */	0xaa,
+    /* 0b101	0b 0000 1000 */	0x08,
+    /* 0b110	0b 0000 1100 */	0x0c,
+    /* 0b111	0b 0000 0000 */	0x00
 };
 
 uint16_t mifare_trailer_access_permissions[] = {
-/*
- *                          [ Key A ]     [ Access bits ]    [ Key B ]
- *                              |                |                |
- *                 ,----------- read A           |                |
- *                 |,---------- read B           |                |
- *                 ||,--------- write A          |                |
- *                 |||,-------- write B          |                |
- *                 ||||                          |                |
- *                 |||| ,----------------------- read A           |
- *                 |||| |,---------------------- read B           |
- *                 |||| ||,--------------------- write A          |
- *                 |||| |||,-------------------- write B          |
- *                 |||| ||||                                      |
- *                 |||| |||| ,----------------------------------- read A
- *   ,----- C3     |||| |||| |,---------------------------------- read B
- *   |,---- C2     |||| |||| ||,--------------------------------- write A
- *   ||,--- C1     |||| |||| |||,-------------------------------- write B
- *   |||           |||| |||| ||||
- * 0b000	0b 0010 1000 1010*/	0x28a,
-/* 0b001 	0b 0001 1100 0001*/	0x1c1,
-/* 0b010	0b 0000 1000 1000*/	0x088,
-/* 0b011	0b 0000 1100 0000*/	0x0c0,
-/* 0b100	0b 0010 1010 1010*/	0x2aa, /* Default (blank card) */
-/* 0b101	0b 0000 1101 0000*/	0x0d0,
-/* 0b110	0b 0001 1101 0001*/	0x1d1,
-/* 0b111	0b 0000 1100 0000*/	0x0c0
+    /*
+     *                          [ Key A ]     [ Access bits ]    [ Key B ]
+     *                              |                |                |
+     *                 ,----------- read A           |                |
+     *                 |,---------- read B           |                |
+     *                 ||,--------- write A          |                |
+     *                 |||,-------- write B          |                |
+     *                 ||||                          |                |
+     *                 |||| ,----------------------- read A           |
+     *                 |||| |,---------------------- read B           |
+     *                 |||| ||,--------------------- write A          |
+     *                 |||| |||,-------------------- write B          |
+     *                 |||| ||||                                      |
+     *                 |||| |||| ,----------------------------------- read A
+     *   ,----- C3     |||| |||| |,---------------------------------- read B
+     *   |,---- C2     |||| |||| ||,--------------------------------- write A
+     *   ||,--- C1     |||| |||| |||,-------------------------------- write B
+     *   |||           |||| |||| ||||
+     * 0b000	0b 0010 1000 1010*/	0x28a,
+    /* 0b001 	0b 0001 1100 0001*/	0x1c1,
+    /* 0b010	0b 0000 1000 1000*/	0x088,
+    /* 0b011	0b 0000 1100 0000*/	0x0c0,
+    /* 0b100	0b 0010 1010 1010*/	0x2aa, /* Default (blank card) */
+    /* 0b101	0b 0000 1101 0000*/	0x0d0,
+    /* 0b110	0b 0001 1101 0001*/	0x1d1,
+    /* 0b111	0b 0000 1100 0000*/	0x0c0
 };
 
 
@@ -543,7 +544,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
      */
     if (MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number == trailer) {
 	/* cache hit! */
-    	sector_access_bits = MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits;
+	sector_access_bits = MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits;
     } else {
 
 	MifareClassicBlock trailer_data;
@@ -561,7 +562,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
 	}
 	MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number = trailer;
 	MIFARE_CLASSIC(tag)->cached_access_bits.block_number = -1;
-    	MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits = sector_access_bits;
+	MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits = sector_access_bits;
     }
 
     /*
@@ -730,7 +731,7 @@ MifareClassicBlockNumber
 mifare_classic_sector_last_block (MifareClassicSectorNumber sector)
 {
     return mifare_classic_sector_first_block (sector) +
-	   mifare_classic_sector_block_count (sector) - 1;
+	mifare_classic_sector_block_count (sector) - 1;
 }
 
 /*

@@ -73,7 +73,7 @@ tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *
 	return NULL;
 
     if ((res = malloc (1 + ((isize > 254) ? 3 : 1) + isize + 1))) {
-	               /* type + size + payload + terminator */
+	/* type + size + payload + terminator */
 	res[n++] = type;
 
 	if (isize > 254) {

@@ -93,8 +93,9 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 
 #define ASSERT_AUTHENTICATED(tag) \
     do { \
-	if (MIFARE_DESFIRE (tag)->authenticated_key_no == NOT_YET_AUTHENTICATED) \
+	if (MIFARE_DESFIRE (tag)->authenticated_key_no == NOT_YET_AUTHENTICATED) { \
 	    return errno = EINVAL, -1;\
+	} \
     } while (0)
 
 /*
@@ -103,18 +104,20 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  */
 #define ASSERT_CS(cs) \
     do { \
-	if (cs < 0) \
+	if (cs < 0) { \
 	    return errno = EINVAL, -1; \
-	if (cs == 0x02) \
+	} else if (cs == 0x02) { \
 	    return errno = EINVAL, -1; \
-	if (cs > 0x03) \
+	} else if (cs > 0x03) { \
 	    return errno = EINVAL, -1; \
+	} \
     } while (0)
 
 #define ASSERT_NOT_NULL(argument) \
     do { \
-	if (!argument) \
+	if (!argument) { \
 	    return errno = EINVAL, -1; \
+	} \
     } while (0)
 
 
@@ -144,8 +147,9 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	errno = 0; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
 	DEBUG_XFER (__##msg, __##msg##_n+1, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, __##msg, __##msg##_n+1, __##res, &__##res##_n))) \
+	if (!(nfc_initiator_transceive_bytes (tag->device, __##msg, __##msg##_n+1, __##res, &__##res##_n))) { \
 	    return errno = EIO, -1; \
+	} \
 	DEBUG_XFER (__##res, __##res##_n, "<=== "); \
 	__##res##_n -= 1; \
 	while (__##res[0] == 0xf2) { \
@@ -157,8 +161,9 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	    DEBUG_XFER (__##res, __##res##_n, "<=== "); \
 	    __##res##_n -= 1; \
 	} \
-	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) \
+	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) { \
 	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
+	} \
     } while (0)
 
 
@@ -717,7 +722,7 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
     settings->file_type = raw_settings.file_type;
     settings->communication_settings = raw_settings.communication_settings;
     settings->access_rights = le16toh (raw_settings.access_rights);
-    
+
     switch (settings->file_type) {
 	case MDFT_STANDARD_DATA_FILE:
 	case MDFT_BACKUP_DATA_FILE:
@@ -757,15 +762,15 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
     cached_file_settings_current[file_no] = false;
 
     if (MDAR_CHANGE_AR(settings.access_rights) == MDAR_FREE) {
-    BUFFER_INIT (cmd, 5);
-    BUFFER_INIT (res, 1);
+	BUFFER_INIT (cmd, 5);
+	BUFFER_INIT (res, 1);
 
-    BUFFER_APPEND (cmd, 0x5F);
-    BUFFER_APPEND (cmd, file_no);
-    BUFFER_APPEND (cmd, communication_settings);
-    BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
+	BUFFER_APPEND (cmd, 0x5F);
+	BUFFER_APPEND (cmd, file_no);
+	BUFFER_APPEND (cmd, communication_settings);
+	BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+	DESFIRE_TRANSCEIVE (tag, cmd, res);
     } else {
 	BUFFER_INIT (cmd, 10);
 	BUFFER_INIT (res, 1);
@@ -946,8 +951,8 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 		    return -1;
 
 	    }
-	BUFFER_CLEAR (cmd);
-	BUFFER_APPEND (cmd, 0xAF);
+	    BUFFER_CLEAR (cmd);
+	    BUFFER_APPEND (cmd, 0xAF);
 	}
 
     } while (res[0] != 0x00);

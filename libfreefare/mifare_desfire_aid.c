@@ -56,7 +56,7 @@ mifare_desfire_aid_new (uint32_t aid)
     uint32_t aid_le = htole32 (aid);
 
     if ((res = malloc (sizeof (*res)))) {
-        memcpy(res->data, ((uint8_t*)&aid_le), 3);
+	memcpy(res->data, ((uint8_t*)&aid_le), 3);
     }
 
     return res;

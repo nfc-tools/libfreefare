@@ -132,7 +132,7 @@ main(int argc, char *argv[])
 
     nfc_list_devices (devices, 8, &device_count);
     if (!device_count)
-        errx (EXIT_FAILURE, "No NFC device found.");
+	errx (EXIT_FAILURE, "No NFC device found.");
 
     for (size_t d = 0; d < device_count; d++) {
 	device = nfc_connect (&(devices[d]));
@@ -142,179 +142,179 @@ main(int argc, char *argv[])
 	    continue;
 	}
 
-    tags = freefare_get_tags (device);
-    if (!tags) {
-	nfc_disconnect (device);
-	errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
-    }
-
-    for (int i = 0; (!error) && tags[i]; i++) {
-	switch (freefare_get_tag_type (tags[i])) {
-	    case CLASSIC_1K:
-	    case CLASSIC_4K:
-		break;
-	    default:
-		continue;
+	tags = freefare_get_tags (device);
+	if (!tags) {
+	    nfc_disconnect (device);
+	    errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
 	}
 
-	char *tag_uid = freefare_get_tag_uid (tags[i]);
-	char buffer[BUFSIZ];
-
-	printf ("Found %s with UID %s. Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	fgets (buffer, BUFSIZ, stdin);
-	bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
-
-	if (write_ndef) {
+	for (int i = 0; (!error) && tags[i]; i++) {
 	    switch (freefare_get_tag_type (tags[i])) {
-		case CLASSIC_4K:
-		    if (!search_sector_key (tags[i], 0x10, &(card_write_keys[0x10].key), &(card_write_keys[0x10].type))) {
-			error = 1;
-			goto error;
-		    }
-		    /* fallthrough */
 		case CLASSIC_1K:
-		    if (!search_sector_key (tags[i], 0x00, &(card_write_keys[0x00].key), &(card_write_keys[0x00].type))) {
-			error = 1;
-			goto error;
-		    }
+		case CLASSIC_4K:
 		    break;
 		default:
-		    /* Keep compiler quiet */
-		    break;
+		    continue;
 	    }
 
-	    if (!error) {
-		/* Ensure the auth key is always a B one. If not, change it! */
+	    char *tag_uid = freefare_get_tag_uid (tags[i]);
+	    char buffer[BUFSIZ];
+
+	    printf ("Found %s with UID %s. Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    fgets (buffer, BUFSIZ, stdin);
+	    bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+
+	    if (write_ndef) {
 		switch (freefare_get_tag_type (tags[i])) {
 		    case CLASSIC_4K:
-			if (card_write_keys[0x10].type != MFC_KEY_B) {
-			    if( 0 != fix_mad_trailer_block( tags[i], 0x10, card_write_keys[0x10].key, card_write_keys[0x10].type)) {
-				error = 1;
-				goto error;
-			    }
-			    memcpy (&(card_write_keys[0x10].key), &default_keyb, sizeof (MifareClassicKey));
-			    card_write_keys[0x10].type = MFC_KEY_B;
-			}
-			/* fallthrough */
-		    case CLASSIC_1K:
-			if (card_write_keys[0x00].type != MFC_KEY_B) {
-			    if( 0 != fix_mad_trailer_block( tags[i], 0x00, card_write_keys[0x00].key, card_write_keys[0x00].type)) {
-				error = 1;
-				goto error;
-			    }
-			    memcpy (&(card_write_keys[0x00].key), &default_keyb, sizeof (MifareClassicKey));
-			    card_write_keys[0x00].type = MFC_KEY_B;
-			}
-			break;
-		    default:
-			/* Keep compiler quiet */
-			break;
-		}
-	    }
-
-	    size_t encoded_size;
-	    uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
-
-	    /*
-	     * At his point, we should have collected all information needed to
-	     * succeed.
-	     */
-
-	    // If the card already has a MAD, load it.
-	    if ((mad = mad_read (tags[i]))) {
-		// If our application already exists, erase it.
-		mifare_application_free (mad, mad_nfcforum_aid);
-	    } else {
-
-		// Create a MAD and mark unaccessible sectors in the card
-		if (!(mad = mad_new ((freefare_get_tag_type (tags[i]) == CLASSIC_4K) ? 2 : 1))) {
-		    perror ("mad_new");
-		    error = 1;
-		    goto error;
-		}
-
-		MifareClassicSectorNumber max_s;
-		switch (freefare_get_tag_type (tags[i])) {
-		    case CLASSIC_1K:
-			max_s = 15;
-			break;
-		    case CLASSIC_4K:
-			max_s = 39;
-			break;
-		    default:
-			/* Keep compiler quiet */
-			break;
-		}
-
-		MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
-
-		// Mark unusable sectors as so
-		for (size_t s = max_s; s; s--) {
-		    if (s == 0x10) continue;
-		    if (!search_sector_key (tags[i], s, &(card_write_keys[s].key), &(card_write_keys[s].type))) {
-			mad_set_aid (mad, s, mad_defect_aid);
-		    } else if ((memcmp (card_write_keys[s].key, transport_key, sizeof (transport_key)) != 0) &&
-			    (card_write_keys[s].type != MFC_KEY_A)) {
-			// Revert to transport configuration
-			if (mifare_classic_format_sector (tags[i], s) < 0) {
-			    perror ("mifare_classic_format_sector");
+			if (!search_sector_key (tags[i], 0x10, &(card_write_keys[0x10].key), &(card_write_keys[0x10].type))) {
 			    error = 1;
 			    goto error;
 			}
+			/* fallthrough */
+		    case CLASSIC_1K:
+			if (!search_sector_key (tags[i], 0x00, &(card_write_keys[0x00].key), &(card_write_keys[0x00].type))) {
+			    error = 1;
+			    goto error;
+			}
+			break;
+		    default:
+			/* Keep compiler quiet */
+			break;
+		}
+
+		if (!error) {
+		    /* Ensure the auth key is always a B one. If not, change it! */
+		    switch (freefare_get_tag_type (tags[i])) {
+			case CLASSIC_4K:
+			    if (card_write_keys[0x10].type != MFC_KEY_B) {
+				if( 0 != fix_mad_trailer_block( tags[i], 0x10, card_write_keys[0x10].key, card_write_keys[0x10].type)) {
+				    error = 1;
+				    goto error;
+				}
+				memcpy (&(card_write_keys[0x10].key), &default_keyb, sizeof (MifareClassicKey));
+				card_write_keys[0x10].type = MFC_KEY_B;
+			    }
+			    /* fallthrough */
+			case CLASSIC_1K:
+			    if (card_write_keys[0x00].type != MFC_KEY_B) {
+				if( 0 != fix_mad_trailer_block( tags[i], 0x00, card_write_keys[0x00].key, card_write_keys[0x00].type)) {
+				    error = 1;
+				    goto error;
+				}
+				memcpy (&(card_write_keys[0x00].key), &default_keyb, sizeof (MifareClassicKey));
+				card_write_keys[0x00].type = MFC_KEY_B;
+			    }
+			    break;
+			default:
+			    /* Keep compiler quiet */
+			    break;
 		    }
 		}
-	    }
 
-	    MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, mad_nfcforum_aid, encoded_size);
-	    if (!sectors) {
-		perror ("mifare_application_alloc");
-		error = EXIT_FAILURE;
-		goto error;
-	    }
+		size_t encoded_size;
+		uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
 
-	    if (mad_write (tags[i], mad, card_write_keys[0x00].key, card_write_keys[0x10].key) < 0) {
-		perror ("mad_write");
-		error = EXIT_FAILURE;
-		goto error;
-	    }
+		/*
+		 * At his point, we should have collected all information needed to
+		 * succeed.
+		 */
 
-	    int s = 0;
-	    while (sectors[s]) {
-		MifareClassicBlockNumber block = mifare_classic_sector_last_block (sectors[s]);
-		MifareClassicBlock block_data;
-		mifare_classic_trailer_block (&block_data, mifare_classic_nfcforum_public_key_a, 0x0, 0x0, 0x0, 0x6, 0x40, default_keyb);
-		if (mifare_classic_authenticate (tags[i], block, card_write_keys[sectors[s]].key, card_write_keys[sectors[s]].type) < 0) {
-		    perror ("mifare_classic_authenticate");
+		// If the card already has a MAD, load it.
+		if ((mad = mad_read (tags[i]))) {
+		    // If our application already exists, erase it.
+		    mifare_application_free (mad, mad_nfcforum_aid);
+		} else {
+
+		    // Create a MAD and mark unaccessible sectors in the card
+		    if (!(mad = mad_new ((freefare_get_tag_type (tags[i]) == CLASSIC_4K) ? 2 : 1))) {
+			perror ("mad_new");
+			error = 1;
+			goto error;
+		    }
+
+		    MifareClassicSectorNumber max_s;
+		    switch (freefare_get_tag_type (tags[i])) {
+			case CLASSIC_1K:
+			    max_s = 15;
+			    break;
+			case CLASSIC_4K:
+			    max_s = 39;
+			    break;
+			default:
+			    /* Keep compiler quiet */
+			    break;
+		    }
+
+		    MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+
+		    // Mark unusable sectors as so
+		    for (size_t s = max_s; s; s--) {
+			if (s == 0x10) continue;
+			if (!search_sector_key (tags[i], s, &(card_write_keys[s].key), &(card_write_keys[s].type))) {
+			    mad_set_aid (mad, s, mad_defect_aid);
+			} else if ((memcmp (card_write_keys[s].key, transport_key, sizeof (transport_key)) != 0) &&
+				   (card_write_keys[s].type != MFC_KEY_A)) {
+			    // Revert to transport configuration
+			    if (mifare_classic_format_sector (tags[i], s) < 0) {
+				perror ("mifare_classic_format_sector");
+				error = 1;
+				goto error;
+			    }
+			}
+		    }
+		}
+
+		MifareClassicSectorNumber *sectors = mifare_application_alloc (mad, mad_nfcforum_aid, encoded_size);
+		if (!sectors) {
+		    perror ("mifare_application_alloc");
 		    error = EXIT_FAILURE;
 		    goto error;
 		}
-		if (mifare_classic_write (tags[i], block, block_data) < 0) {
-		    perror ("mifare_classic_write");
+
+		if (mad_write (tags[i], mad, card_write_keys[0x00].key, card_write_keys[0x10].key) < 0) {
+		    perror ("mad_write");
 		    error = EXIT_FAILURE;
 		    goto error;
 		}
-		s++;
+
+		int s = 0;
+		while (sectors[s]) {
+		    MifareClassicBlockNumber block = mifare_classic_sector_last_block (sectors[s]);
+		    MifareClassicBlock block_data;
+		    mifare_classic_trailer_block (&block_data, mifare_classic_nfcforum_public_key_a, 0x0, 0x0, 0x0, 0x6, 0x40, default_keyb);
+		    if (mifare_classic_authenticate (tags[i], block, card_write_keys[sectors[s]].key, card_write_keys[sectors[s]].type) < 0) {
+			perror ("mifare_classic_authenticate");
+			error = EXIT_FAILURE;
+			goto error;
+		    }
+		    if (mifare_classic_write (tags[i], block, block_data) < 0) {
+			perror ("mifare_classic_write");
+			error = EXIT_FAILURE;
+			goto error;
+		    }
+		    s++;
+		}
+
+		if ((ssize_t) encoded_size != mifare_application_write (tags[i], mad, mad_nfcforum_aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
+		    perror ("mifare_application_write");
+		    error = EXIT_FAILURE;
+		    goto error;
+		}
+
+		free (sectors);
+
+		free (tlv_data);
+
+		free (mad);
 	    }
-
-	    if ((ssize_t) encoded_size != mifare_application_write (tags[i], mad, mad_nfcforum_aid, tlv_data, encoded_size, default_keyb, MCAB_WRITE_KEYB)) {
-		perror ("mifare_application_write");
-		error = EXIT_FAILURE;
-		goto error;
-	    }
-
-	    free (sectors);
-
-	    free (tlv_data);
-
-	    free (mad);
-	}
 
 error:
-	free (tag_uid);
-    }
+	    free (tag_uid);
+	}
 
-    freefare_free_tags (tags);
-    nfc_disconnect (device);
+	freefare_free_tags (tags);
+	nfc_disconnect (device);
     }
 
     free (card_write_keys);

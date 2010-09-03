@@ -292,7 +292,7 @@ test_mifare_desfire (void)
 	struct mifare_desfire_file_settings settings;
 	res = mifare_desfire_get_file_settings (tag, files[i], &settings);
 	cut_assert_success ("mifare_desfire_get_file_settings()");
-	
+
 	switch (files[i]) {
 	    case 0:
 		cut_assert_equal_int (MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP, settings.file_type, cut_message ("Wrong file type"));

@@ -75,7 +75,7 @@ main(int argc, char *argv[])
 
     nfc_list_devices (devices, 8, &device_count);
     if (!device_count)
-        errx (EXIT_FAILURE, "No NFC device found.");
+	errx (EXIT_FAILURE, "No NFC device found.");
 
     for (size_t d = 0; d < device_count; d++) {
 	device = nfc_connect (&(devices[d]));
@@ -85,62 +85,62 @@ main(int argc, char *argv[])
 	    continue;
 	}
 
-    tags = freefare_get_tags (device);
-    if (!tags) {
+	tags = freefare_get_tags (device);
+	if (!tags) {
+	    nfc_disconnect (device);
+	    errx (EXIT_FAILURE, "Error listing Mifare DESFire tags.");
+	}
+
+	for (int i = 0; (!error) && tags[i]; i++) {
+	    if (DESFIRE != freefare_get_tag_type (tags[i]))
+		continue;
+
+	    char *tag_uid = freefare_get_tag_uid (tags[i]);
+	    char buffer[BUFSIZ];
+
+	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    bool format = true;
+	    if (format_options.interactive) {
+		printf ("Format [yN] ");
+		fgets (buffer, BUFSIZ, stdin);
+		format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    } else {
+		printf ("\n");
+	    }
+
+	    if (format) {
+		int res;
+		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
+
+		res = mifare_desfire_connect (tags[i]);
+		if (res < 0) {
+		    warnx ("Can't connect to Mifare DESFire target.");
+		    error = EXIT_FAILURE;
+		    break;
+		}
+
+		res = mifare_desfire_authenticate (tags[i], 0, default_key);
+		if (res < 0) {
+		    warnx ("Can't authenticate on Mifare DESFire target.");
+		    error = EXIT_FAILURE;
+		    break;
+		}
+
+		res = mifare_desfire_format_picc (tags[i]);
+		if (res < 0) {
+		    warn ("Can't format PICC.");
+		    error = EXIT_FAILURE;
+		    break;
+		}
+
+		mifare_desfire_disconnect (tags[i]);
+	    }
+
+	    free (tag_uid);
+	}
+
+	freefare_free_tags (tags);
 	nfc_disconnect (device);
-	errx (EXIT_FAILURE, "Error listing Mifare DESFire tags.");
-    }
-
-    for (int i = 0; (!error) && tags[i]; i++) {
-	if (DESFIRE != freefare_get_tag_type (tags[i]))
-	    continue;
-
-	char *tag_uid = freefare_get_tag_uid (tags[i]);
-	char buffer[BUFSIZ];
-
-	printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	bool format = true;
-	if (format_options.interactive) {
-	    printf ("Format [yN] ");
-	    fgets (buffer, BUFSIZ, stdin);
-	    format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
-	} else {
-	    printf ("\n");
-	}
-
-	if (format) {
-	    int res;
-	    MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
-
-	    res = mifare_desfire_connect (tags[i]);
-	    if (res < 0) {
-		warnx ("Can't connect to Mifare DESFire target.");
-		error = EXIT_FAILURE;
-		break;
-	    }
-
-	    res = mifare_desfire_authenticate (tags[i], 0, default_key);
-	    if (res < 0) {
-		warnx ("Can't authenticate on Mifare DESFire target.");
-		error = EXIT_FAILURE;
-		break;
-	    }
-
-	    res = mifare_desfire_format_picc (tags[i]);
-	    if (res < 0) {
-		warn ("Can't format PICC.");
-		error = EXIT_FAILURE;
-		break;
-	    }
-
-	    mifare_desfire_disconnect (tags[i]);
-	}
-
-	free (tag_uid);
-    }
-
-    freefare_free_tags (tags);
-    nfc_disconnect (device);
     }
 
     exit (error);

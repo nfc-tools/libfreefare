@@ -24,42 +24,42 @@
 const uint8_t shortdata[8]  = "elephant";
 const uint8_t eshortdata[11] = "\x03" "\x08" "elephant" "\xfe";
 
-			    /*
-			     * Many thanks to Charles Baudelaire for helping me
-			     * test things and helping you realize your f**king
-			     * OS / compiler does not support UTF-8 ;-)
-			     */
-const uint8_t longdata[660] =  "Dans une terre grasse et pleine d'escargots\n"
-                            "Je veux creuser moi-même une fosse profonde,\n"
-		            "Où je puisse à loisir étaler mes vieux os\n"
-		            "Et dormir dans l'oubli comme un requin dans l'onde.\n"
-		            "Je hais les testaments et je hais les tombeaux;\n"
-		            "Plutôt que d'implorer une larme du monde,\n"
-		            "Vivant, j'aimerais mieux inviter les corbeaux\n"
-		            "À saigner tous les bouts de ma carcasse immonde.\n"
-		            "Ô vers! noirs compagnons sans oreille et sans yeux,\n"
-		            "Voyez venir à vous un mort libre et joyeux;\n"
-		            "Philosophes viveurs, fils de la pourriture,\n"
-		            "À travers ma ruine allez donc sans remords,\n"
-		            "Et dites-moi s'il est encor quelque torture\n"
-		            "Pour ce vieux corps sans âme et mort parmi les morts!\n";
+/*
+ * Many thanks to Charles Baudelaire for helping me
+ * test things and helping you realize your f**king
+ * OS / compiler does not support UTF-8 ;-)
+ */
+const uint8_t longdata[660] =  "Dans une terre grasse et pleine d'escargots\n" \
+				"Je veux creuser moi-même une fosse profonde,\n" \
+				"Où je puisse à loisir étaler mes vieux os\n" \
+				"Et dormir dans l'oubli comme un requin dans l'onde.\n" \
+				"Je hais les testaments et je hais les tombeaux;\n" \
+				"Plutôt que d'implorer une larme du monde,\n" \
+				"Vivant, j'aimerais mieux inviter les corbeaux\n" \
+				"À saigner tous les bouts de ma carcasse immonde.\n" \
+				"Ô vers! noirs compagnons sans oreille et sans yeux,\n" \
+				"Voyez venir à vous un mort libre et joyeux;\n" \
+				"Philosophes viveurs, fils de la pourriture,\n" \
+				"À travers ma ruine allez donc sans remords,\n" \
+				"Et dites-moi s'il est encor quelque torture\n" \
+				"Pour ce vieux corps sans âme et mort parmi les morts!\n";
 
-const uint8_t elongdata[665] = "\x07" "\xff\x02\x94"
-                            "Dans une terre grasse et pleine d'escargots\n"
-                            "Je veux creuser moi-même une fosse profonde,\n"
-		            "Où je puisse à loisir étaler mes vieux os\n"
-		            "Et dormir dans l'oubli comme un requin dans l'onde.\n"
-		            "Je hais les testaments et je hais les tombeaux;\n"
-		            "Plutôt que d'implorer une larme du monde,\n"
-		            "Vivant, j'aimerais mieux inviter les corbeaux\n"
-		            "À saigner tous les bouts de ma carcasse immonde.\n"
-		            "Ô vers! noirs compagnons sans oreille et sans yeux,\n"
-		            "Voyez venir à vous un mort libre et joyeux;\n"
-		            "Philosophes viveurs, fils de la pourriture,\n"
-		            "À travers ma ruine allez donc sans remords,\n"
-		            "Et dites-moi s'il est encor quelque torture\n"
-		            "Pour ce vieux corps sans âme et mort parmi les morts!\n"
-			    "\xfe";
+const uint8_t elongdata[665] = "\x07" "\xff\x02\x94" \
+				"Dans une terre grasse et pleine d'escargots\n" \
+				"Je veux creuser moi-même une fosse profonde,\n" \
+				"Où je puisse à loisir étaler mes vieux os\n" \
+				"Et dormir dans l'oubli comme un requin dans l'onde.\n" \
+				"Je hais les testaments et je hais les tombeaux;\n" \
+				"Plutôt que d'implorer une larme du monde,\n" \
+				"Vivant, j'aimerais mieux inviter les corbeaux\n" \
+				"À saigner tous les bouts de ma carcasse immonde.\n" \
+				"Ô vers! noirs compagnons sans oreille et sans yeux,\n" \
+				"Voyez venir à vous un mort libre et joyeux;\n" \
+				"Philosophes viveurs, fils de la pourriture,\n" \
+				"À travers ma ruine allez donc sans remords,\n" \
+				"Et dites-moi s'il est encor quelque torture\n" \
+				"Pour ce vieux corps sans âme et mort parmi les morts!\n"
+				"\xfe";
 
 void
 test_tlv_encode_short (void)

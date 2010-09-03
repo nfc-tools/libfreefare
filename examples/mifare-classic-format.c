@@ -167,7 +167,7 @@ main(int argc, char *argv[])
 
     nfc_list_devices (devices, 8, &device_count);
     if (!device_count)
-        errx (EXIT_FAILURE, "No NFC device found.");
+	errx (EXIT_FAILURE, "No NFC device found.");
 
     for (size_t d = 0; d < device_count; d++) {
 	device = nfc_connect (&(devices[d]));
@@ -177,72 +177,72 @@ main(int argc, char *argv[])
 	    continue;
 	}
 
-    tags = freefare_get_tags (device);
-    if (!tags) {
-	nfc_disconnect (device);
-	errx (EXIT_FAILURE, "Error listing Mifare Classic tag.");
-    }
-
-    for (int i = 0; (!error) && tags[i]; i++) {
-	switch (freefare_get_tag_type (tags[i])) {
-	    case CLASSIC_1K:
-	    case CLASSIC_4K:
-		break;
-	    default:
-		continue;
+	tags = freefare_get_tags (device);
+	if (!tags) {
+	    nfc_disconnect (device);
+	    errx (EXIT_FAILURE, "Error listing Mifare Classic tag.");
 	}
 
-	char *tag_uid = freefare_get_tag_uid (tags[i]);
-	char buffer[BUFSIZ];
-
-	printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	bool format = true;
-	if (format_options.interactive) {
-	    printf ("Format [yN] ");
-	    fgets (buffer, BUFSIZ, stdin);
-	    format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
-	} else {
-	    printf ("\n");
-	}
-
-	if (format) {
-	    enum mifare_tag_type tt = freefare_get_tag_type (tags[i]);
-	    at_block = 0;
-
-	    if (format_options.fast) {
-		printf (START_FORMAT_N, (tt == CLASSIC_1K) ? 1 : 2);
-		if (!try_format_sector (tags[i], 0x00))
-		    break;
-
-		if (tt == CLASSIC_4K)
-		    if (!try_format_sector (tags[i], 0x10))
-			break;
-
-		printf (DONE_FORMAT);
-		continue;
-	    }
-	    switch (tt) {
+	for (int i = 0; (!error) && tags[i]; i++) {
+	    switch (freefare_get_tag_type (tags[i])) {
 		case CLASSIC_1K:
-		    mod_block = 4;
-		    if (!format_mifare_classic_1k (tags[i]))
-			error = 1;
-		    break;
 		case CLASSIC_4K:
-		    mod_block = 10;
-		    if (!format_mifare_classic_4k (tags[i]))
-			error = 1;
 		    break;
 		default:
-		    /* Keep compiler quiet */
-		    break;
+		    continue;
 	    }
+
+	    char *tag_uid = freefare_get_tag_uid (tags[i]);
+	    char buffer[BUFSIZ];
+
+	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    bool format = true;
+	    if (format_options.interactive) {
+		printf ("Format [yN] ");
+		fgets (buffer, BUFSIZ, stdin);
+		format = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    } else {
+		printf ("\n");
+	    }
+
+	    if (format) {
+		enum mifare_tag_type tt = freefare_get_tag_type (tags[i]);
+		at_block = 0;
+
+		if (format_options.fast) {
+		    printf (START_FORMAT_N, (tt == CLASSIC_1K) ? 1 : 2);
+		    if (!try_format_sector (tags[i], 0x00))
+			break;
+
+		    if (tt == CLASSIC_4K)
+			if (!try_format_sector (tags[i], 0x10))
+			    break;
+
+		    printf (DONE_FORMAT);
+		    continue;
+		}
+		switch (tt) {
+		    case CLASSIC_1K:
+			mod_block = 4;
+			if (!format_mifare_classic_1k (tags[i]))
+			    error = 1;
+			break;
+		    case CLASSIC_4K:
+			mod_block = 10;
+			if (!format_mifare_classic_4k (tags[i]))
+			    error = 1;
+			break;
+		    default:
+			/* Keep compiler quiet */
+			break;
+		}
+	    }
+
+	    free (tag_uid);
 	}
 
-	free (tag_uid);
-    }
-
-    freefare_free_tags (tags);
-    nfc_disconnect (device);
+	freefare_free_tags (tags);
+	nfc_disconnect (device);
     }
 
     exit (error);
