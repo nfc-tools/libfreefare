@@ -100,6 +100,21 @@ main(int argc, char *argv[])
 	printf ("    Storage size:         0x%02x (%s%d bytes)\n", info.software.storage_size, (info.software.storage_size & 1) ? ">" : "=", (int)pow (2, info.software.storage_size >> 1));
 	printf ("    Protocol:             0x%02x\n", info.software.protocol);
 
+	uint8_t settings;
+	uint8_t max_keys;
+	res = mifare_desfire_get_key_settings (tags[i], &settings, &max_keys);
+	if (res < 0) {
+	    warnx ("Cant' get Mifare DESFire Master Key settings: %s", mifare_desfire_error_lookup (mifare_desfire_get_last_error (tags[i])));
+	    error = 1;
+	    break;
+	}
+
+	printf ("Master Key settings (0x%02x):\n", settings);
+	printf ("    0x%02x configuration changeable;\n", settings & 0x08);
+	printf ("    0x%02x PICC Master Key not required for create / delete;\n", settings & 0x04);
+	printf ("    0x%02x Free directory list access without PICC Master Key;\n", settings & 0x02);
+	printf ("    0x%02x Allow changing the Master Key;\n", settings & 0x01);
+
 	free (tag_uid);
 
 	mifare_desfire_disconnect (tags[i]);
