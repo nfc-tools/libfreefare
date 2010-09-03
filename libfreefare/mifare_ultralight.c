@@ -51,7 +51,7 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_dep_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
@@ -187,7 +187,7 @@ mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, c
     memcpy (cmd + 2, data, sizeof (MifareUltralightPage));
 
     size_t n;
-    if (!(nfc_initiator_transceive_dep_bytes (tag->device, cmd, sizeof (cmd), NULL, &n))) {
+    if (!(nfc_initiator_transceive_bytes (tag->device, cmd, sizeof (cmd), NULL, &n))) {
 	errno = EIO;
 	return -1;
     }

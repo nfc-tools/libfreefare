@@ -277,6 +277,7 @@ mifare_desfire_connect (MifareTag tag)
 	errno = EIO;
 	return -1;
     }
+    nfc_configure (tag->device, NDO_EASY_FRAMING, false);
     return 0;
 }
 
@@ -295,6 +296,7 @@ mifare_desfire_disconnect (MifareTag tag)
     if (nfc_initiator_deselect_target (tag->device)) {
 	tag->active = 0;
     }
+    nfc_configure (tag->device, NDO_EASY_FRAMING, true);
     return 0;
 }
 
