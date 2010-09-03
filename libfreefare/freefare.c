@@ -64,16 +64,16 @@ freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
 
     /* Allocate memory for the found MIFARE target */
     switch (tag_info->type) {
-	case CLASSIC_1K:
-	case CLASSIC_4K:
-	    tag = mifare_classic_tag_new ();
-	    break;
-	case DESFIRE:
-	    tag = mifare_desfire_tag_new ();
-	    break;
-	case ULTRALIGHT:
-	    tag = mifare_ultralight_tag_new ();
-	    break;
+    case CLASSIC_1K:
+    case CLASSIC_4K:
+	tag = mifare_classic_tag_new ();
+	break;
+    case DESFIRE:
+	tag = mifare_desfire_tag_new ();
+	break;
+    case ULTRALIGHT:
+	tag = mifare_ultralight_tag_new ();
+	break;
     }
 
     if (!tag)
@@ -188,16 +188,16 @@ freefare_free_tag (MifareTag tag)
 {
     if (tag) {
 	switch (tag->tag_info->type) {
-	    case CLASSIC_1K:
-	    case CLASSIC_4K:
-		mifare_classic_tag_free (tag);
-		break;
-	    case DESFIRE:
-		mifare_desfire_tag_free (tag);
-		break;
-	    case ULTRALIGHT:
-		mifare_ultralight_tag_free (tag);
-		break;
+	case CLASSIC_1K:
+	case CLASSIC_4K:
+	    mifare_classic_tag_free (tag);
+	    break;
+	case DESFIRE:
+	    mifare_desfire_tag_free (tag);
+	    break;
+	case ULTRALIGHT:
+	    mifare_ultralight_tag_free (tag);
+	    break;
 	}
     }
 }

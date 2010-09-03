@@ -724,22 +724,22 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
     settings->access_rights = le16toh (raw_settings.access_rights);
 
     switch (settings->file_type) {
-	case MDFT_STANDARD_DATA_FILE:
-	case MDFT_BACKUP_DATA_FILE:
-	    settings->settings.standard_file.file_size = le24toh (raw_settings.settings.standard_file.file_size);
-	    break;
-	case MDFT_VALUE_FILE_WITH_BACKUP:
-	    settings->settings.value_file.lower_limit = le32toh (raw_settings.settings.value_file.lower_limit);
-	    settings->settings.value_file.upper_limit = le32toh (raw_settings.settings.value_file.upper_limit);
-	    settings->settings.value_file.limited_credit_value = le32toh (raw_settings.settings.value_file.limited_credit_value);
-	    settings->settings.value_file.limited_credit_enabled = raw_settings.settings.value_file.limited_credit_enabled;
-	    break;
-	case MDFT_LINEAR_RECORD_FILE_WITH_BACKUP:
-	case MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP:
-	    settings->settings.linear_record_file.record_size = le24toh (raw_settings.settings.linear_record_file.record_size);
-	    settings->settings.linear_record_file.max_number_of_records = le24toh (raw_settings.settings.linear_record_file.max_number_of_records);
-	    settings->settings.linear_record_file.current_number_of_records = le24toh (raw_settings.settings.linear_record_file.current_number_of_records);
-	    break;
+    case MDFT_STANDARD_DATA_FILE:
+    case MDFT_BACKUP_DATA_FILE:
+	settings->settings.standard_file.file_size = le24toh (raw_settings.settings.standard_file.file_size);
+	break;
+    case MDFT_VALUE_FILE_WITH_BACKUP:
+	settings->settings.value_file.lower_limit = le32toh (raw_settings.settings.value_file.lower_limit);
+	settings->settings.value_file.upper_limit = le32toh (raw_settings.settings.value_file.upper_limit);
+	settings->settings.value_file.limited_credit_value = le32toh (raw_settings.settings.value_file.limited_credit_value);
+	settings->settings.value_file.limited_credit_enabled = raw_settings.settings.value_file.limited_credit_enabled;
+	break;
+    case MDFT_LINEAR_RECORD_FILE_WITH_BACKUP:
+    case MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP:
+	settings->settings.linear_record_file.record_size = le24toh (raw_settings.settings.linear_record_file.record_size);
+	settings->settings.linear_record_file.max_number_of_records = le24toh (raw_settings.settings.linear_record_file.max_number_of_records);
+	settings->settings.linear_record_file.current_number_of_records = le24toh (raw_settings.settings.linear_record_file.current_number_of_records);
+	break;
     }
 
     cached_file_settings[file_no] = *settings;

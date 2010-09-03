@@ -150,11 +150,11 @@ main(int argc, char *argv[])
 
 	for (int i = 0; (!error) && tags[i]; i++) {
 	    switch (freefare_get_tag_type (tags[i])) {
-		case CLASSIC_1K:
-		case CLASSIC_4K:
-		    break;
-		default:
-		    continue;
+	    case CLASSIC_1K:
+	    case CLASSIC_4K:
+		break;
+	    default:
+		continue;
 	    }
 
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
@@ -166,49 +166,49 @@ main(int argc, char *argv[])
 
 	    if (write_ndef) {
 		switch (freefare_get_tag_type (tags[i])) {
-		    case CLASSIC_4K:
-			if (!search_sector_key (tags[i], 0x10, &(card_write_keys[0x10].key), &(card_write_keys[0x10].type))) {
-			    error = 1;
-			    goto error;
-			}
-			/* fallthrough */
-		    case CLASSIC_1K:
-			if (!search_sector_key (tags[i], 0x00, &(card_write_keys[0x00].key), &(card_write_keys[0x00].type))) {
-			    error = 1;
-			    goto error;
-			}
-			break;
-		    default:
-			/* Keep compiler quiet */
-			break;
+		case CLASSIC_4K:
+		    if (!search_sector_key (tags[i], 0x10, &(card_write_keys[0x10].key), &(card_write_keys[0x10].type))) {
+			error = 1;
+			goto error;
+		    }
+		    /* fallthrough */
+		case CLASSIC_1K:
+		    if (!search_sector_key (tags[i], 0x00, &(card_write_keys[0x00].key), &(card_write_keys[0x00].type))) {
+			error = 1;
+			goto error;
+		    }
+		    break;
+		default:
+		    /* Keep compiler quiet */
+		    break;
 		}
 
 		if (!error) {
 		    /* Ensure the auth key is always a B one. If not, change it! */
 		    switch (freefare_get_tag_type (tags[i])) {
-			case CLASSIC_4K:
-			    if (card_write_keys[0x10].type != MFC_KEY_B) {
-				if( 0 != fix_mad_trailer_block( tags[i], 0x10, card_write_keys[0x10].key, card_write_keys[0x10].type)) {
-				    error = 1;
-				    goto error;
-				}
-				memcpy (&(card_write_keys[0x10].key), &default_keyb, sizeof (MifareClassicKey));
-				card_write_keys[0x10].type = MFC_KEY_B;
+		    case CLASSIC_4K:
+			if (card_write_keys[0x10].type != MFC_KEY_B) {
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x10, card_write_keys[0x10].key, card_write_keys[0x10].type)) {
+				error = 1;
+				goto error;
 			    }
-			    /* fallthrough */
-			case CLASSIC_1K:
-			    if (card_write_keys[0x00].type != MFC_KEY_B) {
-				if( 0 != fix_mad_trailer_block( tags[i], 0x00, card_write_keys[0x00].key, card_write_keys[0x00].type)) {
-				    error = 1;
-				    goto error;
-				}
-				memcpy (&(card_write_keys[0x00].key), &default_keyb, sizeof (MifareClassicKey));
-				card_write_keys[0x00].type = MFC_KEY_B;
+			    memcpy (&(card_write_keys[0x10].key), &default_keyb, sizeof (MifareClassicKey));
+			    card_write_keys[0x10].type = MFC_KEY_B;
+			}
+			/* fallthrough */
+		    case CLASSIC_1K:
+			if (card_write_keys[0x00].type != MFC_KEY_B) {
+			    if( 0 != fix_mad_trailer_block( tags[i], 0x00, card_write_keys[0x00].key, card_write_keys[0x00].type)) {
+				error = 1;
+				goto error;
 			    }
-			    break;
-			default:
-			    /* Keep compiler quiet */
-			    break;
+			    memcpy (&(card_write_keys[0x00].key), &default_keyb, sizeof (MifareClassicKey));
+			    card_write_keys[0x00].type = MFC_KEY_B;
+			}
+			break;
+		    default:
+			/* Keep compiler quiet */
+			break;
 		    }
 		}
 
@@ -235,15 +235,15 @@ main(int argc, char *argv[])
 
 		    MifareClassicSectorNumber max_s;
 		    switch (freefare_get_tag_type (tags[i])) {
-			case CLASSIC_1K:
-			    max_s = 15;
-			    break;
-			case CLASSIC_4K:
-			    max_s = 39;
-			    break;
-			default:
-			    /* Keep compiler quiet */
-			    break;
+		    case CLASSIC_1K:
+			max_s = 15;
+			break;
+		    case CLASSIC_4K:
+			max_s = 39;
+			break;
+		    default:
+			/* Keep compiler quiet */
+			break;
 		    }
 
 		    MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };

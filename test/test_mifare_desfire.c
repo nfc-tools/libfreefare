@@ -60,17 +60,17 @@ test_mifare_desfire (void)
     MifareDESFireKey key;
 
     switch (key_version) {
-	case 0x00:
-	    key = mifare_desfire_des_key_new_with_version (key_data_null);
-	    break;
-	case 0xAA:
-	    key = mifare_desfire_des_key_new_with_version (key_data_des);
-	    break;
-	case 0xC7:
-	    key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-	    break;
-	default:
-	    cut_fail ("Unknown master key.");
+    case 0x00:
+	key = mifare_desfire_des_key_new_with_version (key_data_null);
+	break;
+    case 0xAA:
+	key = mifare_desfire_des_key_new_with_version (key_data_des);
+	break;
+    case 0xC7:
+	key = mifare_desfire_3des_key_new_with_version (key_data_3des);
+	break;
+    default:
+	cut_fail ("Unknown master key.");
     }
 
     cut_assert_not_null (key, cut_message ("Cannot allocate key"));
@@ -294,34 +294,34 @@ test_mifare_desfire (void)
 	cut_assert_success ("mifare_desfire_get_file_settings()");
 
 	switch (files[i]) {
-	    case 0:
-		cut_assert_equal_int (MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP, settings.file_type, cut_message ("Wrong file type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
-		cut_assert_equal_int (4, settings.settings.linear_record_file.record_size, cut_message ("Wrong record size"));
-		cut_assert_equal_int (10, settings.settings.linear_record_file.max_number_of_records, cut_message ("Wrong max number of records"));
-		cut_assert_equal_int (9, settings.settings.linear_record_file.current_number_of_records, cut_message ("Wrong current number of records"));
-		break;
-	    case 4:
-		cut_assert_equal_int (MDFT_VALUE_FILE_WITH_BACKUP, settings.file_type, cut_message ("Wrong file type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
+	case 0:
+	    cut_assert_equal_int (MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP, settings.file_type, cut_message ("Wrong file type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
+	    cut_assert_equal_int (4, settings.settings.linear_record_file.record_size, cut_message ("Wrong record size"));
+	    cut_assert_equal_int (10, settings.settings.linear_record_file.max_number_of_records, cut_message ("Wrong max number of records"));
+	    cut_assert_equal_int (9, settings.settings.linear_record_file.current_number_of_records, cut_message ("Wrong current number of records"));
+	    break;
+	case 4:
+	    cut_assert_equal_int (MDFT_VALUE_FILE_WITH_BACKUP, settings.file_type, cut_message ("Wrong file type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
 
-		cut_assert_equal_int (0, settings.settings.value_file.lower_limit, cut_message ("Wrong lower limit"));
-		cut_assert_equal_int (1000, settings.settings.value_file.upper_limit, cut_message ("Wrong upper limit"));
-		cut_assert_equal_int (97, settings.settings.value_file.limited_credit_value, cut_message ("Wrong limited_credit value"));
-		cut_assert_equal_int (0, settings.settings.value_file.limited_credit_enabled, cut_message ("Wrong limited_credit enable state"));
-		break;
-	    case 5:
-		cut_assert_equal_int (MDFT_BACKUP_DATA_FILE, settings.file_type, cut_message ("Wrong file type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
-		cut_assert_equal_int (64, settings.settings.standard_file.file_size, cut_message ("Wrong file size"));
-		break;
-	    case 15:
-		cut_assert_equal_int (MDFT_STANDARD_DATA_FILE, settings.file_type, cut_message ("Wrong file type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
-		cut_assert_equal_int (100, settings.settings.standard_file.file_size, cut_message ("Wrong file size"));
-		break;
-	    default:
-		cut_fail ("Wow!  Cosmic ray!");
+	    cut_assert_equal_int (0, settings.settings.value_file.lower_limit, cut_message ("Wrong lower limit"));
+	    cut_assert_equal_int (1000, settings.settings.value_file.upper_limit, cut_message ("Wrong upper limit"));
+	    cut_assert_equal_int (97, settings.settings.value_file.limited_credit_value, cut_message ("Wrong limited_credit value"));
+	    cut_assert_equal_int (0, settings.settings.value_file.limited_credit_enabled, cut_message ("Wrong limited_credit enable state"));
+	    break;
+	case 5:
+	    cut_assert_equal_int (MDFT_BACKUP_DATA_FILE, settings.file_type, cut_message ("Wrong file type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
+	    cut_assert_equal_int (64, settings.settings.standard_file.file_size, cut_message ("Wrong file size"));
+	    break;
+	case 15:
+	    cut_assert_equal_int (MDFT_STANDARD_DATA_FILE, settings.file_type, cut_message ("Wrong file type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("Wrong communication settings"));
+	    cut_assert_equal_int (100, settings.settings.standard_file.file_size, cut_message ("Wrong file size"));
+	    break;
+	default:
+	    cut_fail ("Wow!  Cosmic ray!");
 	}
 
 	res = mifare_desfire_delete_file (tag, files[i]);
@@ -608,31 +608,31 @@ test_mifare_desfire (void)
 	cut_assert_success ("mifare_desfire_get_file_settings()");
 
 	switch (files[i]) {
-	    case 1:
-		cut_assert_equal_int (MDFT_LINEAR_RECORD_FILE_WITH_BACKUP, settings.file_type, cut_message ("type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("cs"));
-		cut_assert_equal_int (0x1324, settings.access_rights, cut_message ("access_rights"));
-		cut_assert_equal_int (25, settings.settings.linear_record_file.record_size, cut_message ("record_size"));
-		cut_assert_equal_int (4, settings.settings.linear_record_file.max_number_of_records, cut_message ("max_number_of_records"));
-		cut_assert_equal_int (2, settings.settings.linear_record_file.current_number_of_records, cut_message ("current_number_of_records"));
-		break;
-	    case 4:
-		cut_assert_equal_int (MDFT_VALUE_FILE_WITH_BACKUP , settings.file_type, cut_message ("type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("cs"));
-		cut_assert_equal_int (0x1324, settings.access_rights, cut_message ("access_rights"));
-		cut_assert_equal_int (-987654321, settings.settings.value_file.lower_limit, cut_message ("lower_limit"));
-		cut_assert_equal_int (-1000, settings.settings.value_file.upper_limit, cut_message ("upper_limit"));
-		cut_assert_equal_int (0, settings.settings.value_file.limited_credit_value, cut_message ("limited_credit_value"));
-		cut_assert_equal_int (1, settings.settings.value_file.limited_credit_enabled, cut_message ("limited_credit_enabled"));
-		break;
-	    case 14: /* std_data_file_id */
-		cut_assert_equal_int (MDFT_STANDARD_DATA_FILE, settings.file_type, cut_message ("type"));
-		cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("cs"));
-		cut_assert_equal_int (0x1234, settings.access_rights, cut_message ("access_rights"));
-		cut_assert_equal_int (100, settings.settings.standard_file.file_size, cut_message ("size"));
-		break;
-	    default:
-		cut_fail ("file_no");
+	case 1:
+	    cut_assert_equal_int (MDFT_LINEAR_RECORD_FILE_WITH_BACKUP, settings.file_type, cut_message ("type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("cs"));
+	    cut_assert_equal_int (0x1324, settings.access_rights, cut_message ("access_rights"));
+	    cut_assert_equal_int (25, settings.settings.linear_record_file.record_size, cut_message ("record_size"));
+	    cut_assert_equal_int (4, settings.settings.linear_record_file.max_number_of_records, cut_message ("max_number_of_records"));
+	    cut_assert_equal_int (2, settings.settings.linear_record_file.current_number_of_records, cut_message ("current_number_of_records"));
+	    break;
+	case 4:
+	    cut_assert_equal_int (MDFT_VALUE_FILE_WITH_BACKUP , settings.file_type, cut_message ("type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("cs"));
+	    cut_assert_equal_int (0x1324, settings.access_rights, cut_message ("access_rights"));
+	    cut_assert_equal_int (-987654321, settings.settings.value_file.lower_limit, cut_message ("lower_limit"));
+	    cut_assert_equal_int (-1000, settings.settings.value_file.upper_limit, cut_message ("upper_limit"));
+	    cut_assert_equal_int (0, settings.settings.value_file.limited_credit_value, cut_message ("limited_credit_value"));
+	    cut_assert_equal_int (1, settings.settings.value_file.limited_credit_enabled, cut_message ("limited_credit_enabled"));
+	    break;
+	case 14: /* std_data_file_id */
+	    cut_assert_equal_int (MDFT_STANDARD_DATA_FILE, settings.file_type, cut_message ("type"));
+	    cut_assert_equal_int (MDCM_PLAIN, settings.communication_settings, cut_message ("cs"));
+	    cut_assert_equal_int (0x1234, settings.access_rights, cut_message ("access_rights"));
+	    cut_assert_equal_int (100, settings.settings.standard_file.file_size, cut_message ("size"));
+	    break;
+	default:
+	    cut_fail ("file_no");
 
 	}
 

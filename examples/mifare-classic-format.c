@@ -144,19 +144,19 @@ main(int argc, char *argv[])
 
     while ((ch = getopt (argc, argv, "fhy")) != -1) {
 	switch (ch) {
-	    case 'f':
-		format_options.fast = true;
-		break;
-	    case 'h':
-		usage(argv[0]);
-		exit (EXIT_SUCCESS);
-		break;
-	    case 'y':
-		format_options.interactive = false;
-		break;
-	    default:
-		usage(argv[0]);
-		exit (EXIT_FAILURE);
+	case 'f':
+	    format_options.fast = true;
+	    break;
+	case 'h':
+	    usage(argv[0]);
+	    exit (EXIT_SUCCESS);
+	    break;
+	case 'y':
+	    format_options.interactive = false;
+	    break;
+	default:
+	    usage(argv[0]);
+	    exit (EXIT_FAILURE);
 	}
     }
     argc -= optind;
@@ -185,11 +185,11 @@ main(int argc, char *argv[])
 
 	for (int i = 0; (!error) && tags[i]; i++) {
 	    switch (freefare_get_tag_type (tags[i])) {
-		case CLASSIC_1K:
-		case CLASSIC_4K:
-		    break;
-		default:
-		    continue;
+	    case CLASSIC_1K:
+	    case CLASSIC_4K:
+		break;
+	    default:
+		continue;
 	    }
 
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
@@ -222,19 +222,19 @@ main(int argc, char *argv[])
 		    continue;
 		}
 		switch (tt) {
-		    case CLASSIC_1K:
-			mod_block = 4;
-			if (!format_mifare_classic_1k (tags[i]))
-			    error = 1;
-			break;
-		    case CLASSIC_4K:
-			mod_block = 10;
-			if (!format_mifare_classic_4k (tags[i]))
-			    error = 1;
-			break;
-		    default:
-			/* Keep compiler quiet */
-			break;
+		case CLASSIC_1K:
+		    mod_block = 4;
+		    if (!format_mifare_classic_1k (tags[i]))
+			error = 1;
+		    break;
+		case CLASSIC_4K:
+		    mod_block = 10;
+		    if (!format_mifare_classic_4k (tags[i]))
+			error = 1;
+		    break;
+		default:
+		    /* Keep compiler quiet */
+		    break;
 		}
 	    }
 

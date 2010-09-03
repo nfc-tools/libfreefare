@@ -106,54 +106,54 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
     size_t edl, mdl;
 
     switch (communication_settings) {
-	case 0:
-	case 2:
-	    res = data;
-	    break;
-	case 1:
-	    edl = padded_data_length (*nbytes);
-	    if (!(res = assert_crypto_buffer_size (tag, edl)))
-		abort();
+    case 0:
+    case 2:
+	res = data;
+	break;
+    case 1:
+	edl = padded_data_length (*nbytes);
+	if (!(res = assert_crypto_buffer_size (tag, edl)))
+	    abort();
 
-	    // Fill in the crypto buffer with data ...
-	    memcpy (res, data, *nbytes);
-	    // ... and 0 padding
-	    bzero ((uint8_t *)res + *nbytes, edl - *nbytes);
+	// Fill in the crypto buffer with data ...
+	memcpy (res, data, *nbytes);
+	// ... and 0 padding
+	bzero ((uint8_t *)res + *nbytes, edl - *nbytes);
 
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, edl, MD_SEND, 1);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, edl, MD_SEND, 1);
 
-	    memcpy (mac, (uint8_t *)res + edl - 8, 4);
+	memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
-	    mdl = maced_data_length (*nbytes);
-	    if (!(res = assert_crypto_buffer_size (tag, mdl)))
-		abort();
+	mdl = maced_data_length (*nbytes);
+	if (!(res = assert_crypto_buffer_size (tag, mdl)))
+	    abort();
 
-	    memcpy (res, data, *nbytes);
-	    memcpy ((uint8_t *)res + *nbytes, mac, 4);
+	memcpy (res, data, *nbytes);
+	memcpy ((uint8_t *)res + *nbytes, mac, 4);
 
-	    *nbytes += 4;
+	*nbytes += 4;
 
-	    break;
-	case 3:
-	    edl = enciphered_data_length (*nbytes);
-	    if (!(res = assert_crypto_buffer_size (tag, edl)))
-		abort();
+	break;
+    case 3:
+	edl = enciphered_data_length (*nbytes);
+	if (!(res = assert_crypto_buffer_size (tag, edl)))
+	    abort();
 
-	    // Fill in the crypto buffer with data ...
-	    memcpy (res, data, *nbytes);
-	    // ... CRC ...
-	    append_iso14443a_crc (res, *nbytes);
-	    // ... and 0 padding
-	    bzero ((uint8_t *)(res) + *nbytes + 2, edl - *nbytes - 2);
+	// Fill in the crypto buffer with data ...
+	memcpy (res, data, *nbytes);
+	// ... CRC ...
+	append_iso14443a_crc (res, *nbytes);
+	// ... and 0 padding
+	bzero ((uint8_t *)(res) + *nbytes + 2, edl - *nbytes - 2);
 
-	    *nbytes = edl;
+	*nbytes = edl;
 
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, *nbytes, MD_SEND, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, *nbytes, MD_SEND, 0);
 
-	    break;
-	default:
-	    res = NULL;
-	    break;
+	break;
+    default:
+	res = NULL;
+	break;
     }
 
     return res;
@@ -167,73 +167,73 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     void *edata;
 
     switch (communication_settings) {
-	case 0:
-	case 2:
-	    break;
-	case 1:
-	    *nbytes -= 4;
+    case 0:
+    case 2:
+	break;
+    case 1:
+	*nbytes -= 4;
 
-	    edl = enciphered_data_length (*nbytes);
-	    edata = malloc (edl);
+	edl = enciphered_data_length (*nbytes);
+	edata = malloc (edl);
 
-	    memcpy (edata, data, *nbytes);
-	    bzero ((uint8_t *)edata + *nbytes, edl - *nbytes);
+	memcpy (edata, data, *nbytes);
+	bzero ((uint8_t *)edata + *nbytes, edl - *nbytes);
 
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, edata, edl, MD_SEND, 1);
-	    /*                                                            ,^^^^^^^
-	     * No!  This is not a typo! ---------------------------------'
-	     */
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, edata, edl, MD_SEND, 1);
+	/*                                                            ,^^^^^^^
+	 * No!  This is not a typo! ---------------------------------'
+	 */
 
-	    if (0 != memcmp ((uint8_t *)data + *nbytes, (uint8_t *)edata + edl - 8, 4)) {
-		printf ("MACing not verified\n");
-		*nbytes = -1;
-		res = NULL;
-	    }
-
-	    free (edata);
-
-	    break;
-	case 3:
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, *nbytes, MD_RECEIVE, 0);
-
-	    /*
-	     * Look for the CRC and ensure it is following by NULL padding.  We
-	     * can't start by the end because the CRC is supposed to be 0 when
-	     * verified, and accumulating 0's in it should not change it.
-	     */
-	    bool verified = false;
-	    int end_crc_pos = *nbytes - 7; // The CRC can be over two blocks
-
-	    do {
-		uint16_t crc;
-		iso14443a_crc (res, end_crc_pos, (uint8_t *)&crc);
-		if (!crc) {
-		    verified = true;
-		    for (int n = end_crc_pos; n < *nbytes; n++) {
-			uint8_t byte = ((uint8_t *)res)[n];
-			if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
-			    verified = false;
-		    }
-		}
-		if (verified) {
-		    *nbytes = end_crc_pos - 2;
-		} else {
-		    end_crc_pos++;
-		}
-	    } while (!verified && (end_crc_pos < *nbytes));
-
-	    if (!verified) {
-		printf ("(3)DES not verified\n");
-		*nbytes = -1;
-		res = NULL;
-	    }
-
-	    break;
-	default:
-	    printf ("Unknown communication settings\n");
+	if (0 != memcmp ((uint8_t *)data + *nbytes, (uint8_t *)edata + edl - 8, 4)) {
+	    printf ("MACing not verified\n");
 	    *nbytes = -1;
 	    res = NULL;
-	    break;
+	}
+
+	free (edata);
+
+	break;
+    case 3:
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, *nbytes, MD_RECEIVE, 0);
+
+	/*
+	 * Look for the CRC and ensure it is following by NULL padding.  We
+	 * can't start by the end because the CRC is supposed to be 0 when
+	 * verified, and accumulating 0's in it should not change it.
+	 */
+	bool verified = false;
+	int end_crc_pos = *nbytes - 7; // The CRC can be over two blocks
+
+	do {
+	    uint16_t crc;
+	    iso14443a_crc (res, end_crc_pos, (uint8_t *)&crc);
+	    if (!crc) {
+		verified = true;
+		for (int n = end_crc_pos; n < *nbytes; n++) {
+		    uint8_t byte = ((uint8_t *)res)[n];
+		    if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
+			verified = false;
+		}
+	    }
+	    if (verified) {
+		*nbytes = end_crc_pos - 2;
+	    } else {
+		end_crc_pos++;
+	    }
+	} while (!verified && (end_crc_pos < *nbytes));
+
+	if (!verified) {
+	    printf ("(3)DES not verified\n");
+	    *nbytes = -1;
+	    res = NULL;
+	}
+
+	break;
+    default:
+	printf ("Unknown communication settings\n");
+	*nbytes = -1;
+	res = NULL;
+	break;
 
     }
     return res;
@@ -252,26 +252,26 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
     uint8_t edata[8];
 
     switch (key->type) {
-	case T_DES:
-	    if (mac) {
-		DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
-	    } else {
-		DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
-	    }
-	    memcpy (data, edata, 8);
-	    break;
-	case T_3DES:
-	    if (mac) {
-		DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
-		DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_DECRYPT);
-		DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
-	    } else {
-		DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
-		DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_ENCRYPT);
-		DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
-	    }
-	    memcpy (data, edata, 8);
-	    break;
+    case T_DES:
+	if (mac) {
+	    DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
+	} else {
+	    DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	}
+	memcpy (data, edata, 8);
+	break;
+    case T_3DES:
+	if (mac) {
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_DECRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
+	} else {
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_ENCRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	}
+	memcpy (data, edata, 8);
+	break;
     }
 
     if (direction == MD_SEND) {

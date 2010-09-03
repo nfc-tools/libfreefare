@@ -131,23 +131,23 @@ tlv_record_length (const uint8_t *stream, size_t *field_length_size, size_t *fie
     size_t fvs = 0;
 
     switch (stream[0]) {
-	case 0x00:
-	case 0xfe:
-	    break;
-	case 0x01:
-	case 0x02:
-	case 0x03:
-	default: // FIXME Not supported.
-	    if (stream[1] == 0xff) {
-		uint16_t be_size;
-		memcpy (&be_size, stream + 2, sizeof (uint16_t));
-		fls = 3;
-		fvs = be16toh(be_size);
-	    } else {
-		fls = 1;
-		fvs = stream[1];
-	    }
-	    break;
+    case 0x00:
+    case 0xfe:
+	break;
+    case 0x01:
+    case 0x02:
+    case 0x03:
+    default: // FIXME Not supported.
+	if (stream[1] == 0xff) {
+	    uint16_t be_size;
+	    memcpy (&be_size, stream + 2, sizeof (uint16_t));
+	    fls = 3;
+	    fvs = be16toh(be_size);
+	} else {
+	    fls = 1;
+	    fvs = stream[1];
+	}
+	break;
     }
 
     if (field_length_size)
