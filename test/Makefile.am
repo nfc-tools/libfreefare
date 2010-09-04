@@ -53,7 +53,7 @@ test_mifare_desfire_aid_la_SOURCES = test_mifare_desfire_aid.c
 test_mifare_desfire_aid_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_desfire_des_la_SOURCES = test_mifare_desfire_des.c
-test_mifare_desfire_des_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la -lssl
+test_mifare_desfire_des_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_desfire_key_la_SOURCES = test_mifare_desfire_key.c
 test_mifare_desfire_key_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
