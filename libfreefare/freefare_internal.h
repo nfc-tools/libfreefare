@@ -51,6 +51,20 @@
 #  define be16toh(x) betoh16(x)
 #endif
 
+#if !defined(le32toh) && defined(CFSwapInt32LittleToHost)
+#  define be32toh(x) CFSwapInt32BigToHost(x)
+#  define htobe32(x) CFSwapInt32HostToBig(x)
+#  define le32toh(x) CFSwapInt32LittleToHost(x)
+#  define htole32(x) CFSwapInt32HostToLittle(x)
+#endif
+
+#if !defined(le16toh) && defined(CFSwapInt16LittleToHost)
+#  define be16toh(x) CFSwapInt16BigToHost(x)
+#  define htobe16(x) CFSwapInt16HostToBig(x)
+#  define le16toh(x) CFSwapInt16LittleToHost(x)
+#  define htole16(x) CFSwapInt16HostToLittle(x)
+#endif
+
 #if !defined(le32toh) && defined(bswap_32)
 #  if BYTE_ORDER == LITTLE_ENDIAN
 #    define be32toh(x) bswap_32(x)

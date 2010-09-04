@@ -35,6 +35,10 @@
 #  include <endian.h>
 #endif
 
+#if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
+#  include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #if defined(HAVE_BYTESWAP_H)
 #  include <byteswap.h>
 #endif

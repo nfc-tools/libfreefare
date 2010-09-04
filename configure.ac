@@ -40,9 +40,9 @@ AC_FUNC_REALLOC
 AC_CHECK_HEADERS([sys/types.h])
 AC_CHECK_FUNCS([memset letoh32 htole32 pow strerror])
 
-AC_CHECK_HEADERS([endian.h sys/endian.h])
-if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no"; then
-  AC_MSG_ERROR(["Can't locate header endian.h."]);
+AC_CHECK_HEADERS([endian.h sys/endian.h CoreFoundation/CoreFoundation.h])
+if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no" -a $ac_cv_header_CoreFoundation_CoreFoundation_h = "no"; then
+  AC_MSG_ERROR(["Can't locate usable header file for endianness convertions."]);
 fi
 
 AC_CHECK_HEADERS([byteswap.h])
