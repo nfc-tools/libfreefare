@@ -119,6 +119,7 @@ freefare_get_tags (nfc_device_t *device)
     // Configure the CRC and Parity settings
     nfc_configure(device,NDO_HANDLE_CRC,true);
     nfc_configure(device,NDO_HANDLE_PARITY,true);
+    nfc_configure(device,NDO_AUTO_ISO14443_4,true);
 
     // Enable field so more power consuming cards can power themselves up
     nfc_configure(device,NDO_ACTIVATE_FIELD,true);
