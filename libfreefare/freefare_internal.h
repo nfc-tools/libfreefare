@@ -41,6 +41,16 @@
  * dealt with).
  */
 
+#if !defined(le32toh) && defined(letoh32)
+#  define le32toh(x) letoh32(x)
+#  define be32toh(x) betoh32(x)
+#endif
+
+#if !defined(le16toh) && defined(letoh16)
+#  define le16toh(x) letoh16(x)
+#  define be16toh(x) betoh16(x)
+#endif
+
 #if !defined(le32toh) && defined(bswap_32)
 #  if BYTE_ORDER == LITTLE_ENDIAN
 #    define be32toh(x) bswap_32(x)
