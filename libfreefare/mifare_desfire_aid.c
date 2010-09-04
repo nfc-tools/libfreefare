@@ -16,7 +16,13 @@
  * 
  * $Id$
  */
+
 /*
+ * This implementation was written based on information provided by the
+ * following document:
+ *
+ * Mifare DESFire Specification by LASSeO
+ * Version 1.0 - 29'th September 2009
  * http://www.scnf.org.uk/smartstore/LASSeO%20docs/DESFIRE%20Specification%20V1%200.pdf
  */
 
