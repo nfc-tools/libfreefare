@@ -57,7 +57,7 @@ AC_CHECK_LIB([crypto], [DES_ecb_encrypt], [], [AC_MSG_ERROR([Cannot find libcryp
 AC_CHECK_HEADER([openssl/des.h], [], [AC_MSG_ERROR([Cannot find openssl headers.])])
 
 # Checks for pkg-config modules.
-LIBNFC_REQUIRED_VERSION=1.3.4
+LIBNFC_REQUIRED_VERSION=1.3.9
 PKG_CHECK_MODULES([LIBNFC], [libnfc >= $LIBNFC_REQUIRED_VERSION], [], [AC_MSG_ERROR([libnfc >= $LIBNFC_REQUIRED_VERSION is mandatory.])])
 
 PKG_CONFIG_REQUIRES="libnfc"
