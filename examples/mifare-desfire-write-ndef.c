@@ -49,6 +49,9 @@ main(int argc, char *argv[])
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
 
+    printf ("WARNING: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
+    printf ("THIS IS IRREVERSIBLE!\n");
+
     if (argc > 1)
 	errx (EXIT_FAILURE, "usage: %s", argv[0]);
 
@@ -107,6 +110,22 @@ main(int argc, char *argv[])
 		res = mifare_desfire_authenticate (tags[i], 0, key);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with PICC master key failed");
+
+		uint8_t key_settings;
+		uint8_t max_keys;
+		mifare_desfire_get_key_settings(tags[i], &key_settings,&max_keys);
+		if ((key_settings & 0x08) == 0x08){
+
+		    // Send Mifare DESFire ChangeKeySetting to change the PICC master key settings into :
+		    // bit7-bit4 equal to 0000b
+		    // bit3 equal to Xb, the configuration of the PICC master key MAY be changeable or frozen
+		    // bit2 equal to 0b, CreateApplication and DeleteApplication commands are allowed with PICC master key authentication
+		    // bit1 equal to 0b, GetApplicationIDs, and GetKeySettings are allowed with PICC master key authentication
+		    // bit0 equal to Xb, PICC masterkey MAY be frozen or changeable
+		    res = mifare_desfire_change_key_settings (tags[i],0x00);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "ChangeKeySettings failed");
+		}
 
 		// Mifare DESFire Create Application with AID equal to EEEE10h, key settings equal to 09, NumOfKeys equal to 01h
 		MifareDESFireAID aid = mifare_desfire_aid_new(0xEEEE10);
