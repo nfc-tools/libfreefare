@@ -122,7 +122,7 @@ main(int argc, char *argv[])
 		    // bit2 equal to 0b, CreateApplication and DeleteApplication commands are allowed with PICC master key authentication
 		    // bit1 equal to 0b, GetApplicationIDs, and GetKeySettings are allowed with PICC master key authentication
 		    // bit0 equal to Xb, PICC masterkey MAY be frozen or changeable
-		    res = mifare_desfire_change_key_settings (tags[i],0x00);
+		    res = mifare_desfire_change_key_settings (tags[i],0x09);
 		    if (res < 0)
 			errx (EXIT_FAILURE, "ChangeKeySettings failed");
 		}
@@ -143,8 +143,8 @@ main(int argc, char *argv[])
 		res = mifare_desfire_authenticate (tags[i], 0, key);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
-		// Mifare DESFire ChangeKeySetting with key settings equal to 00000000b
-		res = mifare_desfire_change_key_settings (tags[i],0x00);
+		// Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
+		res = mifare_desfire_change_key_settings (tags[i],0x09);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "ChangeKeySettings failed");
 
