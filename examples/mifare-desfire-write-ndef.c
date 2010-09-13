@@ -49,8 +49,7 @@ main(int argc, char *argv[])
     nfc_device_t *device = NULL;
     MifareTag *tags = NULL;
 
-    printf ("WARNING: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
-    printf ("THIS IS IRREVERSIBLE!\n");
+    printf ("NOTE: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
 
     if (argc > 1)
 	errx (EXIT_FAILURE, "usage: %s", argv[0]);
