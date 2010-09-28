@@ -18,6 +18,16 @@
  */
 
 /*
+ * This implementation was written based on information provided by the
+ * following documents:
+ *
+ * Draft ISO/IEC FCD 14443-4
+ * Identification cards
+ *   - Contactless integrated circuit(s) cards
+ *     - Proximity cards
+ *       - Part 4: Transmission protocol
+ * Final Committee Draft - 2000-03-10
+ *
  * http://ridrix.wordpress.com/2009/09/19/mifare-desfire-communication-example/
  */
 
@@ -140,6 +150,20 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
     size_t __##buffer_name##_n = 0
 
 /*
+ * Conditionnaly toogles tag->block_number depending on the last received
+ * block.  This is described in section "7.4.4 Block numbering rules" of
+ * ISO/IEC 14443-4.
+ */
+#define ISO144443_CHAIN_BLOCK_NUMBER(tag, block) \
+    do { \
+	if (((__##res[0] & 0xc0) == 0x00) || (((__##res[0] & 0xa0) == 0xa0) && ((__##res[0] & 0x50) == 0x00))) { \
+	    if (MIFARE_DESFIRE (tag)->block_number == (block & 0x01)) { \
+		MIFARE_DESFIRE (tag)->block_number ^= 0x01; \
+	    } \
+	} \
+    } while (0)
+
+/*
  * Transmit the message msg to the NFC tag and receive the response res.  The
  * response buffer's size is set according to the quantity of data received.
  *
@@ -149,11 +173,13 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 #define DESFIRE_TRANSCEIVE(tag, msg, res) \
     do { \
 	errno = 0; \
+	__##msg[0] = 0x02 | (MIFARE_DESFIRE (tag)->block_number & 0x01); \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
 	DEBUG_XFER (__##msg, __##msg##_n+1, "===> "); \
 	if (!(nfc_initiator_transceive_bytes (tag->device, __##msg, __##msg##_n+1, __##res, &__##res##_n))) { \
 	    return errno = EIO, -1; \
 	} \
+	ISO144443_CHAIN_BLOCK_NUMBER (tag, __##res[0]); \
 	DEBUG_XFER (__##res, __##res##_n, "<=== "); \
 	__##res##_n -= 1; \
 	while (__##res[0] == 0xf2) { \
@@ -282,6 +308,7 @@ mifare_desfire_connect (MifareTag tag)
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
 	MIFARE_DESFIRE (tag)->last_pcd_error = NULL;
 	MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
+	MIFARE_DESFIRE (tag)->block_number = 0;
     } else {
 	errno = EIO;
 	return -1;

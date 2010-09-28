@@ -185,6 +185,7 @@ struct mifare_desfire_tag {
     uint8_t authenticated_key_no;
     uint8_t *crypto_buffer;
     size_t crypto_buffer_size;
+    uint8_t block_number;
 };
 
 MifareDESFireKey mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireKey authentication_key);
