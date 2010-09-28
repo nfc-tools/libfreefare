@@ -203,6 +203,30 @@ freefare_free_tag (MifareTag tag)
     }
 }
 
+const char *
+freefare_strerror (MifareTag tag)
+{
+    const char *p = "Unkown error";
+    if (tag->device->iLastError > 0)
+	p = nfc_strerror (tag->device);
+    else if (tag->tag_info->type == DESFIRE)
+	p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
+
+    return p;
+}
+
+int
+freefare_strerror_r (MifareTag tag, char *buffer, size_t len)
+{
+    return (snprintf (buffer, len, "%s", freefare_strerror (tag)) < 0) ? -1 : 0;
+}
+
+void
+freefare_perror (MifareTag tag, const char *string)
+{
+    fprintf (stderr, "%s: %s\n", string, freefare_strerror (tag));
+}
+
 /*
  * Free the provided tag list.
  */

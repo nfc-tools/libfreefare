@@ -76,7 +76,7 @@ main(int argc, char *argv[])
 
 	    res = mifare_desfire_get_version (tags[i], &info);
 	    if (res < 0) {
-		warnx ("Can't get Mifare DESFire version information.");
+		freefare_perror (tags[i], "mifare_desfire_get_version");
 		error = 1;
 		break;
 	    }
@@ -104,7 +104,7 @@ main(int argc, char *argv[])
 	    uint8_t max_keys;
 	    res = mifare_desfire_get_key_settings (tags[i], &settings, &max_keys);
 	    if (res < 0) {
-		warnx ("Cant' get Mifare DESFire Master Key settings: %s", mifare_desfire_error_lookup (mifare_desfire_get_last_error (tags[i])));
+		freefare_perror (tags[i], "mifare_desfire_get_key_settings");
 		error = 1;
 		break;
 	    }

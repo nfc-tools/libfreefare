@@ -338,14 +338,6 @@ mifare_desfire_disconnect (MifareTag tag)
 
 
 
-uint8_t
-mifare_desfire_get_last_error (MifareTag tag)
-{
-    return MIFARE_DESFIRE (tag)->last_picc_error;
-}
-
-
-
 int
 mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
 {

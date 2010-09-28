@@ -189,6 +189,7 @@ struct mifare_desfire_tag {
 };
 
 MifareDESFireKey mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireKey authentication_key);
+const char	*mifare_desfire_error_lookup (uint8_t error);
 
 struct mifare_ultralight_tag {
     struct mifare_tag __tag;
