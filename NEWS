@@ -1,4 +1,9 @@
-Changes between 0.1.0 and x.x.x  [xx XXX xxxx]
+Changes between 0.2.0 and 0.2.1  [xx XXX xxxx]
+
+  *) Blok numbers in ISO14443-4 blocks are incremented according to the
+     specification.
+
+Changes between 0.1.0 and 0.2.0  [07 sep 2010]
 
   *) New function freefare_free_tag() to free individual tags from a MifareTag
      list.
