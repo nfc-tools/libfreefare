@@ -55,16 +55,16 @@ main(int argc, char *argv[])
 
     while ((ch = getopt (argc, argv, "hy")) != -1) {
 	switch (ch) {
-	    case 'h':
-		usage(argv[0]);
-		exit (EXIT_SUCCESS);
-		break;
-	    case 'y':
-		configure_options.interactive = false;
-		break;
-	    default:
-		usage(argv[0]);
-		exit (EXIT_FAILURE);
+	case 'h':
+	    usage(argv[0]);
+	    exit (EXIT_SUCCESS);
+	    break;
+	case 'y':
+	    configure_options.interactive = false;
+	    break;
+	default:
+	    usage(argv[0]);
+	    exit (EXIT_FAILURE);
 	}
     }
     argc -= optind;
@@ -105,41 +105,41 @@ main(int argc, char *argv[])
 	    size_t tag_uid_len = strlen (tag_uid) / 2;
 	    switch (tag_uid_len) {
 	    case 7: // Regular UID
-	    if (configure_options.interactive) {
-		printf ("Configure random UID (this cannot be undone) [yN] ");
-		fgets (buffer, BUFSIZ, stdin);
-		do_it = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
-	    } else {
-		printf ("\n");
-	    }
-
-	    if (do_it) {
-
-		res = mifare_desfire_connect (tags[i]);
-		if (res < 0) {
-		    warnx ("Can't connect to Mifare DESFire target.");
-		    error = EXIT_FAILURE;
-		    break;
+		if (configure_options.interactive) {
+		    printf ("Configure random UID (this cannot be undone) [yN] ");
+		    fgets (buffer, BUFSIZ, stdin);
+		    do_it = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+		} else {
+		    printf ("\n");
 		}
 
-		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
-		res = mifare_desfire_authenticate (tags[i], 0, default_key);
-		if (res < 0) {
-		    freefare_perror (tags[i], "mifare_desfire_authenticate");
-		    error = EXIT_FAILURE;
-		    break;
-		}
-		mifare_desfire_key_free (default_key);
+		if (do_it) {
 
-		res = mifare_desfire_set_configuration (tags[i], false, true);
-		if (res < 0) {
-		    freefare_perror (tags[i], "mifare_desfire_set_configuration");
-		    error = EXIT_FAILURE;
-		    break;
-		}
+		    res = mifare_desfire_connect (tags[i]);
+		    if (res < 0) {
+			warnx ("Can't connect to Mifare DESFire target.");
+			error = EXIT_FAILURE;
+			break;
+		    }
 
-		mifare_desfire_disconnect (tags[i]);
-	    }
+		    MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
+		    res = mifare_desfire_authenticate (tags[i], 0, default_key);
+		    if (res < 0) {
+			freefare_perror (tags[i], "mifare_desfire_authenticate");
+			error = EXIT_FAILURE;
+			break;
+		    }
+		    mifare_desfire_key_free (default_key);
+
+		    res = mifare_desfire_set_configuration (tags[i], false, true);
+		    if (res < 0) {
+			freefare_perror (tags[i], "mifare_desfire_set_configuration");
+			error = EXIT_FAILURE;
+			break;
+		    }
+
+		    mifare_desfire_disconnect (tags[i]);
+		}
 		break;
 	    case 4: // Random UID
 
