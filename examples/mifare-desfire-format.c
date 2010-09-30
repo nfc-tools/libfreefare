@@ -77,7 +77,7 @@ main(int argc, char *argv[])
     if (!device_count)
 	errx (EXIT_FAILURE, "No NFC device found.");
 
-    for (size_t d = 0; d < device_count; d++) {
+    for (size_t d = 0; (!error) && (d < device_count); d++) {
 	device = nfc_connect (&(devices[d]));
 	if (!device) {
 	    warnx ("nfc_connect() failed.");
@@ -110,7 +110,6 @@ main(int argc, char *argv[])
 
 	    if (format) {
 		int res;
-		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
 
 		res = mifare_desfire_connect (tags[i]);
 		if (res < 0) {
@@ -119,12 +118,14 @@ main(int argc, char *argv[])
 		    break;
 		}
 
+		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
 		res = mifare_desfire_authenticate (tags[i], 0, default_key);
 		if (res < 0) {
 		    warnx ("Can't authenticate on Mifare DESFire target.");
 		    error = EXIT_FAILURE;
 		    break;
 		}
+		mifare_desfire_key_free (default_key);
 
 		res = mifare_desfire_format_picc (tags[i]);
 		if (res < 0) {
