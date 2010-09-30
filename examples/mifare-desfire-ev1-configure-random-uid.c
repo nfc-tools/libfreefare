@@ -77,7 +77,7 @@ main(int argc, char *argv[])
     if (!device_count)
 	errx (EXIT_FAILURE, "No NFC device found.");
 
-    for (size_t d = 0; d < device_count; d++) {
+    for (size_t d = 0; (!error) && (d < device_count); d++) {
 	device = nfc_connect (&(devices[d]));
 	if (!device) {
 	    warnx ("nfc_connect() failed.");
@@ -100,6 +100,11 @@ main(int argc, char *argv[])
 
 	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
 	    bool do_it = true;
+	    int res;
+
+	    size_t tag_uid_len = strlen (tag_uid) / 2;
+	    switch (tag_uid_len) {
+	    case 7: // Regular UID
 	    if (configure_options.interactive) {
 		printf ("Configure random UID (this cannot be undone) [yN] ");
 		fgets (buffer, BUFSIZ, stdin);
@@ -109,8 +114,6 @@ main(int argc, char *argv[])
 	    }
 
 	    if (do_it) {
-		int res;
-		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
 
 		res = mifare_desfire_connect (tags[i]);
 		if (res < 0) {
@@ -119,12 +122,14 @@ main(int argc, char *argv[])
 		    break;
 		}
 
+		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
 		res = mifare_desfire_authenticate (tags[i], 0, default_key);
 		if (res < 0) {
 		    freefare_perror (tags[i], "mifare_desfire_authenticate");
 		    error = EXIT_FAILURE;
 		    break;
 		}
+		mifare_desfire_key_free (default_key);
 
 		res = mifare_desfire_set_configuration (tags[i], false, true);
 		if (res < 0) {
@@ -134,6 +139,43 @@ main(int argc, char *argv[])
 		}
 
 		mifare_desfire_disconnect (tags[i]);
+	    }
+		break;
+	    case 4: // Random UID
+
+		res = mifare_desfire_connect (tags[i]);
+		if (res < 0) {
+		    warnx ("Can't connect to Mifare DESFire target.");
+		    error = EXIT_FAILURE;
+		    break;
+		}
+
+		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
+		res = mifare_desfire_authenticate (tags[i], 0, default_key);
+		if (res < 0) {
+		    freefare_perror (tags[i], "mifare_desfire_authenticate");
+		    error = EXIT_FAILURE;
+		    break;
+		}
+		mifare_desfire_key_free (default_key);
+
+		char *old_tag_uid;
+		res = mifare_desfire_get_card_uid (tags[i], &old_tag_uid);
+		if (res < 0) {
+		    freefare_perror (tags[i], "mifare_desfire_get_card_uid");
+		    error = EXIT_FAILURE;
+		    break;
+		}
+
+		printf ("Old card UID: %s\n", old_tag_uid);
+		free (old_tag_uid);
+
+		mifare_desfire_disconnect (tags[i]);
+		break;
+	    default: // Should not happen
+		warnx ("Unsupported UID length %d.", tag_uid_len);
+		error = EXIT_FAILURE;
+		break;
 	    }
 
 	    free (tag_uid);
