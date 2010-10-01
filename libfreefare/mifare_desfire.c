@@ -282,7 +282,7 @@ mifare_desfire_connect (MifareTag tag)
     ASSERT_MIFARE_DESFIRE (tag);
 
     nfc_target_info_t pnti;
-    if (nfc_initiator_select_passive_target (tag->device, NM_ISO14443A_106, tag->info.abtUid, 7, &pnti)) {
+    if (nfc_initiator_select_passive_target (tag->device, NM_ISO14443A_106, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
 	tag->active = 1;
 	free (MIFARE_DESFIRE (tag)->session_key);
 	MIFARE_DESFIRE (tag)->session_key = NULL;
