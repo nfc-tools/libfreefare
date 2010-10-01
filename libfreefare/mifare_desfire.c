@@ -139,58 +139,39 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  * Convenience macros.
  */
 
-/*
- * Since we will have to deal with a 1-byte headers for all transmissions,
- * redefine the BUFFER_INIT macro.
- */
-#undef BUFFER_INIT
-#define BUFFER_INIT(buffer_name, size) \
-    uint8_t __##buffer_name[size+1] = { 0x02 }; \
-    uint8_t *buffer_name = &(__##buffer_name[1]); \
-    size_t __##buffer_name##_n = 0
+static uint8_t __msg[MAX_FRAME_SIZE] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 };
+/*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/
+static uint8_t __res[MAX_FRAME_SIZE];
 
-/*
- * Conditionnaly toogles tag->block_number depending on the last received
- * block.  This is described in section "7.4.4 Block numbering rules" of
- * ISO/IEC 14443-4.
- */
-#define ISO144443_CHAIN_BLOCK_NUMBER(tag, block) \
-    do { \
-	if (((__##res[0] & 0xc0) == 0x00) || (((__##res[0] & 0xa0) == 0xa0) && ((__##res[0] & 0x50) == 0x00))) { \
-	    if (MIFARE_DESFIRE (tag)->block_number == (block & 0x01)) { \
-		MIFARE_DESFIRE (tag)->block_number ^= 0x01; \
-	    } \
-	} \
-    } while (0)
+#define FRAME_PAYLOAD_SIZE (MAX_FRAME_SIZE - 6)
 
 /*
  * Transmit the message msg to the NFC tag and receive the response res.  The
  * response buffer's size is set according to the quantity of data received.
  *
- * This macro takes care of handling wait-time extension (WTX) requests defined
- * by ISO-14443-4.
+ * The Mifare DESFire function return value which is returned at the end of the
+ * response is copied at the beginning to match the PICC documentation.
  */
 #define DESFIRE_TRANSCEIVE(tag, msg, res) \
     do { \
+	size_t __len = 5; \
 	errno = 0; \
-	__##msg[0] = 0x02 | (MIFARE_DESFIRE (tag)->block_number & 0x01); \
+	__msg[1] = msg[0]; \
+	if (__##msg##_n > 1) { \
+	    __len += __##msg##_n; \
+	    __msg[4] = __##msg##_n - 1; \
+	    memcpy (__msg + 5, msg + 1, __##msg##_n - 1); \
+	} \
+	__msg[__len-1] = 0x00; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
-	DEBUG_XFER (__##msg, __##msg##_n+1, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, __##msg, __##msg##_n+1, __##res, &__##res##_n))) { \
+	DEBUG_XFER (__msg, __len, "===> "); \
+	if (!(nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, &__##res##_n))) { \
 	    return errno = EIO, -1; \
 	} \
-	ISO144443_CHAIN_BLOCK_NUMBER (tag, __##res[0]); \
-	DEBUG_XFER (__##res, __##res##_n, "<=== "); \
-	__##res##_n -= 1; \
-	while (__##res[0] == 0xf2) { \
-	    uint8_t ack[2] = { 0xf2, 0x00 }; \
-	    ack[1] |= __##res[1] & 0x3f; \
-	    __##res##_n = 0; \
-	    DEBUG_XFER (ack, 2, "===> "); \
-	    nfc_initiator_transceive_bytes (tag->device, ack, 2, __##res, &__##res##_n); \
-	    DEBUG_XFER (__##res, __##res##_n, "<=== "); \
-	    __##res##_n -= 1; \
-	} \
+	DEBUG_XFER (__res, __##res##_n, "<=== "); \
+	res[0] = __res[__##res##_n-1]; \
+	__##res##_n--; \
+	memcpy (res + 1, __res, __##res##_n - 1); \
 	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) { \
 	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
 	} \
@@ -313,7 +294,6 @@ mifare_desfire_connect (MifareTag tag)
 	errno = EIO;
 	return -1;
     }
-    nfc_configure (tag->device, NDO_EASY_FRAMING, false);
     return 0;
 }
 
@@ -332,7 +312,6 @@ mifare_desfire_disconnect (MifareTag tag)
     if (nfc_initiator_deselect_target (tag->device)) {
 	tag->active = 0;
     }
-    nfc_configure (tag->device, NDO_EASY_FRAMING, true);
     return 0;
 }
 
@@ -1022,7 +1001,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 
     p = mifare_cryto_preprocess_data (tag, data, &length, cs);
 
-    bytes_left = 52;
+    bytes_left = FRAME_PAYLOAD_SIZE - 8;
 
     while (bytes_send < length) {
 	size_t frame_bytes = MIN(bytes_left, length - bytes_send);
@@ -1039,7 +1018,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 	// PICC returned 0xAF and expects more data
 	BUFFER_CLEAR (cmd);
 	BUFFER_APPEND (cmd, 0xAF);
-	bytes_left = 0x59;
+	bytes_left = FRAME_PAYLOAD_SIZE - 1;
     }
 
     if (0x00 != res[0]) {
