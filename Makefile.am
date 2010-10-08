@@ -35,5 +35,5 @@ svn-keywords:
 	$(MAKE) svn-keywords-check
 
 svn-keywords-check:
-	@echo Files  missing a '$$Id$$' vcs keyword:
+	@echo "Files missing a '$$"Id"$$' vcs keyword:"
 	@$(SVN_KEYWORDS_FILES_LIST_CMD) | xargs grep -L '\$$Id[^$$]*\$$'
