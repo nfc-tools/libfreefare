@@ -20,6 +20,8 @@
 #include <cutter.h>
 #include <freefare.h>
 
+#include "mifare_classic_fixture.h"
+
 static nfc_device_t *device = NULL;
 static MifareTag *tags = NULL;
 MifareTag tag = NULL;
