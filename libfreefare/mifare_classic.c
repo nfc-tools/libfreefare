@@ -226,8 +226,12 @@ mifare_classic_connect (MifareTag tag)
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    nfc_target_info_t pnti;
-    if (nfc_initiator_select_passive_target (tag->device, NM_ISO14443A_106, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
+    nfc_target_t pnti;
+    nfc_modulation_t modulation = {
+	.nmt = NMT_ISO14443A,
+	.nbr = NBR_106
+    };
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
 	tag->active = 1;
     } else {
 	errno = EIO;
