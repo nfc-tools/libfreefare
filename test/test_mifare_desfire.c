@@ -33,8 +33,8 @@ uint8_t key_data_3des[16] = { 'C', 'a', 'r', 'd', ' ', 'M', 'a', 's', 't', 'e', 
 
 #define cut_assert_success(last_command) \
     do { \
-	if ((res < 0) || (MIFARE_DESFIRE (tag)->last_picc_error != OPERATION_OK)) { \
-	    cut_fail ("%s returned %d, error: %s, errno: %s\n", last_command, res, mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error), strerror (errno)); \
+	if ((res < 0) || (mifare_desfire_last_picc_error (tag) != OPERATION_OK)) { \
+	    cut_fail ("%s returned %d, error: %s, errno: %s\n", last_command, res, mifare_desfire_error_lookup (mifare_desfire_last_picc_error (tag)), strerror (errno)); \
 	} \
     } while (0)
 
@@ -197,7 +197,7 @@ test_mifare_desfire (void)
     // Try to overwrute the file
     res = mifare_desfire_write_data (tag, std_data_file_id, 20, 5, (char *)"Test!");
     cut_assert_equal_int (-1, res, cut_message ("Wrong return value"));
-    cut_assert_equal_int (PERMISSION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("Wrong PICC error"));
+    cut_assert_equal_int (PERMISSION_ERROR, mifare_desfire_last_picc_error (tag), cut_message ("Wrong PICC error"));
 
     int32_t expected_value = 0;
     for (int transaction = 0; transaction < 15; transaction++) {
@@ -507,7 +507,7 @@ test_mifare_desfire (void)
 		sprintf (data_buffer3, "Test invalid write");
 		res = mifare_desfire_write_record (tag, 1, 0, strlen (data_buffer3), data_buffer3);
 		cut_assert_equal_int (-1, res, cut_message ("error code"));
-		cut_assert_equal_int (PERMISSION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("PICC error"));
+		cut_assert_equal_int (PERMISSION_ERROR, mifare_desfire_last_picc_error (tag), cut_message ("PICC error"));
 
 		// The prebious failure has aborted the transaction, so clear
 		// record again.
@@ -798,18 +798,18 @@ test_mifare_desfire (void)
     /* We should not be able to list applications now */
     res = mifare_desfire_get_application_ids (tag, &aids, &aid_count);
     cut_assert_equal_int (-1, res, cut_message ("Wrong return value"));
-    cut_assert_equal_int (AUTHENTICATION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("Wrong PICC error"));
+    cut_assert_equal_int (AUTHENTICATION_ERROR, mifare_desfire_last_picc_error (tag), cut_message ("Wrong PICC error"));
 
     /* Deleting an application should not be possible */
     res = mifare_desfire_delete_application (tag, aid_c);
     cut_assert_equal_int (-1, res, cut_message ("Wrong return value"));
-    cut_assert_equal_int (AUTHENTICATION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("Wrong PICC error"));
+    cut_assert_equal_int (AUTHENTICATION_ERROR, mifare_desfire_last_picc_error (tag), cut_message ("Wrong PICC error"));
 
     /* Creating an application should also be forbidden */
     MifareDESFireAID aid_d = mifare_desfire_aid_new (0x00DDDDDD);
     res = mifare_desfire_create_application (tag, aid_d, 0xEF, 0);
     cut_assert_equal_int (-1, res, cut_message ("Wrong return value"));
-    cut_assert_equal_int (AUTHENTICATION_ERROR, MIFARE_DESFIRE (tag)->last_picc_error, cut_message ("Wrong PICC error"));
+    cut_assert_equal_int (AUTHENTICATION_ERROR, mifare_desfire_last_picc_error (tag), cut_message ("Wrong PICC error"));
 
     /*
      * Now we retry authenticated with the master key.

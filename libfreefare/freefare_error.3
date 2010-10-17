@@ -27,7 +27,8 @@
 .Sh NAME
 .Nm freefare_strerror ,
 .Nm freefare_strerror_r ,
-.Nm freefare_perror
+.Nm freefare_perror ,
+.Nm mifare_desfire_last_picc_error
 .Nd Error Reporting Functions.
 .\"  _     _ _
 .\" | |   (_) |__  _ __ __ _ _ __ _   _
@@ -51,6 +52,8 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn freefare_strerror_r "MifareTag tag" "char *buffer" "size_t len"
 .Ft "void"
 .Fn freefare_strerror "MifareTag tag" "char *string"
+.Ft uint8_t
+.Fm mifare_desfire_last_picc_error "MifareTag tag"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
@@ -79,6 +82,11 @@ The
 function displays the last PCD or PICC error encounred using
 .Vt tag
 to stderr.
+.Pp
+The
+.Fn mifare_desfire_last_picc_error
+function returns the error code returned by the last command run on
+.Vt tag .
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
@@ -87,9 +95,13 @@ to stderr.
 .\"
 .Sh RETURN VALUES
 .Fn freefare_strerror
-returns the error message, while
+returns the error message,
 .Fn freefare_strerror_r
-returns 0 on success, -1 on failure.
+returns 0 on success, -1 on failure, and
+.Fn mifare_desfire_last_picc_error
+returns an error code or 0 if no error is known or
+.Vt tag
+is not a Mifare DESFire target.
 .\"  ____                    _
 .\" / ___|  ___  ___    __ _| |___  ___
 .\" \___ \ / _ \/ _ \  / _` | / __|/ _ \

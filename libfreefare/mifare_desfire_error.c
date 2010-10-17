@@ -24,6 +24,8 @@
 
 #include <freefare.h>
 
+#include "freefare_internal.h"
+
 #define EM(e) { e, #e }
 
 static struct error_message {
@@ -66,4 +68,13 @@ mifare_desfire_error_lookup (uint8_t code)
     }
 
     return "Invalid error code";
+}
+
+uint8_t
+mifare_desfire_last_picc_error (MifareTag tag)
+{
+    if (tag->tag_info->type != DESFIRE)
+	return 0;
+
+    return MIFARE_DESFIRE (tag)->last_picc_error;
 }

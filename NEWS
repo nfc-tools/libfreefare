@@ -3,6 +3,7 @@ Changes between 0.2.0 and 0.2.1  [xx XXX xxxx]
   *) The mifare_desfire_error_lookup() and mifare_desfire_get_last_error()
      functions were removed and replaced by the freefare_strerror(),
      freefare_strerror_r() and freefare_perror() functions.
+  *) New function mifare_desfire_last_picc_error().
   *) Blok numbers in ISO14443-4 blocks are incremented according to the
      specification.
 

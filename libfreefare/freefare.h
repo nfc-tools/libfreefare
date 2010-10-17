@@ -244,6 +244,8 @@ typedef struct mifare_desfire_aid *MifareDESFireAID;
 MifareDESFireAID mifare_desfire_aid_new (uint32_t aid);
 MifareDESFireAID mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n);
 
+uint8_t		 mifare_desfire_last_picc_error (MifareTag tag);
+
 struct mifare_desfire_key;
 typedef struct mifare_desfire_key *MifareDESFireKey;
 
