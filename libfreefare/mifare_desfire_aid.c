@@ -55,7 +55,7 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-// FIXME Theorically, it should be an uint24_t ...
+// Theorically, it should be an uint24_t ...
 MifareDESFireAID
 mifare_desfire_aid_new (uint32_t aid)
 {
@@ -82,3 +82,8 @@ mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n)
     return mifare_desfire_aid_new (0xf00000 | (mad_aid.function_cluster_code << 12) | (mad_aid.application_code << 4) | n);
 }
 
+uint32_t
+mifare_desfire_aid_get_aid (MifareDESFireAID aid)
+{
+    return aid->data[0] | (aid->data[1] << 8) | (aid->data[2] << 16);
+}

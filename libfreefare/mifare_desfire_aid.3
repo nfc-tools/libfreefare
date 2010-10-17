@@ -26,7 +26,8 @@
 .\"
 .Sh NAME
 .Nm mifare_desfire_aid_new ,
-.Nm mifare_desfire_aid_new_with_mad_aid
+.Nm mifare_desfire_aid_new_with_mad_aid ,
+.Nm mifare_desfire_aid_get_aid
 .Nd Mifare DESFire AID Manipulation Functions
 .\"  _     _ _
 .\" | |   (_) |__  _ __ __ _ _ __ _   _
@@ -48,6 +49,8 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_desfire_aid_new "uint32_t aid"
 .Ft MifareDESFireAID
 .Fn mifare_desfire_aid_new_with_mad_aid "MadAid mad_aid" "uint8_t n"
+.Ft uint32_t
+.Fn mifare_desfire_aid_get_aid "MifareDESFireAID aid"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
@@ -78,6 +81,12 @@ and
 .Fn mifare_desfire_aid_new_with_mad_aid
 allocates memory that should be reclaimed using
 .Xr free 3 .
+.Pp
+The
+.Fn mifare_desfire_aid_get_aid
+function returns the
+.Vt aid
+of the provided Mifare DESFire AID.
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
@@ -85,7 +94,7 @@ allocates memory that should be reclaimed using
 .\" |_| \_\___|\__|\__,_|_|  |_| |_|   \_/ \__,_|_|\__,_|\___||___/
 .\"
 .Sh RETURN VALUES
-The functions returns the allocated AID on success,
+The allocation functions returns the allocated AID on success,
 .Va NULL
 otherwise.
 .\"  ____                    _

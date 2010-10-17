@@ -44,6 +44,8 @@ test_mifare_desfire_aid (void)
 
     cut_assert_equal_memory (desfire_aid->data,3, desfire_aid2->data, 3, cut_message ("wrong aid"));
 
+    cut_assert_equal_int (mifare_desfire_aid_get_aid (desfire_aid), 0x00f12ab8, cut_message ("wrong aid"));
+
     free (desfire_aid);
     free (desfire_aid2);
 }
