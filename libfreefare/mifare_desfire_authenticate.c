@@ -142,7 +142,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 	// Fill in the crypto buffer with data ...
 	memcpy (res, data, *nbytes);
 	// ... CRC ...
-	append_iso14443a_crc (res, *nbytes);
+	iso14443a_crc_append (res, *nbytes);
 	// ... and 0 padding
 	bzero ((uint8_t *)(res) + *nbytes + 2, edl - *nbytes - 2);
 
