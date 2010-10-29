@@ -243,7 +243,7 @@ mifare_desfire_tag_new (void)
     MifareTag tag;
     if ((tag= malloc (sizeof (struct mifare_desfire_tag)))) {
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
-	MIFARE_DESFIRE (tag)->last_pcd_error = NULL;
+	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
 	MIFARE_DESFIRE (tag)->session_key = NULL;
 	MIFARE_DESFIRE (tag)->crypto_buffer = NULL;
 	MIFARE_DESFIRE (tag)->crypto_buffer_size = 0;
@@ -258,7 +258,6 @@ void
 mifare_desfire_tag_free (MifareTag tag)
 {
     free (MIFARE_DESFIRE (tag)->session_key);
-    free (MIFARE_DESFIRE (tag)->last_pcd_error);
     free (MIFARE_DESFIRE (tag)->crypto_buffer);
     free (tag);
 }
@@ -291,7 +290,7 @@ mifare_desfire_connect (MifareTag tag)
 	free (MIFARE_DESFIRE (tag)->session_key);
 	MIFARE_DESFIRE (tag)->session_key = NULL;
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
-	MIFARE_DESFIRE (tag)->last_pcd_error = NULL;
+	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
 	MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
 	MIFARE_DESFIRE (tag)->block_number = 0;
     } else {

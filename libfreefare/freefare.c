@@ -214,10 +214,17 @@ const char *
 freefare_strerror (MifareTag tag)
 {
     const char *p = "Unkown error";
-    if (tag->device->iLastError > 0)
+    if (tag->device->iLastError > 0) {
 	p = nfc_strerror (tag->device);
-    else if (tag->tag_info->type == DESFIRE)
-	p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
+    } else {
+	if (tag->tag_info->type == DESFIRE) {
+	    if (MIFARE_DESFIRE (tag)->last_pcd_error) {
+		p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
+	    } else if (MIFARE_DESFIRE (tag)->last_picc_error) {
+		p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
+	    }
+	}
+    }
 
     return p;
 }

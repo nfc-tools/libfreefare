@@ -3,6 +3,7 @@ Changes between 0.2.0 and 0.2.1  [xx XXX xxxx]
   *) The mifare_desfire_error_lookup() and mifare_desfire_get_last_error()
      functions were removed and replaced by the freefare_strerror(),
      freefare_strerror_r() and freefare_perror() functions.
+  *) The library reports errors other that the ones returned by the PICC.
   *) The MDAD_KEYx macro where renamed MDAR_KEYx for consistency.
   *) The MDCM_MACING macro was renamed MDCM_MACED.
   *) The MDCM_FULLDES macro was renamed MDCM_ENCIPHERED.

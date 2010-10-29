@@ -183,7 +183,7 @@ struct mifare_desfire_tag {
     struct mifare_tag __tag;
 
     uint8_t last_picc_error;
-    char *last_pcd_error;
+    uint8_t last_pcd_error;
     MifareDESFireKey session_key;
     uint8_t authenticated_key_no;
     uint8_t ivect[MAX_CRYPTO_BLOCK_SIZE];
