@@ -96,6 +96,8 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
+#define MAX_CRYPTO_BLOCK_SIZE 8
+
 struct mad_sector_0x00;
 struct mad_sector_0x10;
 
@@ -183,7 +185,7 @@ struct mifare_desfire_tag {
     char *last_pcd_error;
     MifareDESFireKey session_key;
     uint8_t authenticated_key_no;
-    uint8_t ivect[16];
+    uint8_t ivect[MAX_CRYPTO_BLOCK_SIZE];
     uint8_t *crypto_buffer;
     size_t crypto_buffer_size;
     uint8_t block_number;

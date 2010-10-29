@@ -28,7 +28,7 @@
 #include "freefare_internal.h"
 
 static void	 xor (const uint8_t *ivect, uint8_t *data, const size_t len);
-static void	 mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac);
+static void	 mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac, size_t block_size);
 
 static size_t	 padded_data_length (size_t nbytes);
 static size_t	 maced_data_length (size_t nbytes);
@@ -240,16 +240,17 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 }
 
 static void
-mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac)
+mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac, size_t block_size)
 {
-    uint8_t ovect[8];
+    uint8_t ovect[MAX_CRYPTO_BLOCK_SIZE];
 
     if (direction == MD_SEND) {
-	xor (ivect, data, 8);
+	xor (ivect, data, block_size);
     } else {
-	memcpy (ovect, data, 8);
+	memcpy (ovect, data, block_size);
     }
-    uint8_t edata[8];
+
+    uint8_t edata[MAX_CRYPTO_BLOCK_SIZE];
 
     switch (key->type) {
     case T_DES:
@@ -258,7 +259,6 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
 	} else {
 	    DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
 	}
-	memcpy (data, edata, 8);
 	break;
     case T_3DES:
 	if (mac) {
@@ -270,31 +270,35 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
 	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_ENCRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
 	}
-	memcpy (data, edata, 8);
 	break;
     }
 
+    memcpy (data, edata, block_size);
+
     if (direction == MD_SEND) {
-	memcpy (ivect, data, 8);
+	memcpy (ivect, data, block_size);
     } else {
-	xor (ivect, data, 8);
-	memcpy (ivect, ovect, 8);
+	xor (ivect, data, block_size);
+	memcpy (ivect, ovect, block_size);
     }
 }
 
 void
 mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac)
 {
+    size_t block_size;
+
     switch (key->type) {
 	case T_DES:
 	case T_3DES:
-	    bzero (ivect, 8);
+	    bzero (ivect, MAX_CRYPTO_BLOCK_SIZE);
+	    block_size = 8;
+	    break;
     }
 
     size_t offset = 0;
     while (offset < data_size) {
-	mifare_des (key, data + offset, ivect, direction, mac);
-	offset += 8;
+	mifare_des (key, data + offset, ivect, direction, mac, block_size);
+	offset += block_size;
     }
-
 }
