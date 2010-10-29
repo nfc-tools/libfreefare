@@ -354,7 +354,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     uint8_t PCD_r_RndB[8];
     memcpy (PCD_r_RndB, PICC_RndB, 8);
-    rol8 (PCD_r_RndB);
+    rol (PCD_r_RndB, 8);
 
     uint8_t token[16];
     memcpy (token, PCD_RndA, 8);
@@ -378,7 +378,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     uint8_t PCD_RndA_s[8];
     memcpy (PCD_RndA_s, PCD_RndA, 8);
-    rol8 (PCD_RndA_s);
+    rol (PCD_RndA_s, 8);
 
 
     if (0 != memcmp (PCD_RndA_s, PICC_RndA_s, 8)) {

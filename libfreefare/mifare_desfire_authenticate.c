@@ -43,13 +43,13 @@ xor8 (uint8_t *ivect, uint8_t *data)
 }
 
 void
-rol8(uint8_t *data)
+rol(uint8_t *data, const size_t len)
 {
     uint8_t first = data[0];
-    for (int i = 0; i < 7; i++) {
+    for (size_t i = 0; i < len-1; i++) {
 	data[i] = data[i+1];
     }
-    data[7] = first;
+    data[len-1] = first;
 }
 
 /*

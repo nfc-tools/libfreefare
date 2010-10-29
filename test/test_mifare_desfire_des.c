@@ -22,11 +22,11 @@
 #include "freefare_internal.h"
 
 void
-test_mifare_rol8 (void)
+test_mifare_rol (void)
 {
     uint8_t data[8] = "01234567";
-    rol8 (data);
-    cut_assert_equal_memory ("12345670", 8, data, 8, cut_message ("Wrong data"));
+    rol (data, sizeof (data));
+    cut_assert_equal_memory ("12345670", 8, data, sizeof (data), cut_message ("Wrong data"));
 }
 
 void
