@@ -179,9 +179,9 @@ enum mifare_desfire_file_types {
 
 /* Communication mode */
 
-#define MDCM_PLAIN   0x00
-#define MDCM_MACING  0x01
-#define MDCM_FULLDES 0x03
+#define MDCM_PLAIN      0x00
+#define MDCM_MACED      0x01
+#define MDCM_ENCIPHERED 0x03
 
 /* Access right */
 
@@ -196,20 +196,20 @@ enum mifare_desfire_file_types {
 #define MDAR_READ_WRITE(ar) (((ar) >>  4) & 0x0f)
 #define MDAR_CHANGE_AR(ar)  ((ar)         & 0x0f)
 
-#define MDAD_KEY0  0x0
-#define MDAD_KEY1  0x1
-#define MDAD_KEY2  0x2
-#define MDAD_KEY3  0x3
-#define MDAD_KEY4  0x4
-#define MDAD_KEY5  0x5
-#define MDAD_KEY6  0x6
-#define MDAD_KEY7  0x7
-#define MDAD_KEY8  0x8
-#define MDAD_KEY9  0x9
-#define MDAD_KEY10 0xa
-#define MDAD_KEY11 0xb
-#define MDAD_KEY12 0xc
-#define MDAD_KEY13 0xd
+#define MDAR_KEY0  0x0
+#define MDAR_KEY1  0x1
+#define MDAR_KEY2  0x2
+#define MDAR_KEY3  0x3
+#define MDAR_KEY4  0x4
+#define MDAR_KEY5  0x5
+#define MDAR_KEY6  0x6
+#define MDAR_KEY7  0x7
+#define MDAR_KEY8  0x8
+#define MDAR_KEY9  0x9
+#define MDAR_KEY10 0xa
+#define MDAR_KEY11 0xb
+#define MDAR_KEY12 0xc
+#define MDAR_KEY13 0xd
 #define MDAR_FREE  0xE
 #define MDAR_DENY  0xF
 

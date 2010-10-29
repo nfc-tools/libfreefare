@@ -915,7 +915,7 @@ test_mifare_desfire_get_many_application_ids (void)
 }
 
 void
-test_mifare_desfire_des_macing(void)
+test_mifare_desfire_des_macing (void)
 {
     int res;
 
@@ -934,7 +934,7 @@ test_mifare_desfire_des_macing(void)
     res = mifare_desfire_authenticate (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate()");
 
-    res = mifare_desfire_create_std_data_file (tag, 1, MDCM_MACING, 0x0000, 20);
+    res = mifare_desfire_create_std_data_file (tag, 1, MDCM_MACED, 0x0000, 20);
     cut_assert_success ("mifare_desfire_create_std_data_file()");
 
     char *s= "Hello World";

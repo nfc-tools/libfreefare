@@ -94,7 +94,7 @@ main(int argc, char *argv[])
 	    if (res < 0)
 		errx (EXIT_FAILURE, "Authentication on application failed");
 
-	    res = mifare_desfire_create_std_data_file (tags[i], 1, MDCM_FULLDES, 0x0000, 20);
+	    res = mifare_desfire_create_std_data_file (tags[i], 1, MDCM_ENCIPHERED, 0x0000, 20);
 	    if (res < 0)
 		errx (EXIT_FAILURE, "File creation failed");
 
