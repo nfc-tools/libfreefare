@@ -27,8 +27,12 @@ void
 test_mifare_rol (void)
 {
     uint8_t data[8] = "01234567";
-    rol (data, sizeof (data));
-    cut_assert_equal_memory ("12345670", 8, data, sizeof (data), cut_message ("Wrong data"));
+    rol (data, 8);
+    cut_assert_equal_memory ("12345670", 8, data, 8, cut_message ("Wrong data"));
+
+    uint8_t data2[16] = "0123456789abcdef";
+    rol (data2, 16);
+    cut_assert_equal_memory (data2, 16, "123456789abcdef0", 16, cut_message ("Wrong data"));
 }
 
 void
