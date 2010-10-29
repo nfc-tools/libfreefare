@@ -326,7 +326,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    bzero (MIFARE_DESFIRE (tag)->ivect, 16);
+    bzero (MIFARE_DESFIRE (tag)->ivect, MAX_CRYPTO_BLOCK_SIZE);
 
     MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
 
@@ -388,7 +388,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     MIFARE_DESFIRE (tag)->authenticated_key_no = key_no;
     MIFARE_DESFIRE (tag)->session_key = mifare_desfire_session_key_new (PCD_RndA, PICC_RndB, key);
-    bzero (MIFARE_DESFIRE (tag)->ivect, 16);
+    bzero (MIFARE_DESFIRE (tag)->ivect, MAX_CRYPTO_BLOCK_SIZE);
 
     return 0;
 }
