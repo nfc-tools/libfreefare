@@ -115,19 +115,21 @@ mifare_desfire_key_set_version (MifareDESFireKey key, uint8_t version)
 MifareDESFireKey
 mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireKey authentication_key)
 {
-    MifareDESFireKey key;
+    MifareDESFireKey key = NULL;
 
     uint8_t buffer[16];
-    memcpy (buffer, rnda, 4);
-    memcpy (buffer+4, rndb, 4);
-    memcpy (buffer+8, rnda+4, 4);
-    memcpy (buffer+12, rndb+4, 4);
 
     switch (authentication_key->type) {
     case T_DES:
+	memcpy (buffer, rnda, 4);
+	memcpy (buffer+4, rndb, 4);
 	key = mifare_desfire_des_key_new_with_version (buffer);
 	break;
     case T_3DES:
+	memcpy (buffer, rnda, 4);
+	memcpy (buffer+4, rndb, 4);
+	memcpy (buffer+8, rnda+4, 4);
+	memcpy (buffer+12, rndb+4, 4);
 	key = mifare_desfire_3des_key_new_with_version (buffer);
 	break;
     }
