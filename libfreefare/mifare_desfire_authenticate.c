@@ -30,9 +30,9 @@
 static void	 xor (const uint8_t *ivect, uint8_t *data, const size_t len);
 static void	 mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac, size_t block_size);
 
-static size_t	 padded_data_length (size_t nbytes);
-static size_t	 maced_data_length (size_t nbytes);
-static size_t	 enciphered_data_length (size_t nbytes);
+static size_t	 padded_data_length (size_t nbytes, const size_t block_size);
+static size_t	 maced_data_length (const MifareDESFireKey key, size_t nbytes);
+static size_t	 enciphered_data_length (const MifareDESFireKey key, size_t nbytes);
 
 static void
 xor (const uint8_t *ivect, uint8_t *data, const size_t len)
@@ -52,14 +52,29 @@ rol(uint8_t *data, const size_t len)
     data[len-1] = first;
 }
 
+size_t
+key_block_size (const MifareDESFireKey key)
+{
+    size_t block_size;
+
+    switch (key->type) {
+    case T_DES:
+    case T_3DES:
+	block_size = 8;
+	break;
+    }
+
+    return block_size;
+}
+
 /*
- * Size required to store nbytes of data in a buffer of size n*8.
+ * Size required to store nbytes of data in a buffer of size n*block_size.
  */
 static size_t
-padded_data_length (size_t nbytes)
+padded_data_length (const size_t nbytes, const size_t block_size)
 {
-    if (nbytes % 8)
-	return ((nbytes / 8) + 1) * 8;
+    if (nbytes % block_size)
+	return ((nbytes / block_size) + 1) * block_size;
     else
 	return nbytes;
 }
@@ -68,17 +83,34 @@ padded_data_length (size_t nbytes)
  * Buffer size required to MAC nbytes of data
  */
 static size_t
-maced_data_length (size_t nbytes)
+maced_data_length (const MifareDESFireKey key, const size_t nbytes)
 {
-    return nbytes + 4;
+    size_t mac_length;
+    switch (key->type) {
+    case T_DES:
+    case T_3DES:
+	mac_length = 4;
+	break;
+    }
+    return nbytes + mac_length;
 }
 /*
  * Buffer size required to encipher nbytes of data and a two bytes CRC.
  */
 static size_t
-enciphered_data_length (size_t nbytes)
+enciphered_data_length (const MifareDESFireKey key, const size_t nbytes)
 {
-    return padded_data_length (nbytes + 2);
+    size_t crc_length;
+    switch (key->type) {
+    case T_DES:
+    case T_3DES:
+	crc_length = 2;
+	break;
+    }
+
+    size_t block_size = key_block_size (key);
+
+    return padded_data_length (nbytes + crc_length, block_size);
 }
 
 
@@ -111,7 +143,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 	res = data;
 	break;
     case 1:
-	edl = padded_data_length (*nbytes);
+	edl = padded_data_length (*nbytes, key_block_size (MIFARE_DESFIRE (tag)->session_key));
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
 
@@ -124,7 +156,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 
 	memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
-	mdl = maced_data_length (*nbytes);
+	mdl = maced_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes);
 	if (!(res = assert_crypto_buffer_size (tag, mdl)))
 	    abort();
 
@@ -135,7 +167,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 
 	break;
     case 3:
-	edl = enciphered_data_length (*nbytes);
+	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes);
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
 
@@ -173,7 +205,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     case 1:
 	*nbytes -= 4;
 
-	edl = enciphered_data_length (*nbytes);
+	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes);
 	edata = malloc (edl);
 
 	memcpy (edata, data, *nbytes);

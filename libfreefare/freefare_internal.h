@@ -120,6 +120,7 @@ void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, 
 void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
 void		 mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac);
 void		 rol (uint8_t *data, const size_t len);
+size_t		 key_block_size (const MifareDESFireKey key);
 void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT 16
