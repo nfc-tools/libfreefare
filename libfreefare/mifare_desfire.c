@@ -62,6 +62,8 @@
 #  include <libutil.h>
 #endif
 
+#include <openssl/rand.h>
+
 #include <freefare.h>
 #include "freefare_internal.h"
 
@@ -351,7 +353,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect,  PICC_RndB, 8, MD_RECEIVE, 0);
 
     uint8_t PCD_RndA[8];
-    DES_random_key ((DES_cblock*)&PCD_RndA);
+    RAND_bytes (PCD_RndA, 8);
 
     uint8_t PCD_r_RndB[8];
     memcpy (PCD_r_RndB, PICC_RndB, 8);

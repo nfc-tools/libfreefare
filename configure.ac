@@ -54,7 +54,7 @@ CFLAGS="$CFLAGS -std=c99"
 
 # Crypto functions for MIFARE DesFire support are provided by OpenSSL.
 AC_CHECK_LIB([crypto], [DES_ecb_encrypt], [], [AC_MSG_ERROR([Cannot find libcrypto.])])
-AC_CHECK_HEADER([openssl/des.h], [], [AC_MSG_ERROR([Cannot find openssl headers.])])
+AC_CHECK_HEADERS([openssl/des.h openssl/rand.h], [], [AC_MSG_ERROR([Cannot find openssl headers.])])
 
 # Checks for pkg-config modules.
 LIBNFC_REQUIRED_VERSION="1.4.0"
