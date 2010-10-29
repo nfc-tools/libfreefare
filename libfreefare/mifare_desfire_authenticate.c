@@ -27,7 +27,7 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-static void	 xor8 (uint8_t *ivect, uint8_t *data);
+static void	 xor (const uint8_t *ivect, uint8_t *data, const size_t len);
 static void	 mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac);
 
 static size_t	 padded_data_length (size_t nbytes);
@@ -35,9 +35,9 @@ static size_t	 maced_data_length (size_t nbytes);
 static size_t	 enciphered_data_length (size_t nbytes);
 
 static void
-xor8 (uint8_t *ivect, uint8_t *data)
+xor (const uint8_t *ivect, uint8_t *data, const size_t len)
 {
-    for (int i = 0; i < 8; i++) {
+    for (size_t i = 0; i < len; i++) {
 	data[i] ^= ivect[i];
     }
 }
@@ -245,7 +245,7 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
     uint8_t ovect[8];
 
     if (direction == MD_SEND) {
-	xor8 (ivect, data);
+	xor (ivect, data, 8);
     } else {
 	memcpy (ovect, data, 8);
     }
@@ -277,7 +277,7 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
     if (direction == MD_SEND) {
 	memcpy (ivect, data, 8);
     } else {
-	xor8 (ivect, data);
+	xor (ivect, data, 8);
 	memcpy (ivect, ovect, 8);
     }
 }
