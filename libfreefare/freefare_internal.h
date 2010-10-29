@@ -116,7 +116,7 @@ typedef enum {
 
 void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int communication_settings);
 void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
-void		 mifare_cbc_des (MifareDESFireKey key, uint8_t *data, size_t data_size, MifareDirection direction, int mac);
+void		 mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac);
 void		 rol (uint8_t *data, const size_t len);
 void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 
@@ -183,6 +183,7 @@ struct mifare_desfire_tag {
     char *last_pcd_error;
     MifareDESFireKey session_key;
     uint8_t authenticated_key_no;
+    uint8_t ivect[16];
     uint8_t *crypto_buffer;
     size_t crypto_buffer_size;
     uint8_t block_number;

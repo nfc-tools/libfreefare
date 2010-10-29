@@ -327,6 +327,8 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
+    bzero (MIFARE_DESFIRE (tag)->ivect, 16);
+
     MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
 
     MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
@@ -347,7 +349,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     uint8_t PICC_RndB[8];
     memcpy (PICC_RndB, PICC_E_RndB, 8);
-    mifare_cbc_des (key, PICC_RndB, 8, MD_RECEIVE, 0);
+    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect,  PICC_RndB, 8, MD_RECEIVE, 0);
 
     uint8_t PCD_RndA[8];
     DES_random_key ((DES_cblock*)&PCD_RndA);
@@ -360,7 +362,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     memcpy (token, PCD_RndA, 8);
     memcpy (token+8, PCD_r_RndB, 8);
 
-    mifare_cbc_des (key, token, 16, MD_SEND, 0);
+    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, token, 16, MD_SEND, 0);
 
     BUFFER_INIT (cmd2, 17);
 
@@ -374,7 +376,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     uint8_t PICC_RndA_s[8];
     memcpy (PICC_RndA_s, PICC_E_RndA_s, 8);
-    mifare_cbc_des (key, PICC_RndA_s, 8, MD_RECEIVE, 0);
+    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, PICC_RndA_s, 8, MD_RECEIVE, 0);
 
     uint8_t PCD_RndA_s[8];
     memcpy (PCD_RndA_s, PCD_RndA, 8);
@@ -387,6 +389,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     MIFARE_DESFIRE (tag)->authenticated_key_no = key_no;
     MIFARE_DESFIRE (tag)->session_key = mifare_desfire_session_key_new (PCD_RndA, PICC_RndB, key);
+    bzero (MIFARE_DESFIRE (tag)->ivect, 16);
 
     return 0;
 }
@@ -409,7 +412,7 @@ mifare_desfire_change_key_settings (MifareTag tag, uint8_t settings)
     iso14443a_crc (data, 1, data + 1);
     bzero (data+3, 5);
 
-    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, data, 8, MD_SEND, 0);
+    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 8, MD_SEND, 0);
 
     BUFFER_APPEND_BYTES (cmd, data, 8);
 
@@ -482,7 +485,7 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	}
     }
 
-    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, data, 24, MD_SEND, 0);
+    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 24, MD_SEND, 0);
 
     BUFFER_APPEND_BYTES (cmd, data, 24);
 
@@ -791,7 +794,7 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
 	memcpy (data + 1, &le_ar, sizeof (le_ar));
 	iso14443a_crc (data, 3, data+3);
 	bzero (data + 5, 3);
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, data, 8, MD_SEND, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 8, MD_SEND, 0);
 
 	BUFFER_APPEND_BYTES (cmd, data, 8);
 

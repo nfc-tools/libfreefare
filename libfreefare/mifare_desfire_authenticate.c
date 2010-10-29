@@ -120,7 +120,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 	// ... and 0 padding
 	bzero ((uint8_t *)res + *nbytes, edl - *nbytes);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, edl, MD_SEND, 1);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, edl, MD_SEND, 1);
 
 	memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
@@ -148,7 +148,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 
 	*nbytes = edl;
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, *nbytes, MD_SEND, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_SEND, 0);
 
 	break;
     default:
@@ -179,9 +179,9 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	memcpy (edata, data, *nbytes);
 	bzero ((uint8_t *)edata + *nbytes, edl - *nbytes);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, edata, edl, MD_SEND, 1);
-	/*                                                            ,^^^^^^^
-	 * No!  This is not a typo! ---------------------------------'
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MD_SEND, 1);
+	/*                                                                                         ,^^^^^^^
+	 * No!  This is not a typo! --------------------------------------------------------------'
 	 */
 
 	if (0 != memcmp ((uint8_t *)data + *nbytes, (uint8_t *)edata + edl - 8, 4)) {
@@ -194,7 +194,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 
 	break;
     case 3:
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, res, *nbytes, MD_RECEIVE, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, 0);
 
 	/*
 	 * Look for the CRC and ensure it is following by NULL padding.  We
@@ -283,12 +283,15 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
 }
 
 void
-mifare_cbc_des (MifareDESFireKey key, uint8_t *data, size_t data_size, MifareDirection direction, int mac)
+mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac)
 {
-    size_t offset = 0;
-    uint8_t ivect[8];
-    bzero (ivect, sizeof (ivect));
+    switch (key->type) {
+	case T_DES:
+	case T_3DES:
+	    bzero (ivect, 8);
+    }
 
+    size_t offset = 0;
     while (offset < data_size) {
 	mifare_des (key, data + offset, ivect, direction, mac);
 	offset += 8;
