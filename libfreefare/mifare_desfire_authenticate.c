@@ -131,11 +131,15 @@ assert_crypto_buffer_size (MifareTag tag, size_t nbytes)
 }
 
 void *
-mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int communication_settings)
+mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings)
 {
     void *res;
     uint8_t mac[4];
     size_t edl, mdl;
+    MifareDESFireKey key = MIFARE_DESFIRE (tag)->session_key;
+
+    if (!key)
+	return data;
 
     switch (communication_settings) {
     case 0:
@@ -143,7 +147,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 	res = data;
 	break;
     case 1:
-	edl = padded_data_length (*nbytes, key_block_size (MIFARE_DESFIRE (tag)->session_key));
+	edl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key)) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
 
@@ -152,11 +156,11 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 	// ... and 0 padding
 	bzero ((uint8_t *)res + *nbytes, edl - *nbytes);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, edl, MD_SEND, 1);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MD_SEND, 1);
 
 	memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
-	mdl = maced_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes);
+	mdl = maced_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, mdl)))
 	    abort();
 
@@ -167,20 +171,20 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, int com
 
 	break;
     case 3:
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes);
+	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
 
 	// Fill in the crypto buffer with data ...
 	memcpy (res, data, *nbytes);
 	// ... CRC ...
-	iso14443a_crc_append (res, *nbytes);
+	iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
 	// ... and 0 padding
 	bzero ((uint8_t *)(res) + *nbytes + 2, edl - *nbytes - 2);
 
 	*nbytes = edl;
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_SEND, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MD_SEND, 0);
 
 	break;
     default:

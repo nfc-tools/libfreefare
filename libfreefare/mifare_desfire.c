@@ -155,14 +155,16 @@ static uint8_t __res[MAX_FRAME_SIZE];
  * response is copied at the beginning to match the PICC documentation.
  */
 #define DESFIRE_TRANSCEIVE(tag, msg, res) \
+    DESFIRE_TRANSCEIVE2 (tag, msg, __##msg##_n, res)
+#define DESFIRE_TRANSCEIVE2(tag, msg, msg_len, res) \
     do { \
 	size_t __len = 5; \
 	errno = 0; \
 	__msg[1] = msg[0]; \
-	if (__##msg##_n > 1) { \
-	    __len += __##msg##_n; \
-	    __msg[4] = __##msg##_n - 1; \
-	    memcpy (__msg + 5, msg + 1, __##msg##_n - 1); \
+	if (msg_len > 1) { \
+	    __len += msg_len; \
+	    __msg[4] = msg_len - 1; \
+	    memcpy (__msg + 5, msg + 1, msg_len - 1); \
 	} \
 	__msg[__len-1] = 0x00; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
@@ -999,24 +1001,25 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
-    BUFFER_INIT (cmd, MAX_FRAME_SIZE);
+    BUFFER_INIT (cmd, 8 + length);
     BUFFER_INIT (res, 1);
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
     BUFFER_APPEND_LE (cmd, offset, 3, sizeof (off_t));
     BUFFER_APPEND_LE (cmd, length, 3, sizeof (size_t));
+    BUFFER_APPEND_BYTES (cmd, data, length);
 
-    p = mifare_cryto_preprocess_data (tag, data, &length, cs);
+    p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs);
 
-    bytes_left = FRAME_PAYLOAD_SIZE - 8;
+    BUFFER_INIT(d, FRAME_PAYLOAD_SIZE);
+    bytes_left = FRAME_PAYLOAD_SIZE;
 
-    while (bytes_send < length) {
-	size_t frame_bytes = MIN(bytes_left, length - bytes_send);
+    while (bytes_send < __cmd_n) {
+	size_t frame_bytes = MIN(bytes_left, __cmd_n - bytes_send);
+	BUFFER_APPEND_BYTES (d, (uint8_t *) p + bytes_send, frame_bytes);
 
-	BUFFER_APPEND_BYTES (cmd, (uint8_t *)p + bytes_send, frame_bytes);
-
-	DESFIRE_TRANSCEIVE (tag, cmd, res);
+	DESFIRE_TRANSCEIVE (tag, d, res);
 
 	bytes_send += frame_bytes;
 
@@ -1024,12 +1027,15 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 	    break;
 
 	// PICC returned 0xAF and expects more data
-	BUFFER_CLEAR (cmd);
-	BUFFER_APPEND (cmd, 0xAF);
+	BUFFER_CLEAR (d);
+	BUFFER_APPEND (d, 0xAF);
 	bytes_left = FRAME_PAYLOAD_SIZE - 1;
     }
 
-    if (0x00 != res[__res_n-1]) {
+    if (0x00 == res[__res_n-1]) {
+	// Remove header length
+	bytes_send -= 8;
+    } else {
 	// 0xAF (additionnal Frame) failure can happen here (wrong crypto method).
 	MIFARE_DESFIRE (tag)->last_picc_error = res[__res_n-1];
 	bytes_send = -1;
@@ -1109,16 +1115,12 @@ mifare_desfire_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1);
 
-    BUFFER_INIT (data, 4);
-    BUFFER_APPEND_LE (data, amount, 4, sizeof (int32_t));
-
     BUFFER_APPEND (cmd, 0x0C);
     BUFFER_APPEND (cmd, file_no);
-    size_t n = 4;
-    void *d = mifare_cryto_preprocess_data (tag, data, &n, cs);
-    BUFFER_APPEND_BYTES (cmd, d, n);
+    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (int32_t));
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     cached_file_settings_current[file_no] = false;
 
@@ -1140,16 +1142,12 @@ mifare_desfire_debit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs)
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1);
 
-    BUFFER_INIT (data, 4);
-    BUFFER_APPEND_LE (data, amount, 4, sizeof (int32_t));
-
     BUFFER_APPEND (cmd, 0xDC);
     BUFFER_APPEND (cmd, file_no);
-    size_t n = 4;
-    void *d = mifare_cryto_preprocess_data (tag, data, &n, cs);
-    BUFFER_APPEND_BYTES (cmd, d, n);
+    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (int32_t));
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     cached_file_settings_current[file_no] = false;
 
@@ -1171,16 +1169,12 @@ mifare_desfire_limited_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1);
 
-    BUFFER_INIT (data, 4);
-    BUFFER_APPEND_LE (data, amount, 4, sizeof (int32_t));
-
     BUFFER_APPEND (cmd, 0x1C);
     BUFFER_APPEND (cmd, file_no);
-    size_t n = 4;
-    void *d = mifare_cryto_preprocess_data (tag, data, &n, cs);
-    BUFFER_APPEND_BYTES (cmd, d, n);
+    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (int32_t));
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     cached_file_settings_current[file_no] = false;
 
