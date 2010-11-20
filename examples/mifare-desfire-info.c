@@ -115,6 +115,10 @@ main(int argc, char *argv[])
 	    printf ("    0x%02x Free directory list access without PICC Master Key;\n", settings & 0x02);
 	    printf ("    0x%02x Allow changing the Master Key;\n", settings & 0x01);
 
+	    uint8_t version;
+	    mifare_desfire_get_key_version (tags[i], 0, &version);
+	    printf ("Master Key version: %d (0x%02x)\n", version, version);
+
 	    free (tag_uid);
 
 	    mifare_desfire_disconnect (tags[i]);
