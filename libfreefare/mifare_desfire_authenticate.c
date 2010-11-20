@@ -133,7 +133,7 @@ assert_crypto_buffer_size (MifareTag tag, size_t nbytes)
 void *
 mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings)
 {
-    void *res;
+    void *res = data;
     uint8_t mac[4];
     size_t edl, mdl;
     MifareDESFireKey key = MIFARE_DESFIRE (tag)->session_key;
@@ -141,9 +141,12 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
     if (!key)
 	return data;
 
+    // Return directly if we just have a command code.
+    if (1 == *nbytes)
+	return data;
+
     switch (communication_settings) {
     case MDCM_PLAIN:
-	res = data;
 	break;
     case MDCM_MACED:
 	edl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key)) + offset;
@@ -200,6 +203,10 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     void *res = data;
     size_t edl;
     void *edata;
+
+    // Return directly if we just have a status code.
+    if (1 == *nbytes)
+	return res;
 
     switch (communication_settings) {
     case MDCM_PLAIN:
