@@ -171,11 +171,11 @@ static uint8_t __res[MAX_FRAME_SIZE];
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (__res, __##res##_n, "<=== "); \
-	res[0] = __res[__##res##_n-1]; \
-	__##res##_n--; \
-	memcpy (res + 1, __res, __##res##_n - 1); \
-	if ((1 == __##res##_n) && (OPERATION_OK != res[0]) && (ADDITIONAL_FRAME != res[0])) { \
-	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
+	memcpy (res, __res, __##res##_n - 2); \
+	res[__##res##_n-2] = __res[__##res##_n-1]; \
+	__##res##_n-=1; \
+	if ((1 == __##res##_n) && (OPERATION_OK != res[__##res##_n-1]) && (ADDITIONAL_FRAME != res[__##res##_n-1])) { \
+	    return MIFARE_DESFIRE (tag)->last_picc_error = res[__##res##_n-1], -1; \
 	} \
     } while (0)
 
@@ -346,7 +346,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
 
     uint8_t PICC_E_RndB[8];
-    memcpy (PICC_E_RndB, res+1, 8);
+    memcpy (PICC_E_RndB, res, 8);
 
     uint8_t PICC_RndB[8];
     memcpy (PICC_RndB, PICC_E_RndB, 8);
@@ -373,7 +373,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     DESFIRE_TRANSCEIVE (tag, cmd2, res);
 
     uint8_t PICC_E_RndA_s[8];
-    memcpy (PICC_E_RndA_s, res+1, 8);
+    memcpy (PICC_E_RndA_s, res, 8);
 
     uint8_t PICC_RndA_s[8];
     memcpy (PICC_RndA_s, PICC_E_RndA_s, 8);
@@ -436,9 +436,9 @@ mifare_desfire_get_key_settings (MifareTag tag, uint8_t *settings, uint8_t *max_
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
     if (settings)
-	*settings = res[1];
+	*settings = res[0];
     if (max_keys)
-	*max_keys = res[2];
+	*max_keys = res[1];
 
     return 0;
 }
@@ -514,7 +514,7 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
-    *version = res[1];
+    *version = res[0];
 
     return 0;
 }
@@ -572,10 +572,10 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
     *count = (BUFFER_SIZE (res)-1)/3;
     *aids = malloc ((*count + 1) * sizeof (MifareDESFireAID));
     for (size_t i = 0; (3*i + 1) < BUFFER_SIZE (res); i++) {
-	(*aids)[i] = memdup (res + 3*i + 1, 3);
+	(*aids)[i] = memdup (res + 3*i, 3);
     }
 
-    if (res[0] == 0xAF) {
+    if (res[__res_n-1] == 0xAF) {
 	cmd[0] = 0xAF;
 	DESFIRE_TRANSCEIVE (tag, cmd, res);
 	*count += (BUFFER_SIZE (res)-1) / 3;
@@ -584,8 +584,8 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
 	if ((p = realloc (*aids, (*count + 1) * sizeof (MifareDESFireAID)))) {
 	    *aids = p;
 
-	    for (size_t i = 0; (3*i + 1) < BUFFER_SIZE (res); i++) {
-		(*aids)[19+i] = memdup (res + 3*i + 1, 3);
+	    for (size_t i = 0; (3*i) < BUFFER_SIZE (res); i++) {
+		(*aids)[19+i] = memdup (res + 3*i, 3);
 	    }
 	}
     }
@@ -667,14 +667,14 @@ mifare_desfire_get_version (MifareTag tag, struct mifare_desfire_version_info *v
     BUFFER_APPEND (cmd, 0x60);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
-    memcpy (&(version_info->hardware), res+1, 7);
+    memcpy (&(version_info->hardware), res, 7);
 
     cmd[0] = 0xAF;
     DESFIRE_TRANSCEIVE (tag, cmd, res);
-    memcpy (&(version_info->software), res+1, 7);
+    memcpy (&(version_info->software), res, 7);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
-    memcpy (&(version_info->uid), res+1, 14);
+    memcpy (&(version_info->uid), res, 14);
 
     return 0;
 }
@@ -702,7 +702,7 @@ mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count)
 	errno = ENOMEM;
 	return -1;
     }
-    memcpy (*files, res+1, *count);
+    memcpy (*files, res, *count);
 
     return 0;
 }
@@ -727,7 +727,7 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
     struct mifare_desfire_raw_file_settings raw_settings;
-    memcpy (&raw_settings, res+1, BUFFER_SIZE (res)-1);
+    memcpy (&raw_settings, res, BUFFER_SIZE (res));
 
     settings->file_type = raw_settings.file_type;
     settings->communication_settings = raw_settings.communication_settings;
@@ -951,10 +951,10 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 	DESFIRE_TRANSCEIVE (tag, cmd, res);
 
 	frame_bytes = BUFFER_SIZE (res) - 1;
-	memcpy ((uint8_t *)p + bytes_read, res + 1, frame_bytes);
+	memcpy ((uint8_t *)p + bytes_read, res, frame_bytes);
 	bytes_read += frame_bytes;
 
-	if (res[0] == 0xAF) {
+	if (res[__res_n-1] == 0xAF) {
 	    if (p != data) {
 		// If we are handling memory, request more for next frame.
 		if (!(p = assert_crypto_buffer_size (tag, bytes_read + MAX_FRAME_SIZE - 1)))
@@ -965,7 +965,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 	    BUFFER_APPEND (cmd, 0xAF);
 	}
 
-    } while (res[0] != 0x00);
+    } while (res[__res_n-1] != 0x00);
 
     if (cs) {
 	if (mifare_cryto_postprocess_data (tag, p, &bytes_read, cs))
@@ -1020,7 +1020,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 
 	bytes_send += frame_bytes;
 
-	if (0x00 == res[0])
+	if (0x00 == res[__res_n-1])
 	    break;
 
 	// PICC returned 0xAF and expects more data
@@ -1029,9 +1029,9 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 	bytes_left = FRAME_PAYLOAD_SIZE - 1;
     }
 
-    if (0x00 != res[0]) {
+    if (0x00 != res[__res_n-1]) {
 	// 0xAF (additionnal Frame) failure can happen here (wrong crypto method).
-	MIFARE_DESFIRE (tag)->last_picc_error = res[0];
+	MIFARE_DESFIRE (tag)->last_picc_error = res[__res_n-1];
 	bytes_send = -1;
     }
 
@@ -1077,7 +1077,7 @@ mifare_desfire_get_value_ex (MifareTag tag, uint8_t file_no, int32_t *value, int
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
-    p = (uint8_t *)res + 1;
+    p = (uint8_t *)res;
 
     if (cs) {
 	ssize_t rdl = BUFFER_SIZE (res) - 1;
