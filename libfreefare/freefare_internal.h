@@ -116,6 +116,8 @@ typedef enum {
     MD_RECEIVE
 } MifareDirection;
 
+#define MDCM_MASK 0x000F
+
 void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
 void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
 void		 mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac);

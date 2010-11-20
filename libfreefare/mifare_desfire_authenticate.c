@@ -145,7 +145,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
     if (1 == *nbytes)
 	return data;
 
-    switch (communication_settings) {
+    switch (communication_settings & MDCM_MASK) {
     case MDCM_PLAIN:
 	break;
     case MDCM_MACED:
@@ -208,7 +208,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     if (1 == *nbytes)
 	return res;
 
-    switch (communication_settings) {
+    switch (communication_settings & MDCM_MASK) {
     case MDCM_PLAIN:
 	break;
     case MDCM_MACED:
