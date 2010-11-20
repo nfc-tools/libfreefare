@@ -141,10 +141,6 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
     if (!key)
 	return data;
 
-    // Return directly if we just have a command code.
-    if (1 == *nbytes)
-	return data;
-
     switch (communication_settings & MDCM_MASK) {
     case MDCM_PLAIN:
 	break;
