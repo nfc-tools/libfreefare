@@ -142,11 +142,10 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	return data;
 
     switch (communication_settings) {
-    case 0:
-    case 2:
+    case MDCM_PLAIN:
 	res = data;
 	break;
-    case 1:
+    case MDCM_MACED:
 	edl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key)) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
@@ -170,7 +169,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	*nbytes += 4;
 
 	break;
-    case 3:
+    case MDCM_ENCIPHERED:
 	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
@@ -203,10 +202,9 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     void *edata;
 
     switch (communication_settings) {
-    case 0:
-    case 2:
+    case MDCM_PLAIN:
 	break;
-    case 1:
+    case MDCM_MACED:
 	*nbytes -= 4;
 
 	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes);
@@ -229,7 +227,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	free (edata);
 
 	break;
-    case 3:
+    case MDCM_ENCIPHERED:
 	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, 0);
 
 	/*
