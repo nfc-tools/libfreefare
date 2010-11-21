@@ -850,10 +850,7 @@ test_mifare_desfire_get_many_application_ids (void)
 {
     int res;
 
-    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-    mifare_desfire_key_free (key);
+    mifare_desfire_auto_authenticate (tag, 0);
 
     /* Wipeout the card */
     res = mifare_desfire_format_picc (tag);
@@ -890,9 +887,7 @@ test_mifare_desfire_des_macing (void)
 {
     int res;
 
-    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    mifare_desfire_auto_authenticate (tag, 0);
 
     MifareDESFireAID aid = mifare_desfire_aid_new (0x00123456);
     res = mifare_desfire_create_application (tag, aid, 0xFF, 1);
@@ -902,6 +897,7 @@ test_mifare_desfire_des_macing (void)
     cut_assert_success ("mifare_desfire_select_application");
     free (aid);
 
+    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_null);
     res = mifare_desfire_authenticate (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate()");
 
