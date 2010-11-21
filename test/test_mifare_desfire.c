@@ -26,10 +26,7 @@
 #include "freefare_internal.h"
 
 #include "mifare_desfire_fixture.h"
-
-uint8_t key_data_null[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-uint8_t key_data_des[8]   = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
-uint8_t key_data_3des[16] = { 'C', 'a', 'r', 'd', ' ', 'M', 'a', 's', 't', 'e', 'r', ' ', 'K', 'e', 'y', '!' };
+#include "mifare_desfire_auto_authenticate.h"
 
 #define cut_assert_success(last_command) \
     do { \
@@ -52,34 +49,7 @@ test_mifare_desfire (void)
     res = mifare_desfire_get_version (tag, &version_info);
     cut_assert_success ("mifare_desfire_get_version()");
 
-    /* Determine which key is currently the master one */
-    uint8_t key_version;
-    res = mifare_desfire_get_key_version (tag, 0, &key_version);
-    cut_assert_success ("mifare_desfire_get_key_version()");
-
-    MifareDESFireKey key;
-
-    switch (key_version) {
-    case 0x00:
-	key = mifare_desfire_des_key_new_with_version (key_data_null);
-	break;
-    case 0xAA:
-	key = mifare_desfire_des_key_new_with_version (key_data_des);
-	break;
-    case 0xC7:
-	key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-	break;
-    default:
-	cut_fail ("Unknown master key.");
-    }
-
-    cut_assert_not_null (key, cut_message ("Cannot allocate key"));
-
-    /* Authenticate with this key */
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-
-    mifare_desfire_key_free (key);
+     mifare_desfire_auto_authenticate (tag, 0);
 
     /*
      * This unit test change key settings to more restrictive ones, so reset
@@ -89,10 +59,11 @@ test_mifare_desfire (void)
     cut_assert_success ("mifare_desfire_change_key_settings()");
 
     /* Change master key to DES */
-    key = mifare_desfire_des_key_new_with_version (key_data_des);
+    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_des);
     mifare_desfire_change_key (tag, 0, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
 
+    uint8_t key_version;
     res = mifare_desfire_get_key_version (tag, 0, &key_version);
     cut_assert_success ("mifare_desfire_get_key_version()");
     cut_assert_equal_int (0xAA, key_version, cut_message ("Wrong key_version value."));
