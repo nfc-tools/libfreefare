@@ -632,6 +632,9 @@ mifare_desfire_select_application (MifareTag tag, MifareDESFireAID aid)
     for (int n = 0; n < MAX_FILE_COUNT; n++)
 	cached_file_settings_current[n] = false;
 
+    free (MIFARE_DESFIRE (tag)->session_key);
+    MIFARE_DESFIRE (tag)->session_key = NULL;
+
     return 0;
 }
 
