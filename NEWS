@@ -1,4 +1,4 @@
-Changes between 0.2.0 and 0.2.1  [xx XXX xxxx]
+Changes between 0.2.0 and 0.2.1  [23 nov 2010]
 
   *) The mifare_desfire_error_lookup() and mifare_desfire_get_last_error()
      functions were removed and replaced by the freefare_strerror(),
@@ -9,8 +9,6 @@ Changes between 0.2.0 and 0.2.1  [xx XXX xxxx]
   *) The MDCM_FULLDES macro was renamed MDCM_ENCIPHERED.
   *) New function mifare_desfire_last_picc_error().
   *) New function mifare_desfire_aid_get_aid().
-  *) Blok numbers in ISO14443-4 blocks are incremented according to the
-     specification.
 
 Changes between 0.1.0 and 0.2.0  [07 sep 2010]
 
