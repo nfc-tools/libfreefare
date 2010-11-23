@@ -3,6 +3,7 @@
 INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
 LIBS = $(CUTTER_LIBS)
 
+SUBDIRS = common .
 
 AM_CFLAGS = @LIBNFC_CFLAGS@
 
@@ -12,7 +13,6 @@ TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE=yes CUTTER="$(CUTTER)"
 
 noinst_LTLIBRARIES = \
-		     mifare_desfire_auto_authenticate.la \
 		     test_mad.la \
 		     test_mifare_application.la \
 		     test_mifare_classic.la \
@@ -26,9 +26,6 @@ noinst_LTLIBRARIES = \
 		     test_tlv.la
 
 AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
-
-mifare_desfire_auto_authenticate_la_SOURCES = mifare_desfire_auto_authenticate.c \
-						 mifare_desfire_auto_authenticate.h
 
 test_mad_la_SOURCES = test_mad.c
 test_mad_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
@@ -52,7 +49,7 @@ test_mifare_desfire_la_SOURCES = test_mifare_desfire.c \
 				 mifare_desfire_fixture.c \
 				 mifare_desfire_fixture.h
 test_mifare_desfire_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
-				mifare_desfire_auto_authenticate.lo
+				$(top_builddir)/test/common/libtestcommon.la
 
 test_mifare_desfire_aid_la_SOURCES = test_mifare_desfire_aid.c
 test_mifare_desfire_aid_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la

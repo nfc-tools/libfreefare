@@ -82,5 +82,6 @@ AC_OUTPUT([Makefile
 	   examples/Makefile
 	   libfreefare/Makefile
 	   libfreefare.pc
-	   test/Makefile])
+	   test/Makefile
+	   test/common/Makefile])
 

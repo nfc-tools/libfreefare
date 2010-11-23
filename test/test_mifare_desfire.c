@@ -26,7 +26,7 @@
 #include "freefare_internal.h"
 
 #include "mifare_desfire_fixture.h"
-#include "mifare_desfire_auto_authenticate.h"
+#include "common/mifare_desfire_auto_authenticate.h"
 
 #define cut_assert_success(last_command) \
     do { \
