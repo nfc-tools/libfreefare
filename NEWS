@@ -1,3 +1,7 @@
+Changes between 0.2.1 and 0.2.2  [23 nov 2010]
+
+  *) Fix build when cutter is not available or is disabled.
+
 Changes between 0.2.0 and 0.2.1  [23 nov 2010]
 
   *) The mifare_desfire_error_lookup() and mifare_desfire_get_last_error()
