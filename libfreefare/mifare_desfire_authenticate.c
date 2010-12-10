@@ -152,7 +152,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	// Fill in the crypto buffer with data ...
 	memcpy (res, data, *nbytes);
 	// ... and 0 padding
-	bzero ((uint8_t *)res + *nbytes, edl - *nbytes);
+        memset ((uint8_t *)res + *nbytes, 0, edl - *nbytes);
 
 	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MD_SEND, 1);
 
@@ -178,7 +178,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	// ... CRC ...
 	iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
 	// ... and 0 padding
-	bzero ((uint8_t *)(res) + *nbytes + 2, edl - *nbytes - 2);
+        memset ((uint8_t *)(res) + *nbytes + 2, 0, edl - *nbytes - 2);
 
 	*nbytes = edl;
 
@@ -214,7 +214,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	edata = malloc (edl);
 
 	memcpy (edata, data, *nbytes);
-	bzero ((uint8_t *)edata + *nbytes, edl - *nbytes);
+        memset ((uint8_t *)edata + *nbytes, 0, edl - *nbytes);
 
 	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MD_SEND, 1);
 	/*                                                                                         ,^^^^^^^
@@ -328,7 +328,7 @@ mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data
     switch (key->type) {
 	case T_DES:
 	case T_3DES:
-	    bzero (ivect, MAX_CRYPTO_BLOCK_SIZE);
+            memset (ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 	    block_size = 8;
 	    break;
     }

@@ -330,7 +330,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    bzero (MIFARE_DESFIRE (tag)->ivect, MAX_CRYPTO_BLOCK_SIZE);
+    memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 
     MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
 
@@ -392,7 +392,7 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
 
     MIFARE_DESFIRE (tag)->authenticated_key_no = key_no;
     MIFARE_DESFIRE (tag)->session_key = mifare_desfire_session_key_new (PCD_RndA, PICC_RndB, key);
-    bzero (MIFARE_DESFIRE (tag)->ivect, MAX_CRYPTO_BLOCK_SIZE);
+    memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 
     return 0;
 }
@@ -413,7 +413,7 @@ mifare_desfire_change_key_settings (MifareTag tag, uint8_t settings)
 
     data[0] = settings;
     iso14443a_crc (data, 1, data + 1);
-    bzero (data+3, 5);
+    memset (data+3, 0, 5);
 
     mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 8, MD_SEND, 0);
 
@@ -464,7 +464,7 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	if (old_key) {
 	    memcpy (data, old_key->data, 16);
 	} else {
-	    bzero (data, 16);
+            memset (data, 0, 16);
 	}
 	for (int n=0; n<16; n++) {
 	    data[n] ^= new_key->data[n];
@@ -809,7 +809,7 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
 	uint16_t le_ar = htole16 (access_rights);
 	memcpy (data + 1, &le_ar, sizeof (le_ar));
 	iso14443a_crc (data, 3, data+3);
-	bzero (data + 5, 3);
+        memset (data + 5, 0, 3);
 	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 8, MD_SEND, 0);
 
 	BUFFER_APPEND_BYTES (cmd, data, 8);

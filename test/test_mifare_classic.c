@@ -114,7 +114,7 @@ test_mifare_classic_format (void)
     };
 
     MifareClassicBlock empty;
-    bzero (empty, sizeof (empty));
+    memset (empty, 0, sizeof (empty));
 
     res = mifare_classic_write (tag, 0x3c, data);
     cut_assert_equal_int (0, res, cut_message ("mifare_classic_write() failed"));
