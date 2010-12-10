@@ -556,6 +556,16 @@ mifare_desfire_delete_application (MifareTag tag, MifareDESFireAID aid)
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
+    /*
+     * If we have deleted the current application, we are not authenticated
+     * anymore.
+     */
+    if (MIFARE_DESFIRE (tag)->selected_application == (uint32_t)(aid->data[0] | aid->data[1] << 8 | aid->data[2] << 16)) {
+	free (MIFARE_DESFIRE (tag)->session_key);
+	MIFARE_DESFIRE (tag)->session_key = NULL;
+	MIFARE_DESFIRE (tag)->selected_application = 0x000000;
+    }
+
     return 0;
 }
 

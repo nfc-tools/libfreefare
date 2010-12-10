@@ -1,3 +1,8 @@
+Changes between 0.2.2 and 0.2.3  [XX xxx XXXX]
+
+  *) Deprecate authentication information when deleting the currently selected
+     application
+
 Changes between 0.2.1 and 0.2.2  [23 nov 2010]
 
   *) Fix build when cutter is not available or is disabled.
