@@ -742,7 +742,7 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
     struct mifare_desfire_raw_file_settings raw_settings;
-    memcpy (&raw_settings, res, BUFFER_SIZE (res));
+    memcpy (&raw_settings, res, BUFFER_SIZE (res)-1);
 
     settings->file_type = raw_settings.file_type;
     settings->communication_settings = raw_settings.communication_settings;
