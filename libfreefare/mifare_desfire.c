@@ -574,9 +574,14 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
 
     BUFFER_INIT (res, 2 + CMAC_LENGTH);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
-    *version = res[0];
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    *version = p[0];
 
     return 0;
 }

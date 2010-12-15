@@ -65,11 +65,6 @@ test_mifare_desfire_ev1_aes (void)
     mifare_desfire_change_key (tag, 0, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
 
-    uint8_t key_version;
-//    res = mifare_desfire_get_key_version (tag, 0, &key_version);
- //   cut_assert_success ("mifare_desfire_get_key_version()");
-//    cut_assert_equal_int (key_data_aes_version, key_version, cut_message ("Wrong key_version value."));
-
     res = mifare_desfire_authenticate_aes (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
@@ -82,6 +77,19 @@ test_mifare_desfire_ev1_aes (void)
     /* Create 3 applications */
     res = mifare_desfire_select_application (tag, NULL);
     cut_assert_success ("mifare_desfire_select_application()");
+
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
+    mifare_desfire_key_free (key);
+
+    uint8_t key_version;
+    res = mifare_desfire_get_key_version (tag, 0, &key_version);
+    cut_assert_success ("mifare_desfire_get_key_version()");
+    cut_assert_equal_int (key_data_aes_version, key_version, cut_message ("Wrong key_version value."));
+
+    uint32_t size;
+    res = mifare_desfire_free_mem (tag, &size);
+    cut_assert_success ("mifare_desfire_free_mem()");
 
     MifareDESFireAID aid_a = mifare_desfire_aid_new (0x00AAAAAA);
     cut_assert_not_null (aid_a, cut_message ("Cannot allocate AID"));
