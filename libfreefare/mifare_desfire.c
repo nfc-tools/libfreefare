@@ -830,7 +830,7 @@ mifare_desfire_free_mem (MifareTag tag, uint32_t *size)
     ssize_t sn = __res_n;
     b = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
-    *size = res[1] | (res[2] << 8) | (res[3] << 16);
+    *size = res[0] | (res[1] << 8) | (res[2] << 16);
 
     return 0;
 }
