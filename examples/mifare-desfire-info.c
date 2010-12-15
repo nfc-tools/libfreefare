@@ -119,6 +119,17 @@ main(int argc, char *argv[])
 	    mifare_desfire_get_key_version (tags[i], 0, &version);
 	    printf ("Master Key version: %d (0x%02x)\n", version, version);
 
+	    uint32_t size;
+	    res = mifare_desfire_free_mem (tags[i], &size);
+	    printf ("Free memory: ");
+	    if (0 == res) {
+		printf ("%d bytes\n", size);
+	    } else {
+		printf ("unknown\n");
+	    }
+
+	    printf ("Use random UID: %s\n", (strlen (tag_uid) / 2 == 4) ? "yes" : "no");
+
 	    free (tag_uid);
 
 	    mifare_desfire_disconnect (tags[i]);
