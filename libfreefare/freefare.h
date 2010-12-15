@@ -317,6 +317,8 @@ int		 mifare_desfire_select_application (MifareTag tag, MifareDESFireAID aid);
 int		 mifare_desfire_format_picc (MifareTag tag);
 int		 mifare_desfire_get_version (MifareTag tag, struct mifare_desfire_version_info *version_info);
 int		 mifare_desfire_free_mem (MifareTag tag, uint32_t *size);
+int		 mifare_desfire_set_configuration (MifareTag tag, bool disable_format, bool enable_random_uid);
+int		 mifare_desfire_get_card_uid (MifareTag tag, char **uid);
 int		 mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count);
 int		 mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings);
 int		 mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights);

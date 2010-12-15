@@ -835,6 +835,60 @@ mifare_desfire_free_mem (MifareTag tag, uint32_t *size)
     return 0;
 }
 
+int
+mifare_desfire_set_configuration (MifareTag tag, bool disable_format, bool enable_random_uid)
+{
+    ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_DESFIRE (tag);
+
+    BUFFER_INIT (cmd, 10);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
+
+    BUFFER_APPEND (cmd, 0x5C);
+    BUFFER_APPEND (cmd, 0x00);
+    BUFFER_APPEND (cmd, (enable_random_uid ? 0x02 : 0x00) | (disable_format ? 0x01 : 0x00));
+
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, MDCM_ENCIPHERED | ENC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    return 0;
+}
+
+int
+mifare_desfire_get_card_uid (MifareTag tag, char **uid)
+{
+    ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_DESFIRE (tag);
+
+    ASSERT_NOT_NULL (uid);
+
+    BUFFER_INIT (cmd, 1);
+    BUFFER_INIT (res, 17 + CMAC_LENGTH);
+
+    BUFFER_APPEND (cmd, 0x51);
+
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 1, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_ENCIPHERED);
+
+    if (!(*uid = malloc (2*7+1))) {
+	return -1;
+    }
+
+    sprintf (*uid, "%02x%02x%02x%02x%02x%02x%02x",
+             p[0], p[1], p[2], p[3],
+	     p[4], p[5], p[6]);
+
+    return 0;
+}
+
 
 
 /* Application level commands */
