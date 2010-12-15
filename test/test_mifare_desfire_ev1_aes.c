@@ -25,7 +25,7 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-#include "mifare_desfire_fixture.h"
+#include "mifare_desfire_ev1_fixture.h"
 #include "common/mifare_desfire_auto_authenticate.h"
 
 #define cut_assert_success(last_command) \
@@ -36,7 +36,7 @@
     } while (0)
 
 void
-test_mifare_desfire (void)
+test_mifare_desfire_ev1_aes (void)
 {
     int res;
 
@@ -57,33 +57,21 @@ test_mifare_desfire (void)
      */
     res = mifare_desfire_change_key_settings (tag, 0xF);
     cut_assert_success ("mifare_desfire_change_key_settings()");
+    res = mifare_desfire_change_key_settings (tag, 0xF);
+    cut_assert_success ("mifare_desfire_change_key_settings()");
 
-    /* Change master key to DES */
-    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_des);
+    /* Change master key to AES */
+    MifareDESFireKey key = mifare_desfire_aes_key_new_with_version (key_data_aes, key_data_aes_version);
     mifare_desfire_change_key (tag, 0, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
 
     uint8_t key_version;
-    res = mifare_desfire_get_key_version (tag, 0, &key_version);
-    cut_assert_success ("mifare_desfire_get_key_version()");
-    cut_assert_equal_int (0xAA, key_version, cut_message ("Wrong key_version value."));
+//    res = mifare_desfire_get_key_version (tag, 0, &key_version);
+ //   cut_assert_success ("mifare_desfire_get_key_version()");
+//    cut_assert_equal_int (key_data_aes_version, key_version, cut_message ("Wrong key_version value."));
 
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-    mifare_desfire_key_free (key);
-
-    /* Change master key to 3DES */
-    key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-    mifare_desfire_change_key (tag, 0, key, NULL);
-    cut_assert_success ("mifare_desfire_change_key()");
-
-    res = mifare_desfire_get_key_version (tag, 0, &key_version);
-    cut_assert_success ("mifare_desfire_get_key_version()");
-    cut_assert_equal_int (0xC7, key_version, cut_message ("Wrong key_version value."));
-
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     /* Wipeout the card */
@@ -102,12 +90,12 @@ test_mifare_desfire (void)
 
     MifareDESFireAID aid_b = mifare_desfire_aid_new (0x00BBBBBB);
     cut_assert_not_null (aid_b, cut_message ("Cannot allocate AID"));
-    res = mifare_desfire_create_application (tag, aid_b, 0xEF, 6);
+    res = mifare_desfire_create_application (tag, aid_b, 0xEF, 0x80 | 6);
     cut_assert_success ("mifare_desfire_create_application()");
 
     MifareDESFireAID aid_c = mifare_desfire_aid_new (0x00CCCCCC);
     cut_assert_not_null (aid_c, cut_message ("Cannot allocate AID"));
-    res = mifare_desfire_create_application (tag, aid_c, 0xC2, 14);
+    res = mifare_desfire_create_application (tag, aid_c, 0xC2, 0x80 | 14);
     cut_assert_success ("mifare_desfire_create_application()");
 
     // Ensure we can find the created applications
@@ -198,7 +186,7 @@ test_mifare_desfire (void)
 
 	// Ensure that no content was changed yet
 	char ref_buffer[64];
-        memset (ref_buffer, 0, sizeof (ref_buffer));
+	bzero (ref_buffer, sizeof (ref_buffer));
 	for (int n = 0; n < transaction; n++) {
 	    sprintf (ref_buffer + 3 * n, "%02d", n);
 	}
@@ -310,8 +298,8 @@ test_mifare_desfire (void)
     res = mifare_desfire_select_application (tag, 0);
     cut_assert_success ("mifare_desfire_select_application()");
 
-    key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-    res = mifare_desfire_authenticate (tag, 0, key);
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate()");
     mifare_desfire_key_free (key);
 
@@ -328,61 +316,53 @@ test_mifare_desfire (void)
     res = mifare_desfire_select_application (tag, aid_b);
     cut_assert_success ("mifare_desfire_select_application()");
 
-    key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
-    // Use a 3DES application master key
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Master Key");
+    // Use an AES application master key
+    key = mifare_desfire_aes_key_new_with_version ((uint8_t *) "App.B Master Key", 0x83);
     res = mifare_desfire_change_key (tag, 0, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
 
     /* Authenticate with the new master key */
-    /* (Reversed parity bits this time) */
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "@pp/C!L`ruds!Kdx");
-    res = mifare_desfire_authenticate (tag, 0, key);
+    key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Master Key");
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate()");
     mifare_desfire_key_free (key);
 
     res = mifare_desfire_get_key_version (tag, 0, &key_version);
     cut_assert_success ("mifare_desfire_get_key_version()");
-    //   App.B Mas-ter Key
-    // 0b100000111-0100111
-    // 0x       83-     A7
     cut_assert_equal_int (0x83, key_version, cut_message ("Wrong key version"));
 
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Master Key");
-    cut_assert_equal_int (0x83, mifare_desfire_key_get_version (key), cut_message ("mifare_desfire_key_get_version() returns an invalid version"));
-    mifare_desfire_key_free (key);
-
     /* Change key #1 */
-    key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_authenticate (tag, 1, key);
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 1, key);
     cut_assert_success ("mifare_desfire_authenticate()");
     mifare_desfire_key_free (key);
 
-    key = mifare_desfire_des_key_new_with_version ((uint8_t *) "SglDES_1");
+    key = mifare_desfire_aes_key_new ((uint8_t *) "Another AES key!");
     res = mifare_desfire_change_key (tag, 1, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
 
     /* Change key #5 */
-    key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_authenticate (tag, 5, key);
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 5, key);
     cut_assert_success ("mifare_desfire_authenticate()");
     mifare_desfire_key_free (key);
 
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "B's Chg Keys Key");
+    key = mifare_desfire_aes_key_new ((uint8_t *) "B's Chg Keys Key");
     res = mifare_desfire_change_key (tag, 5, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
 
     /* Set key #5 as the change key */
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Master Key");
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Master Key");
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     res = mifare_desfire_change_key_settings (tag, 0x5F);
@@ -397,26 +377,26 @@ test_mifare_desfire (void)
     cut_assert_equal_int (6, max_keys, cut_message ("Wrong maximum number of keys"));
 
     /* Change key #1 to #4 using the three key procedure. */
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "B's Chg Keys Key");
-    res = mifare_desfire_authenticate (tag, 5, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new ((uint8_t *) "B's Chg Keys Key");
+    res = mifare_desfire_authenticate_aes (tag, 5, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *)"App.B Key #1.   ");
-    MifareDESFireKey key1 = mifare_desfire_des_key_new_with_version ((uint8_t *) "SglDES_1");
+    key = mifare_desfire_aes_key_new ((uint8_t *)"App.B Key #1.   ");
+    MifareDESFireKey key1 = mifare_desfire_aes_key_new ((uint8_t *) "Another AES key!");
     res = mifare_desfire_change_key (tag, 1, key, key1);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
     mifare_desfire_key_free (key1);
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *)"App.B Key #2..  ");
+    key = mifare_desfire_aes_key_new ((uint8_t *)"App.B Key #2..  ");
     res = mifare_desfire_change_key (tag, 2, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *)"App.B Key #3... ");
+    key = mifare_desfire_aes_key_new ((uint8_t *)"App.B Key #3... ");
     res = mifare_desfire_change_key (tag, 3, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *)"App.B Key #4....");
+    key = mifare_desfire_aes_key_new ((uint8_t *)"App.B Key #4....");
     res = mifare_desfire_change_key (tag, 4, key, NULL);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (key);
@@ -435,9 +415,9 @@ test_mifare_desfire (void)
 	uint8_t cs = transaction % 3;
 	if (cs == 2) cs++;
 
-	key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Key #4....");
-	res = mifare_desfire_authenticate (tag, 4, key);
-	cut_assert_success ("mifare_desfire_authenticate()");
+	key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Key #4....");
+	res = mifare_desfire_authenticate_aes (tag, 4, key);
+	cut_assert_success ("mifare_desfire_authenticate_aes()");
 	mifare_desfire_key_free (key);
 
 	res = mifare_desfire_change_file_settings (tag, std_data_file_id, cs, 0x1234);
@@ -448,9 +428,9 @@ test_mifare_desfire (void)
 	cut_assert_success ("mifare_desfire_change_file_settings()");
 
 	// Authenticate witht he write key
-	key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Key #2..  ");
-	res = mifare_desfire_authenticate (tag, 2, key);
-	cut_assert_success ("mifare_desfire_authenticate()");
+	key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Key #2..  ");
+	res = mifare_desfire_authenticate_aes (tag, 2, key);
+	cut_assert_success ("mifare_desfire_authenticate_aes()");
 	mifare_desfire_key_free (key);
 
 	char data_buffer[100];
@@ -480,8 +460,13 @@ test_mifare_desfire (void)
 		cut_assert_equal_int (-1, res, cut_message ("error code"));
 		cut_assert_equal_int (PERMISSION_ERROR, mifare_desfire_last_picc_error (tag), cut_message ("PICC error"));
 
-		// The prebious failure has aborted the transaction, so clear
-		// record again.
+		// The previous failure has aborted the transaction, so
+		// re-authenticate, then clear record again.
+		key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Key #2..  ");
+		res = mifare_desfire_authenticate_aes (tag, 2, key);
+		cut_assert_success ("mifare_desfire_authenticate_aes");
+		mifare_desfire_key_free (key);
+
 		res = mifare_desfire_clear_record_file (tag, 1);
 		cut_assert_success ("mifare_desfire_clear_record_file()");
 
@@ -523,9 +508,9 @@ test_mifare_desfire (void)
 	cut_assert_success ("mifare_desfire_commit_transaction()");
 
 	// Authenticate with the key that allows reading
-	key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Key #1.   ");
-	res = mifare_desfire_authenticate (tag, 1, key);
-	cut_assert_success ("mifare_desfire_authenticate()");
+	key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Key #1.   ");
+	res = mifare_desfire_authenticate_aes (tag, 1, key);
+	cut_assert_success ("mifare_desfire_authenticate_aes()");
 	mifare_desfire_key_free (key);
 
 	// Read first half of the file
@@ -618,9 +603,9 @@ test_mifare_desfire (void)
     cut_assert_equal_int (0, file_count, cut_message ("count"));
 
     /* Delete application B */
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.B Master Key");
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new ((uint8_t *) "App.B Master Key");
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     res = mifare_desfire_delete_application (tag, aid_b);
@@ -636,22 +621,22 @@ test_mifare_desfire (void)
     res = mifare_desfire_select_application (tag, aid_c);
     cut_assert_success ("mifare_desfire_select_application()");
 
-    key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_authenticate (tag, 12, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 12, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
 
-    MifareDESFireKey new_key = mifare_desfire_3des_key_new_with_version ((uint8_t *)"App.C Key #1.   ");
+    MifareDESFireKey new_key = mifare_desfire_aes_key_new ((uint8_t *)"App.C Key #1.   ");
     res = mifare_desfire_change_key (tag, 1, new_key, key);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (new_key);
 
-    new_key = mifare_desfire_3des_key_new_with_version ((uint8_t *)"App.C Key #2..  ");
+    new_key = mifare_desfire_aes_key_new ((uint8_t *)"App.C Key #2..  ");
     res = mifare_desfire_change_key (tag, 2, new_key, key);
     cut_assert_success ("mifare_desfire_change_key()");
     mifare_desfire_key_free (new_key);
 
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
 
@@ -665,18 +650,18 @@ test_mifare_desfire (void)
 	uint8_t cs = transaction % 3;
 	if (cs == 2) cs++;
 
-	key = mifare_desfire_des_key_new (key_data_null);
-	res = mifare_desfire_authenticate (tag, 0, key);
-	cut_assert_success ("mifare_desfire_authenticate()");
+	key = mifare_desfire_aes_key_new (key_data_aes);
+	res = mifare_desfire_authenticate_aes (tag, 0, key);
+	cut_assert_success ("mifare_desfire_authenticate_aes()");
 	mifare_desfire_key_free (key);
 
 	res = mifare_desfire_change_file_settings (tag, 6, cs, 0x12E0);
 	cut_assert_success ("mifare_desfire_change_file_settings()");
 
 	if (transaction & 4) {
-	    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.C Key #2..  ");
-	    res = mifare_desfire_authenticate (tag, 2, key);
-	    cut_assert_success ("mifare_desfire_authenticate()");
+	    key = mifare_desfire_aes_key_new ((uint8_t *) "App.C Key #2..  ");
+	    res = mifare_desfire_authenticate_aes (tag, 2, key);
+	    cut_assert_success ("mifare_desfire_authenticate_aes()");
 	    mifare_desfire_key_free (key);
 	} else {
 	    cs = 0;
@@ -690,9 +675,9 @@ test_mifare_desfire (void)
 	cut_assert_success ("mifare_desfire_write_record()");
 
 	if (transaction & 4) {
-	    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.C Key #1.   ");
-	    res = mifare_desfire_authenticate (tag, 1, key);
-	    cut_assert_success ("mifare_desfire_authenticate()");
+	    key = mifare_desfire_aes_key_new ((uint8_t *) "App.C Key #1.   ");
+	    res = mifare_desfire_authenticate_aes (tag, 1, key);
+	    cut_assert_success ("mifare_desfire_authenticate_aes()");
 	    mifare_desfire_key_free (key);
 	}
 
@@ -718,9 +703,9 @@ test_mifare_desfire (void)
     }
 
     // Read each record
-    key = mifare_desfire_3des_key_new_with_version ((uint8_t *) "App.C Key #1.   ");
-    res = mifare_desfire_authenticate (tag, 1, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new ((uint8_t *) "App.C Key #1.   ");
+    res = mifare_desfire_authenticate_aes (tag, 1, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     int t = 49;
@@ -754,9 +739,9 @@ test_mifare_desfire (void)
     res = mifare_desfire_select_application (tag, 0);
     cut_assert_success ("mifare_desfire_select_application()");
 
-    key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     res = mifare_desfire_change_key_settings (tag, 0x08);
@@ -785,9 +770,9 @@ test_mifare_desfire (void)
     /*
      * Now we retry authenticated with the master key.
      */
-    key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     /* We should be able to list applications again */
@@ -809,9 +794,9 @@ test_mifare_desfire (void)
     cut_assert_success ("mifare_desfire_change_key_settings()");
 
     /* Change the master key back to the default one */
-    key = mifare_desfire_3des_key_new_with_version (key_data_3des);
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
+    key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
 
     key = mifare_desfire_des_key_new_with_version (key_data_null);
@@ -835,99 +820,3 @@ test_mifare_desfire (void)
     free (aid_d);
 }
 
-void
-test_mifare_desfire_get_tag_friendly_name (void)
-{
-    const char *name = freefare_get_tag_friendly_name (tag);
-
-    cut_assert_not_null (name, cut_message ("freefare_get_tag_friendly_name() failed"));
-}
-
-#define NAID 28
-
-void
-test_mifare_desfire_get_many_application_ids (void)
-{
-    int res;
-
-    mifare_desfire_auto_authenticate (tag, 0);
-
-    /* Wipeout the card */
-    res = mifare_desfire_format_picc (tag);
-    cut_assert_success ("mifare_desfire_format_picc()");
-
-    for (int i = 0; i < NAID; i++) {
-	MadAid mad_aid = { i, i };
-	MifareDESFireAID aid = mifare_desfire_aid_new_with_mad_aid ( mad_aid, i % 0x10);
-
-	res = mifare_desfire_create_application (tag, aid, 0xff, 0);
-	cut_assert_success ("mifare_desfire_create_application()");
-
-	free (aid);
-    }
-
-
-    MifareDESFireAID *aids;
-    size_t aid_count;
-
-    res = mifare_desfire_get_application_ids (tag, &aids, &aid_count);
-    cut_assert_success ("mifare_desfire_get_application_ids()");
-
-    cut_assert_equal_int (NAID, aid_count, cut_message ("count"));
-
-    mifare_desfire_free_application_ids (aids);
-
-    /* Wipeout the card */
-    res = mifare_desfire_format_picc (tag);
-    cut_assert_success ("mifare_desfire_format_picc()");
-}
-
-void
-test_mifare_desfire_des_macing (void)
-{
-    int res;
-
-    mifare_desfire_auto_authenticate (tag, 0);
-
-    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_null);
-    res = mifare_desfire_change_key (tag, 0, key, NULL);
-    cut_assert_success ("mifare_desfire_change_key()");
-
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-
-    MifareDESFireAID aid = mifare_desfire_aid_new (0x00123456);
-    res = mifare_desfire_create_application (tag, aid, 0xFF, 1);
-    cut_assert_success ("mifare_desfire_create_application()");
-
-    res = mifare_desfire_select_application (tag, aid);
-    cut_assert_success ("mifare_desfire_select_application");
-    free (aid);
-
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-
-    res = mifare_desfire_create_std_data_file (tag, 1, MDCM_MACED, 0x0000, 20);
-    cut_assert_success ("mifare_desfire_create_std_data_file()");
-
-    char *s= "Hello World";
-    res = mifare_desfire_write_data (tag, 1, 0, strlen (s), s);
-    cut_assert_success ("mifare_desfire_write_data()");
-
-    char buffer[20];
-    res = mifare_desfire_read_data (tag, 1, 0, 0, buffer);
-    cut_assert_success ("mifare_desfire_read_data()");
-    cut_assert_equal_int (20, res, cut_message ("retval"));
-    cut_assert_equal_string (s, buffer, cut_message ("value"));
-
-    res = mifare_desfire_select_application (tag, NULL);
-    cut_assert_success ("mifare_desfire_select_application");
-    res = mifare_desfire_authenticate (tag, 0, key);
-    cut_assert_success ("mifare_desfire_authenticate()");
-
-    /* Wipeout the card */
-    res = mifare_desfire_format_picc (tag);
-    cut_assert_success ("mifare_desfire_format_picc()");
-
-    mifare_desfire_key_free (key);
-}

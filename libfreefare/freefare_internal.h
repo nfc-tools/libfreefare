@@ -96,7 +96,10 @@
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
-#define MAX_CRYPTO_BLOCK_SIZE 8
+#define MAX_CRYPTO_BLOCK_SIZE 16
+#define MAX_FRAME_SIZE 60
+
+void		*memdup (const void *p, const size_t n);
 
 struct mad_sector_0x00;
 struct mad_sector_0x10;
@@ -118,11 +121,38 @@ typedef enum {
 
 #define MDCM_MASK 0x000F
 
+#define CMAC_NONE 0
+
+// Data send to the PICC is used to update the CMAC
+#define CMAC_COMMAND 0x010
+// Data received from the PICC is used to update the CMAC
+#define CMAC_VERIFY  0x020
+
+// MAC the command (when MDCM_MACED)
+#define MAC_COMMAND 0x100
+// The command returns a MAC to verify (when MDCM_MACED)
+#define MAC_VERIFY  0x200
+
+#define ENC_COMMAND 0x1000
+#define NO_CRC      0x2000
+#define UNSPECIFIED_DATA_LENGTH 0x4000
+
+#define MAC_MASK   0x0F0
+#define CMAC_MACK  0xF00
+
 void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
 void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
 void		 mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac);
 void		 rol (uint8_t *data, const size_t len);
+void		 desfire_crc32 (const uint8_t *data, const size_t len, uint8_t *crc);
+void		 desfire_crc32_append (uint8_t *data, const size_t len);
 size_t		 key_block_size (const MifareDESFireKey key);
+size_t		 padded_data_length (const size_t nbytes, const size_t block_size);
+size_t		 maced_data_length (const MifareDESFireKey key, const size_t nbytes);
+size_t		 enciphered_data_length (const MifareDESFireKey key, const size_t nbytes);
+
+void		 cmac_generate_subkeys (MifareDESFireKey key);
+void		 cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
 void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT 16
@@ -175,23 +205,29 @@ struct mifare_desfire_key {
     uint8_t data[16];
     enum {
 	T_DES,
-	T_3DES
+	T_3DES,
+	T_AES
     } type;
     DES_key_schedule ks1;
     DES_key_schedule ks2;
+    uint8_t aes_sk1[16];
+    uint8_t aes_sk2[16];
+    uint8_t aes_version;
 };
 
 struct mifare_desfire_tag {
     struct mifare_tag __tag;
 
     uint8_t last_picc_error;
+    uint8_t last_internal_error;
     uint8_t last_pcd_error;
     MifareDESFireKey session_key;
     uint8_t authenticated_key_no;
     uint8_t ivect[MAX_CRYPTO_BLOCK_SIZE];
+    uint8_t cmac[16];
     uint8_t *crypto_buffer;
     size_t crypto_buffer_size;
-    uint8_t block_number;
+    uint32_t selected_application;
 };
 
 MifareDESFireKey mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireKey authentication_key);

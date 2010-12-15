@@ -83,6 +83,25 @@ mifare_desfire_3des_key_new_with_version (uint8_t value[16])
     return key;
 }
 
+MifareDESFireKey
+mifare_desfire_aes_key_new (uint8_t value[16])
+{
+    return mifare_desfire_aes_key_new_with_version (value, 0);
+}
+
+MifareDESFireKey
+mifare_desfire_aes_key_new_with_version (uint8_t value[16], uint8_t version)
+{
+    MifareDESFireKey key;
+
+    if ((key = malloc (sizeof (struct mifare_desfire_key)))) {
+	memcpy (key->data, value, 16);
+	key->type = T_AES;
+	key->aes_version = version;
+    }
+    return key;
+}
+
 uint8_t
 mifare_desfire_key_get_version (MifareDESFireKey key)
 {
@@ -131,6 +150,13 @@ mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireK
 	memcpy (buffer+8, rnda+4, 4);
 	memcpy (buffer+12, rndb+4, 4);
 	key = mifare_desfire_3des_key_new_with_version (buffer);
+	break;
+    case T_AES:
+	memcpy (buffer, rnda, 4);
+	memcpy (buffer+4, rndb, 4);
+	memcpy (buffer+8, rnda+12, 4);
+	memcpy (buffer+12, rndb+12, 4);
+	key = mifare_desfire_aes_key_new (buffer);
 	break;
     }
 

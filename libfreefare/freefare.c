@@ -254,3 +254,19 @@ freefare_free_tags (MifareTag *tags)
 	free (tags);
     }
 }
+
+
+
+/*
+ * Low-level API
+ */
+
+void *
+memdup (const void *p, const size_t n)
+{
+    void *res;
+    if ((res = malloc (n))) {
+	memcpy (res, p, n);
+    }
+    return res;
+}

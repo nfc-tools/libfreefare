@@ -19,8 +19,10 @@ noinst_LTLIBRARIES = \
 		     test_mifare_classic_create_trailer_block.la \
 		     test_mifare_classic_sector_boundaries.la \
 		     test_mifare_desfire.la \
+		     test_mifare_desfire_aes.la \
 		     test_mifare_desfire_aid.la \
 		     test_mifare_desfire_des.la \
+		     test_mifare_desfire_ev1.la \
 		     test_mifare_desfire_key.la \
 		     test_mifare_ultralight.la \
 		     test_tlv.la
@@ -51,11 +53,21 @@ test_mifare_desfire_la_SOURCES = test_mifare_desfire.c \
 test_mifare_desfire_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
 				$(top_builddir)/test/common/libtestcommon.la
 
+test_mifare_desfire_aes_la_SOURCES = test_mifare_desfire_aes.c
+test_mifare_desfire_aes_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
+
 test_mifare_desfire_aid_la_SOURCES = test_mifare_desfire_aid.c
 test_mifare_desfire_aid_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_desfire_des_la_SOURCES = test_mifare_desfire_des.c
 test_mifare_desfire_des_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
+
+test_mifare_desfire_ev1_la_SOURCES = test_mifare_desfire_ev1.c \
+				     test_mifare_desfire_ev1_aes.c \
+				     mifare_desfire_ev1_fixture.c \
+				     mifare_desfire_ev1_fixture.h
+test_mifare_desfire_ev1_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
+				    $(top_builddir)/test/common/libtestcommon.la
 
 test_mifare_desfire_key_la_SOURCES = test_mifare_desfire_key.c
 test_mifare_desfire_key_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la

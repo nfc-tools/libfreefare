@@ -93,17 +93,18 @@ struct mifare_desfire_raw_file_settings {
 #pragma pack (pop)
 
 #define MAX_APPLICATION_COUNT 28
-#define MAX_FILE_COUNT 16
+#define MAX_FILE_COUNT 32
+
+#define CMAC_LENGTH 8
 
 static struct mifare_desfire_file_settings cached_file_settings[MAX_FILE_COUNT];
 static bool cached_file_settings_current[MAX_FILE_COUNT];
 
+static int	 authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key);
 static int	 create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
 static int	 create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
 static ssize_t	 write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
 static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
-
-#define MAX_FRAME_SIZE 60
 
 #define NOT_YET_AUTHENTICATED 255
 
@@ -116,7 +117,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 
 /*
  * XXX: cs < 0 is a CommunicationSettings detection error. Other values are
- * user erros. We may need to distinguish them.
+ * user errors. We may need to distinguish them.
  */
 #define ASSERT_CS(cs) \
     do { \
@@ -145,7 +146,12 @@ static uint8_t __msg[MAX_FRAME_SIZE] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., *
 /*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/
 static uint8_t __res[MAX_FRAME_SIZE];
 
-#define FRAME_PAYLOAD_SIZE (MAX_FRAME_SIZE - 6)
+uint8_t cmac_cmd_buf[4096];
+uint8_t cmac_res_buf[4096];
+size_t cmac_cmd_len = 0;
+size_t cmac_res_len = 0;
+
+#define FRAME_PAYLOAD_SIZE (MAX_FRAME_SIZE - 5)
 
 /*
  * Transmit the message msg to the NFC tag and receive the response res.  The
@@ -166,6 +172,7 @@ static uint8_t __res[MAX_FRAME_SIZE];
 	    __msg[4] = msg_len - 1; \
 	    memcpy (__msg + 5, msg + 1, msg_len - 1); \
 	} \
+	/* reply length */ \
 	__msg[__len-1] = 0x00; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
@@ -173,12 +180,12 @@ static uint8_t __res[MAX_FRAME_SIZE];
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (__res, __##res##_n, "<=== "); \
-	memcpy (res, __res, __##res##_n - 2); \
 	res[__##res##_n-2] = __res[__##res##_n-1]; \
-	__##res##_n-=1; \
-	if ((1 == __##res##_n) && (OPERATION_OK != res[__##res##_n-1]) && (ADDITIONAL_FRAME != res[__##res##_n-1])) { \
-	    return MIFARE_DESFIRE (tag)->last_picc_error = res[__##res##_n-1], -1; \
+	__##res##_n--; \
+	if ((1 == __##res##_n) && (ADDITIONAL_FRAME != res[__##res##_n-1]) && (OPERATION_OK != res[__##res##_n-1])) { \
+	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
 	} \
+	memcpy (res, __res, __##res##_n - 1); \
     } while (0)
 
 
@@ -186,7 +193,6 @@ static uint8_t __res[MAX_FRAME_SIZE];
  * Miscellaneous low-level memory manipulation functions.
  */
 
-static void	*memdup (void *p, size_t n);
 static int32_t	 le24toh (uint8_t data[3]);
 
 int
@@ -221,16 +227,6 @@ static int32_t
 le24toh (uint8_t data[3])
 {
     return (data[2] << 16) | (data[1] << 8) | data[0];
-}
-
-static void *
-memdup (void *p, size_t n)
-{
-    void *res;
-    if ((res = malloc (n))) {
-	memcpy (res, p, n);
-    }
-    return res;
 }
 
 
@@ -296,7 +292,7 @@ mifare_desfire_connect (MifareTag tag)
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
 	MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
-	MIFARE_DESFIRE (tag)->block_number = 0;
+	MIFARE_DESFIRE (tag)->selected_application = 0;
     } else {
 	errno = EIO;
 	return -1;
@@ -324,8 +320,8 @@ mifare_desfire_disconnect (MifareTag tag)
 
 
 
-int
-mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
+static int
+authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
@@ -339,54 +335,59 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     MIFARE_DESFIRE (tag)->session_key = NULL;
 
     BUFFER_INIT (cmd1, 2);
-    BUFFER_INIT (res, 9);
+    BUFFER_INIT (res, 17);
 
-    BUFFER_APPEND (cmd1, 0x0A);
+    BUFFER_APPEND (cmd1, cmd);
     BUFFER_APPEND (cmd1, key_no);
 
     DESFIRE_TRANSCEIVE (tag, cmd1, res);
 
+    size_t key_length = __res_n - 1;
 
-    uint8_t PICC_E_RndB[8];
-    memcpy (PICC_E_RndB, res, 8);
+    uint8_t PICC_E_RndB[16];
+    memcpy (PICC_E_RndB, res, key_length);
 
-    uint8_t PICC_RndB[8];
-    memcpy (PICC_RndB, PICC_E_RndB, 8);
-    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect,  PICC_RndB, 8, MD_RECEIVE, 0);
+    uint8_t PICC_RndB[16];
+    memcpy (PICC_RndB, PICC_E_RndB, key_length);
+    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, PICC_RndB, key_length, MD_RECEIVE, 0);
 
-    uint8_t PCD_RndA[8];
-    RAND_bytes (PCD_RndA, 8);
+    uint8_t PCD_RndA[16];
+    RAND_bytes (PCD_RndA, 16);
 
-    uint8_t PCD_r_RndB[8];
-    memcpy (PCD_r_RndB, PICC_RndB, 8);
-    rol (PCD_r_RndB, 8);
+    uint8_t PCD_r_RndB[16];
+    memcpy (PCD_r_RndB, PICC_RndB, key_length);
+    rol (PCD_r_RndB, key_length);
 
-    uint8_t token[16];
-    memcpy (token, PCD_RndA, 8);
-    memcpy (token+8, PCD_r_RndB, 8);
+    uint8_t token[32];
+    memcpy (token, PCD_RndA, key_length);
+    memcpy (token+key_length, PCD_r_RndB, key_length);
 
-    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, token, 16, MD_SEND, 0);
+    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, token, 2 * key_length, MD_SEND, (0x0A == cmd) ? 0 : 1);
 
-    BUFFER_INIT (cmd2, 17);
+    BUFFER_INIT (cmd2, 33);
 
     BUFFER_APPEND (cmd2, 0xAF);
-    BUFFER_APPEND_BYTES (cmd2, token, 16);
+    BUFFER_APPEND_BYTES (cmd2, token, 2*key_length);
 
     DESFIRE_TRANSCEIVE (tag, cmd2, res);
 
-    uint8_t PICC_E_RndA_s[8];
-    memcpy (PICC_E_RndA_s, res, 8);
+    uint8_t PICC_E_RndA_s[16];
+    memcpy (PICC_E_RndA_s, res, key_length);
 
-    uint8_t PICC_RndA_s[8];
-    memcpy (PICC_RndA_s, PICC_E_RndA_s, 8);
-    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, PICC_RndA_s, 8, MD_RECEIVE, 0);
+    uint8_t PICC_RndA_s[16];
+    memcpy (PICC_RndA_s, PICC_E_RndA_s, key_length);
+    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, PICC_RndA_s, key_length, MD_RECEIVE, 0);
 
-    uint8_t PCD_RndA_s[8];
-    memcpy (PCD_RndA_s, PCD_RndA, 8);
-    rol (PCD_RndA_s, 8);
+    uint8_t PCD_RndA_s[key_length];
+    memcpy (PCD_RndA_s, PCD_RndA, key_length);
+    rol (PCD_RndA_s, key_length);
 
 
-    if (0 != memcmp (PCD_RndA_s, PICC_RndA_s, 8)) {
+    if (0 != memcmp (PCD_RndA_s, PICC_RndA_s, key_length)) {
+#ifdef WITH_DEBUG
+	hexdump (PCD_RndA_s, key_length, "PCD  ", 0);
+	hexdump (PICC_RndA_s, key_length, "PICC ", 0);
+#endif
 	return -1;
     }
 
@@ -394,7 +395,22 @@ mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key
     MIFARE_DESFIRE (tag)->session_key = mifare_desfire_session_key_new (PCD_RndA, PICC_RndB, key);
     memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 
+    if (MIFARE_DESFIRE (tag)->session_key->type == T_AES)
+	cmac_generate_subkeys (MIFARE_DESFIRE (tag)->session_key);
+
     return 0;
+}
+
+int
+mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
+{
+    return authenticate (tag, 0x0A, key_no, key);
+}
+
+int
+mifare_desfire_authenticate_aes (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
+{
+    return authenticate (tag, 0xAA, key_no, key);
 }
 
 int
@@ -404,22 +420,18 @@ mifare_desfire_change_key_settings (MifareTag tag, uint8_t settings)
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_AUTHENTICATED (tag);
 
-    BUFFER_INIT (cmd, 9);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 9 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x54);
+    BUFFER_APPEND (cmd, settings);
 
-    uint8_t data[8];
+    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 1, MDCM_ENCIPHERED | ENC_COMMAND);
 
-    data[0] = settings;
-    iso14443a_crc (data, 1, data + 1);
-    memset (data+3, 0, 5);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
-    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 8, MD_SEND, 0);
-
-    BUFFER_APPEND_BYTES (cmd, data, 8);
-
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    ssize_t n = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
 }
@@ -431,16 +443,21 @@ mifare_desfire_get_key_settings (MifareTag tag, uint8_t *settings, uint8_t *max_
     ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 3);
+    BUFFER_INIT (res, 3 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x45);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 1, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t n = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     if (settings)
 	*settings = res[0];
     if (max_keys)
-	*max_keys = res[1];
+	*max_keys = res[1] & 0x0F;
 
     return 0;
 }
@@ -452,47 +469,90 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_AUTHENTICATED (tag);
 
-    BUFFER_INIT (cmd, 1+1+24);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 42);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
+
+    key_no &= 0x0F;
+
+    /*
+     * Because new crypto methods can be setup only at application creation,
+     * changing the card master key to one of them require a key_no tweak.
+     */
+    if (0x000000 == MIFARE_DESFIRE (tag)->selected_application) {
+	switch (new_key->type) {
+	case T_DES:
+	case T_3DES:
+	    break;
+	case T_AES:
+	    key_no |= 0x80;
+	    break;
+	}
+    }
 
     BUFFER_APPEND (cmd, 0xC4);
     BUFFER_APPEND (cmd, key_no);
 
-    uint8_t data[24];
+    int new_key_length;
+    switch (new_key->type) {
+	case T_DES:
+	case T_3DES:
+	case T_AES:
+	    new_key_length = 16;
+	    break;
+    }
 
-    if (MIFARE_DESFIRE (tag)->authenticated_key_no != key_no) {
+    memcpy (cmd + __cmd_n, new_key->data, new_key_length);
+
+    if ((MIFARE_DESFIRE (tag)->authenticated_key_no & 0x0f) != (key_no & 0x0f)) {
 	if (old_key) {
-	    memcpy (data, old_key->data, 16);
-	} else {
-            memset (data, 0, 16);
-	}
-	for (int n=0; n<16; n++) {
-	    data[n] ^= new_key->data[n];
-	}
-	// Append XORed data CRC
-	iso14443a_crc (data, 16, data+16);
-	// Append new key CRC
-	iso14443a_crc (new_key->data, 16, data+18);
-	// Padding
-	for (int n=20; n<24; n++) {
-	    data[n] = 0x00;
-	}
-    } else {
-	memcpy (data, new_key->data, 16);
-	// Append new key CRC
-	iso14443a_crc (data, 16, data+16);
-
-	// Padding
-	for (int n=18; n<24; n++) {
-	    data[n] = 0x00;
+	    for (int n = 0; n < new_key_length; n++) {
+		cmd[__cmd_n + n] ^= old_key->data[n];
+	    }
 	}
     }
 
-    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 24, MD_SEND, 0);
+    __cmd_n += new_key_length;
 
-    BUFFER_APPEND_BYTES (cmd, data, 24);
+    if (new_key->type == T_AES)
+	cmd[__cmd_n++] = new_key->aes_version;
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    if ((MIFARE_DESFIRE (tag)->authenticated_key_no & 0x0f) != (key_no & 0x0f)) {
+	switch (MIFARE_DESFIRE (tag)->session_key->type) {
+	case T_DES:
+	case T_3DES:
+	    iso14443a_crc_append (cmd + 2, __cmd_n - 2);
+	    __cmd_n += 2;
+	    iso14443a_crc (new_key->data, new_key_length, cmd + __cmd_n);
+	    __cmd_n += 2;
+	    break;
+	case T_AES:
+	    desfire_crc32_append (cmd, __cmd_n);
+	    __cmd_n += 4;
+
+	    desfire_crc32 (new_key->data, new_key_length, cmd + __cmd_n);
+	    __cmd_n += 4;
+	    break;
+	}
+    } else {
+	switch (MIFARE_DESFIRE (tag)->session_key->type) {
+	case T_DES:
+	case T_3DES:
+	    iso14443a_crc_append (cmd + 2 , __cmd_n - 2);
+	    __cmd_n += 2;
+	    break;
+	case T_AES:
+	    desfire_crc32_append (cmd, __cmd_n);
+	    __cmd_n += 4;
+	    break;
+	}
+    }
+
+    uint8_t * p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, MDCM_ENCIPHERED | ENC_COMMAND | NO_CRC);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
 }
@@ -512,7 +572,7 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
     BUFFER_APPEND (cmd, 0x64);
     BUFFER_APPEND (cmd, key_no);
 
-    BUFFER_INIT (res, 2);
+    BUFFER_INIT (res, 2 + CMAC_LENGTH);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
 
@@ -524,22 +584,33 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
 
 
 int
-mifare_desfire_create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
+create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, uint16_t iso_file_id, char *iso_file_name)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 6);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 22);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xCA);
     BUFFER_APPEND_LE (cmd, aid->data, sizeof (aid->data), sizeof (aid->data));
-    BUFFER_APPEND (cmd, settings);
-    BUFFER_APPEND (cmd, key_no);
+    BUFFER_APPEND (cmd, settings1);
+    BUFFER_APPEND (cmd, settings2);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
+}
+
+int
+mifare_desfire_create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
+{
+    return create_application (tag, aid, settings, key_no, 0, NULL);
 }
 
 int
@@ -548,13 +619,18 @@ mifare_desfire_delete_application (MifareTag tag, MifareDESFireAID aid)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 4);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 4 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xDA);
     BUFFER_APPEND_LE (cmd, aid->data, sizeof (aid->data), sizeof (aid->data));
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     /*
      * If we have deleted the current application, we are not authenticated
@@ -580,28 +656,43 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
 
     BUFFER_APPEND (cmd, 0x6A);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
-    *count = (BUFFER_SIZE (res)-1)/3;
-    *aids = malloc ((*count + 1) * sizeof (MifareDESFireAID));
-    for (size_t i = 0; (3*i + 1) < BUFFER_SIZE (res); i++) {
-	(*aids)[i] = memdup (res + 3*i, 3);
-    }
+    uint8_t buffer[3*MAX_APPLICATION_COUNT + CMAC_LENGTH + 1];
+    *count = 0;
+
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    // FIXME This code needs refactoring!
+    memcpy (buffer, res, __res_n);
 
     if (res[__res_n-1] == 0xAF) {
-	cmd[0] = 0xAF;
-	DESFIRE_TRANSCEIVE (tag, cmd, res);
-	*count += (BUFFER_SIZE (res)-1) / 3;
+	off_t offset = __res_n - 1;
+	p[0] = 0xAF;
+	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
-	MifareDESFireAID *p;
-	if ((p = realloc (*aids, (*count + 1) * sizeof (MifareDESFireAID)))) {
-	    *aids = p;
-
-	    for (size_t i = 0; (3*i) < BUFFER_SIZE (res); i++) {
-		(*aids)[19+i] = memdup (res + 3*i, 3);
-	    }
-	}
+	memcpy ((uint8_t *)buffer + offset, res, __res_n);
+	__res_n += offset;
     }
 
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    *count = (sn - 1)/3;
+
+    *aids = malloc (sn - 1);
+    if (!(*aids = malloc ((*count + 1) * sizeof (MifareDESFireAID))))
+	return -1;
+
+    for (size_t i = 0; i < *count; i++) {
+	if (!((*aids)[i] = memdup (p + 3 * i, 3))) {
+	    while (i--) {
+		free ((*aids)[i]);
+	    }
+	    free (aids);
+	    return -1;
+	}
+    }
     (*aids)[*count] = NULL;
 
     return 0;
@@ -631,19 +722,26 @@ mifare_desfire_select_application (MifareTag tag, MifareDESFireAID aid)
 	aid = &null_aid;
     }
 
-    BUFFER_INIT (cmd, 4);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 4 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x5A);
     BUFFER_APPEND_LE (cmd, aid->data, sizeof (aid->data), sizeof (aid->data));
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND);
 
     for (int n = 0; n < MAX_FILE_COUNT; n++)
 	cached_file_settings_current[n] = false;
 
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE (tag)->session_key = NULL;
+
+    MIFARE_DESFIRE (tag)->selected_application = aid->data[0] | aid->data[1] << 8 | aid->data[2] << 16;
 
     return 0;
 }
@@ -655,12 +753,21 @@ mifare_desfire_format_picc (MifareTag tag)
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_AUTHENTICATED (tag);
 
-    BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xFC);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    free (MIFARE_DESFIRE (tag)->session_key);
+    MIFARE_DESFIRE (tag)->session_key = NULL;
+    MIFARE_DESFIRE (tag)->selected_application = 0x000000;
 
     return 0;
 }
@@ -677,19 +784,53 @@ mifare_desfire_get_version (MifareTag tag, struct mifare_desfire_version_info *v
     ASSERT_NOT_NULL (version_info);
 
     BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 15); /* 8, 8, then 15 byte results */
+    BUFFER_INIT (res, 14 + CMAC_LENGTH); /* 8, 8, then 15 byte results */
+
+    char buffer[28 + CMAC_LENGTH + 1];
 
     BUFFER_APPEND (cmd, 0x60);
+    uint8_t *b = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
     memcpy (&(version_info->hardware), res, 7);
+    memcpy (buffer, res, 7);
 
     cmd[0] = 0xAF;
     DESFIRE_TRANSCEIVE (tag, cmd, res);
     memcpy (&(version_info->software), res, 7);
+    memcpy (buffer + 7, res, 7);
 
     DESFIRE_TRANSCEIVE (tag, cmd, res);
     memcpy (&(version_info->uid), res, 14);
+    memcpy (buffer + 14, res, __res_n);
+
+    ssize_t sn = 28 + CMAC_LENGTH + 1;
+    b = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    return 0;
+}
+
+int
+mifare_desfire_free_mem (MifareTag tag, uint32_t *size)
+{
+    ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_DESFIRE (tag);
+
+    ASSERT_NOT_NULL (size);
+
+    BUFFER_INIT (cmd, 1);
+    BUFFER_INIT (res, 4 + CMAC_LENGTH);
+
+    BUFFER_APPEND (cmd, 0x6E);
+
+    uint8_t *b = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, b, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    b = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    *size = res[1] | (res[2] << 8) | (res[3] << 16);
 
     return 0;
 }
@@ -704,14 +845,20 @@ mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 16);
+    BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
+    BUFFER_INIT (res, 16 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x6F);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
 
-    *count = BUFFER_SIZE (res) - 1;
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    *count = sn - 1;
 
     if (!(*files = malloc (*count))) {
 	errno = ENOMEM;
@@ -733,16 +880,21 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
 	return 0;
     }
 
-    BUFFER_INIT (cmd, 2);
-    BUFFER_INIT (res, 18);
+    BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
+    BUFFER_INIT (res, 18 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xF5);
     BUFFER_APPEND (cmd, file_no);
+    
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     struct mifare_desfire_raw_file_settings raw_settings;
-    memcpy (&raw_settings, res, BUFFER_SIZE (res)-1);
+    memcpy (&raw_settings, p, sn - 1);
 
     settings->file_type = raw_settings.file_type;
     settings->communication_settings = raw_settings.communication_settings;
@@ -787,34 +939,34 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
     cached_file_settings_current[file_no] = false;
 
     if (MDAR_CHANGE_AR(settings.access_rights) == MDAR_FREE) {
-	BUFFER_INIT (cmd, 5);
-	BUFFER_INIT (res, 1);
+	BUFFER_INIT (cmd, 5 + CMAC_LENGTH);
+	BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
 	BUFFER_APPEND (cmd, 0x5F);
 	BUFFER_APPEND (cmd, file_no);
 	BUFFER_APPEND (cmd, communication_settings);
 	BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
 
-	DESFIRE_TRANSCEIVE (tag, cmd, res);
+	uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+	ssize_t sn = __res_n;
+	p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
     } else {
 	BUFFER_INIT (cmd, 10);
-	BUFFER_INIT (res, 1);
-
-	uint8_t data[8];
+	BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
 	BUFFER_APPEND (cmd, 0x5F);
 	BUFFER_APPEND (cmd, file_no);
+	BUFFER_APPEND (cmd, communication_settings);
+	BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
 
-	data[0] = communication_settings;
-	uint16_t le_ar = htole16 (access_rights);
-	memcpy (data + 1, &le_ar, sizeof (le_ar));
-	iso14443a_crc (data, 3, data+3);
-        memset (data + 5, 0, 3);
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, data, 8, MD_SEND, 0);
+	uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, MDCM_ENCIPHERED | ENC_COMMAND);
 
-	BUFFER_APPEND_BYTES (cmd, data, 8);
+	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
-	DESFIRE_TRANSCEIVE (tag, cmd, res);
+	ssize_t sn = __res_n;
+	p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
     }
 
     return 0;
@@ -826,8 +978,8 @@ create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 8);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 8 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
@@ -835,7 +987,12 @@ create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
     BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
     BUFFER_APPEND_LE (cmd, file_size, 3, sizeof (uint32_t));
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -860,8 +1017,8 @@ mifare_desfire_create_value_file (MifareTag tag, uint8_t file_no, uint8_t commun
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 18);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 18 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xCC);
     BUFFER_APPEND (cmd, file_no);
@@ -872,7 +1029,12 @@ mifare_desfire_create_value_file (MifareTag tag, uint8_t file_no, uint8_t commun
     BUFFER_APPEND_LE (cmd, value, 4, sizeof (int32_t));
     BUFFER_APPEND (cmd, limited_credit_enable);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, communication_settings | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, communication_settings | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -885,8 +1047,8 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 11);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 11 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
@@ -895,7 +1057,12 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
     BUFFER_APPEND_LE (cmd, record_size, 3, sizeof (uint32_t));
     BUFFER_APPEND_LE (cmd, max_number_of_records, 3, sizeof (uint32_t));
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, communication_settings | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, communication_settings | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -920,13 +1087,18 @@ mifare_desfire_delete_file (MifareTag tag, uint8_t file_no)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 2);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xDF);
     BUFFER_APPEND (cmd, file_no);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
 }
@@ -939,9 +1111,7 @@ mifare_desfire_delete_file (MifareTag tag, uint8_t file_no)
 static ssize_t
 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs)
 {
-    ssize_t bytes_read = 0;
-
-    void *p = data;
+    size_t bytes_received = 0;
 
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
@@ -955,39 +1125,34 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     BUFFER_APPEND_LE (cmd, offset, 3, sizeof (off_t));
     BUFFER_APPEND_LE (cmd, length, 3, sizeof (size_t));
 
-    if (cs) {
-	if (!(p = assert_crypto_buffer_size (tag, MAX_FRAME_SIZE - 1)))
-	    return -1;
+    // FIXME This is somewhat done in mifare_cryto_preprocess_data (or should be!!)
+    uint8_t ocs = cs;
+    if ((MIFARE_DESFIRE (tag)->session_key) && (MIFARE_DESFIRE (tag)->session_key->type == T_AES) && (cs | MDCM_MACED)) {
+	cs = MDCM_PLAIN;
     }
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | CMAC_COMMAND);
+    cs= ocs;
 
     do {
-	ssize_t frame_bytes;
+	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
-	DESFIRE_TRANSCEIVE (tag, cmd, res);
+	size_t frame_bytes = BUFFER_SIZE (res) - 1;
+	memcpy ((uint8_t *)data + bytes_received, res, frame_bytes);
+	bytes_received += frame_bytes;
 
-	frame_bytes = BUFFER_SIZE (res) - 1;
-	memcpy ((uint8_t *)p + bytes_read, res, frame_bytes);
-	bytes_read += frame_bytes;
+	p[0] = 0xAF;
+	__cmd_n = 1;
+    } while (0xAF == res[__res_n-1]);
 
-	if (res[__res_n-1] == 0xAF) {
-	    if (p != data) {
-		// If we are handling memory, request more for next frame.
-		if (!(p = assert_crypto_buffer_size (tag, bytes_read + MAX_FRAME_SIZE - 1)))
-		    return -1;
+    ((uint8_t *)data)[bytes_received++] = 0x00;
 
-	    }
-	    BUFFER_CLEAR (cmd);
-	    BUFFER_APPEND (cmd, 0xAF);
-	}
+    ssize_t sr = bytes_received;
+    uint8_t uds = 0;
+    if (!length)
+	uds |= UNSPECIFIED_DATA_LENGTH;
+    p = mifare_cryto_postprocess_data (tag, data, &sr, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
-    } while (res[__res_n-1] != 0x00);
-
-    if (cs) {
-	if (mifare_cryto_postprocess_data (tag, p, &bytes_read, cs))
-	    memcpy (data, p, bytes_read);
-    }
-
-    return bytes_read;
+    return sr - 1;
 }
 
 ssize_t
@@ -1014,8 +1179,8 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
-    BUFFER_INIT (cmd, 8 + length);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 8 + length + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
@@ -1023,10 +1188,10 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     BUFFER_APPEND_LE (cmd, length, 3, sizeof (size_t));
     BUFFER_APPEND_BYTES (cmd, data, length);
 
-    p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs);
+    p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
 
     BUFFER_INIT(d, FRAME_PAYLOAD_SIZE);
-    bytes_left = FRAME_PAYLOAD_SIZE;
+    bytes_left = FRAME_PAYLOAD_SIZE - 8;
 
     while (bytes_send < __cmd_n) {
 	size_t frame_bytes = MIN(bytes_left, __cmd_n - bytes_send);
@@ -1044,6 +1209,9 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 	BUFFER_APPEND (d, 0xAF);
 	bytes_left = FRAME_PAYLOAD_SIZE - 1;
     }
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_MACED | CMAC_COMMAND | CMAC_VERIFY);
 
     if (0x00 == res[__res_n-1]) {
 	// Remove header length
@@ -1082,30 +1250,22 @@ mifare_desfire_get_value_ex (MifareTag tag, uint8_t file_no, int32_t *value, int
     if (!value)
 	return errno = EINVAL, -1;
 
-    void *p;
-
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
-    BUFFER_INIT (cmd, 2);
-    BUFFER_INIT (res, 9);
+    BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
+    BUFFER_INIT (res, 9 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x6C);
     BUFFER_APPEND (cmd, file_no);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
-    p = (uint8_t *)res;
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
-    if (cs) {
-	ssize_t rdl = BUFFER_SIZE (res) - 1;
-	p = mifare_cryto_postprocess_data (tag, p, &rdl, cs);
-	if (rdl != 4) {
-	    printf ("invalid data length");
-	    return -1;
-	}
-    }
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
     *value = le32toh (*(int32_t *)(p));
 
@@ -1125,15 +1285,18 @@ mifare_desfire_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
-    BUFFER_INIT (cmd, 10);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x0C);
     BUFFER_APPEND (cmd, file_no);
     BUFFER_APPEND_LE (cmd, amount, 4, sizeof (int32_t));
-    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
 
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -1152,15 +1315,18 @@ mifare_desfire_debit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs)
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
-    BUFFER_INIT (cmd, 10);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xDC);
     BUFFER_APPEND (cmd, file_no);
     BUFFER_APPEND_LE (cmd, amount, 4, sizeof (int32_t));
-    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
 
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -1179,15 +1345,18 @@ mifare_desfire_limited_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
-    BUFFER_INIT (cmd, 10);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0x1C);
     BUFFER_APPEND (cmd, file_no);
     BUFFER_APPEND_LE (cmd, amount, 4, sizeof (int32_t));
-    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
 
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -1223,13 +1392,18 @@ mifare_desfire_clear_record_file (MifareTag tag, uint8_t file_no)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 2);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xEB);
     BUFFER_APPEND (cmd, file_no);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
@@ -1242,12 +1416,17 @@ mifare_desfire_commit_transaction (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xC7);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
 }
@@ -1258,12 +1437,17 @@ mifare_desfire_abort_transaction (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, 0xA7);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
 }

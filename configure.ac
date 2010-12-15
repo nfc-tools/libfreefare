@@ -38,7 +38,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 
 AC_CHECK_HEADERS([sys/types.h])
-AC_CHECK_FUNCS([memset letoh32 htole32 pow strerror])
+AC_CHECK_FUNCS([memset letoh32 htole32 pow strdup strerror])
 
 AC_CHECK_HEADERS([endian.h sys/endian.h CoreFoundation/CoreFoundation.h])
 if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no" -a $ac_cv_header_CoreFoundation_CoreFoundation_h = "no"; then
@@ -54,7 +54,7 @@ CFLAGS="$CFLAGS -std=c99"
 
 # Crypto functions for MIFARE DesFire support are provided by OpenSSL.
 AC_CHECK_LIB([crypto], [DES_ecb_encrypt], [], [AC_MSG_ERROR([Cannot find libcrypto.])])
-AC_CHECK_HEADERS([openssl/des.h openssl/rand.h], [], [AC_MSG_ERROR([Cannot find openssl headers.])])
+AC_CHECK_HEADERS([openssl/aes.h openssl/des.h openssl/rand.h], [], [AC_MSG_ERROR([Cannot find openssl headers.])])
 
 # Checks for pkg-config modules.
 LIBNFC_REQUIRED_VERSION="1.4.0"

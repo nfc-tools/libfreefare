@@ -173,7 +173,7 @@ main(int argc, char *argv[])
 		mifare_desfire_disconnect (tags[i]);
 		break;
 	    default: // Should not happen
-		warnx ("Unsupported UID length %d.", tag_uid_len);
+		warnx ("Unsupported UID length %d.", (int) tag_uid_len);
 		error = EXIT_FAILURE;
 		break;
 	    }
