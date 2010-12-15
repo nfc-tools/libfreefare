@@ -455,9 +455,9 @@ mifare_desfire_get_key_settings (MifareTag tag, uint8_t *settings, uint8_t *max_
     p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     if (settings)
-	*settings = res[0];
+	*settings = p[0];
     if (max_keys)
-	*max_keys = res[1] & 0x0F;
+	*max_keys = p[1] & 0x0F;
 
     return 0;
 }
@@ -828,14 +828,14 @@ mifare_desfire_free_mem (MifareTag tag, uint32_t *size)
 
     BUFFER_APPEND (cmd, 0x6E);
 
-    uint8_t *b = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
-    DESFIRE_TRANSCEIVE2 (tag, b, __cmd_n, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    b = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
-    *size = res[0] | (res[1] << 8) | (res[2] << 16);
+    *size = p[0] | (p[1] << 8) | (p[2] << 16);
 
     return 0;
 }
@@ -1232,8 +1232,6 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     size_t bytes_left;
     size_t bytes_send = 0;
 
-    void *p = data;
-
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
@@ -1247,14 +1245,14 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     BUFFER_APPEND_LE (cmd, length, 3, sizeof (size_t));
     BUFFER_APPEND_BYTES (cmd, data, length);
 
-    p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
 
     BUFFER_INIT(d, FRAME_PAYLOAD_SIZE);
     bytes_left = FRAME_PAYLOAD_SIZE - 8;
 
     while (bytes_send < __cmd_n) {
 	size_t frame_bytes = MIN(bytes_left, __cmd_n - bytes_send);
-	BUFFER_APPEND_BYTES (d, (uint8_t *) p + bytes_send, frame_bytes);
+	BUFFER_APPEND_BYTES (d, p + bytes_send, frame_bytes);
 
 	DESFIRE_TRANSCEIVE (tag, d, res);
 
@@ -1272,12 +1270,12 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_MACED | CMAC_COMMAND | CMAC_VERIFY);
 
-    if (0x00 == res[__res_n-1]) {
+    if (0x00 == p[__res_n-1]) {
 	// Remove header length
 	bytes_send -= 8;
     } else {
 	// 0xAF (additionnal Frame) failure can happen here (wrong crypto method).
-	MIFARE_DESFIRE (tag)->last_picc_error = res[__res_n-1];
+	MIFARE_DESFIRE (tag)->last_picc_error = p[__res_n-1];
 	bytes_send = -1;
     }
 
