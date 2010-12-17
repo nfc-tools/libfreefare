@@ -78,6 +78,7 @@ test_mifare_desfire_ev1_aes (void)
     res = mifare_desfire_select_application (tag, NULL);
     cut_assert_success ("mifare_desfire_select_application()");
 
+    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data_aes, key_data_aes_version);
     res = mifare_desfire_authenticate_aes (tag, 0, key);
     cut_assert_success ("mifare_desfire_authenticate_aes()");
     mifare_desfire_key_free (key);
