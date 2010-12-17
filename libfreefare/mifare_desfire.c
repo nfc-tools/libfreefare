@@ -591,6 +591,9 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
 int
 create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, uint16_t iso_file_id, char *iso_file_name)
 {
+    (void) iso_file_id;
+    (void) iso_file_name;
+
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
