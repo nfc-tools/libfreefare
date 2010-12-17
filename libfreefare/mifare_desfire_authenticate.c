@@ -236,7 +236,7 @@ key_macing_length (const MifareDESFireKey key)
 size_t
 padded_data_length (const size_t nbytes, const size_t block_size)
 {
-    if (nbytes % block_size)
+    if ((!nbytes) || (nbytes % block_size))
 	return ((nbytes / block_size) + 1) * block_size;
     else
 	return nbytes;

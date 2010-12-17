@@ -71,3 +71,22 @@ test_mifare_desfire_des_send (void)
 
     mifare_desfire_key_free (key);
 }
+
+void
+test_mifare_desfire_padded_data_length (void)
+{
+    size_t res;
+
+    res = padded_data_length (0, 8);
+    cut_assert_equal_int (res, 8, cut_message ("Invalid size"));
+    res = padded_data_length (1, 8);
+    cut_assert_equal_int (res, 8, cut_message ("Invalid size"));
+    res = padded_data_length (8, 8);
+    cut_assert_equal_int (res, 8, cut_message ("Invalid size"));
+    res = padded_data_length (9, 8);
+    cut_assert_equal_int (res, 16, cut_message ("Invalid size"));
+    res = padded_data_length (0, 16);
+    cut_assert_equal_int (res, 16, cut_message ("Invalid size"));
+    res = padded_data_length (33, 16);
+    cut_assert_equal_int (res, 48, cut_message ("Invalid size"));
+}
