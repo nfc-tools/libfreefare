@@ -554,6 +554,15 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
     ssize_t sn = __res_n;
     mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    /*
+     * If we changed the current authenticated key, we are not authenticated
+     * anymore.
+     */
+    if (key_no == MIFARE_DESFIRE (tag)->authenticated_key_no) {
+	free (MIFARE_DESFIRE (tag)->session_key);
+	MIFARE_DESFIRE (tag)->session_key = NULL;
+    }
+
     return 0;
 }
 
