@@ -554,6 +554,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	switch (key->type) {
 	case T_DES:
 	case T_3DES:
+	    (*nbytes)--;
 	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, 0);
 
 	/*
