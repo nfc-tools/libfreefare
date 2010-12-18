@@ -9,5 +9,3 @@
     up and is now between 25 and 100 lines of code (depending of my refactoring
     mood).  The main drawbacks are poor readability, redundant code in the
     binary, debuggers don't cope well with macros, and by design it sucks.
-[ ] libfreefare/mifare_desfire_authenticate.c should be renamed to a better name
-    such as libfreefare/mifare_desfire_crypto.c.
