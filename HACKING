@@ -70,3 +70,15 @@ infrastructure ready for hacking the new card support:
 	knows...
       - <tag>_tag_free() SHALL free all resources allocated for the tag
 	(surprising, isn't it?)
+
+
+Various guidelines
+------------------
+
+  - If a given card has different cryptographic modes, you SHOULD use
+    switch/cases to handle specific branches of code, even when applicable to
+    only one cypher.  The idea is that if you don't provide support for all
+    cryptographic schemes, or if an evolution of the card provides more
+    cryptographic possibilities, when adding support for a new cypher, the
+    compiler can warn the developer about unhandled values in switch
+    statements.  Please refer to the Mifare DESFire code for an example.

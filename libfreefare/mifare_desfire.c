@@ -395,8 +395,14 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     MIFARE_DESFIRE (tag)->session_key = mifare_desfire_session_key_new (PCD_RndA, PICC_RndB, key);
     memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 
-    if (MIFARE_DESFIRE (tag)->session_key->type == T_AES)
+    switch (MIFARE_DESFIRE (tag)->session_key->type) {
+    case T_DES:
+    case T_3DES:
+	break;
+    case T_AES:
 	cmac_generate_subkeys (MIFARE_DESFIRE (tag)->session_key);
+	break;
+    }
 
     return 0;
 }
@@ -1196,10 +1202,16 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     BUFFER_APPEND_LE (cmd, offset, 3, sizeof (off_t));
     BUFFER_APPEND_LE (cmd, length, 3, sizeof (size_t));
 
-    // FIXME This is somewhat done in mifare_cryto_preprocess_data (or should be!!)
     uint8_t ocs = cs;
-    if ((MIFARE_DESFIRE (tag)->session_key) && (MIFARE_DESFIRE (tag)->session_key->type == T_AES) && (cs | MDCM_MACED)) {
-	cs = MDCM_PLAIN;
+    if ((MIFARE_DESFIRE (tag)->session_key) && (cs | MDCM_MACED)) {
+	switch (MIFARE_DESFIRE (tag)->session_key->type) {
+	case T_DES:
+	case T_3DES:
+	    break;
+	case T_AES:
+	    cs = MDCM_PLAIN;
+	    break;
+	}
     }
     uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | CMAC_COMMAND);
     cs = ocs;

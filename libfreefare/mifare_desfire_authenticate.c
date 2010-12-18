@@ -403,12 +403,20 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	memcpy (res, data, *nbytes);
 	if (!(communication_settings & NO_CRC)) {
 	// ... CRC ...
+	    switch (key->type) {
+		case T_DES:
+		case T_3DES:
 	iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
-	} else {
-	    bzero ((uint8_t *) res + *nbytes, 2);
+		    *nbytes += 2;
+		    break;
+		case T_AES:
+		    // Never reached.
+		    abort ();
+		    break;
+	    }
 	}
 	// ... and 0 padding
-        memset ((uint8_t *)(res) + *nbytes + 2, 0, edl - *nbytes - 2);
+        memset ((uint8_t *)(res) + *nbytes, 0, edl - *nbytes);
 
 	*nbytes = edl;
 
