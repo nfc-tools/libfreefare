@@ -135,7 +135,6 @@ typedef enum {
 
 #define ENC_COMMAND 0x1000
 #define NO_CRC      0x2000
-#define UNSPECIFIED_DATA_LENGTH 0x4000
 
 #define MAC_MASK   0x0F0
 #define CMAC_MACK  0xF00

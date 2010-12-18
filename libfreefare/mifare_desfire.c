@@ -1214,9 +1214,6 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     ((uint8_t *)data)[bytes_received++] = 0x00;
 
     ssize_t sr = bytes_received;
-    uint8_t uds = 0;
-    if (!length)
-	uds |= UNSPECIFIED_DATA_LENGTH;
     p = mifare_cryto_postprocess_data (tag, data, &sr, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
     return sr - 1;

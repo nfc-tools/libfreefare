@@ -590,9 +590,8 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    while (!*p) {
 		p--;
 	    }
-	    if (UNSPECIFIED_DATA_LENGTH && (*p == 0x80)) {
+	    if (0x80 == *p)
 		p--;
-	    }
 	    p -= 3;
 
 	    uint8_t crc_ref[4];
