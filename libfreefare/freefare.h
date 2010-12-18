@@ -304,6 +304,7 @@ int		 mifare_desfire_connect (MifareTag tag);
 int		 mifare_desfire_disconnect (MifareTag tag);
 
 int		 mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key);
+int		 mifare_desfire_authenticate_iso (MifareTag tag, uint8_t key_no, MifareDESFireKey key);
 int		 mifare_desfire_authenticate_aes (MifareTag tag, uint8_t key_no, MifareDESFireKey key);
 int		 mifare_desfire_change_key_settings (MifareTag tag, uint8_t settings);
 int		 mifare_desfire_get_key_settings (MifareTag tag, uint8_t *settings, uint8_t *max_keys);
@@ -353,6 +354,8 @@ MifareDESFireKey mifare_desfire_des_key_new (uint8_t value[8]);
 MifareDESFireKey mifare_desfire_3des_key_new (uint8_t value[16]);
 MifareDESFireKey mifare_desfire_des_key_new_with_version (uint8_t value[8]);
 MifareDESFireKey mifare_desfire_3des_key_new_with_version (uint8_t value[16]);
+MifareDESFireKey mifare_desfire_3k3des_key_new (uint8_t value[24]);
+MifareDESFireKey mifare_desfire_3k3des_key_new_with_version (uint8_t value[24]);
 MifareDESFireKey mifare_desfire_aes_key_new (uint8_t value[16]);
 MifareDESFireKey mifare_desfire_aes_key_new_with_version (uint8_t value[16], uint8_t version);
 uint8_t		 mifare_desfire_key_get_version (MifareDESFireKey key);

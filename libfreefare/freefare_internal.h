@@ -201,16 +201,18 @@ struct mifare_desfire_aid {
 };
 
 struct mifare_desfire_key {
-    uint8_t data[16];
+    uint8_t data[24];
     enum {
 	T_DES,
 	T_3DES,
+	T_3K3DES,
 	T_AES
     } type;
     DES_key_schedule ks1;
     DES_key_schedule ks2;
-    uint8_t cmac_sk1[16];
-    uint8_t cmac_sk2[16];
+    DES_key_schedule ks3;
+    uint8_t cmac_sk1[24];
+    uint8_t cmac_sk2[24];
     uint8_t aes_version;
 };
 

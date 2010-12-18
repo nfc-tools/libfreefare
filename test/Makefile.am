@@ -63,6 +63,7 @@ test_mifare_desfire_des_la_SOURCES = test_mifare_desfire_des.c
 test_mifare_desfire_des_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_desfire_ev1_la_SOURCES = test_mifare_desfire_ev1.c \
+				     test_mifare_desfire_ev1_3k3des.c \
 				     test_mifare_desfire_ev1_aes.c \
 				     mifare_desfire_ev1_fixture.c \
 				     mifare_desfire_ev1_fixture.h

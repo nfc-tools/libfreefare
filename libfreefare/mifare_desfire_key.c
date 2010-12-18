@@ -32,6 +32,9 @@ update_key_schedules (MifareDESFireKey key)
 {
     DES_set_key ((DES_cblock *)key->data, &(key->ks1));
     DES_set_key ((DES_cblock *)(key->data + 8), &(key->ks2));
+    if (T_3K3DES == key->type) {
+	DES_set_key ((DES_cblock *)(key->data + 16), &(key->ks3));
+    }
 }
 
 MifareDESFireKey
@@ -50,10 +53,10 @@ mifare_desfire_des_key_new_with_version (uint8_t value[8])
     MifareDESFireKey key;
 
     if ((key = malloc (sizeof (struct mifare_desfire_key)))) {
+	key->type = T_DES;
 	memcpy (key->data, value, 8);
 	memcpy (key->data+8, value, 8);
 	update_key_schedules (key);
-	key->type = T_DES;
     }
     return key;
 }
@@ -76,9 +79,32 @@ mifare_desfire_3des_key_new_with_version (uint8_t value[16])
     MifareDESFireKey key;
 
     if ((key = malloc (sizeof (struct mifare_desfire_key)))) {
+	key->type = T_3DES;
 	memcpy (key->data, value, 16);
 	update_key_schedules (key);
-	key->type = T_3DES;
+    }
+    return key;
+}
+
+MifareDESFireKey
+mifare_desfire_3k3des_key_new (uint8_t value[24])
+{
+    uint8_t data[24];
+    memcpy (data, value, 24);
+    for (int n=0; n < 8; n++)
+	data[n] &= 0xfe;
+    return mifare_desfire_3k3des_key_new_with_version (data);
+}
+
+MifareDESFireKey
+mifare_desfire_3k3des_key_new_with_version (uint8_t value[24])
+{
+    MifareDESFireKey key;
+
+    if ((key = malloc (sizeof (struct mifare_desfire_key)))) {
+	key->type = T_3K3DES;
+	memcpy (key->data, value, 24);
+	update_key_schedules (key);
     }
     return key;
 }
@@ -136,7 +162,7 @@ mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireK
 {
     MifareDESFireKey key = NULL;
 
-    uint8_t buffer[16];
+    uint8_t buffer[24];
 
     switch (authentication_key->type) {
     case T_DES:
@@ -150,6 +176,15 @@ mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireK
 	memcpy (buffer+8, rnda+4, 4);
 	memcpy (buffer+12, rndb+4, 4);
 	key = mifare_desfire_3des_key_new_with_version (buffer);
+	break;
+    case T_3K3DES:
+	memcpy (buffer, rnda, 4);
+	memcpy (buffer+4, rndb, 4);
+	memcpy (buffer+8, rnda+6, 4);
+	memcpy (buffer+12, rndb+6, 4);
+	memcpy (buffer+16, rnda+12, 4);
+	memcpy (buffer+20, rndb+12, 4);
+	key = mifare_desfire_3k3des_key_new (buffer);
 	break;
     case T_AES:
 	memcpy (buffer, rnda, 4);

@@ -203,6 +203,7 @@ key_block_size (const MifareDESFireKey key)
     switch (key->type) {
     case T_DES:
     case T_3DES:
+    case T_3K3DES:
 	block_size = 8;
 	break;
     case T_AES:
@@ -226,6 +227,7 @@ key_macing_length (const MifareDESFireKey key)
     case T_3DES:
 	mac_length = MAC_LENGTH;
 	break;
+    case T_3K3DES:
     case T_AES:
 	mac_length = CMAC_LENGTH;
 	break;
@@ -267,6 +269,7 @@ enciphered_data_length (const MifareDESFireKey key, const size_t nbytes, int com
     case T_3DES:
 	crc_length = 2;
 	break;
+    case T_3K3DES:
     case T_AES:
 	crc_length = 4;
 	break;
@@ -331,6 +334,8 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	case T_3DES:
 	    if (!(communication_settings & MAC_COMMAND))
 		break;
+
+	    /* pass through */
 	edl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key)) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
@@ -347,6 +352,8 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	// Copy again provided data (was overwritten by mifare_cbc_des)
 	memcpy (res, data, *nbytes);
 
+	    if (!(communication_settings & MAC_COMMAND))
+		break;
 	// Append MAC
 	mdl = maced_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, mdl)))
@@ -356,6 +363,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	*nbytes += 4;
 	    break;
+	case T_3K3DES:
 	case T_AES:
 	    if (!(communication_settings & CMAC_COMMAND))
 		break;
@@ -393,6 +401,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	switch (key->type) {
 	case T_DES:
 	case T_3DES:
+	case T_3K3DES:
 	    if (!(communication_settings & ENC_COMMAND))
 		break;
 	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
@@ -409,6 +418,10 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
 		    *nbytes += 2;
 		    break;
+		case T_3K3DES:
+		    desfire_crc32_append ((uint8_t *)res, *nbytes);
+		    *nbytes += 4;
+		    break;
 		case T_AES:
 		    // Never reached.
 		    abort ();
@@ -420,7 +433,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	*nbytes = edl;
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MD_SEND, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MD_SEND, (key->type == T_3K3DES) ? 1 : 0);
 
 	    break;
 	case T_AES:
@@ -504,8 +517,8 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	if (0 != memcmp ((uint8_t *)data + *nbytes - 1, (uint8_t *)edata + edl - 8, 4)) {
 	    warnx ("MACing not verified");
 #if WITH_DEBUG
-	    hexdump ((uint8_t *)data + *nbytes - 1, 4, "Expect ", 0);
-	    hexdump ((uint8_t *)edata + edl - 8, 4, "Actual ", 0);
+	    hexdump ((uint8_t *)data + *nbytes - 1, key_macing_length (key), "Expect ", 0);
+	    hexdump ((uint8_t *)edata + edl - 8, key_macing_length (key), "Actual ", 0);
 	    abort ();
 #endif
 	    *nbytes = -1;
@@ -513,6 +526,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	}
 	    }
 	    break;
+	case T_3K3DES:
 	case T_AES:
 	    if (!(communication_settings & CMAC_COMMAND))
 		break;
@@ -594,6 +608,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	}
 	break;
 
+	case T_3K3DES:
 	case T_AES:
 	    (*nbytes)--;
 	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, 0);
@@ -670,6 +685,17 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
 	}
 	break;
+    case T_3K3DES:
+	if (mac) {
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_DECRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks3), DES_ENCRYPT);
+	} else {
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks3), DES_DECRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_ENCRYPT);
+	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	}
+	break;
     case T_AES:
 	if (mac) {
 	    AES_KEY k;
@@ -702,6 +728,8 @@ mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data
 	case T_DES:
 	case T_3DES:
             memset (ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
+	    /* pass-through */
+	case T_3K3DES:
 	    block_size = 8;
 	    break;
 	case T_AES:

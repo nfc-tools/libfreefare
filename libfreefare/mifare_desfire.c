@@ -399,6 +399,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     case T_DES:
     case T_3DES:
 	break;
+    case T_3K3DES:
     case T_AES:
 	cmac_generate_subkeys (MIFARE_DESFIRE (tag)->session_key);
 	break;
@@ -411,6 +412,12 @@ int
 mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
 {
     return authenticate (tag, 0x0A, key_no, key);
+}
+
+int
+mifare_desfire_authenticate_iso (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
+{
+    return authenticate (tag, 0x1A, key_no, key);
 }
 
 int
@@ -437,7 +444,7 @@ mifare_desfire_change_key_settings (MifareTag tag, uint8_t settings)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t n = __res_n;
-    p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_COMMAND | MAC_VERIFY);
 
     return 0;
 }
@@ -489,6 +496,9 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	case T_DES:
 	case T_3DES:
 	    break;
+	case T_3K3DES:
+	    key_no |= 0x40;
+	    break;
 	case T_AES:
 	    key_no |= 0x80;
 	    break;
@@ -504,6 +514,9 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	case T_3DES:
 	case T_AES:
 	    new_key_length = 16;
+	    break;
+	case T_3K3DES:
+	    new_key_length = 24;
 	    break;
     }
 
@@ -531,6 +544,7 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	    iso14443a_crc (new_key->data, new_key_length, cmd + __cmd_n);
 	    __cmd_n += 2;
 	    break;
+	case T_3K3DES:
 	case T_AES:
 	    desfire_crc32_append (cmd, __cmd_n);
 	    __cmd_n += 4;
@@ -546,6 +560,7 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	    iso14443a_crc_append (cmd + 2 , __cmd_n - 2);
 	    __cmd_n += 2;
 	    break;
+	case T_3K3DES:
 	case T_AES:
 	    desfire_crc32_append (cmd, __cmd_n);
 	    __cmd_n += 4;
@@ -594,7 +609,7 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
     *version = p[0];
 
@@ -625,7 +640,7 @@ create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
     return 0;
 }
@@ -699,7 +714,7 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
     }
 
     ssize_t sn = __res_n;
-    p = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
     *count = (sn - 1)/3;
 
@@ -1208,6 +1223,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 	case T_DES:
 	case T_3DES:
 	    break;
+	case T_3K3DES:
 	case T_AES:
 	    cs = MDCM_PLAIN;
 	    break;
