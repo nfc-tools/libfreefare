@@ -654,7 +654,7 @@ test_mifare_desfire_ev1_aes (void)
 
     for (int transaction = 0; transaction < 50; transaction++) {
 	char data_buffer[100];
-	char read_buffer[100];
+	char read_buffer[100+20]; // XXX
 
 	uint8_t cs = transaction % 3;
 	if (cs == 2) cs++;
@@ -699,7 +699,7 @@ test_mifare_desfire_ev1_aes (void)
 		cut_assert_equal_int (-1, n, cut_message ("Wrong return value"));
 	    } else {
 		cut_assert_equal_int (100, n, cut_message ("Wrong return value"));
-		cut_assert_not_equal_memory (data_buffer, sizeof (data_buffer), read_buffer, sizeof (read_buffer), cut_message ("Wrong data"));
+		cut_assert_not_equal_memory (data_buffer, sizeof (data_buffer), read_buffer, 100, cut_message ("Wrong data"));
 	    }
 	} else {
 	    res = mifare_desfire_commit_transaction (tag);
@@ -707,7 +707,7 @@ test_mifare_desfire_ev1_aes (void)
 
 	    ssize_t n = mifare_desfire_read_records (tag, 6, 0, 1, read_buffer);
 	    cut_assert_equal_int (100, n, cut_message ("Wrong return value"));
-	    cut_assert_equal_memory (data_buffer, sizeof (data_buffer), read_buffer, sizeof (read_buffer), cut_message ("Wrong data"));
+	    cut_assert_equal_memory (data_buffer, sizeof (data_buffer), read_buffer, 100, cut_message ("Wrong data"));
 	}
     }
 
