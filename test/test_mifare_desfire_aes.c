@@ -59,8 +59,8 @@ test_mifare_desfire_aes_generate_subkeys (void)
     MifareDESFireKey key = mifare_desfire_aes_key_new (key_data);
     cmac_generate_subkeys (key);
 
-    cut_assert_equal_memory (sk1, 16, key->aes_sk1, 16, cut_message ("Wrong sub-key 1"));
-    cut_assert_equal_memory (sk2, 16, key->aes_sk2, 16, cut_message ("Wrong sub-key 2"));
+    cut_assert_equal_memory (sk1, 16, key->cmac_sk1, 16, cut_message ("Wrong sub-key 1"));
+    cut_assert_equal_memory (sk2, 16, key->cmac_sk2, 16, cut_message ("Wrong sub-key 2"));
 
     mifare_desfire_key_free (key);
 }

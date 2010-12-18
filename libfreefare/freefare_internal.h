@@ -209,8 +209,8 @@ struct mifare_desfire_key {
     } type;
     DES_key_schedule ks1;
     DES_key_schedule ks2;
-    uint8_t aes_sk1[16];
-    uint8_t aes_sk2[16];
+    uint8_t cmac_sk1[16];
+    uint8_t cmac_sk2[16];
     uint8_t aes_version;
 };
 

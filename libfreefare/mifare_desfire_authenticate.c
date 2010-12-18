@@ -105,54 +105,58 @@ lsl (uint8_t *data, size_t len)
 void
 cmac_generate_subkeys (MifareDESFireKey key)
 {
-    uint8_t l[16];
-    bzero (l, 16);
+    int kbs = key_block_size (key);
+    uint8_t R = (kbs == 8) ? 0x1B : 0x87;
 
-    uint8_t ivect[16];
-    bzero (ivect, 16);
+    uint8_t l[kbs];
+    bzero (l, kbs);
 
-    mifare_cbc_des (key, ivect, l, 16, MD_RECEIVE, 1);
+    uint8_t ivect[kbs];
+    bzero (ivect, kbs);
+
+    mifare_cbc_des (key, ivect, l, kbs, MD_RECEIVE, 1);
 
     bool xor = false;
 
     // Used to compute CMAC on complete blocks
-    memcpy (key->aes_sk1, l, 16);
+    memcpy (key->cmac_sk1, l, kbs);
     xor = l[0] & 0x80;
-    lsl (key->aes_sk1, 16);
+    lsl (key->cmac_sk1, kbs);
     if (xor)
-	key->aes_sk1[15] ^= 0x87;
+	key->cmac_sk1[kbs-1] ^= R;
 
     // Used to compute CMAC on the last block if non-complete
-    memcpy (key->aes_sk2, key->aes_sk1, 16);
-    xor = key->aes_sk1[0] & 0x80;
-    lsl (key->aes_sk2, 16);
+    memcpy (key->cmac_sk2, key->cmac_sk1, kbs);
+    xor = key->cmac_sk1[0] & 0x80;
+    lsl (key->cmac_sk2, kbs);
     if (xor)
-	key->aes_sk2[15] ^= 0x87;
+	key->cmac_sk2[kbs-1] ^= R;
 }
 
 void
 cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac)
 {
-    uint8_t *buffer = malloc (padded_data_length (len, key_block_size (key)));
+    int kbs = key_block_size (key);
+    uint8_t *buffer = malloc (padded_data_length (len, kbs));
 
     if (!buffer)
 	abort();
 
     memcpy (buffer, data, len);
 
-    if ((!len) || (len % 16)) {
+    if ((!len) || (len % kbs)) {
 	buffer[len++] = 0x80;
-	while (len % 16) {
+	while (len % kbs) {
 	    buffer[len++] = 0x00;
 	}
-	xor (key->aes_sk2, buffer + len - 16, 16);
+	xor (key->cmac_sk2, buffer + len - kbs, kbs);
     } else {
-	xor (key->aes_sk1, buffer + len - 16, 16);
+	xor (key->cmac_sk1, buffer + len - kbs, kbs);
     }
 
     mifare_cbc_des (key, ivect, buffer, len, MD_SEND, 1);
 
-    memcpy (cmac, ivect, 16);
+    memcpy (cmac, ivect, kbs);
 
     free (buffer);
 }
