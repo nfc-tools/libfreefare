@@ -258,9 +258,10 @@ maced_data_length (const MifareDESFireKey key, const size_t nbytes)
  * Buffer size required to encipher nbytes of data and a two bytes CRC.
  */
 size_t
-enciphered_data_length (const MifareDESFireKey key, const size_t nbytes)
+enciphered_data_length (const MifareDESFireKey key, const size_t nbytes, int communication_settings)
 {
-    size_t crc_length;
+    size_t crc_length = 0;
+    if (!(communication_settings & NO_CRC)) {
     switch (key->type) {
     case T_DES:
     case T_3DES:
@@ -269,6 +270,7 @@ enciphered_data_length (const MifareDESFireKey key, const size_t nbytes)
     case T_AES:
 	crc_length = 4;
 	break;
+    }
     }
 
     size_t block_size = key_block_size (key);
@@ -393,7 +395,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	case T_3DES:
 	    if (!(communication_settings & ENC_COMMAND))
 		break;
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
+	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
 
@@ -414,11 +416,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	    break;
 	case T_AES:
-	if (!(communication_settings & NO_CRC)) {
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes + 4 - offset) + offset;
-	} else {
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
-	}
+	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
 	if (!(res = assert_crypto_buffer_size (tag, edl)))
 	    abort();
 
@@ -484,7 +482,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    if (communication_settings & MAC_VERIFY) {
 	*nbytes -= key_macing_length (key);
 
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - 1);
+	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - 1, communication_settings);
 	edata = malloc (edl);
 
 	memcpy (edata, data, *nbytes - 1);
