@@ -510,14 +510,14 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 
     int new_key_length;
     switch (new_key->type) {
-	case T_DES:
-	case T_3DES:
-	case T_AES:
-	    new_key_length = 16;
-	    break;
-	case T_3K3DES:
-	    new_key_length = 24;
-	    break;
+    case T_DES:
+    case T_3DES:
+    case T_AES:
+	new_key_length = 16;
+	break;
+    case T_3K3DES:
+	new_key_length = 24;
+	break;
     }
 
     memcpy (cmd + __cmd_n, new_key->data, new_key_length);
@@ -921,7 +921,7 @@ mifare_desfire_get_card_uid (MifareTag tag, char **uid)
     }
 
     sprintf (*uid, "%02x%02x%02x%02x%02x%02x%02x",
-             p[0], p[1], p[2], p[3],
+	     p[0], p[1], p[2], p[3],
 	     p[4], p[5], p[6]);
 
     return 0;
@@ -977,7 +977,7 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
 
     BUFFER_APPEND (cmd, 0xF5);
     BUFFER_APPEND (cmd, file_no);
-    
+
     uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);

@@ -365,7 +365,7 @@ mad_set_version (Mad mad, const uint8_t version)
 {
     if ((version == 2) && (mad->version == 1)) {
 	/* We use a larger MAD so initialise the new blocks */
-        memset (&(mad->sector_0x10), 0, sizeof (mad->sector_0x10));
+	memset (&(mad->sector_0x10), 0, sizeof (mad->sector_0x10));
     }
     mad->version = version;
 }

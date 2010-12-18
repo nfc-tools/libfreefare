@@ -264,16 +264,16 @@ enciphered_data_length (const MifareDESFireKey key, const size_t nbytes, int com
 {
     size_t crc_length = 0;
     if (!(communication_settings & NO_CRC)) {
-    switch (key->type) {
-    case T_DES:
-    case T_3DES:
-	crc_length = 2;
-	break;
-    case T_3K3DES:
-    case T_AES:
-	crc_length = 4;
-	break;
-    }
+	switch (key->type) {
+	case T_DES:
+	case T_3DES:
+	    crc_length = 2;
+	    break;
+	case T_3K3DES:
+	case T_AES:
+	    crc_length = 4;
+	    break;
+	}
     }
 
     size_t block_size = key_block_size (key);
@@ -336,39 +336,39 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 		break;
 
 	    /* pass through */
-	edl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key)) + offset;
-	if (!(res = assert_crypto_buffer_size (tag, edl)))
-	    abort();
+	    edl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key)) + offset;
+	    if (!(res = assert_crypto_buffer_size (tag, edl)))
+		abort();
 
-	// Fill in the crypto buffer with data ...
-	memcpy (res, data, *nbytes);
-	// ... and 0 padding
-        memset ((uint8_t *)res + *nbytes, 0, edl - *nbytes);
+	    // Fill in the crypto buffer with data ...
+	    memcpy (res, data, *nbytes);
+	    // ... and 0 padding
+	    memset ((uint8_t *)res + *nbytes, 0, edl - *nbytes);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MCD_SEND, MCO_ENCYPHER);
+	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MCD_SEND, MCO_ENCYPHER);
 
-	memcpy (mac, (uint8_t *)res + edl - 8, 4);
+	    memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
-	// Copy again provided data (was overwritten by mifare_cbc_des)
-	memcpy (res, data, *nbytes);
+	    // Copy again provided data (was overwritten by mifare_cbc_des)
+	    memcpy (res, data, *nbytes);
 
 	    if (!(communication_settings & MAC_COMMAND))
 		break;
-	// Append MAC
-	mdl = maced_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
-	if (!(res = assert_crypto_buffer_size (tag, mdl)))
-	    abort();
+	    // Append MAC
+	    mdl = maced_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset) + offset;
+	    if (!(res = assert_crypto_buffer_size (tag, mdl)))
+		abort();
 
-	memcpy ((uint8_t *)res + *nbytes, mac, 4);
+	    memcpy ((uint8_t *)res + *nbytes, mac, 4);
 
-	*nbytes += 4;
+	    *nbytes += 4;
 	    break;
 	case T_3K3DES:
 	case T_AES:
 	    if (!(communication_settings & CMAC_COMMAND))
 		break;
 	    cmac (key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MIFARE_DESFIRE (tag)->cmac);
-	    
+
 	    if (append_mac) {
 		mdl = maced_data_length (key, *nbytes);
 		if (!(res = assert_crypto_buffer_size (tag, mdl)))
@@ -404,18 +404,18 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	case T_3K3DES:
 	    if (!(communication_settings & ENC_COMMAND))
 		break;
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
-	if (!(res = assert_crypto_buffer_size (tag, edl)))
-	    abort();
+	    edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
+	    if (!(res = assert_crypto_buffer_size (tag, edl)))
+		abort();
 
-	// Fill in the crypto buffer with data ...
-	memcpy (res, data, *nbytes);
-	if (!(communication_settings & NO_CRC)) {
-	// ... CRC ...
-	    switch (key->type) {
+	    // Fill in the crypto buffer with data ...
+	    memcpy (res, data, *nbytes);
+	    if (!(communication_settings & NO_CRC)) {
+		// ... CRC ...
+		switch (key->type) {
 		case T_DES:
 		case T_3DES:
-	iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
+		    iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
 		    *nbytes += 2;
 		    break;
 		case T_3K3DES:
@@ -426,32 +426,32 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 		    // Never reached.
 		    abort ();
 		    break;
+		}
 	    }
-	}
-	// ... and 0 padding
-        memset ((uint8_t *)(res) + *nbytes, 0, edl - *nbytes);
+	    // ... and 0 padding
+	    memset ((uint8_t *)(res) + *nbytes, 0, edl - *nbytes);
 
-	*nbytes = edl;
+	    *nbytes = edl;
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (key->type == T_3K3DES) ? MCO_ENCYPHER : MCO_DECYPHER);
+	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (key->type == T_3K3DES) ? MCO_ENCYPHER : MCO_DECYPHER);
 
 	    break;
 	case T_AES:
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
-	if (!(res = assert_crypto_buffer_size (tag, edl)))
-	    abort();
+	    edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
+	    if (!(res = assert_crypto_buffer_size (tag, edl)))
+		abort();
 
-	// Fill in the crypto buffer with data ...
-	memcpy (res, data, *nbytes);
-	size_t pdl;
-	if (!(communication_settings & NO_CRC)) {
-	    desfire_crc32_append (res, *nbytes);
-	    pdl = padded_data_length (*nbytes - offset + 4, key_block_size (MIFARE_DESFIRE (tag)->session_key));
-	    bzero ((uint8_t *)res + *nbytes + 4, (offset + pdl) - (*nbytes + 4));
-	} else {
-	    pdl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key));
-	    bzero ((uint8_t *)res + *nbytes, (offset + pdl) - (*nbytes));
-	}
+	    // Fill in the crypto buffer with data ...
+	    memcpy (res, data, *nbytes);
+	    size_t pdl;
+	    if (!(communication_settings & NO_CRC)) {
+		desfire_crc32_append (res, *nbytes);
+		pdl = padded_data_length (*nbytes - offset + 4, key_block_size (MIFARE_DESFIRE (tag)->session_key));
+		bzero ((uint8_t *)res + *nbytes + 4, (offset + pdl) - (*nbytes + 4));
+	    } else {
+		pdl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key));
+		bzero ((uint8_t *)res + *nbytes, (offset + pdl) - (*nbytes));
+	    }
 	    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *)res + offset, pdl, MCD_SEND, MCO_ENCYPHER);
 	    *nbytes = offset + pdl;
 
@@ -501,26 +501,26 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case T_DES:
 	case T_3DES:
 	    if (communication_settings & MAC_VERIFY) {
-	*nbytes -= key_macing_length (key);
+		*nbytes -= key_macing_length (key);
 
-	edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - 1, communication_settings);
-	edata = malloc (edl);
+		edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - 1, communication_settings);
+		edata = malloc (edl);
 
-	memcpy (edata, data, *nbytes - 1);
-	memset ((uint8_t *)edata + *nbytes - 1, 0, edl - *nbytes + 1);
+		memcpy (edata, data, *nbytes - 1);
+		memset ((uint8_t *)edata + *nbytes - 1, 0, edl - *nbytes + 1);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MCD_SEND, MCO_ENCYPHER);
+		mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MCD_SEND, MCO_ENCYPHER);
 
-	if (0 != memcmp ((uint8_t *)data + *nbytes - 1, (uint8_t *)edata + edl - 8, 4)) {
-	    warnx ("MACing not verified");
+		if (0 != memcmp ((uint8_t *)data + *nbytes - 1, (uint8_t *)edata + edl - 8, 4)) {
+		    warnx ("MACing not verified");
 #if WITH_DEBUG
-	    hexdump ((uint8_t *)data + *nbytes - 1, key_macing_length (key), "Expect ", 0);
-	    hexdump ((uint8_t *)edata + edl - 8, key_macing_length (key), "Actual ", 0);
-	    abort ();
+		    hexdump ((uint8_t *)data + *nbytes - 1, key_macing_length (key), "Expect ", 0);
+		    hexdump ((uint8_t *)edata + edl - 8, key_macing_length (key), "Actual ", 0);
+		    abort ();
 #endif
-	    *nbytes = -1;
-	    res = NULL;
-	}
+		    *nbytes = -1;
+		    res = NULL;
+		}
 	    }
 	    break;
 	case T_3K3DES:
@@ -566,44 +566,44 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case T_DES:
 	case T_3DES:
 	    (*nbytes)--;
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
+	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
 
-	/*
-	 * Look for the CRC and ensure it is followed by NULL padding.  We
-	 * can't start by the end because the CRC is supposed to be 0 when
-	 * verified, and accumulating 0's in it should not change it.
-	 */
-	bool verified = false;
-	int end_crc_pos = *nbytes - 7; // The CRC can be over two blocks
+	    /*
+	     * Look for the CRC and ensure it is followed by NULL padding.  We
+	     * can't start by the end because the CRC is supposed to be 0 when
+	     * verified, and accumulating 0's in it should not change it.
+	     */
+	    bool verified = false;
+	    int end_crc_pos = *nbytes - 7; // The CRC can be over two blocks
 
-	do {
-	    uint16_t crc;
-	    iso14443a_crc (res, end_crc_pos, (uint8_t *)&crc);
-	    if (!crc) {
-		verified = true;
-		for (int n = end_crc_pos; n < *nbytes - 1; n++) {
-		    uint8_t byte = ((uint8_t *)res)[n];
-		    if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
-			verified = false;
+	    do {
+		uint16_t crc;
+		iso14443a_crc (res, end_crc_pos, (uint8_t *)&crc);
+		if (!crc) {
+		    verified = true;
+		    for (int n = end_crc_pos; n < *nbytes - 1; n++) {
+			uint8_t byte = ((uint8_t *)res)[n];
+			if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
+			    verified = false;
+		    }
 		}
-	    }
-	    if (verified) {
-		*nbytes = end_crc_pos - 2;
-		((uint8_t *)data)[(*nbytes)++] = 0x00;
-	    } else {
-		end_crc_pos++;
-	    }
-	} while (!verified && (end_crc_pos < *nbytes - 1));
+		if (verified) {
+		    *nbytes = end_crc_pos - 2;
+		    ((uint8_t *)data)[(*nbytes)++] = 0x00;
+		} else {
+		    end_crc_pos++;
+		}
+	    } while (!verified && (end_crc_pos < *nbytes - 1));
 
-	if (!verified) {
-	    warnx ("(3)DES not verified");
+	    if (!verified) {
+		warnx ("(3)DES not verified");
 #if WITH_DEBUG
-	    abort ();
+		abort ();
 #endif
-	    *nbytes = -1;
-	    res = NULL;
-	}
-	break;
+		*nbytes = -1;
+		res = NULL;
+	    }
+	    break;
 
 	case T_3K3DES:
 	case T_AES:
@@ -733,16 +733,16 @@ mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data
     size_t block_size;
 
     switch (key->type) {
-	case T_DES:
-	case T_3DES:
-            memset (ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
-	    /* pass-through */
-	case T_3K3DES:
-	    block_size = 8;
-	    break;
-	case T_AES:
-	    block_size = 16;
-	    break;
+    case T_DES:
+    case T_3DES:
+	memset (ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
+	/* pass-through */
+    case T_3K3DES:
+	block_size = 8;
+	break;
+    case T_AES:
+	block_size = 16;
+	break;
     }
 
     size_t offset = 0;

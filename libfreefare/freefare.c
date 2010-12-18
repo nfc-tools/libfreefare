@@ -54,7 +54,7 @@ freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
 	if (((nai.szUidLen == 4) || (nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
 	    (nai.btSak == supported_tags[i].SAK) &&
 	    (!supported_tags[i].ATS_length || ((nai.szAtsLen == supported_tags[i].ATS_length) &&
-	    (0 == memcmp (nai.abtAts, supported_tags[i].ATS, ATS_LENGTH))))) {
+					       (0 == memcmp (nai.abtAts, supported_tags[i].ATS, ATS_LENGTH))))) {
 
 	    tag_info = &(supported_tags[i]);
 	    found = true;
