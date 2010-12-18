@@ -45,7 +45,7 @@ test_mifare_desfire_des_receive (void)
     uint8_t expected_data[8]  = { 0x73, 0x0d, 0xdf, 0xad, 0xa4, 0xd2, 0x07, 0x89 };
     uint8_t expected_key[8]   = { 1, 1, 1, 1, 1, 1, 1, 1 };
 
-    mifare_cbc_des (key, null_ivect, data, 8, MD_RECEIVE, 0);
+    mifare_cbc_des (key, null_ivect, data, 8, MD_RECEIVE, MCO_DECYPHER);
 
     cut_assert_equal_memory (&expected_data,  8, &data,       8, cut_message ("Wrong data"));
     cut_assert_equal_memory (&expected_key,   8, key->data,   8, cut_message ("Wrong key"));
@@ -64,7 +64,7 @@ test_mifare_desfire_des_send (void)
     uint8_t expected_data[8]  = { 0xd6, 0x59, 0xe1, 0x70, 0x43, 0xa8, 0x40, 0x68 };
     uint8_t expected_key[8]   = { 1, 1, 1, 1, 1, 1, 1, 1 };
 
-    mifare_cbc_des (key, null_ivect, data, 8, MD_SEND, 0);
+    mifare_cbc_des (key, null_ivect, data, 8, MD_SEND, MCO_DECYPHER);
 
     cut_assert_equal_memory (&expected_data,  8, &data,       8, cut_message ("Wrong data"));
     cut_assert_equal_memory (&expected_key,   8, key->data,   8, cut_message ("Wrong key"));

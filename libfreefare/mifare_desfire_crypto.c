@@ -71,7 +71,7 @@
 #define CMAC_LENGTH 8
 
 static void	 xor (const uint8_t *ivect, uint8_t *data, const size_t len);
-static void	 mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac, size_t block_size);
+static void	 mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, MifareCryptoOperation operation, size_t block_size);
 static void	 desfire_crc32_byte (uint32_t *crc, const uint8_t value);
 static size_t	 key_macing_length (MifareDESFireKey key);
 
@@ -114,7 +114,7 @@ cmac_generate_subkeys (MifareDESFireKey key)
     uint8_t ivect[kbs];
     bzero (ivect, kbs);
 
-    mifare_cbc_des (key, ivect, l, kbs, MD_RECEIVE, 1);
+    mifare_cbc_des (key, ivect, l, kbs, MD_RECEIVE, MCO_ENCYPHER);
 
     bool xor = false;
 
@@ -154,7 +154,7 @@ cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t le
 	xor (key->cmac_sk1, buffer + len - kbs, kbs);
     }
 
-    mifare_cbc_des (key, ivect, buffer, len, MD_SEND, 1);
+    mifare_cbc_des (key, ivect, buffer, len, MD_SEND, MCO_ENCYPHER);
 
     memcpy (cmac, ivect, kbs);
 
@@ -345,7 +345,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	// ... and 0 padding
         memset ((uint8_t *)res + *nbytes, 0, edl - *nbytes);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MD_SEND, 1);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MD_SEND, MCO_ENCYPHER);
 
 	memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
@@ -433,7 +433,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	*nbytes = edl;
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MD_SEND, (key->type == T_3K3DES) ? 1 : 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MD_SEND, (key->type == T_3K3DES) ? MCO_ENCYPHER : MCO_DECYPHER);
 
 	    break;
 	case T_AES:
@@ -452,7 +452,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	    pdl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key));
 	    bzero ((uint8_t *)res + *nbytes, (offset + pdl) - (*nbytes));
 	}
-	    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *)res + offset, pdl, MD_SEND, 1);
+	    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *)res + offset, pdl, MD_SEND, MCO_ENCYPHER);
 	    *nbytes = offset + pdl;
 
 	    break;
@@ -509,7 +509,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	memcpy (edata, data, *nbytes - 1);
 	memset ((uint8_t *)edata + *nbytes - 1, 0, edl - *nbytes + 1);
 
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MD_SEND, 1);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MD_SEND, MCO_ENCYPHER);
 	/*                                                                                         ,^^^^^^^
 	 * No!  This is not a typo! --------------------------------------------------------------'
 	 */
@@ -569,7 +569,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case T_DES:
 	case T_3DES:
 	    (*nbytes)--;
-	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, 0);
+	mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, MCO_DECYPHER);
 
 	/*
 	 * Look for the CRC and ensure it is followed by NULL padding.  We
@@ -611,7 +611,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case T_3K3DES:
 	case T_AES:
 	    (*nbytes)--;
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, 0);
+	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MD_RECEIVE, MCO_DECYPHER);
 	    uint8_t *p = ((uint8_t *)res) + *nbytes - 1;
 	    while (!*p) {
 		p--;
@@ -654,8 +654,9 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 }
 
 static void
-mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, int mac, size_t block_size)
+mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection direction, MifareCryptoOperation operation, size_t block_size)
 {
+    AES_KEY k;
     uint8_t ovect[MAX_CRYPTO_BLOCK_SIZE];
 
     if (direction == MD_SEND) {
@@ -668,43 +669,53 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
 
     switch (key->type) {
     case T_DES:
-	if (mac) {
+	switch (operation) {
+	case MCO_ENCYPHER:
 	    DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
-	} else {
+	    break;
+	case MCO_DECYPHER:
 	    DES_ecb_encrypt ((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	    break;
 	}
 	break;
     case T_3DES:
-	if (mac) {
+	switch (operation) {
+	case MCO_ENCYPHER:
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_DECRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
-	} else {
+	    break;
+	case MCO_DECYPHER:
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_ENCRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	    break;
 	}
 	break;
     case T_3K3DES:
-	if (mac) {
+	switch (operation) {
+	case MCO_ENCYPHER:
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_DECRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks3), DES_ENCRYPT);
-	} else {
+	    break;
+	case MCO_DECYPHER:
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks3), DES_DECRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) edata, (DES_cblock *) data,  &(key->ks2), DES_ENCRYPT);
 	    DES_ecb_encrypt ((DES_cblock *) data,  (DES_cblock *) edata, &(key->ks1), DES_DECRYPT);
+	    break;
 	}
 	break;
     case T_AES:
-	if (mac) {
-	    AES_KEY k;
+	switch (operation) {
+	case MCO_ENCYPHER:
 	    AES_set_encrypt_key (key->data, 8*16, &k);
 	    AES_encrypt (data, edata, &k);
-	} else {
-	    AES_KEY k;
+	    break;
+	case MCO_DECYPHER:
 	    AES_set_decrypt_key (key->data, 8*16, &k);
 	    AES_decrypt (data, edata, &k);
+	    break;
 	}
 	break;
     }
@@ -720,7 +731,7 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareDirection
 }
 
 void
-mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, int mac)
+mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareDirection direction, MifareCryptoOperation operation)
 {
     size_t block_size;
 
@@ -739,7 +750,7 @@ mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data
 
     size_t offset = 0;
     while (offset < data_size) {
-	mifare_des (key, data + offset, ivect, direction, mac, block_size);
+	mifare_des (key, data + offset, ivect, direction, operation, block_size);
 	offset += block_size;
     }
 }
