@@ -914,7 +914,7 @@ test_mifare_desfire_des_macing (void)
     res = mifare_desfire_write_data (tag, 1, 0, strlen (s), s);
     cut_assert_success ("mifare_desfire_write_data()");
 
-    char buffer[20];
+    char buffer[50];
     res = mifare_desfire_read_data (tag, 1, 0, 0, buffer);
     cut_assert_success ("mifare_desfire_read_data()");
     cut_assert_equal_int (20, res, cut_message ("retval"));

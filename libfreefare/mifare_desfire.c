@@ -1193,8 +1193,13 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 	cs = MDCM_PLAIN;
     }
     uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | CMAC_COMMAND);
-    cs= ocs;
+    cs = ocs;
 
+    /*
+     * FIXME: This is bogus: the user has to provide a data buffer with enougth
+     * room to store CRC + padding or MAC.  If the user wants to read 1 byte,
+     * there is no reason to provide a 16 bytes buffer.
+     */
     do {
 	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
