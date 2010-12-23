@@ -1,4 +1,4 @@
-Changes between 0.2.2 and 0.2.3  [XX xxx XXXX]
+Changes between 0.2.3 and 0.3.0  [XX xxx XXXX]
 
   *) New functions mifare_desfire_create_application_ex(),
      mifare_desfire_create_application_iso(),
@@ -13,6 +13,10 @@ Changes between 0.2.2 and 0.2.3  [XX xxx XXXX]
      targets manipulation.
   *) Deprecate authentication information when deleting the currently selected
      application
+
+Changes between 0.2.2 and 0.2.3  [23 dec 2010]
+
+  *) Fix a buffer overflow in mifare_desfire_get_file_settings().
 
 Changes between 0.2.1 and 0.2.2  [23 nov 2010]
 
