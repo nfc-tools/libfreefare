@@ -299,7 +299,7 @@ assert_crypto_buffer_size (MifareTag tag, size_t nbytes)
 void *
 mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings)
 {
-    void *res = data;
+    uint8_t *res = data;
     uint8_t mac[4];
     size_t edl, mdl;
     bool append_mac = true;
@@ -340,11 +340,11 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	    // Fill in the crypto buffer with data ...
 	    memcpy (res, data, *nbytes);
 	    // ... and 0 padding
-	    memset ((uint8_t *)res + *nbytes, 0, edl - *nbytes);
+	    memset (res + *nbytes, 0, edl - *nbytes);
 
-	    mifare_cypher_blocks_chained (tag, NULL, NULL, (uint8_t *) res + offset, edl - offset, MCD_SEND, MCO_ENCYPHER);
+	    mifare_cypher_blocks_chained (tag, NULL, NULL, res + offset, edl - offset, MCD_SEND, MCO_ENCYPHER);
 
-	    memcpy (mac, (uint8_t *)res + edl - 8, 4);
+	    memcpy (mac, res + edl - 8, 4);
 
 	    // Copy again provided data (was overwritten by mifare_cypher_blocks_chained)
 	    memcpy (res, data, *nbytes);
@@ -356,7 +356,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	    if (!(res = assert_crypto_buffer_size (tag, mdl)))
 		abort();
 
-	    memcpy ((uint8_t *)res + *nbytes, mac, 4);
+	    memcpy (res + *nbytes, mac, 4);
 
 	    *nbytes += 4;
 	    break;
@@ -371,7 +371,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 		    abort();
 
 		memcpy (res, data, *nbytes);
-		memcpy ((uint8_t *) res + *nbytes, MIFARE_DESFIRE (tag)->cmac, CMAC_LENGTH);
+		memcpy (res + *nbytes, MIFARE_DESFIRE (tag)->cmac, CMAC_LENGTH);
 		*nbytes += CMAC_LENGTH;
 	    }
 	    break;
@@ -394,10 +394,6 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	 *                            encypher()/decypher()
 	 */
 
-	switch (key->type) {
-	case T_DES:
-	case T_3DES:
-	case T_3K3DES:
 	    if (!(communication_settings & ENC_COMMAND))
 		break;
 	    edl = enciphered_data_length (tag, *nbytes - offset, communication_settings) + offset;
@@ -410,45 +406,21 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 		// ... CRC ...
 		switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
 		case AS_LEGACY:
-		    iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
+		    iso14443a_crc_append (res + offset, *nbytes - offset);
 		    *nbytes += 2;
 		    break;
 		case AS_NEW:
-		    desfire_crc32_append ((uint8_t *)res, *nbytes);
+		    desfire_crc32_append (res, *nbytes);
 		    *nbytes += 4;
 		    break;
 		}
 	    }
-	    // ... and 0 padding
-	    memset ((uint8_t *)(res) + *nbytes, 0, edl - *nbytes);
+	    // ... and padding
+	    memset (res + *nbytes, 0, edl - *nbytes);
 
 	    *nbytes = edl;
 
-	    mifare_cypher_blocks_chained (tag, NULL, NULL, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (AS_NEW == MIFARE_DESFIRE (tag)->authentication_scheme) ? MCO_ENCYPHER : MCO_DECYPHER);
-
-	    break;
-	case T_AES:
-	    edl = enciphered_data_length (tag, *nbytes - offset, communication_settings) + offset;
-	    if (!(res = assert_crypto_buffer_size (tag, edl)))
-		abort();
-
-	    // Fill in the crypto buffer with data ...
-	    memcpy (res, data, *nbytes);
-	    size_t pdl;
-	    if (!(communication_settings & NO_CRC)) {
-		desfire_crc32_append (res, *nbytes);
-		pdl = padded_data_length (*nbytes - offset + 4, key_block_size (MIFARE_DESFIRE (tag)->session_key));
-		memset ((uint8_t *)res + *nbytes + 4, 0, (offset + pdl) - (*nbytes + 4));
-	    } else {
-		pdl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key));
-		memset ((uint8_t *)res + *nbytes, 0, (offset + pdl) - (*nbytes));
-	    }
-	    mifare_cypher_blocks_chained (tag, NULL, NULL, (uint8_t *)res + offset, pdl, MCD_SEND, MCO_ENCYPHER);
-	    *nbytes = offset + pdl;
-
-	    break;
-	}
-
+	    mifare_cypher_blocks_chained (tag, NULL, NULL, res + offset, *nbytes - offset, MCD_SEND, (AS_NEW == MIFARE_DESFIRE (tag)->authentication_scheme) ? MCO_ENCYPHER : MCO_DECYPHER);
 	break;
     default:
 	warnx ("Unknown communication settings");
