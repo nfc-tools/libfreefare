@@ -109,10 +109,10 @@ cmac_generate_subkeys (MifareDESFireKey key)
     uint8_t R = (kbs == 8) ? 0x1B : 0x87;
 
     uint8_t l[kbs];
-    bzero (l, kbs);
+    memset (l, 0, kbs);
 
     uint8_t ivect[kbs];
-    bzero (ivect, kbs);
+    memset (ivect, 0, kbs);
 
     mifare_cbc_des (NULL, key, ivect, l, kbs, MCD_RECEIVE, MCO_ENCYPHER);
 
@@ -438,10 +438,10 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	    if (!(communication_settings & NO_CRC)) {
 		desfire_crc32_append (res, *nbytes);
 		pdl = padded_data_length (*nbytes - offset + 4, key_block_size (MIFARE_DESFIRE (tag)->session_key));
-		bzero ((uint8_t *)res + *nbytes + 4, (offset + pdl) - (*nbytes + 4));
+		memset ((uint8_t *)res + *nbytes + 4, 0, (offset + pdl) - (*nbytes + 4));
 	    } else {
 		pdl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key));
-		bzero ((uint8_t *)res + *nbytes, (offset + pdl) - (*nbytes));
+		memset ((uint8_t *)res + *nbytes, 0, (offset + pdl) - (*nbytes));
 	    }
 	    mifare_cbc_des (tag, NULL, NULL, (uint8_t *)res + offset, pdl, MCD_SEND, MCO_ENCYPHER);
 	    *nbytes = offset + pdl;

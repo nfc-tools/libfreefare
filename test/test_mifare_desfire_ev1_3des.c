@@ -195,7 +195,7 @@ test_mifare_desfire_ev1_3des (void)
 
 	// Ensure that no content was changed yet
 	char ref_buffer[64];
-	bzero (ref_buffer, sizeof (ref_buffer));
+	memset (ref_buffer, 0, sizeof (ref_buffer));
 	for (int n = 0; n < transaction; n++) {
 	    sprintf (ref_buffer + 3 * n, "%02d", n);
 	}

@@ -72,7 +72,7 @@ test_mifare_desfire_aes_cmac_empty (void)
     cmac_generate_subkeys (key);
 
     uint8_t ivect[16];
-    bzero (ivect, sizeof (ivect));
+    memset (ivect, 0, sizeof (ivect));
 
     uint8_t expected_cmac[] = {
 	0xbb, 0x1d, 0x69, 0x29,
@@ -96,7 +96,7 @@ test_mifare_desfire_aes_cmac_128 (void)
     cmac_generate_subkeys (key);
 
     uint8_t ivect[16];
-    bzero (ivect, sizeof (ivect));
+    memset (ivect, 0, sizeof (ivect));
 
     uint8_t message[] = {
 	0x6b, 0xc1, 0xbe, 0xe2,
@@ -127,7 +127,7 @@ test_mifare_desfire_aes_cmac_320 (void)
     cmac_generate_subkeys (key);
 
     uint8_t ivect[16];
-    bzero (ivect, sizeof (ivect));
+    memset (ivect, 0, sizeof (ivect));
 
     uint8_t message[] = {
 	0x6b, 0xc1, 0xbe, 0xe2,
@@ -164,7 +164,7 @@ test_mifare_desfire_aes_cmac_512 (void)
     cmac_generate_subkeys (key);
 
     uint8_t ivect[16];
-    bzero (ivect, sizeof (ivect));
+    memset (ivect, 0, sizeof (ivect));
 
     uint8_t message[] = {
 	0x6b, 0xc1, 0xbe, 0xe2,
