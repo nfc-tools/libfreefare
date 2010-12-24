@@ -48,9 +48,10 @@ linkedman = \
 	    freefare.3 freefare_get_tag_type.3 \
 	    freefare.3 freefare_get_tag_uid.3 \
 	    freefare.3 freefare_get_tags.3 \
+	    freefare_error.3 freefare_perror.3 \
 	    freefare_error.3 freefare_strerror.3 \
 	    freefare_error.3 freefare_strerror_r.3 \
-	    freefare_error.3 freefare_perror.3 \
+	    freefare_error.3 mifare_desfire_last_picc_error.3 \
 	    mad.3 mad_free.3 \
 	    mad.3 mad_get_aid.3 \
 	    mad.3 mad_get_card_publisher_sector.3 \
@@ -124,6 +125,7 @@ linkedman = \
 	    mifare_desfire.3 mifare_desfire_write_data_ex.3 \
 	    mifare_desfire.3 mifare_desfire_write_record.3 \
 	    mifare_desfire.3 mifare_desfire_write_record_ex.3 \
+	    mifare_desfire_aid.3 mifare_desfire_aid_get_aid.3 \
 	    mifare_desfire_aid.3 mifare_desfire_aid_new.3 \
 	    mifare_desfire_aid.3 mifare_desfire_aid_new_with_mad_aid.3 \
 	    mifare_desfire_key.3 mifare_desfire_3des_key_new.3 \
