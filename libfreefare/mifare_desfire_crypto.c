@@ -264,13 +264,11 @@ enciphered_data_length (const MifareTag tag, const size_t nbytes, int communicat
 {
     size_t crc_length = 0;
     if (!(communication_settings & NO_CRC)) {
-	switch (MIFARE_DESFIRE (tag)->session_key->type) {
-	case T_DES:
-	case T_3DES:
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    crc_length = 2;
 	    break;
-	case T_3K3DES:
-	case T_AES:
+	case AS_NEW:
 	    crc_length = 4;
 	    break;
 	}
@@ -312,7 +310,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
     switch (communication_settings & MDCM_MASK) {
     case MDCM_PLAIN:
-	if ((T_DES == key->type) || (T_3DES == key->type))
+	if (AS_LEGACY == MIFARE_DESFIRE (tag)->authentication_scheme)
 	    break;
 
 	/*
@@ -329,9 +327,8 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	/* pass through */
     case MDCM_MACED:
-	switch (key->type) {
-	case T_DES:
-	case T_3DES:
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    if (!(communication_settings & MAC_COMMAND))
 		break;
 
@@ -363,8 +360,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	    *nbytes += 4;
 	    break;
-	case T_3K3DES:
-	case T_AES:
+	case AS_NEW:
 	    if (!(communication_settings & CMAC_COMMAND))
 		break;
 	    cmac (key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MIFARE_DESFIRE (tag)->cmac);
@@ -412,19 +408,14 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	    memcpy (res, data, *nbytes);
 	    if (!(communication_settings & NO_CRC)) {
 		// ... CRC ...
-		switch (key->type) {
-		case T_DES:
-		case T_3DES:
+		switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+		case AS_LEGACY:
 		    iso14443a_crc_append ((uint8_t *)res + offset, *nbytes - offset);
 		    *nbytes += 2;
 		    break;
-		case T_3K3DES:
+		case AS_NEW:
 		    desfire_crc32_append ((uint8_t *)res, *nbytes);
 		    *nbytes += 4;
-		    break;
-		case T_AES:
-		    // Never reached.
-		    abort ();
 		    break;
 		}
 	    }
@@ -433,7 +424,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	    *nbytes = edl;
 
-	    mifare_cbc_des (tag, NULL, NULL, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (key->type == T_3K3DES) ? MCO_ENCYPHER : MCO_DECYPHER);
+	    mifare_cbc_des (tag, NULL, NULL, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (AS_NEW == MIFARE_DESFIRE (tag)->authentication_scheme) ? MCO_ENCYPHER : MCO_DECYPHER);
 
 	    break;
 	case T_AES:
@@ -492,14 +483,13 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     switch (communication_settings & MDCM_MASK) {
     case MDCM_PLAIN:
 
-	if ((T_DES == key->type) || (T_3DES == key->type))
+	if (AS_LEGACY == MIFARE_DESFIRE (tag)->authentication_scheme)
 	    break;
 
 	/* pass through */
     case MDCM_MACED:
-	switch (key->type) {
-	case T_DES:
-	case T_3DES:
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    if (communication_settings & MAC_VERIFY) {
 		*nbytes -= key_macing_length (key);
 
@@ -523,8 +513,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		}
 	    }
 	    break;
-	case T_3K3DES:
-	case T_AES:
+	case AS_NEW:
 	    if (!(communication_settings & CMAC_COMMAND))
 		break;
 	    if (communication_settings & CMAC_VERIFY) {
@@ -562,10 +551,9 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 
 	break;
     case MDCM_ENCIPHERED:
-	switch (key->type) {
-	case T_DES:
-	case T_3DES:
-	    (*nbytes)--;
+	(*nbytes)--;
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    mifare_cbc_des (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
 
 	    /*
@@ -605,9 +593,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    }
 	    break;
 
-	case T_3K3DES:
-	case T_AES:
-	    (*nbytes)--;
+	case AS_NEW:
 	    mifare_cbc_des (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
 	    uint8_t *p = ((uint8_t *)res) + *nbytes - 1;
 	    while (!*p) {
@@ -747,6 +733,14 @@ mifare_cbc_des (MifareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *da
 	    key = MIFARE_DESFIRE (tag)->session_key;
 	if (!ivect)
 	    ivect = MIFARE_DESFIRE (tag)->ivect;
+
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
+	    memset (ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
+	    break;
+	case AS_NEW:
+	    break;
+	}
     }
 
     if (!key || !ivect)
@@ -755,8 +749,6 @@ mifare_cbc_des (MifareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *da
     switch (key->type) {
     case T_DES:
     case T_3DES:
-	memset (ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
-	/* pass-through */
     case T_3K3DES:
 	block_size = 8;
 	break;

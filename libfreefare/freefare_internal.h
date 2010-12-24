@@ -228,6 +228,7 @@ struct mifare_desfire_tag {
     uint8_t last_internal_error;
     uint8_t last_pcd_error;
     MifareDESFireKey session_key;
+    enum { AS_LEGACY, AS_NEW } authentication_scheme;
     uint8_t authenticated_key_no;
     uint8_t ivect[MAX_CRYPTO_BLOCK_SIZE];
     uint8_t cmac[16];

@@ -334,6 +334,8 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE (tag)->session_key = NULL;
 
+    MIFARE_DESFIRE (tag)->authentication_scheme = (0x0A == cmd) ? AS_LEGACY : AS_NEW;
+
     BUFFER_INIT (cmd1, 2);
     BUFFER_INIT (res, 17);
 
@@ -395,12 +397,10 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     MIFARE_DESFIRE (tag)->session_key = mifare_desfire_session_key_new (PCD_RndA, PICC_RndB, key);
     memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 
-    switch (MIFARE_DESFIRE (tag)->session_key->type) {
-    case T_DES:
-    case T_3DES:
+    switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+    case AS_LEGACY:
 	break;
-    case T_3K3DES:
-    case T_AES:
+    case AS_NEW:
 	cmac_generate_subkeys (MIFARE_DESFIRE (tag)->session_key);
 	break;
     }
@@ -536,16 +536,14 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	cmd[__cmd_n++] = new_key->aes_version;
 
     if ((MIFARE_DESFIRE (tag)->authenticated_key_no & 0x0f) != (key_no & 0x0f)) {
-	switch (MIFARE_DESFIRE (tag)->session_key->type) {
-	case T_DES:
-	case T_3DES:
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    iso14443a_crc_append (cmd + 2, __cmd_n - 2);
 	    __cmd_n += 2;
 	    iso14443a_crc (new_key->data, new_key_length, cmd + __cmd_n);
 	    __cmd_n += 2;
 	    break;
-	case T_3K3DES:
-	case T_AES:
+	case AS_NEW:
 	    desfire_crc32_append (cmd, __cmd_n);
 	    __cmd_n += 4;
 
@@ -554,14 +552,12 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
 	    break;
 	}
     } else {
-	switch (MIFARE_DESFIRE (tag)->session_key->type) {
-	case T_DES:
-	case T_3DES:
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    iso14443a_crc_append (cmd + 2 , __cmd_n - 2);
 	    __cmd_n += 2;
 	    break;
-	case T_3K3DES:
-	case T_AES:
+	case AS_NEW:
 	    desfire_crc32_append (cmd, __cmd_n);
 	    __cmd_n += 4;
 	    break;
@@ -1219,12 +1215,10 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 
     uint8_t ocs = cs;
     if ((MIFARE_DESFIRE (tag)->session_key) && (cs | MDCM_MACED)) {
-	switch (MIFARE_DESFIRE (tag)->session_key->type) {
-	case T_DES:
-	case T_3DES:
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
 	    break;
-	case T_3K3DES:
-	case T_AES:
+	case AS_NEW:
 	    cs = MDCM_PLAIN;
 	    break;
 	}
