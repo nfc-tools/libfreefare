@@ -165,7 +165,8 @@ struct supported_tag {
     enum mifare_tag_type type;
     const char *friendly_name;
     uint8_t SAK;
-    uint8_t ATS_length;
+    uint8_t ATS_min_length;
+    uint8_t ATS_compare_length;
     uint8_t ATS[5];
 };
 
