@@ -893,6 +893,43 @@ mifare_desfire_set_configuration (MifareTag tag, bool disable_format, bool enabl
 }
 
 int
+mifare_desfire_set_default_key (MifareTag tag, MifareDESFireKey key)
+{
+    ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_DESFIRE (tag);
+
+    BUFFER_INIT (cmd, 34);
+    BUFFER_INIT (res, 1 + CMAC_LENGTH);
+
+    BUFFER_APPEND (cmd, 0x5C);
+    BUFFER_APPEND (cmd, 0x01);
+    size_t key_data_length;
+    switch (key->type) {
+    case T_DES:
+    case T_3DES:
+    case T_AES:
+	key_data_length = 16;
+	break;
+    case T_3K3DES:
+	key_data_length = 24;
+	break;
+    }
+    BUFFER_APPEND_BYTES (cmd, key->data, key_data_length);
+    while (__cmd_n < 26)
+	BUFFER_APPEND (cmd, 0x00);
+    BUFFER_APPEND (cmd, mifare_desfire_key_get_version (key));
+
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 2, MDCM_ENCIPHERED | ENC_COMMAND);
+
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+    ssize_t sn = __res_n;
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    return 0;
+}
+
+int
 mifare_desfire_get_card_uid (MifareTag tag, char **uid)
 {
     ASSERT_ACTIVE (tag);
