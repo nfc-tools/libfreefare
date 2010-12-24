@@ -114,7 +114,7 @@ cmac_generate_subkeys (MifareDESFireKey key)
     uint8_t ivect[kbs];
     bzero (ivect, kbs);
 
-    mifare_cbc_des (key, ivect, l, kbs, MCD_RECEIVE, MCO_ENCYPHER);
+    mifare_cbc_des (NULL, key, ivect, l, kbs, MCD_RECEIVE, MCO_ENCYPHER);
 
     bool xor = false;
 
@@ -154,7 +154,7 @@ cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t le
 	xor (key->cmac_sk1, buffer + len - kbs, kbs);
     }
 
-    mifare_cbc_des (key, ivect, buffer, len, MCD_SEND, MCO_ENCYPHER);
+    mifare_cbc_des (NULL, key, ivect, buffer, len, MCD_SEND, MCO_ENCYPHER);
 
     memcpy (cmac, ivect, kbs);
 
@@ -345,7 +345,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	    // ... and 0 padding
 	    memset ((uint8_t *)res + *nbytes, 0, edl - *nbytes);
 
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, edl - offset, MCD_SEND, MCO_ENCYPHER);
+	    mifare_cbc_des (tag, NULL, NULL, (uint8_t *) res + offset, edl - offset, MCD_SEND, MCO_ENCYPHER);
 
 	    memcpy (mac, (uint8_t *)res + edl - 8, 4);
 
@@ -433,7 +433,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	    *nbytes = edl;
 
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (key->type == T_3K3DES) ? MCO_ENCYPHER : MCO_DECYPHER);
+	    mifare_cbc_des (tag, NULL, NULL, (uint8_t *) res + offset, *nbytes - offset, MCD_SEND, (key->type == T_3K3DES) ? MCO_ENCYPHER : MCO_DECYPHER);
 
 	    break;
 	case T_AES:
@@ -452,7 +452,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 		pdl = padded_data_length (*nbytes - offset, key_block_size (MIFARE_DESFIRE (tag)->session_key));
 		bzero ((uint8_t *)res + *nbytes, (offset + pdl) - (*nbytes));
 	    }
-	    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, (uint8_t *)res + offset, pdl, MCD_SEND, MCO_ENCYPHER);
+	    mifare_cbc_des (tag, NULL, NULL, (uint8_t *)res + offset, pdl, MCD_SEND, MCO_ENCYPHER);
 	    *nbytes = offset + pdl;
 
 	    break;
@@ -509,7 +509,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		memcpy (edata, data, *nbytes - 1);
 		memset ((uint8_t *)edata + *nbytes - 1, 0, edl - *nbytes + 1);
 
-		mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, edata, edl, MCD_SEND, MCO_ENCYPHER);
+		mifare_cbc_des (tag, NULL, NULL, edata, edl, MCD_SEND, MCO_ENCYPHER);
 
 		if (0 != memcmp ((uint8_t *)data + *nbytes - 1, (uint8_t *)edata + edl - 8, 4)) {
 		    warnx ("MACing not verified");
@@ -566,7 +566,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case T_DES:
 	case T_3DES:
 	    (*nbytes)--;
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
+	    mifare_cbc_des (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
 
 	    /*
 	     * Look for the CRC and ensure it is followed by NULL padding.  We
@@ -608,7 +608,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case T_3K3DES:
 	case T_AES:
 	    (*nbytes)--;
-	    mifare_cbc_des (MIFARE_DESFIRE (tag)->session_key, MIFARE_DESFIRE (tag)->ivect, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
+	    mifare_cbc_des (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
 	    uint8_t *p = ((uint8_t *)res) + *nbytes - 1;
 	    while (!*p) {
 		p--;
@@ -727,10 +727,30 @@ mifare_des (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDir
     }
 }
 
+/*
+ * This function performs all CBC cyphering / deciphering.
+ *
+ * The tag argument may be NULL, in which case both key and ivect shall be set.
+ * When using the tag session_key and ivect for processing data, these
+ * arguments should be set to NULL.
+ *
+ * Because the tag may contain additional data, one may need to call this
+ * function with tag, key and ivect defined.
+ */
 void
-mifare_cbc_des (MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation)
+mifare_cbc_des (MifareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation)
 {
     size_t block_size;
+
+    if (tag) {
+	if (!key)
+	    key = MIFARE_DESFIRE (tag)->session_key;
+	if (!ivect)
+	    ivect = MIFARE_DESFIRE (tag)->ivect;
+    }
+
+    if (!key || !ivect)
+	abort();
 
     switch (key->type) {
     case T_DES:

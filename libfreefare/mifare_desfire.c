@@ -349,7 +349,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 
     uint8_t PICC_RndB[16];
     memcpy (PICC_RndB, PICC_E_RndB, key_length);
-    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, PICC_RndB, key_length, MCD_RECEIVE, MCO_DECYPHER);
+    mifare_cbc_des (tag, key, MIFARE_DESFIRE (tag)->ivect, PICC_RndB, key_length, MCD_RECEIVE, MCO_DECYPHER);
 
     uint8_t PCD_RndA[16];
     RAND_bytes (PCD_RndA, 16);
@@ -362,7 +362,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     memcpy (token, PCD_RndA, key_length);
     memcpy (token+key_length, PCD_r_RndB, key_length);
 
-    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, token, 2 * key_length, MCD_SEND, (0x0A == cmd) ? MCO_DECYPHER : MCO_ENCYPHER);
+    mifare_cbc_des (tag, key, MIFARE_DESFIRE (tag)->ivect, token, 2 * key_length, MCD_SEND, (0x0A == cmd) ? MCO_DECYPHER : MCO_ENCYPHER);
 
     BUFFER_INIT (cmd2, 33);
 
@@ -376,7 +376,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 
     uint8_t PICC_RndA_s[16];
     memcpy (PICC_RndA_s, PICC_E_RndA_s, key_length);
-    mifare_cbc_des (key, MIFARE_DESFIRE (tag)->ivect, PICC_RndA_s, key_length, MCD_RECEIVE, MCO_DECYPHER);
+    mifare_cbc_des (tag, key, MIFARE_DESFIRE (tag)->ivect, PICC_RndA_s, key_length, MCD_RECEIVE, MCO_DECYPHER);
 
     uint8_t PCD_RndA_s[key_length];
     memcpy (PCD_RndA_s, PCD_RndA, key_length);
