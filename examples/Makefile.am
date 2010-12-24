@@ -6,6 +6,7 @@ AM_LDFLAGS = @LIBNFC_LIBS@
 bin_PROGRAMS = mifare-classic-format \
 	       mifare-classic-write-ndef \
 	       mifare-desfire-access \
+	       mifare-desfire-ev1-configure-ats \
 	       mifare-desfire-ev1-configure-default-key \
 	       mifare-desfire-ev1-configure-random-uid \
 	       mifare-desfire-format \
@@ -20,6 +21,9 @@ mifare_classic_write_ndef_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.
 
 mifare_desfire_access_SOURCES = mifare-desfire-access.c
 mifare_desfire_access_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la
+
+mifare_desfire_ev1_configure_ats_SOURCES = mifare-desfire-ev1-configure-ats.c
+mifare_desfire_ev1_configure_ats_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la
 
 mifare_desfire_ev1_configure_default_key_SOURCES = mifare-desfire-ev1-configure-default-key.c
 mifare_desfire_ev1_configure_default_key_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la
