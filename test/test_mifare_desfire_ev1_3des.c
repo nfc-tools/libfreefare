@@ -30,9 +30,8 @@
 
 #define cut_assert_success(last_command) \
     do { \
-	if ((res < 0) || (mifare_desfire_last_picc_error (tag) != OPERATION_OK)) { \
-	    cut_fail ("%s returned %d, error: %s, errno: %s\n", last_command, res, mifare_desfire_error_lookup (mifare_desfire_last_picc_error (tag)), strerror (errno)); \
-	} \
+	cut_assert_equal_int (OPERATION_OK, mifare_desfire_last_picc_error (tag), cut_message ("PICC replied %s", mifare_desfire_error_lookup (mifare_desfire_last_picc_error (tag)))); \
+	cut_assert_not_equal_int (-1, res, cut_message ("Wrong return value")); \
     } while (0)
 
 void
