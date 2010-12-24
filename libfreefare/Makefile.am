@@ -85,6 +85,8 @@ linkedman = \
 	    mifare_classic.3 mifare_classic_write.3 \
 	    mifare_desfire.3 mifare_desfire_abort_transaction.3 \
 	    mifare_desfire.3 mifare_desfire_authenticate.3 \
+	    mifare_desfire.3 mifare_desfire_authenticate_aes.3 \
+	    mifare_desfire.3 mifare_desfire_authenticate_iso.3 \
 	    mifare_desfire.3 mifare_desfire_change_file_settings.3 \
 	    mifare_desfire.3 mifare_desfire_change_key.3 \
 	    mifare_desfire.3 mifare_desfire_change_key_settings.3 \
@@ -130,6 +132,10 @@ linkedman = \
 	    mifare_desfire_aid.3 mifare_desfire_aid_new_with_mad_aid.3 \
 	    mifare_desfire_key.3 mifare_desfire_3des_key_new.3 \
 	    mifare_desfire_key.3 mifare_desfire_3des_key_new_with_version.3 \
+	    mifare_desfire_key.3 mifare_desfire_3k3des_key_new.3 \
+	    mifare_desfire_key.3 mifare_desfire_3k3des_key_new_with_version.3 \
+	    mifare_desfire_key.3 mifare_desfire_aes_key_new.3 \
+	    mifare_desfire_key.3 mifare_desfire_aes_key_new_with_version.3 \
 	    mifare_desfire_key.3 mifare_desfire_des_key_new.3 \
 	    mifare_desfire_key.3 mifare_desfire_des_key_new_with_version.3 \
 	    mifare_desfire_key.3 mifare_desfire_key_free.3 \

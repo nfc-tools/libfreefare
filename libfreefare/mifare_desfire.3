@@ -29,6 +29,8 @@
 .Nm mifare_desfire_disconnect .
 .\"
 .Nm mifare_desfire_authenticate ,
+.Nm mifare_desfire_authenticate_aes ,
+.Nm mifare_desfire_authenticate_iso ,
 .Nm mifare_desfire_change_key_settings ,
 .Nm mifare_desfire_get_key_settings ,
 .Nm mifare_desfire_change_key ,
@@ -96,6 +98,10 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_desfire_disconnect "MifareTag tag"
 .Ft int
 .Fn mifare_desfire_authenticate "MifareTag tag" "uint8_t key_no" "MifareDESFireKey key"
+.Ft int
+.Fn mifare_desfire_authenticate_aes "MifareTag tag" "uint8_t key_no" "MifareDESFireKey key"
+.Ft int
+.Fn mifare_desfire_authenticate_iso "MifareTag tag" "uint8_t key_no" "MifareDESFireKey key"
 .Ft int
 .Fn mifare_desfire_change_key_settings "MifareTag tag" "uint8_t settings"
 .Ft int
@@ -243,6 +249,16 @@ on the card and the
 .Vt key
 (3)DES key on
 .Vt tag .
+.Pp
+The
+.Fn mifare_desfire_authenticate_aes
+function performs an authentication using an AES
+.Vt key .
+.Pp
+The
+.Fn mifare_desfire_authenticate_iso
+function performs an ISO authentication using either a 3DES or a 3K3DES
+.Vt key .
 .Pp
 The
 .Fn mifare_desfire_get_key_settings

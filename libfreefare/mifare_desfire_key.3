@@ -27,8 +27,12 @@
 .Sh NAME
 .Nm mifare_desfire_des_key_new ,
 .Nm mifare_desfire_3des_key_new ,
+.Nm mifare_desfire_3k3des_key_new ,
+.Nm mifare_desfire_aes_key_new ,
 .Nm mifare_desfire_des_key_new_with_version ,
 .Nm mifare_desfire_3des_key_new_with_version ,
+.Nm mifare_desfire_3k3des_key_new_with_version ,
+.Nm mifare_desfire_aes_key_new _with_version,
 .Nm mifare_desfire_key_get_version ,
 .Nm mifare_desfire_key_set_version ,
 .Nm mifare_desfire_key_free
@@ -54,9 +58,17 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Ft MifareDESFireKey
 .Fn mifare_desfire_3des_key_new "uint8_t value[16]"
 .Ft MifareDESFireKey
+.Fn mifare_desfire_3k3des_key_new "uint8_t value[24]"
+.Ft MifareDESFireKey
+.Fn mifare_desfire_aes_key_new "uint8_t value[16]"
+.Ft MifareDESFireKey
 .Fn mifare_desfire_des_key_new_with_version "uint8_t value[8]"
 .Ft MifareDESFireKey
 .Fn mifare_desfire_3des_key_new_with_version "uint8_t value[16]"
+.Ft MifareDESFireKey
+.Fn mifare_desfire_3k3des_key_new_with_version "uint8_t value[24]"
+.Ft MifareDESFireKey
+.Fn mifare_desfire_aes_key_new_with_version "uint8_t value[16]" "uint8_t version"
 .Ft uint8_t
 .Fn mifare_desfire_key_get_version "MifareDESFireKey key"
 .Ft void
@@ -75,24 +87,28 @@ The
 family of functions allows management of Mifare DESFire keys.
 .Pp
 The
-.Fn mifare_desfire_des_key_new
+.Fn mifare_desfire_des_key_new ,
+.Fn mifare_desfire_3des_key_new ,
+.Fn mifare_desfire_3k3des_key_new
 and
-.Fn mifare_desfire_3des_key_new
+.Fn mifare_desfire_ades_key_new
 alocate a new key with the provided data
 .Va value .
 The key version is set to
 .Va 0 .
 .Pp
 The
-.Fn mifare_desfire_des_key_new_with_version
+.Fn mifare_desfire_des_key_new_with_version ,
+.Fn mifare_desfire_3des_key_new_with_version ,
+.Fn mifare_desfire_3k3des_key_new_with_version
 and
-.Fn mifare_desfire_3des_key_new_with_version
-functions are equivalent to the
-.Fn mifare_desfire_des_key_new
-and
-.Fn mifare_desfire_3des_key_new
-functions except that the key version is set to
-.Va version .
+.Fn mifare_desfire_aes_key_new_with_version
+functions are equivalent to the previous functions except that the key version
+is read from
+.Va value
+(DES, 3DES, 3K3DES) or set to
+.Va version
+(AES).
 .Pp
 The version of a
 .Vt MifareDESFireKey
