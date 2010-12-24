@@ -260,11 +260,11 @@ maced_data_length (const MifareDESFireKey key, const size_t nbytes)
  * Buffer size required to encipher nbytes of data and a two bytes CRC.
  */
 size_t
-enciphered_data_length (const MifareDESFireKey key, const size_t nbytes, int communication_settings)
+enciphered_data_length (const MifareTag tag, const size_t nbytes, int communication_settings)
 {
     size_t crc_length = 0;
     if (!(communication_settings & NO_CRC)) {
-	switch (key->type) {
+	switch (MIFARE_DESFIRE (tag)->session_key->type) {
 	case T_DES:
 	case T_3DES:
 	    crc_length = 2;
@@ -276,7 +276,7 @@ enciphered_data_length (const MifareDESFireKey key, const size_t nbytes, int com
 	}
     }
 
-    size_t block_size = key_block_size (key);
+    size_t block_size = key_block_size (MIFARE_DESFIRE (tag)->session_key);
 
     return padded_data_length (nbytes + crc_length, block_size);
 }
@@ -404,7 +404,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	case T_3K3DES:
 	    if (!(communication_settings & ENC_COMMAND))
 		break;
-	    edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
+	    edl = enciphered_data_length (tag, *nbytes - offset, communication_settings) + offset;
 	    if (!(res = assert_crypto_buffer_size (tag, edl)))
 		abort();
 
@@ -437,7 +437,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 
 	    break;
 	case T_AES:
-	    edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - offset, communication_settings) + offset;
+	    edl = enciphered_data_length (tag, *nbytes - offset, communication_settings) + offset;
 	    if (!(res = assert_crypto_buffer_size (tag, edl)))
 		abort();
 
@@ -503,7 +503,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    if (communication_settings & MAC_VERIFY) {
 		*nbytes -= key_macing_length (key);
 
-		edl = enciphered_data_length (MIFARE_DESFIRE (tag)->session_key, *nbytes - 1, communication_settings);
+		edl = enciphered_data_length (tag, *nbytes - 1, communication_settings);
 		edata = malloc (edl);
 
 		memcpy (edata, data, *nbytes - 1);

@@ -153,7 +153,7 @@ void		 desfire_crc32_append (uint8_t *data, const size_t len);
 size_t		 key_block_size (const MifareDESFireKey key);
 size_t		 padded_data_length (const size_t nbytes, const size_t block_size);
 size_t		 maced_data_length (const MifareDESFireKey key, const size_t nbytes);
-size_t		 enciphered_data_length (const MifareDESFireKey key, const size_t nbytes, int communication_settings);
+size_t		 enciphered_data_length (const MifareTag tag, const size_t nbytes, int communication_settings);
 
 void		 cmac_generate_subkeys (MifareDESFireKey key);
 void		 cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
