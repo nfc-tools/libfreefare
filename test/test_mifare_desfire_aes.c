@@ -26,7 +26,7 @@
  */
 
 #include <cutter.h>
-#include <strings.h>
+#include <string.h>
 
 #include <freefare.h>
 #include "freefare_internal.h"
