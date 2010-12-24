@@ -32,7 +32,7 @@
 uint8_t null_key_data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 uint8_t new_key_data[8]  = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77 };
 
-#define NEW_KEY_VERSION 0x34;
+#define NEW_KEY_VERSION 0x34
 
 struct {
     bool interactive;
@@ -171,7 +171,7 @@ main(int argc, char *argv[])
 		}
 
 		if (version != NEW_KEY_VERSION) {
-		    fprintf (stderr, "Wrong key version: %02x (expected %02x).\n");
+		    fprintf (stderr, "Wrong key version: %02x (expected %02x).\n", version, NEW_KEY_VERSION);
 		    error = EXIT_FAILURE;
 		    /* continue */
 		}
