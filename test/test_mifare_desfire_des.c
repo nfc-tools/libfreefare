@@ -21,8 +21,6 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-uint8_t null_ivect[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-
 void
 test_mifare_rol (void)
 {
@@ -38,6 +36,8 @@ test_mifare_rol (void)
 void
 test_mifare_desfire_des_receive (void)
 {
+    uint8_t null_ivect[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
     uint8_t data[8]  = { 0xd6, 0x59, 0xe1, 0x70, 0x43, 0xa8, 0x40, 0x68 };
     uint8_t key_data[8]   = { 1, 1, 1, 1, 1, 1, 1, 1 };
     MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data);
@@ -57,6 +57,8 @@ test_mifare_desfire_des_receive (void)
 void
 test_mifare_desfire_des_send (void)
 {
+    uint8_t null_ivect[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
     uint8_t data[8]  = { 0x73, 0x0d, 0xdf, 0xad, 0xa4, 0xd2, 0x07, 0x89 };
     uint8_t key_data[8]   = { 1, 1, 1, 1, 1, 1, 1, 1 };
     MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data);
