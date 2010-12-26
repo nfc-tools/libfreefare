@@ -45,6 +45,11 @@
 .Nm mifare_desfire_format_picc ,
 .\"
 .Nm mifare_desfire_get_version ,
+.Nm mifare_desfire_free_mem ,
+.Nm mifare_desfire_set_configuration ,
+.Nm mifare_desfire_set_default_key ,
+.Nm mifare_desfire_set_ats ,
+.Nm mifare_desfire_get_card_uid ,
 .\"
 .Nm mifare_desfire_get_file_ids ,
 .Nm mifare_desfire_get_file_settings ,
@@ -124,6 +129,16 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_desfire_format_picc "MifareTag tag"
 .Ft int
 .Fn mifare_desfire_get_version "MifareTag tag" "struct mifare_desfire_version_info *version_info"
+.Ft int
+.Fn mifare_desfire_free_mem "MifareTag tag" "uint32_t *size"
+.Ft int
+.Fn mifare_desfire_set_configuration "MifareTag tag" "bool disable_format" "bool enable_random_uid"
+.Ft int
+.Fn mifare_desfire_set_default_key "MifareTag tag" "MifareDESFireKey key"
+.Ft int
+.Fn mifare_desfire_set_ats "MifareTag tag" "uint8_t *ats"
+.Ft int
+.Fn mifare_desfire_get_card_uid "MifareTag tag" "char **uid"
 .Ft int
 .Fn mifare_desfire_get_file_ids "MifareTag tag" "uint8_t *files[]" "size_t *count"
 .Ft int
@@ -215,8 +230,37 @@ function retrieve various information about the provided
 .Vt tag ,
 including UID, batch number, production date, and hardware and software
 information.  Refer to the freefare.h header file for details about the
-.Vt settings
+.Vt version_info
 field.
+.Pp
+The
+.Fn mifare_desfire_free_mem
+functions returns the
+.Vt size
+of the free memory on the PICC (in bytes).
+.Pp
+The
+.Fn mifare_desfire_set_configuration
+function can be used to desactivate the format function when setting
+.Vt disable_format
+to a value different from 0, or swicth the card to use random UDI setting
+.Vt enable_random_uid
+to a non-zero value.
+.Pp
+The
+.Vt mifare_desfire_set_default_key
+function sets the
+.Vt key
+argument as the default key for new applications.
+.Pp
+The
+.Nm mifare_desfire_set_ats
+function replace the ATS bytes returned by PICC when it is selected.
+.Pp
+The
+.Nm mifare_desfire_get_card_uid
+function can be used with a PICC configured for using random UID to retrieve
+the original UID of the target.
 .Pp
 The
 .Fn mifare_desfire_format_picc

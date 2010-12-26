@@ -2,7 +2,10 @@ Changes between 0.2.3 and 0.3.0  [XX xxx XXXX]
 
   *) Add support for ISO and AES authentication through
      mifare_desfire_authenticate_iso() and mifare_desfire_authenticate_aes().
-  *) Add support for 3K3DES and AES cryptographic operations.
+  *) Add support for 3K3DES and AES cryptographic operations and add new
+     functions mifare_desfire_3k3des_key_new(),
+     mifare_desfire_3k3des_key_new_with_version(), mifare_desfire_aes_key_new()
+     and mifare_desfire_aes_key_new_with_version() for generating keys.
   *) New functions mifare_desfire_free_mem(),
      mifare_desfire_set_configuration(), mifare_desfire_set_default_key(),
      mifare_desfire_set_ats(), mifare_desfire_get_card_uid(), for Mifare

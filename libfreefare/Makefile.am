@@ -108,7 +108,9 @@ linkedman = \
 	    mifare_desfire.3 mifare_desfire_disconnect.3 \
 	    mifare_desfire.3 mifare_desfire_format_picc.3 \
 	    mifare_desfire.3 mifare_desfire_free_application_ids.3 \
+	    mifare_desfire.3 mifare_desfire_free_mem.3 \
 	    mifare_desfire.3 mifare_desfire_get_application_ids.3 \
+	    mifare_desfire.3 mifare_desfire_get_card_uid.3 \
 	    mifare_desfire.3 mifare_desfire_get_file_ids.3 \
 	    mifare_desfire.3 mifare_desfire_get_file_settings.3 \
 	    mifare_desfire.3 mifare_desfire_get_key_settings.3 \
@@ -123,6 +125,9 @@ linkedman = \
 	    mifare_desfire.3 mifare_desfire_read_records.3 \
 	    mifare_desfire.3 mifare_desfire_read_records_ex.3 \
 	    mifare_desfire.3 mifare_desfire_select_application.3 \
+	    mifare_desfire.3 mifare_desfire_set_ats.3 \
+	    mifare_desfire.3 mifare_desfire_set_configuration.3 \
+	    mifare_desfire.3 mifare_desfire_set_default_key.3 \
 	    mifare_desfire.3 mifare_desfire_write_data.3 \
 	    mifare_desfire.3 mifare_desfire_write_data_ex.3 \
 	    mifare_desfire.3 mifare_desfire_write_record.3 \
