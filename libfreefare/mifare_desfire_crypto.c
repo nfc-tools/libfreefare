@@ -71,7 +71,6 @@
 #define CMAC_LENGTH 8
 
 static void	 xor (const uint8_t *ivect, uint8_t *data, const size_t len);
-static void	 mifare_cypher_single_block (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDirection direction, MifareCryptoOperation operation, size_t block_size);
 static void	 desfire_crc32_byte (uint32_t *crc, const uint8_t value);
 static size_t	 key_macing_length (MifareDESFireKey key);
 
@@ -608,7 +607,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
     return res;
 }
 
-static void
+void
 mifare_cypher_single_block (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDirection direction, MifareCryptoOperation operation, size_t block_size)
 {
     AES_KEY k;

@@ -32,7 +32,7 @@
 
 enum mifare_tag_type {
     ULTRALIGHT,
-//    ULTRALIGHT_C,
+    ULTRALIGHT_C,
 //    MINI,
     CLASSIC_1K,
     CLASSIC_4K,
@@ -45,6 +45,9 @@ enum mifare_tag_type {
 
 struct mifare_tag;
 typedef struct mifare_tag *MifareTag;
+
+struct mifare_desfire_key;
+typedef struct mifare_desfire_key *MifareDESFireKey;
 
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
@@ -65,6 +68,9 @@ int		 mifare_ultralight_disconnect (MifareTag tag);
 
 int		 mifare_ultralight_read (MifareTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
 int		 mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
+
+int		 mifare_ultralightc_authenticate (MifareTag tag, const MifareDESFireKey key);
+bool		 is_mifare_ultralightc_on_reader (nfc_device_t *device, nfc_iso14443a_info_t nai);
 
 typedef unsigned char MifareClassicBlock[16];
 
@@ -246,9 +252,6 @@ MifareDESFireAID mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n)
 uint32_t	 mifare_desfire_aid_get_aid (MifareDESFireAID aid);
 
 uint8_t		 mifare_desfire_last_picc_error (MifareTag tag);
-
-struct mifare_desfire_key;
-typedef struct mifare_desfire_key *MifareDESFireKey;
 
 #pragma pack (push)
 #pragma pack (1)

@@ -151,6 +151,7 @@ linkedman = \
 	    mifare_ultralight.3 mifare_ultralight_get_uid.3 \
 	    mifare_ultralight.3 mifare_ultralight_read.3 \
 	    mifare_ultralight.3 mifare_ultralight_write.3 \
+	    mifare_ultralight.3 mifare_ultralightc_authenticate.3 \
 	    tlv.3 tlv_decode.3 \
 	    tlv.3 tlv_encode.3
 

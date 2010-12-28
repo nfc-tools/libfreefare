@@ -29,11 +29,12 @@
 #define NXP_MANUFACTURER_CODE 0x04
 
 struct supported_tag supported_tags[] = {
-    { CLASSIC_1K, "Mifare Classic 1k",            0x08, 0, 0, { 0x00 } },
-    { CLASSIC_4K, "Mifare Classic 4k",            0x18, 0, 0, { 0x00 } },
-    { CLASSIC_4K, "Mifare Classic 4k (Emulated)", 0x38, 0, 0, { 0x00 } },
-    { DESFIRE,    "Mifare DESFire",               0x20, 5, 4, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }},
-    { ULTRALIGHT, "Mifare UltraLight",            0x00, 0, 0, { 0x00 } },
+    { CLASSIC_1K,   "Mifare Classic 1k",            0x08, 0, 0, { 0x00 }, NULL },
+    { CLASSIC_4K,   "Mifare Classic 4k",            0x18, 0, 0, { 0x00 }, NULL },
+    { CLASSIC_4K,   "Mifare Classic 4k (Emulated)", 0x38, 0, 0, { 0x00 }, NULL },
+    { DESFIRE,      "Mifare DESFire",               0x20, 5, 4, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }, NULL},
+    { ULTRALIGHT_C, "Mifare UltraLightC",           0x00, 0, 0, { 0x00 }, is_mifare_ultralightc_on_reader },
+    { ULTRALIGHT,   "Mifare UltraLight",            0x00, 0, 0, { 0x00 }, NULL },
 };
 
 /*
@@ -51,7 +52,9 @@ freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
 	if (((nai.szUidLen == 4) || (nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
 	    (nai.btSak == supported_tags[i].SAK) &&
 	    (!supported_tags[i].ATS_min_length || ((nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
-					       (0 == memcmp (nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length))))) {
+						   (0 == memcmp (nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length)) &&
+	     ((supported_tags[i].check_tag_on_reader == NULL) ||
+	      supported_tags[i].check_tag_on_reader(device, nai))))) {
 
 	    tag_info = &(supported_tags[i]);
 	    found = true;
@@ -72,6 +75,7 @@ freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
 	tag = mifare_desfire_tag_new ();
 	break;
     case ULTRALIGHT:
+    case ULTRALIGHT_C:
 	tag = mifare_ultralight_tag_new ();
 	break;
     }
@@ -201,6 +205,7 @@ freefare_free_tag (MifareTag tag)
 	    mifare_desfire_tag_free (tag);
 	    break;
 	case ULTRALIGHT:
+	case ULTRALIGHT_C:
 	    mifare_ultralight_tag_free (tag);
 	    break;
 	}

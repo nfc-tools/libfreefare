@@ -76,11 +76,17 @@ test_mifare_ultralight_invalid_page (void)
     int res;
     MifareUltralightPage page = { 0x00, 0x00, 0x00, 0x00 };
 
-    res = mifare_ultralight_read (tag, 16, &page);
+    int invalid_page;
+    if (IS_MIFARE_ULTRALIGHT_C (tag)) {
+      invalid_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT;
+    } else {
+      invalid_page = MIFARE_ULTRALIGHT_PAGE_COUNT;
+    }
+    res = mifare_ultralight_read (tag, invalid_page, &page);
     cut_assert_equal_int (-1, res, cut_message ("mifare_ultralight_read() succeeded"));
     cut_assert_equal_int (EINVAL, errno, cut_message ("Wrong errno value"));
 
-    res = mifare_ultralight_write (tag, 16, page);
+    res = mifare_ultralight_write (tag, invalid_page, page);
     cut_assert_equal_int (-1, res, cut_message ("mifare_ultralight_write() succeeded"));
     cut_assert_equal_int (EINVAL, errno, cut_message ("Wrong errno value"));
 }
@@ -125,20 +131,26 @@ test_mifare_ultralight_cache_wrap (void)
 {
     int res;
     MifareUltralightPage page;
-
-    res = mifare_ultralight_read (tag, 15, &page);
+    int last_page;
+    if (IS_MIFARE_ULTRALIGHT_C (tag)) {
+      // Last 4 blocks are for 3DES key and cannot be read, read will wrap from 0x2b
+      last_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ -1;
+      // Actually engineering samples require auth to read above page 0x28 so we skip the test entirely
+      cut_omit("mifare_ultralight_read() on last page skipped on UltralightC");
+    } else {
+      last_page = MIFARE_ULTRALIGHT_PAGE_COUNT -1;
+    }
+    res = mifare_ultralight_read (tag, last_page, &page);
     cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
 
     /* Check cached pages consistency */
     for (int i = 0; i <= 2; i++) {
 	cut_assert_equal_int (1, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
-    for (int i = 3; i <= 14; i++) {
+    for (int i = 3; i < last_page; i++) {
 	cut_assert_equal_int (0, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
     }
-    for (int i = 15; i < MIFARE_ULTRALIGHT_PAGE_COUNT; i++) {
-	cut_assert_equal_int (1, MIFARE_ULTRALIGHT(tag)->cached_pages[i], cut_message ("Wrong page cache value for tag->cached_pages[%d]", i));
-    }
+    cut_assert_equal_int (1, MIFARE_ULTRALIGHT(tag)->cached_pages[last_page], cut_message ("Wrong page cache value for tag->cached_pages[%d]", last_page));
 }
 
 void
@@ -162,4 +174,24 @@ test_mifare_ultralight_tag_friendly_name (void)
     cut_assert_not_null (name, cut_message ("freefare_get_tag_friendly_name() failed"));
 }
 
+void
+test_mifare_ultralightc_authenticate (void)
+{
+    int res;
+    MifareDESFireKey key;
 
+    if (tag->tag_info->type == ULTRALIGHT_C) {
+	uint8_t key1_3des_data[16] = { 0x49, 0x45, 0x4D, 0x4B, 0x41, 0x45, 0x52, 0x42, 0x21, 0x4E, 0x41, 0x43, 0x55, 0x4F, 0X59, 0x46 };
+	key = mifare_desfire_3des_key_new (key1_3des_data);
+	res = mifare_ultralightc_authenticate (tag, key);
+	cut_assert_equal_int (0, res, cut_message ("mifare_ultralightc_authenticate() failed"));
+	mifare_desfire_key_free (key);
+
+	MifareUltralightPage page;
+	int last_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ -1;
+	res = mifare_ultralight_read (tag, last_page, &page);
+	cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_read() failed"));
+    } else {
+	cut_omit("mifare_ultralightc_authenticate() skipped on Ultralight");
+    }
+}

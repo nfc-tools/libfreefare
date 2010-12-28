@@ -146,6 +146,7 @@ typedef enum {
 
 void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
 void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
+void		 mifare_cypher_single_block (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDirection direction, MifareCryptoOperation operation, size_t block_size);
 void		 mifare_cypher_blocks_chained (MifareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation);
 void		 rol (uint8_t *data, const size_t len);
 void		 desfire_crc32 (const uint8_t *data, const size_t len, uint8_t *crc);
@@ -159,7 +160,11 @@ void		 cmac_generate_subkeys (MifareDESFireKey key);
 void		 cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
 void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 
-#define MIFARE_ULTRALIGHT_PAGE_COUNT 16
+#define MIFARE_ULTRALIGHT_PAGE_COUNT  0x10
+#define MIFARE_ULTRALIGHT_C_PAGE_COUNT 0x30
+#define MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ 0x2B
+// Max PAGE_COUNT of the Ultralight Family:
+#define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
 
 struct supported_tag {
     enum mifare_tag_type type;
@@ -168,6 +173,7 @@ struct supported_tag {
     uint8_t ATS_min_length;
     uint8_t ATS_compare_length;
     uint8_t ATS[5];
+    bool (*check_tag_on_reader) (nfc_device_t *, nfc_iso14443a_info_t);
 };
 
 /*
@@ -245,8 +251,8 @@ struct mifare_ultralight_tag {
     struct mifare_tag __tag;
 
     /* mifare_ultralight_read() reads 4 pages at a time (wrapping) */
-    MifareUltralightPage cache[MIFARE_ULTRALIGHT_PAGE_COUNT + 3];
-    uint8_t cached_pages[MIFARE_ULTRALIGHT_PAGE_COUNT];
+    MifareUltralightPage cache[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT + 3];
+    uint8_t cached_pages[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT];
 };
 
 /*
@@ -260,7 +266,9 @@ struct mifare_ultralight_tag {
 
 #define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != CLASSIC_1K) && (tag->tag_info->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
 #define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != DESFIRE) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if (tag->tag_info->type != ULTRALIGHT) return errno = ENODEV, -1; } while (0)
+#define IS_MIFARE_ULTRALIGHT_C(tag) (tag->tag_info->type == ULTRALIGHT_C)
+#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if ((tag->tag_info->type != ULTRALIGHT) && (! IS_MIFARE_ULTRALIGHT_C(tag))) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_ULTRALIGHT_C(tag) do { if (! IS_MIFARE_ULTRALIGHT_C(tag)) return errno = ENODEV, -1; } while (0)
 
 /* 
  * MifareTag cast macros 
