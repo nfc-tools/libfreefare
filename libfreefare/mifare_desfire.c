@@ -1353,6 +1353,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     BUFFER_APPEND_BYTES (cmd, data, length);
 
     uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
+    size_t overhead_size = __cmd_n - length; // (CRC | padding) + headers
 
     BUFFER_INIT(d, FRAME_PAYLOAD_SIZE);
     bytes_left = FRAME_PAYLOAD_SIZE - 8;
@@ -1379,7 +1380,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 
     if (0x00 == p[__res_n-1]) {
 	// Remove header length
-	bytes_send -= 8;
+	bytes_send -= overhead_size;
     } else {
 	// 0xAF (additionnal Frame) failure can happen here (wrong crypto method).
 	MIFARE_DESFIRE (tag)->last_picc_error = p[__res_n-1];

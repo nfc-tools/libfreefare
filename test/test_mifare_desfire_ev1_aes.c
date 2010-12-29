@@ -56,8 +56,6 @@ test_mifare_desfire_ev1_aes (void)
      */
     res = mifare_desfire_change_key_settings (tag, 0xF);
     cut_assert_success ("mifare_desfire_change_key_settings()");
-    res = mifare_desfire_change_key_settings (tag, 0xF);
-    cut_assert_success ("mifare_desfire_change_key_settings()");
 
     /* Change master key to AES */
     MifareDESFireKey key = mifare_desfire_aes_key_new_with_version (key_data_aes, key_data_aes_version);
@@ -828,3 +826,43 @@ test_mifare_desfire_ev1_aes (void)
     free (aid_d);
 }
 
+void
+test_mifare_desfire_ev1_aes_write_data_encyphered (void)
+{
+    int res;
+
+     mifare_desfire_auto_authenticate (tag, 0);
+
+    /* Wipeout the card */
+    res = mifare_desfire_format_picc (tag);
+    cut_assert_success ("mifare_desfire_format_picc()");
+
+    MifareDESFireAID aid = mifare_desfire_aid_new (0x112233);
+    res = mifare_desfire_create_application (tag, aid, 0x0F, 0x83);
+    cut_assert_success ("mifare_desfire_create_application()");
+
+    res = mifare_desfire_select_application (tag, aid);
+    cut_assert_success ("mifare_desfire_select_application()");
+
+    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
+    mifare_desfire_key_free (key);
+
+    res = mifare_desfire_create_std_data_file (tag, 9, MDCM_ENCIPHERED, 0x0000, 7);
+    cut_assert_success ("mifare_desfire_create_std_data_file()");
+
+    res = mifare_desfire_write_data (tag, 9, 0, 5, "Hello");
+    cut_assert_equal_int (5, res, cut_message ("Wrong value returned"));
+
+    res = mifare_desfire_select_application (tag, NULL);
+    cut_assert_success ("mifare_desfire_select_application()");
+
+     mifare_desfire_auto_authenticate (tag, 0);
+
+    /* Wipeout the card */
+    res = mifare_desfire_format_picc (tag);
+    cut_assert_success ("mifare_desfire_format_picc()");
+
+    free (aid);
+}
