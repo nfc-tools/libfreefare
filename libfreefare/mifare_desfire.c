@@ -1216,12 +1216,12 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
     BUFFER_APPEND_LE (cmd, record_size, 3, sizeof (uint32_t));
     BUFFER_APPEND_LE (cmd, max_number_of_records, 3, sizeof (uint32_t));
 
-    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, communication_settings | CMAC_COMMAND);
+    char *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    p = mifare_cryto_postprocess_data (tag, res, &sn, communication_settings | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     cached_file_settings_current[file_no] = false;
 
