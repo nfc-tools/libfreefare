@@ -823,23 +823,23 @@ mifare_desfire_get_version (MifareTag tag, struct mifare_desfire_version_info *v
     char buffer[28 + CMAC_LENGTH + 1];
 
     BUFFER_APPEND (cmd, 0x60);
-    uint8_t *b = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
     memcpy (&(version_info->hardware), res, 7);
     memcpy (buffer, res, 7);
 
-    cmd[0] = 0xAF;
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    p[0] = 0xAF;
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
     memcpy (&(version_info->software), res, 7);
     memcpy (buffer + 7, res, 7);
 
-    DESFIRE_TRANSCEIVE (tag, cmd, res);
+    DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
     memcpy (&(version_info->uid), res, 14);
     memcpy (buffer + 14, res, __res_n);
 
     ssize_t sn = 28 + CMAC_LENGTH + 1;
-    b = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     return 0;
 }
