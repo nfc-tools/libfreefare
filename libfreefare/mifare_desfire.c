@@ -314,6 +314,10 @@ mifare_desfire_disconnect (MifareTag tag)
 
 
 
+#define AUTHENTICATE_LEGACY 0x0A
+#define AUTHENTICATE_ISO 0x1A
+#define AUTHENTICATE_AES 0xAA
+
 static int
 authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 {
@@ -328,7 +332,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE (tag)->session_key = NULL;
 
-    MIFARE_DESFIRE (tag)->authentication_scheme = (0x0A == cmd) ? AS_LEGACY : AS_NEW;
+    MIFARE_DESFIRE (tag)->authentication_scheme = (AUTHENTICATE_LEGACY == cmd) ? AS_LEGACY : AS_NEW;
 
     BUFFER_INIT (cmd1, 2);
     BUFFER_INIT (res, 17);
@@ -358,7 +362,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     memcpy (token, PCD_RndA, key_length);
     memcpy (token+key_length, PCD_r_RndB, key_length);
 
-    mifare_cypher_blocks_chained (tag, key, MIFARE_DESFIRE (tag)->ivect, token, 2 * key_length, MCD_SEND, (0x0A == cmd) ? MCO_DECYPHER : MCO_ENCYPHER);
+    mifare_cypher_blocks_chained (tag, key, MIFARE_DESFIRE (tag)->ivect, token, 2 * key_length, MCD_SEND, (AUTHENTICATE_LEGACY == cmd) ? MCO_DECYPHER : MCO_ENCYPHER);
 
     BUFFER_INIT (cmd2, 33);
 
@@ -405,19 +409,32 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 int
 mifare_desfire_authenticate (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
 {
-    return authenticate (tag, 0x0A, key_no, key);
+    switch (key->type) {
+    case T_DES:
+    case T_3DES:
+	return authenticate (tag, AUTHENTICATE_LEGACY, key_no, key);
+	break;
+    case T_3K3DES:
+	return authenticate (tag, AUTHENTICATE_ISO, key_no, key);
+	break;
+    case T_AES:
+	return authenticate (tag, AUTHENTICATE_AES, key_no, key);
+	break;
+    }
+
+    return -1; /* NOTREACHED */
 }
 
 int
 mifare_desfire_authenticate_iso (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
 {
-    return authenticate (tag, 0x1A, key_no, key);
+    return authenticate (tag, AUTHENTICATE_ISO, key_no, key);
 }
 
 int
 mifare_desfire_authenticate_aes (MifareTag tag, uint8_t key_no, MifareDESFireKey key)
 {
-    return authenticate (tag, 0xAA, key_no, key);
+    return authenticate (tag, AUTHENTICATE_AES, key_no, key);
 }
 
 int
