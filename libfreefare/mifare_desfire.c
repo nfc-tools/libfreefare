@@ -142,15 +142,6 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  * Convenience macros.
  */
 
-static uint8_t __msg[MAX_FRAME_SIZE] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 };
-/*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/
-static uint8_t __res[MAX_FRAME_SIZE];
-
-uint8_t cmac_cmd_buf[4096];
-uint8_t cmac_res_buf[4096];
-size_t cmac_cmd_len = 0;
-size_t cmac_res_len = 0;
-
 #define FRAME_PAYLOAD_SIZE (MAX_FRAME_SIZE - 5)
 
 /*
@@ -164,6 +155,9 @@ size_t cmac_res_len = 0;
     DESFIRE_TRANSCEIVE2 (tag, msg, __##msg##_n, res)
 #define DESFIRE_TRANSCEIVE2(tag, msg, msg_len, res) \
     do { \
+	static uint8_t __msg[MAX_FRAME_SIZE] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 }; \
+	/*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/ \
+	static uint8_t __res[MAX_FRAME_SIZE]; \
 	size_t __len = 5; \
 	errno = 0; \
 	__msg[1] = msg[0]; \
