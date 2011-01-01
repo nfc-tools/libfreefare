@@ -103,17 +103,19 @@ main(int argc, char *argv[])
 	    uint8_t settings;
 	    uint8_t max_keys;
 	    res = mifare_desfire_get_key_settings (tags[i], &settings, &max_keys);
-	    if (res < 0) {
+	    if (res == 0) {
+		printf ("Master Key settings (0x%02x):\n", settings);
+		printf ("    0x%02x configuration changeable;\n", settings & 0x08);
+		printf ("    0x%02x PICC Master Key not required for create / delete;\n", settings & 0x04);
+		printf ("    0x%02x Free directory list access without PICC Master Key;\n", settings & 0x02);
+		printf ("    0x%02x Allow changing the Master Key;\n", settings & 0x01);
+	    } else if (AUTHENTICATION_ERROR == mifare_desfire_last_picc_error (tags[i])) {
+		printf ("Master Key settings: LOCKED\n");
+	    } else {
 		freefare_perror (tags[i], "mifare_desfire_get_key_settings");
 		error = 1;
 		break;
 	    }
-
-	    printf ("Master Key settings (0x%02x):\n", settings);
-	    printf ("    0x%02x configuration changeable;\n", settings & 0x08);
-	    printf ("    0x%02x PICC Master Key not required for create / delete;\n", settings & 0x04);
-	    printf ("    0x%02x Free directory list access without PICC Master Key;\n", settings & 0x02);
-	    printf ("    0x%02x Allow changing the Master Key;\n", settings & 0x01);
 
 	    uint8_t version;
 	    mifare_desfire_get_key_version (tags[i], 0, &version);
