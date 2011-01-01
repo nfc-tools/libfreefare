@@ -552,7 +552,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		} else {
 		    end_crc_pos++;
 		}
-	    } while (!verified && (end_crc_pos < *nbytes - 1));
+	    } while (!verified && (end_crc_pos < *nbytes));
 
 	    if (!verified) {
 		warnx ("(3)DES not verified");
