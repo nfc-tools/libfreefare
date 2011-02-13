@@ -12,7 +12,7 @@ if WITH_CUTTER
 TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE=yes CUTTER="$(CUTTER)"
 
-noinst_LTLIBRARIES = \
+check_LTLIBRARIES = \
 		     test_mad.la \
 		     test_mifare_application.la \
 		     test_mifare_classic.la \

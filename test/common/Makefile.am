@@ -5,7 +5,7 @@ AM_CFLAGS = @LIBNFC_CFLAGS@
 
 if WITH_CUTTER
 
-noinst_LTLIBRARIES = \
+check_LTLIBRARIES = \
 		     libtestcommon.la
 
 libtestcommon_la_SOURCES = mifare_desfire_auto_authenticate.c \
