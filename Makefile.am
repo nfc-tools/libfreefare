@@ -8,7 +8,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libfreefare.pc
 
 dist-hook:
-	@if ! grep -q "$$(LC_ALL=C date +'%d %b %Y' | tr '[[:upper:]]' '[[:lower:]]')" NEWS; then \
+	@if ! grep -qi "$$(LC_ALL=C date +'%d %b %Y')" NEWS; then \
 	    printf "\033[31;1mBEWARE!  The first line from the NEWS file does not contain the current date!\033[0m\n"; \
 	    sleep 3; \
 	fi
