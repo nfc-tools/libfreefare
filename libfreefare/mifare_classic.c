@@ -72,6 +72,8 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
+#define MC_OK             0x0A
+
 #define MC_AUTH_A         0x60
 #define MC_AUTH_B         0x61
 #define MC_READ           0x30
@@ -478,7 +480,16 @@ mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber block)
 
     CLASSIC_TRANSCEIVE (tag, cmd, res);
 
-    return (BUFFER_SIZE (res) == 0) ? 0 : res[0];
+    /*
+     * Depending on the device we are using, on success, the TRANSFER command
+     * returns either no data (e.g. touchatag) or a 1 byte response, 0x0A,
+     * meaning that the action was performed correctly (e.g. Snapper Feeder,
+     * SCL 3711).
+     */
+    if (!BUFFER_SIZE (res) || ((BUFFER_SIZE (res) == 1) && (res[0] = MC_OK)))
+	return 0;
+    else
+	return res[0];
 }
 
 

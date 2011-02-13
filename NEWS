@@ -1,4 +1,9 @@
-Changes between 0.2.3 and 0.3.0  [XX xxx XXXX]
+Changes between 0.3.0 and 0.3.1  [XX xxx XXXX]
+
+  *) Fix mifare_classic_transfer() for devices returning a 1 byte response on
+     success.
+
+Changes between 0.2.3 and 0.3.0  [23 dec 2010]
 
   *) Add support for ISO and AES authentication through
      mifare_desfire_authenticate_iso() and mifare_desfire_authenticate_aes().
