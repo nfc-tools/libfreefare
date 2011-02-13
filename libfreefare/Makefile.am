@@ -51,6 +51,7 @@ linkedman = \
 	    freefare_error.3 freefare_perror.3 \
 	    freefare_error.3 freefare_strerror.3 \
 	    freefare_error.3 freefare_strerror_r.3 \
+	    freefare_error.3 mifare_desfire_last_pcd_error.3 \
 	    freefare_error.3 mifare_desfire_last_picc_error.3 \
 	    mad.3 mad_free.3 \
 	    mad.3 mad_get_aid.3 \

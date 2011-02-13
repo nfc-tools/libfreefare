@@ -930,3 +930,68 @@ test_mifare_desfire_des_macing (void)
 
     mifare_desfire_key_free (key);
 }
+
+void
+test_mifare_desfire_free_read (void)
+{
+    int res;
+
+    mifare_desfire_auto_authenticate (tag, 0);
+
+    /* Wipeout the card */
+    res = mifare_desfire_format_picc (tag);
+    cut_assert_success ("mifare_desfire_format_picc()");
+
+    mifare_desfire_auto_authenticate (tag, 0);
+
+    MifareDESFireKey key = mifare_desfire_des_key_new_with_version (key_data_null);
+    res = mifare_desfire_change_key (tag, 0, key, NULL);
+    cut_assert_success ("mifare_desfire_change_key()");
+
+    res = mifare_desfire_authenticate (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate()");
+
+    MifareDESFireAID aid = mifare_desfire_aid_new (0x00123456);
+    res = mifare_desfire_create_application (tag, aid, 0xFF, 2);
+    cut_assert_success ("mifare_desfire_create_application()");
+
+    res = mifare_desfire_select_application (tag, aid);
+    cut_assert_success ("mifare_desfire_select_application");
+    free (aid);
+
+    res = mifare_desfire_authenticate (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate()");
+
+    res = mifare_desfire_create_std_data_file (tag, 1, MDCM_MACED, 0x0000, 20);
+    cut_assert_success ("mifare_desfire_create_std_data_file()");
+
+    char *s= "Hello World";
+    res = mifare_desfire_write_data (tag, 1, 0, strlen (s), s);
+    cut_assert_success ("mifare_desfire_write_data()");
+
+    res = mifare_desfire_change_file_settings (tag, 1, MDCM_ENCIPHERED, 0xEFFF);
+    cut_assert_success ("mifare_desfire_change_file_settings");
+
+    char buffer[20];
+    res = mifare_desfire_read_data (tag, 1, 0, 0, buffer);
+    cut_assert_equal_int (sizeof (buffer), res, cut_message ("Data with free access should be read in PLAIN mode only."));
+    cut_assert_equal_int (OPERATION_OK, mifare_desfire_last_pcd_error (tag), cut_message ("Wrong PCD error"));
+
+    res = mifare_desfire_read_data_ex (tag, 1, 0, 0, buffer, MDCM_MACED);
+    cut_assert_equal_int (-1, res, cut_message ("Data with free access should be read in PLAIN mode only."));
+    cut_assert_equal_int (CRYPTO_ERROR, mifare_desfire_last_pcd_error (tag), cut_message ("Wrong PCD error"));
+
+    res = mifare_desfire_read_data_ex (tag, 1, 0, 0, buffer, MDCM_ENCIPHERED);
+    cut_assert_equal_int (-1, res, cut_message ("Data with free access should be read in PLAIN mode only."));
+    cut_assert_equal_int (CRYPTO_ERROR, mifare_desfire_last_pcd_error (tag), cut_message ("Wrong PCD error"));
+
+    /* Wipeout the card */
+    mifare_desfire_select_application (tag, NULL);
+    cut_assert_equal_int (OPERATION_OK, mifare_desfire_last_pcd_error (tag), cut_message ("Wrong PCD error"));
+    res = mifare_desfire_authenticate (tag, 0, key);
+
+    res = mifare_desfire_format_picc (tag);
+    cut_assert_success ("mifare_desfire_format_picc()");
+
+    mifare_desfire_key_free (key);
+}

@@ -2,6 +2,7 @@ Changes between 0.3.0 and 0.3.1  [XX xxx XXXX]
 
   *) Fix mifare_classic_transfer() for devices returning a 1 byte response on
      success.
+  *) New API function mifare_desfire_last_pcd_error().
 
 Changes between 0.2.3 and 0.3.0  [23 dec 2010]
 

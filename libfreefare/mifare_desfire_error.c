@@ -54,6 +54,7 @@ static struct error_message {
     EM(EEPROM_ERROR),
     EM(FILE_NOT_FOUND),
     EM(FILE_INTEGRITY_ERROR),
+    EM(CRYPTO_ERROR),
     { 0, NULL }
 };
 
@@ -68,6 +69,15 @@ mifare_desfire_error_lookup (uint8_t code)
     }
 
     return "Invalid error code";
+}
+
+uint8_t
+mifare_desfire_last_pcd_error (MifareTag tag)
+{
+    if (tag->tag_info->type != DESFIRE)
+	return 0;
+
+    return MIFARE_DESFIRE (tag)->last_pcd_error;
 }
 
 uint8_t

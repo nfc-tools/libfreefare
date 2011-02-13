@@ -169,6 +169,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	/* reply length */ \
 	__msg[__len-1] = 0x00; \
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
+	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
 	if (!(nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, &__##res##_n))) { \
 	    return errno = EIO, -1; \
@@ -325,8 +326,6 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
     ASSERT_MIFARE_DESFIRE (tag);
 
     memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
-
-    MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
 
     MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
     free (MIFARE_DESFIRE (tag)->session_key);
@@ -1305,7 +1304,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 	    break;
 	}
     }
-    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, MDCM_PLAIN | CMAC_COMMAND);
     cs = ocs;
 
     /*
@@ -1329,7 +1328,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     ssize_t sr = bytes_received;
     p = mifare_cryto_postprocess_data (tag, data, &sr, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
-    return sr - 1;
+    return (sr <= 0) ? sr : sr - 1;
 }
 
 ssize_t
@@ -1387,7 +1386,7 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     }
 
     ssize_t sn = __res_n;
-    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_MACED | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
     if (0x00 == p[__res_n-1]) {
 	// Remove header length

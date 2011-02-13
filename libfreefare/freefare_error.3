@@ -53,6 +53,8 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Ft "void"
 .Fn freefare_strerror "MifareTag tag" "char *string"
 .Ft uint8_t
+.Fm mifare_desfire_last_pcd_error "MifareTag tag"
+.Ft uint8_t
 .Fm mifare_desfire_last_picc_error "MifareTag tag"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
@@ -84,6 +86,10 @@ function displays the last PCD or PICC error encounred using
 to stderr.
 .Pp
 The
+.Fn mifare_desfire_last_pcd_error
+function returns the error code of the last function call from the library.
+.Pp
+The
 .Fn mifare_desfire_last_picc_error
 function returns the error code returned by the last command run on
 .Vt tag .
@@ -97,9 +103,11 @@ function returns the error code returned by the last command run on
 .Fn freefare_strerror
 returns the error message,
 .Fn freefare_strerror_r
-returns 0 on success, -1 on failure, and
+returns 0 on success, -1 on failure;
+.Fn mifare_desfire_last_pcd_error
+and
 .Fn mifare_desfire_last_picc_error
-returns an error code or 0 if no error is known or
+return an error code or 0 if no error occured or if
 .Vt tag
 is not a Mifare DESFire target.
 .\"  ____                    _

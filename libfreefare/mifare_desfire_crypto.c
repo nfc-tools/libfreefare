@@ -473,12 +473,12 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		mifare_cypher_blocks_chained (tag, NULL, NULL, edata, edl, MCD_SEND, MCO_ENCYPHER);
 
 		if (0 != memcmp ((uint8_t *)data + *nbytes - 1, (uint8_t *)edata + edl - 8, 4)) {
-		    warnx ("MACing not verified");
 #if WITH_DEBUG
+		    warnx ("MACing not verified");
 		    hexdump ((uint8_t *)data + *nbytes - 1, key_macing_length (key), "Expect ", 0);
 		    hexdump ((uint8_t *)edata + edl - 8, key_macing_length (key), "Actual ", 0);
-		    abort ();
 #endif
+		    MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		    *nbytes = -1;
 		    res = NULL;
 		}
@@ -507,8 +507,8 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		    warnx ("CMAC NOT verified :-(");
 		    hexdump ((uint8_t *)data + *nbytes - 9, 8, "Expect ", 0);
 		    hexdump (MIFARE_DESFIRE (tag)->cmac, 8, "Actual ", 0);
-		    abort ();
 #endif
+		    MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		    *nbytes = -1;
 		    res = NULL;
 		} else {
@@ -555,10 +555,10 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    } while (!verified && (end_crc_pos < *nbytes));
 
 	    if (!verified) {
-		warnx ("(3)DES not verified");
 #if WITH_DEBUG
-		abort ();
+		warnx ("(3)DES not verified");
 #endif
+		MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		*nbytes = -1;
 		res = NULL;
 	    }
@@ -582,12 +582,12 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    desfire_crc32 (res, p - (uint8_t *)res, crc);
 
 	    if (memcmp (crc, crc_ref, 4)) {
-		warnx ("AES CRC32 not verified in AES stream");
 #if WITH_DEBUG
+		warnx ("AES CRC32 not verified in AES stream");
 		hexdump (crc_ref, 4, "Expect ", 0);
 		hexdump (crc, 4, "Actual ", 0);
-		abort ();
 #endif
+		MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		*nbytes = -1;
 		res = NULL;
 	    }

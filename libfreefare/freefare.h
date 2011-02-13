@@ -244,6 +244,10 @@ enum mifare_desfire_file_types {
 #define	FILE_NOT_FOUND		0xF0
 #define	FILE_INTEGRITY_ERROR	0xF1
 
+/* Error code managed by the library */
+
+#define CRYPTO_ERROR            0x01
+
 struct mifare_desfire_aid;
 typedef struct mifare_desfire_aid *MifareDESFireAID;
 
@@ -251,6 +255,7 @@ MifareDESFireAID mifare_desfire_aid_new (uint32_t aid);
 MifareDESFireAID mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n);
 uint32_t	 mifare_desfire_aid_get_aid (MifareDESFireAID aid);
 
+uint8_t		 mifare_desfire_last_pcd_error (MifareTag tag);
 uint8_t		 mifare_desfire_last_picc_error (MifareTag tag);
 
 #pragma pack (push)
