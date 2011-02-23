@@ -105,7 +105,7 @@ void
 cmac_generate_subkeys (MifareDESFireKey key)
 {
     int kbs = key_block_size (key);
-    uint8_t R = (kbs == 8) ? 0x1B : 0x87;
+    const uint8_t R = (kbs == 8) ? 0x1B : 0x87;
 
     uint8_t l[kbs];
     memset (l, 0, kbs);
