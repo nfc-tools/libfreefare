@@ -1,4 +1,4 @@
-Changes between 0.3.0 and 0.3.1  [XX xxx XXXX]
+Changes between 0.3.0 and 0.3.1  [23 feb 2011]
 
   *) Fix mifare_classic_transfer() for devices returning a 1 byte response on
      success.
