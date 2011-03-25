@@ -189,6 +189,12 @@ enum mifare_desfire_file_types {
 #define MDCM_MACED      0x01
 #define MDCM_ENCIPHERED 0x03
 
+/* Mifare DESFire EV1 Application crypto operations */
+
+#define APPLICATION_CRYPTO_DES    0x00
+#define APPLICATION_CRYPTO_3K3DES 0x40
+#define APPLICATION_CRYPTO_AES    0x80
+
 /* Access right */
 
 #define MDAR(read,write,read_write,change_access_rights) ( \
@@ -319,6 +325,8 @@ int		 mifare_desfire_get_key_settings (MifareTag tag, uint8_t *settings, uint8_t
 int		 mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_key, MifareDESFireKey old_key);
 int		 mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version);
 int		 mifare_desfire_create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
+int		 mifare_desfire_create_application_3k3des (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
+int		 mifare_desfire_create_application_aes (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
 int		 mifare_desfire_delete_application (MifareTag tag, MifareDESFireAID aid);
 int		 mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], size_t *count);
 void		 mifare_desfire_free_application_ids (MifareDESFireAID aids[]);

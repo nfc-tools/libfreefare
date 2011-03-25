@@ -96,12 +96,12 @@ test_mifare_desfire_ev1_aes (void)
 
     MifareDESFireAID aid_b = mifare_desfire_aid_new (0x00BBBBBB);
     cut_assert_not_null (aid_b, cut_message ("Cannot allocate AID"));
-    res = mifare_desfire_create_application (tag, aid_b, 0xEF, 0x80 | 6);
+    res = mifare_desfire_create_application_aes (tag, aid_b, 0xEF, 6);
     cut_assert_success ("mifare_desfire_create_application()");
 
     MifareDESFireAID aid_c = mifare_desfire_aid_new (0x00CCCCCC);
     cut_assert_not_null (aid_c, cut_message ("Cannot allocate AID"));
-    res = mifare_desfire_create_application (tag, aid_c, 0xC2, 0x80 | 14);
+    res = mifare_desfire_create_application_aes (tag, aid_c, 0xC2, 14);
     cut_assert_success ("mifare_desfire_create_application()");
 
     // Ensure we can find the created applications

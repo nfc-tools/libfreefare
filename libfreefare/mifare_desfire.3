@@ -37,6 +37,8 @@
 .Nm mifare_desfire_get_key_version ,
 .\"
 .Nm mifare_desfire_create_application ,
+.Nm mifare_desfire_create_application_3k3des ,
+.Nm mifare_desfire_create_application_aes ,
 .Nm mifare_desfire_delete_application ,
 .Nm mifare_desfire_get_application_ids ,
 .Nm mifare_desfire_free_application_ids ,
@@ -117,6 +119,10 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn mifare_desfire_get_key_version "MifareTag tag" "uint8_t key_no" "uint8_t *version"
 .Ft int
 .Fn mifare_desfire_create_application "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no"
+.Ft int
+.Fn mifare_desfire_create_application_aes "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no"
+.Ft int
+.Fn mifare_desfire_create_application_3k3des "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no"
 .Ft int
 .Fn mifare_desfire_delete_application "MifareTag tag" "MifareDESFireAID aid"
 .Ft int
@@ -349,6 +355,23 @@ the
 key settings and
 .Vt key_no
 authentication keys.  Authentication keys are set to 0 after creation.
+.Pp
+The
+.Fn mifare_desfire_create_application_3k3des
+and
+.Fn mifare_desfire_create_application_aes
+functions acts as the
+.Fn mifare_desfire_create_application
+function except that the whole application is configured to use 3K3DES or AES
+keys.  It is possible to achive the same result using the
+.Fn mifare_desfire_create_application
+function and ORing the
+.Vt key_no
+argument with
+.Vt APPLICATION_CRYPTO_3K3DES
+or
+.Vt APPLICATION_CRYPTO_AES
+respectively.
 .Pp
 The
 .Fn mifare_desfire_delete_application

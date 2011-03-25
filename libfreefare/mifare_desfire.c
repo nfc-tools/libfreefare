@@ -658,6 +658,18 @@ mifare_desfire_create_application (MifareTag tag, MifareDESFireAID aid, uint8_t 
 }
 
 int
+mifare_desfire_create_application_3k3des (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
+{
+    return create_application (tag, aid, settings, APPLICATION_CRYPTO_3K3DES | key_no, 0, NULL);
+}
+
+int
+mifare_desfire_create_application_aes (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
+{
+    return create_application (tag, aid, settings, APPLICATION_CRYPTO_AES | key_no, 0, NULL);
+}
+
+int
 mifare_desfire_delete_application (MifareTag tag, MifareDESFireAID aid)
 {
     ASSERT_ACTIVE (tag);
