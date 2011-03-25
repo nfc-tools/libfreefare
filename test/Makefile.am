@@ -66,6 +66,7 @@ test_mifare_desfire_ev1_la_SOURCES = test_mifare_desfire_ev1.c \
 				     test_mifare_desfire_ev1_3des.c \
 				     test_mifare_desfire_ev1_3k3des.c \
 				     test_mifare_desfire_ev1_aes.c \
+				     test_mifare_desfire_ev1_iso.c \
 				     mifare_desfire_ev1_fixture.c \
 				     mifare_desfire_ev1_fixture.h
 test_mifare_desfire_ev1_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
@@ -87,5 +88,8 @@ echo-cutter:
 
 EXTRA_DIST = run-test.sh
 CLEANFILES = *.gcno
+
+update:
+	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES)
 
 endif

@@ -625,21 +625,27 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
 
 
 int
-create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, uint16_t iso_file_id, char *iso_file_name)
+create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, int want_iso_application, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
 {
-    (void) iso_file_id;
-    (void) iso_file_name;
-
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 22);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
+    if (want_iso_file_identifiers)
+	settings2 |= 0x20;
+
     BUFFER_APPEND (cmd, 0xCA);
     BUFFER_APPEND_LE (cmd, aid->data, sizeof (aid->data), sizeof (aid->data));
     BUFFER_APPEND (cmd, settings1);
     BUFFER_APPEND (cmd, settings2);
+
+    if (want_iso_application)
+	BUFFER_APPEND_LE (cmd, iso_file_id, sizeof (iso_file_id), sizeof (iso_file_id));
+
+    if (iso_file_name_len)
+	BUFFER_APPEND_BYTES (cmd, iso_file_name, iso_file_name_len);
 
     uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
@@ -654,19 +660,37 @@ create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint
 int
 mifare_desfire_create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
 {
-    return create_application (tag, aid, settings, key_no, 0, NULL);
+    return create_application (tag, aid, settings, key_no, 0, 0, 0, NULL, 0);
+}
+
+int
+mifare_desfire_create_application_iso (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
+{
+    return create_application (tag, aid, settings, key_no, 1, want_iso_file_identifiers, iso_file_id, iso_file_name, iso_file_name_len);
 }
 
 int
 mifare_desfire_create_application_3k3des (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
 {
-    return create_application (tag, aid, settings, APPLICATION_CRYPTO_3K3DES | key_no, 0, NULL);
+    return create_application (tag, aid, settings, APPLICATION_CRYPTO_3K3DES | key_no, 0, 0, 0, NULL, 0);
+}
+
+int
+mifare_desfire_create_application_3k3des_iso (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
+{
+    return create_application (tag, aid, settings, APPLICATION_CRYPTO_3K3DES | key_no, 1, want_iso_file_identifiers, iso_file_id, iso_file_name, iso_file_name_len);
 }
 
 int
 mifare_desfire_create_application_aes (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no)
 {
-    return create_application (tag, aid, settings, APPLICATION_CRYPTO_AES | key_no, 0, NULL);
+    return create_application (tag, aid, settings, APPLICATION_CRYPTO_AES | key_no, 0, 0, 0, NULL, 0);
+}
+
+int
+mifare_desfire_create_application_aes_iso (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
+{
+    return create_application (tag, aid, settings, APPLICATION_CRYPTO_AES | key_no, 1, want_iso_file_identifiers, iso_file_id, iso_file_name, iso_file_name_len);
 }
 
 int
@@ -750,6 +774,43 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
 	}
     }
     (*aids)[*count] = NULL;
+
+    return 0;
+}
+
+int
+mifare_desfire_get_df_names (MifareTag tag, MifareDESFireDF *dfs[], size_t *count)
+{
+    ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_DESFIRE (tag);
+
+    *count = 0;
+    *dfs = NULL;
+
+    BUFFER_INIT (cmd, 1);
+    BUFFER_INIT (res, 22 + CMAC_LENGTH);
+
+    BUFFER_APPEND (cmd, 0x6D);
+
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    do {
+	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+	if (__res_n > 1) {
+	    MifareDESFireDF *new_dfs;
+	    if ((new_dfs = realloc (*dfs, sizeof (*new_dfs) * (*count + 1)))) {
+		new_dfs[*count].aid = le24toh (res);
+		new_dfs[*count].fid = le16toh (*(uint16_t *)(res + 3));
+		memcpy (new_dfs[*count].df_name, res + 5, __res_n - 6);
+		new_dfs[*count].df_name_len = __res_n - 6;
+		*dfs = new_dfs;
+		*count += 1;
+	    }
+	}
+
+	p[0] = 0XAF;
+    } while (res[__res_n-1] == 0xAF);
 
     return 0;
 }

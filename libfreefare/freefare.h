@@ -257,6 +257,14 @@ enum mifare_desfire_file_types {
 struct mifare_desfire_aid;
 typedef struct mifare_desfire_aid *MifareDESFireAID;
 
+struct mifare_desfire_df {
+    uint32_t aid;
+    uint16_t fid;
+    uint8_t df_name[16];
+    size_t df_name_len;
+};
+typedef struct mifare_desfire_df MifareDESFireDF;
+
 MifareDESFireAID mifare_desfire_aid_new (uint32_t aid);
 MifareDESFireAID mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n);
 uint32_t	 mifare_desfire_aid_get_aid (MifareDESFireAID aid);
@@ -327,8 +335,14 @@ int		 mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *ve
 int		 mifare_desfire_create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
 int		 mifare_desfire_create_application_3k3des (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
 int		 mifare_desfire_create_application_aes (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
+
+int		 mifare_desfire_create_application_iso (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
+int		 mifare_desfire_create_application_3k3des_iso (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
+int		 mifare_desfire_create_application_aes_iso (MifareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
+
 int		 mifare_desfire_delete_application (MifareTag tag, MifareDESFireAID aid);
 int		 mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], size_t *count);
+int		 mifare_desfire_get_df_names (MifareTag tag, MifareDESFireDF *dfs[], size_t *count);
 void		 mifare_desfire_free_application_ids (MifareDESFireAID aids[]);
 int		 mifare_desfire_select_application (MifareTag tag, MifareDESFireAID aid);
 int		 mifare_desfire_format_picc (MifareTag tag);
