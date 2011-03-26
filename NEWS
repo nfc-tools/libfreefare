@@ -1,7 +1,19 @@
 Changes between 0.3.1 and 0.3.2  [XX xxx XXXX]
 
-  *) New API functions mifare_desfire_create_application_3k3des() and
+  *) New API functions to ease up creation of applications with strong
+     cryptography on Mifare DESFire EV1:
+     mifare_desfire_create_application_3k3des(),
      mifare_desfire_create_application_aes().
+  *) New API functions for ISO 7616 support om Mifare DESFire EV1:
+     mifare_desfire_create_application_iso(),
+     mifare_desfire_create_application_3k3des_iso(),
+     mifare_desfire_create_application_aes_iso(),
+     mifare_desfire_get_df_names(),
+     mifare_desfire_get_iso_file_ids(),
+     mifare_desfire_create_std_data_file_iso(),
+     mifare_desfire_create_backup_data_file_iso(),
+     mifare_desfire_create_linear_record_file_iso(),
+     mifare_desfire_create_cyclic_record_file_iso().
 
 Changes between 0.3.0 and 0.3.1  [23 feb 2011]
 

@@ -353,13 +353,18 @@ int		 mifare_desfire_set_default_key (MifareTag tag, MifareDESFireKey key);
 int		 mifare_desfire_set_ats (MifareTag tag, uint8_t *ats);
 int		 mifare_desfire_get_card_uid (MifareTag tag, char **uid);
 int		 mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count);
+int		 mifare_desfire_get_iso_file_ids (MifareTag tag, uint16_t *files[], size_t *count);
 int		 mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings);
 int		 mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights);
 int		 mifare_desfire_create_std_data_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
+int		 mifare_desfire_create_std_data_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id);
 int		 mifare_desfire_create_backup_data_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
+int		 mifare_desfire_create_backup_data_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id);
 int		 mifare_desfire_create_value_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, int32_t lower_limit, int32_t upper_limit, int32_t value, uint8_t limited_credit_enable);
 int		 mifare_desfire_create_linear_record_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
+int		 mifare_desfire_create_linear_record_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id);
 int		 mifare_desfire_create_cyclic_record_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
+int		 mifare_desfire_create_cyclic_record_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id);
 int		 mifare_desfire_delete_file (MifareTag tag, uint8_t file_no);
 
 ssize_t		 mifare_desfire_read_data (MifareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);

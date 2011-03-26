@@ -96,4 +96,37 @@ test_mifare_desfire_ev1_iso (void)
     cut_assert_equal_int (sizeof (app3), dfs[2].df_name_len, cut_message ("Wrong value"));
     cut_assert_equal_memory (app3, sizeof (app3), dfs[2].df_name, dfs[2].df_name_len, cut_message ("Wrong value"));
     free (dfs);
+
+    aid = mifare_desfire_aid_new (0x555550);
+    res = mifare_desfire_create_application_iso (tag, aid, 0xff, 1, 1, 0x555F, NULL, 0);
+    cut_assert_success ("mifare_desfire_create_application_iso");
+
+    res = mifare_desfire_select_application (tag, aid);
+    cut_assert_success ("mifare_desfire_select_application");
+
+    res = mifare_desfire_create_std_data_file_iso (tag, 1, MDCM_PLAIN, 0xEEEE, 32, 0x1234);
+    cut_assert_success ("mifare_desfire_create_std_data_file_iso");
+
+    res = mifare_desfire_create_backup_data_file_iso (tag, 2, MDCM_PLAIN, 0xEEEE, 32, 0x2345);
+    cut_assert_success ("mifare_desfire_create_std_data_file_iso");
+
+    res = mifare_desfire_create_linear_record_file_iso (tag, 3, MDCM_PLAIN, 0xEEEE, 32, 10, 0x3456);
+    cut_assert_success ("mifare_desfire_create_linear_record_file_iso");
+
+    res = mifare_desfire_create_cyclic_record_file_iso (tag, 4, MDCM_PLAIN, 0xEEEE, 32, 10, 0x4567);
+    cut_assert_success ("mifare_desfire_create_cyclic_record_file_iso");
+
+    uint16_t *ids;
+    res = mifare_desfire_get_iso_file_ids (tag, &ids, &count);
+    cut_assert_success ("mifare_desfire_get_iso_file_ids");
+
+    cut_assert_equal_int (4, count, cut_message ("Invalid file count"));
+    cut_assert_equal_int (0x1234, ids[0], cut_message ("Wrong file ID"));
+    cut_assert_equal_int (0x2345, ids[1], cut_message ("Wrong file ID"));
+    cut_assert_equal_int (0x3456, ids[2], cut_message ("Wrong file ID"));
+    cut_assert_equal_int (0x4567, ids[3], cut_message ("Wrong file ID"));
+    free (ids);
+
+    free (aid);
+
 }

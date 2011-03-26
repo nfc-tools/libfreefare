@@ -1,4 +1,4 @@
-.\" Copyright (C) 2010 Romain Tartiere
+.\" Copyright (C) 2010,2011 Romain Tartiere
 .\"
 .\" This program is free software: you can redistribute it and/or modify it
 .\" under the terms of the GNU Lesser General Public License as published by the
@@ -15,7 +15,7 @@
 .\"
 .\" $Id$
 .\"
-.Dd July 11, 2010
+.Dd March 26, 2011
 .Dt MIFARE_DESFIRE 3
 .Os
 .\"  _   _
@@ -39,9 +39,13 @@
 .Nm mifare_desfire_create_application ,
 .Nm mifare_desfire_create_application_3k3des ,
 .Nm mifare_desfire_create_application_aes ,
+.Nm mifare_desfire_create_application_iso ,
+.Nm mifare_desfire_create_application_3k3des_iso ,
+.Nm mifare_desfire_create_application_aes_iso ,
 .Nm mifare_desfire_delete_application ,
 .Nm mifare_desfire_get_application_ids ,
 .Nm mifare_desfire_free_application_ids ,
+.Nm mifare_desfire_get_df_names ,
 .Nm mifare_desfire_select_application ,
 .\"
 .Nm mifare_desfire_format_picc ,
@@ -54,13 +58,18 @@
 .Nm mifare_desfire_get_card_uid ,
 .\"
 .Nm mifare_desfire_get_file_ids ,
+.Nm mifare_desfire_get_iso_file_ids ,
 .Nm mifare_desfire_get_file_settings ,
 .Nm mifare_desfire_change_file_settings ,
 .Nm mifare_desfire_create_std_data_file ,
-.Nm mifare_desfire_create_backup_data_file  ,
+.Nm mifare_desfire_create_std_data_file_iso ,
+.Nm mifare_desfire_create_backup_data_file ,
+.Nm mifare_desfire_create_backup_data_file_iso ,
 .Nm mifare_desfire_create_value_file ,
 .Nm mifare_desfire_create_linear_record_file ,
+.Nm mifare_desfire_create_linear_record_file_iso ,
 .Nm mifare_desfire_create_cyclic_record_file ,
+.Nm mifare_desfire_create_cyclic_record_file_iso ,
 .Nm mifare_desfire_delete_file ,
 .\"
 .Nm mifare_desfire_read_data ,
@@ -124,11 +133,19 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Ft int
 .Fn mifare_desfire_create_application_3k3des "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no"
 .Ft int
+.Fn mifare_desfire_create_application_iso "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no" "int want_iso_file_identifiers" "uint16_t iso_file_id" "uint8_t *iso_file_name" "size_t iso_file_name_len"
+.Ft int
+.Fn mifare_desfire_create_application_3k3des_iso "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no" "int want_iso_file_identifiers" "uint16_t iso_file_id" "uint8_t *iso_file_name" "size_t iso_file_name_len"
+.Ft int
+.Fn mifare_desfire_create_application_aes_iso "MifareTag tag" "MifareDESFireAID aid" "uint8_t settings" "uint8_t key_no" "int want_iso_file_identifiers" "uint16_t iso_file_id" "uint8_t *iso_file_name" "size_t iso_file_name_len"
+.Ft int
 .Fn mifare_desfire_delete_application "MifareTag tag" "MifareDESFireAID aid"
 .Ft int
 .Fn mifare_desfire_get_application_ids "MifareTag tag" "MifareDESFireAID *aids[]" "size_t *count"
 .Ft void
 .Fn mifare_desfire_free_application_ids "MifareDESFireAID aids[]"
+.Ft int
+.Fn mifare_desfire_get_df_names "MifareTag tag" "MifareDESFireDF *dfs[]" "size_t *count"
 .Ft int
 .Fn mifare_desfire_select_application "MifareTag tag" "MifareDESFireAID aid"
 .Ft int
@@ -148,19 +165,29 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Ft int
 .Fn mifare_desfire_get_file_ids "MifareTag tag" "uint8_t *files[]" "size_t *count"
 .Ft int
+.Fn mifare_desfire_get_iso_file_ids "MifareTag tag" "uint16_t *files[]" "size_t *count"
+.Ft int
 .Fn mifare_desfire_get_file_settings "MifareTag tag" "uint8_t file_no" "struct mifare_desfire_file_settings *settings"
 .Ft int
 .Fn mifare_desfire_change_file_settings "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights"
 .Ft int
 .Fn mifare_desfire_create_std_data_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t file_size"
 .Ft int
+.Fn mifare_desfire_create_std_data_file_iso "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t file_size" "uint16_t iso_file_id"
+.Ft int
 .Fn mifare_desfire_create_backup_data_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t file_size"
+.Ft int
+.Fn mifare_desfire_create_backup_data_file_iso "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t file_size" "uint16_t iso_file_id"
 .Ft int
 .Fn mifare_desfire_create_value_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "int32_t lower_limit" "int32_t upper_limit" "int32_t value" "uint8_t limited_credit_enable"
 .Ft int
 .Fn mifare_desfire_create_linear_record_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records"
 .Ft int
-.Fn mifare_desfire_create_cyclic_record_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records"
+.Fn mifare_desfire_create_linear_record_file_iso "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records"
+.Ft int
+.Fn mifare_desfire_create_cyclic_record_file "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records" "uint16_t iso_file_id"
+.Ft int
+.Fn mifare_desfire_create_cyclic_record_file_iso "MifareTag tag" "uint8_t file_no" "uint8_t communication_settings" "uint16_t access_rights" "uint32_t record_size" "uint32_t max_number_of_records" "uint16_t iso_file_id"
 .Ft int
 .Fn mifare_desfire_delete_file "MifareTag tag" "uint8_t file_no"
 .Ft ssize_t
@@ -374,6 +401,31 @@ or
 respectively.
 .Pp
 The
+.Fn mifare_desfire_create_application_iso
+acts as the
+.Fn mifare_desfire_create_application
+function but allows to specify if the created files within the application shall have an ISO file identifier setting
+.Vt want_iso_file_identifiers
+to a non-NULL value, a DF can be provided using
+.Vt iso_file_id ,
+as long as an optional file name
+.Vt iso_file_name
+of length
+.Vt iso_file_name_len
+(in bytes).
+.Pp
+The
+.Fn mifare_desfire_create_application_3k3des_iso
+and
+.Fn mifare_desfire_create_application_aes_iso
+function acts as the regular
+.Fn mifare_desfire_create_application_3k3des
+and
+.Fn mifare_desfire_create_application_aes
+functions, providing the same extensions ISO parameters of
+.Fn mifare_desfire_create_application_iso .
+.Pp
+The
 .Fn mifare_desfire_delete_application
 deletes the application identified by AID
 .Vt aid .
@@ -385,12 +437,35 @@ function returns a list of all applications of the card.  The
 array has to be freed after usage calling
 .Fn mifare_desfire_free_application_ids .
 .Pp
+The
+.Fn mifare_desfire_get_df_names
+retrieves the list of DF
+.Vt dfs
+from
+.Vt tag
+and set
+.Vt count
+to the number of idems in the allocated array. Memory has to be freed by the
+user using
+.Xr free 3 .
+.Pp
 .Ss File-level operations
 The
 .Fn mifare_desfire_get_file_ids
 function returns the list of
 .Vt count
 files in the selected application as
+.Vt files .
+The memory allocated for
+.Vt files
+has to be reclaimed using
+.Xr free 3 .
+.Pp
+The
+.Fn mifare_desfire_get_iso_file_ids
+function returns the list of
+.Vt count
+file ISO identifiers as
 .Vt files .
 The memory allocated for
 .Vt files
@@ -454,6 +529,13 @@ creates a cyclic record file that can hold
 records of size
 .Vt record_size .
 .El
+.Pp
+The
+.Fn mifare_desfire_create_*_iso
+family of functions acts as the functions without the
+.Vt _iso
+suffix but provide an additionnal argument
+.Vt iso_file_id .
 .Pp
 The
 .Fn mifare_desfire_delete_file

@@ -101,8 +101,8 @@ static struct mifare_desfire_file_settings cached_file_settings[MAX_FILE_COUNT];
 static bool cached_file_settings_current[MAX_FILE_COUNT];
 
 static int	 authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key);
-static int	 create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
-static int	 create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
+static int	 create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
+static int	 create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
 static ssize_t	 write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
 static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
 
@@ -1112,6 +1112,49 @@ mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count)
 }
 
 int
+mifare_desfire_get_iso_file_ids (MifareTag tag, uint16_t *files[], size_t *count)
+{
+    ASSERT_ACTIVE (tag);
+    ASSERT_MIFARE_DESFIRE (tag);
+
+    BUFFER_INIT (cmd, 1);
+    BUFFER_INIT (res, 2*27 + 1);
+
+    BUFFER_APPEND (cmd, 0x61);
+
+    uint8_t *data;
+    if (!(data = malloc ((27 + 5) * 2 + 8)))
+	return -1;
+
+    off_t offset = 0;
+
+    uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+
+    do {
+	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
+
+	memcpy (data + offset, res, __res_n - 1);
+	offset += __res_n - 1;
+
+	p[0] = 0XAF;
+    } while (res[__res_n-1] == 0xAF);
+
+    ssize_t sn = offset;
+    p = mifare_cryto_postprocess_data (tag, data, &sn, MDCM_PLAIN | CMAC_COMMAND);
+
+    *count = sn / 2;
+    *files = malloc (sizeof (**files) * *count);
+    if (!*files)
+	return -1;
+
+    for (size_t i = 0; i < *count; i++) {
+	(*files)[i] = le16toh (*(uint16_t *)(p + (2*i)));
+    }
+
+    return 0;
+}
+
+int
 mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings)
 {
     ASSERT_ACTIVE (tag);
@@ -1215,16 +1258,18 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
 }
 
 static int
-create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size)
+create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id,  uint8_t communication_settings, uint16_t access_rights, uint32_t file_size)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    BUFFER_INIT (cmd, 8 + CMAC_LENGTH);
+    BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
+    if (iso_file_id >= 0)
+	BUFFER_APPEND_LE (cmd, iso_file_id, sizeof (iso_file_id), sizeof (iso_file_id));
     BUFFER_APPEND (cmd, communication_settings);
     BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
     BUFFER_APPEND_LE (cmd, file_size, 3, sizeof (uint32_t));
@@ -1244,13 +1289,25 @@ create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
 int
 mifare_desfire_create_std_data_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size)
 {
-    return create_file1 (tag, 0xCD, file_no, communication_settings, access_rights, file_size);
+    return create_file1 (tag, 0xCD, file_no, 0, 0x0000, communication_settings, access_rights, file_size);
+}
+
+int
+mifare_desfire_create_std_data_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id)
+{
+    return create_file1 (tag, 0xCD, file_no, 1, iso_file_id, communication_settings, access_rights, file_size);
 }
 
 int
 mifare_desfire_create_backup_data_file  (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size)
 {
-    return create_file1 (tag, 0xCB, file_no, communication_settings, access_rights, file_size);
+    return create_file1 (tag, 0xCB, file_no, 0, 0x0000, communication_settings, access_rights, file_size);
+}
+
+int
+mifare_desfire_create_backup_data_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id)
+{
+    return create_file1 (tag, 0xCB, file_no, 1, iso_file_id, communication_settings, access_rights, file_size);
 }
 
 int
@@ -1284,7 +1341,7 @@ mifare_desfire_create_value_file (MifareTag tag, uint8_t file_no, uint8_t commun
 }
 
 static int
-create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records)
+create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
@@ -1294,6 +1351,8 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
+    if (has_iso_file_id)
+	BUFFER_APPEND_LE (cmd, iso_file_id, sizeof (iso_file_id), sizeof (iso_file_id));
     BUFFER_APPEND (cmd, communication_settings);
     BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
     BUFFER_APPEND_LE (cmd, record_size, 3, sizeof (uint32_t));
@@ -1314,13 +1373,25 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, uint8_t communica
 int
 mifare_desfire_create_linear_record_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records)
 {
-    return create_file2 (tag, 0xC1, file_no, communication_settings, access_rights, record_size, max_number_of_records);
+    return create_file2 (tag, 0xC1, file_no, 0, 0x0000, communication_settings, access_rights, record_size, max_number_of_records);
+}
+
+int
+mifare_desfire_create_linear_record_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id)
+{
+    return create_file2 (tag, 0xC1, file_no, 1, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
 }
 
 int
 mifare_desfire_create_cyclic_record_file (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records)
 {
-    return create_file2 (tag, 0xC0, file_no, communication_settings, access_rights, record_size, max_number_of_records);
+    return create_file2 (tag, 0xC0, file_no, 0, 0x000, communication_settings, access_rights, record_size, max_number_of_records);
+}
+
+int
+mifare_desfire_create_cyclic_record_file_iso (MifareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id)
+{
+    return create_file2 (tag, 0xC0, file_no, 1, iso_file_id, communication_settings, access_rights, record_size, max_number_of_records);
 }
 
 int
