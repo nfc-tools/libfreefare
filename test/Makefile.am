@@ -12,20 +12,26 @@ if WITH_CUTTER
 TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE=yes CUTTER="$(CUTTER)"
 
-check_LTLIBRARIES = \
-		     test_mad.la \
-		     test_mifare_application.la \
-		     test_mifare_classic.la \
-		     test_mifare_classic_create_trailer_block.la \
-		     test_mifare_classic_sector_boundaries.la \
-		     test_mifare_desfire.la \
-		     test_mifare_desfire_aes.la \
-		     test_mifare_desfire_aid.la \
-		     test_mifare_desfire_des.la \
-		     test_mifare_desfire_ev1.la \
-		     test_mifare_desfire_key.la \
-		     test_mifare_ultralight.la \
-		     test_tlv.la
+cutter_unit_test_libs = \
+			test_mad.la \
+			test_mifare_application.la \
+			test_mifare_classic.la \
+			test_mifare_classic_create_trailer_block.la \
+			test_mifare_classic_sector_boundaries.la \
+			test_mifare_desfire.la \
+			test_mifare_desfire_aes.la \
+			test_mifare_desfire_aid.la \
+			test_mifare_desfire_des.la \
+			test_mifare_desfire_ev1.la \
+			test_mifare_desfire_key.la \
+			test_mifare_ultralight.la \
+			test_tlv.la
+
+if WITH_DEBUG
+noinst_LTLIBRARIES = $(cutter_unit_test_libs)
+else
+check_LTLIBRARIES = $(cutter_unit_test_libs)
+endif
 
 AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
@@ -88,8 +94,5 @@ echo-cutter:
 
 EXTRA_DIST = run-test.sh
 CLEANFILES = *.gcno
-
-update:
-	$(MAKE) $(AM_MAKEFLAGS) $(check_LTLIBRARIES)
 
 endif
