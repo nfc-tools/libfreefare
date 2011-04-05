@@ -221,16 +221,14 @@ mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, c
     ASSERT_MIFARE_ULTRALIGHT (tag);
     ASSERT_VALID_PAGE (tag, page, true);
 
-    uint8_t cmd[6];
-    cmd[0] = 0xA2;
-    cmd[1] = page;
-    memcpy (cmd + 2, data, sizeof (MifareUltralightPage));
+    BUFFER_INIT (cmd, 6);
+    BUFFER_INIT (res, 1);
 
-    size_t n;
-    if (!(nfc_initiator_transceive_bytes (tag->device, cmd, sizeof (cmd), NULL, &n))) {
-	errno = EIO;
-	return -1;
-    }
+    BUFFER_APPEND (cmd, 0xA2);
+    BUFFER_APPEND (cmd, page);
+    BUFFER_APPEND_BYTES (cmd, data, sizeof (MifareUltralightPage));
+
+    ULTRALIGHT_TRANSCEIVE (tag, cmd, res);
 
     /* Invalidate page in cache */
     MIFARE_ULTRALIGHT(tag)->cached_pages[page] = 0;
