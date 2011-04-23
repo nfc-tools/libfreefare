@@ -870,3 +870,42 @@ test_mifare_desfire_ev1_aes_write_data_encyphered (void)
 
     free (aid);
 }
+
+void
+test_mifare_desfire_ev1_aes_create_value_file_encyphered (void)
+{
+    int res;
+
+    mifare_desfire_auto_authenticate (tag, 0);
+
+    /* Wipeout the card */
+    res = mifare_desfire_format_picc (tag);
+    cut_assert_success ("mifare_desfire_format_picc()");
+
+    MifareDESFireAID aid = mifare_desfire_aid_new (0x112233);
+    res = mifare_desfire_create_application (tag, aid, 0x0F, 0x83);
+    cut_assert_success ("mifare_desfire_create_application()");
+
+    res = mifare_desfire_select_application (tag, aid);
+    cut_assert_success ("mifare_desfire_select_application()");
+
+    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data_aes);
+    res = mifare_desfire_authenticate_aes (tag, 0, key);
+    cut_assert_success ("mifare_desfire_authenticate_aes()");
+    mifare_desfire_key_free (key);
+
+    res = mifare_desfire_create_value_file (tag, 9, MDCM_ENCIPHERED, 0x0000, 0, 1000, 0, 0);
+    cut_assert_success ("mifare_desfire_create_value_file");
+
+    res = mifare_desfire_select_application (tag, NULL);
+
+    cut_assert_success ("mifare_desfire_select_application()");
+
+    mifare_desfire_auto_authenticate (tag, 0);
+
+    /* Wipeout the card */
+    res = mifare_desfire_format_picc (tag);
+    cut_assert_success ("mifare_desfire_format_picc()");
+
+    free (aid);
+}
