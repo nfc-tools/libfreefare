@@ -160,6 +160,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	static uint8_t __res[MAX_FRAME_SIZE]; \
 	size_t __len = 5; \
 	errno = 0; \
+	if (!msg) return errno = EINVAL, -1; \
 	__msg[1] = msg[0]; \
 	if (msg_len > 1) { \
 	    __len += msg_len; \
@@ -456,6 +457,9 @@ mifare_desfire_change_key_settings (MifareTag tag, uint8_t settings)
     ssize_t n = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_COMMAND | MAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     return 0;
 }
 
@@ -476,6 +480,9 @@ mifare_desfire_get_key_settings (MifareTag tag, uint8_t *settings, uint8_t *max_
 
     ssize_t n = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &n, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     if (settings)
 	*settings = p[0];
@@ -579,7 +586,10 @@ mifare_desfire_change_key (MifareTag tag, uint8_t key_no, MifareDESFireKey new_k
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     /*
      * If we changed the current authenticated key, we are not authenticated
@@ -617,6 +627,9 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     *version = p[0];
 
     return 0;
@@ -652,7 +665,10 @@ create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     return 0;
 }
@@ -712,6 +728,9 @@ mifare_desfire_delete_application (MifareTag tag, MifareDESFireAID aid)
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     /*
      * If we have deleted the current application, we are not authenticated
      * anymore.
@@ -757,6 +776,9 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     *count = (sn - 1)/3;
 
@@ -850,7 +872,10 @@ mifare_desfire_select_application (MifareTag tag, MifareDESFireAID aid)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     for (int n = 0; n < MAX_FILE_COUNT; n++)
 	cached_file_settings_current[n] = false;
@@ -880,7 +905,10 @@ mifare_desfire_format_picc (MifareTag tag)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE (tag)->session_key = NULL;
@@ -924,6 +952,9 @@ mifare_desfire_get_version (MifareTag tag, struct mifare_desfire_version_info *v
     ssize_t sn = 28 + CMAC_LENGTH + 1;
     p = mifare_cryto_postprocess_data (tag, buffer, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     return 0;
 }
 
@@ -946,6 +977,9 @@ mifare_desfire_free_mem (MifareTag tag, uint32_t *size)
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     *size = p[0] | (p[1] << 8) | (p[2] << 16);
 
@@ -971,6 +1005,9 @@ mifare_desfire_set_configuration (MifareTag tag, bool disable_format, bool enabl
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     return 0;
 }
@@ -1009,6 +1046,9 @@ mifare_desfire_set_default_key (MifareTag tag, MifareDESFireKey key)
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     return 0;
 }
 
@@ -1043,6 +1083,9 @@ mifare_desfire_set_ats (MifareTag tag, uint8_t *ats)
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     return 0;
 }
 
@@ -1065,6 +1108,9 @@ mifare_desfire_get_card_uid (MifareTag tag, char **uid)
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_ENCIPHERED);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     if (!(*uid = malloc (2*7+1))) {
 	return -1;
@@ -1099,6 +1145,9 @@ mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count)
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     *count = sn - 1;
 
@@ -1142,6 +1191,9 @@ mifare_desfire_get_iso_file_ids (MifareTag tag, uint16_t *files[], size_t *count
     ssize_t sn = offset;
     p = mifare_cryto_postprocess_data (tag, data, &sn, MDCM_PLAIN | CMAC_COMMAND);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     *count = sn / 2;
     *files = malloc (sizeof (**files) * *count);
     if (!*files)
@@ -1177,6 +1229,9 @@ mifare_desfire_get_file_settings (MifareTag tag, uint8_t file_no, struct mifare_
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     struct mifare_desfire_raw_file_settings raw_settings;
     memcpy (&raw_settings, p, sn - 1);
@@ -1237,6 +1292,9 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
 
 	ssize_t sn = __res_n;
 	p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+	if (!p)
+	    return errno = EINVAL, -1;
     } else {
 	BUFFER_INIT (cmd, 10);
 	BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1252,6 +1310,9 @@ mifare_desfire_change_file_settings (MifareTag tag, uint8_t file_no, uint8_t com
 
 	ssize_t sn = __res_n;
 	p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+	if (!p)
+	    return errno = EINVAL, -1;
     }
 
     return 0;
@@ -1280,6 +1341,9 @@ create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     cached_file_settings_current[file_no] = false;
 
@@ -1335,6 +1399,9 @@ mifare_desfire_create_value_file (MifareTag tag, uint8_t file_no, uint8_t commun
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     cached_file_settings_current[file_no] = false;
 
     return 0;
@@ -1364,6 +1431,9 @@ create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     cached_file_settings_current[file_no] = false;
 
@@ -1412,6 +1482,9 @@ mifare_desfire_delete_file (MifareTag tag, uint8_t file_no)
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     return 0;
 }
@@ -1471,6 +1544,9 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
 
     ssize_t sr = bytes_received;
     p = mifare_cryto_postprocess_data (tag, data, &sr, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     return (sr <= 0) ? sr : sr - 1;
 }
@@ -1532,6 +1608,9 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     if (0x00 == p[__res_n-1]) {
 	// Remove header length
 	bytes_send -= overhead_size;
@@ -1586,6 +1665,9 @@ mifare_desfire_get_value_ex (MifareTag tag, uint8_t file_no, int32_t *value, int
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     *value = le32toh (*(int32_t *)(p));
 
     return 0;
@@ -1617,6 +1699,9 @@ mifare_desfire_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     cached_file_settings_current[file_no] = false;
 
     return 0;
@@ -1647,6 +1732,9 @@ mifare_desfire_debit_ex (MifareTag tag, uint8_t file_no, int32_t amount, int cs)
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
 
+    if (!p)
+	return errno = EINVAL, -1;
+
     cached_file_settings_current[file_no] = false;
 
     return 0;
@@ -1676,6 +1764,9 @@ mifare_desfire_limited_credit_ex (MifareTag tag, uint8_t file_no, int32_t amount
 
     ssize_t sn = __res_n;
     p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     cached_file_settings_current[file_no] = false;
 
@@ -1722,7 +1813,10 @@ mifare_desfire_clear_record_file (MifareTag tag, uint8_t file_no)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     cached_file_settings_current[file_no] = false;
 
@@ -1745,7 +1839,10 @@ mifare_desfire_commit_transaction (MifareTag tag)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     return 0;
 }
@@ -1766,7 +1863,10 @@ mifare_desfire_abort_transaction (MifareTag tag)
     DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
     ssize_t sn = __res_n;
-    mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, res, &sn, MDCM_PLAIN | CMAC_COMMAND | CMAC_VERIFY);
+
+    if (!p)
+	return errno = EINVAL, -1;
 
     return 0;
 }
