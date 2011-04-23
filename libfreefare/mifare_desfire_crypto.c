@@ -380,9 +380,9 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
     case MDCM_ENCIPHERED:
 	/*  |<-------------- data -------------->|
 	 *  |<--- offset -->|                    |
-	 *  +-----+---------+--------------------+-----+---------+
+	 *  +---------------+--------------------+-----+---------+
 	 *  | CMD + HEADERS | DATA TO BE SECURED | CRC | PADDING |
-	 *  +-----+---------+--------------------+-----+---------+ ----------------
+	 *  +---------------+--------------------+-----+---------+ ----------------
 	 *  |               |<~~~~v~~~~~~~~~~~~~>|  ^  |         |   (DES / 3DES)
 	 *  |               |     `---- crc16() ----'  |         |
 	 *  |               |                    |  ^  |         | ----- *or* -----
@@ -523,6 +523,8 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	break;
     case MDCM_ENCIPHERED:
 	(*nbytes)--;
+	bool verified = false;
+	int end_crc_pos;
 	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
 	case AS_LEGACY:
 	    mifare_cypher_blocks_chained (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
@@ -532,8 +534,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	     * can't start by the end because the CRC is supposed to be 0 when
 	     * verified, and accumulating 0's in it should not change it.
 	     */
-	    bool verified = false;
-	    int end_crc_pos = *nbytes - 7; // The CRC can be over two blocks
+	    end_crc_pos = *nbytes - 7; // The CRC can be over two blocks
 
 	    do {
 		uint16_t crc;
@@ -566,32 +567,67 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 
 	case AS_NEW:
 	    mifare_cypher_blocks_chained (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
-	    uint8_t *p = ((uint8_t *)res) + *nbytes - 1;
-	    while (!*p) {
-		p--;
+
+	    /*
+	     * ,----------------------------+-----------------------------------------+-------------+
+	     * \              BLOCK n-1     |                  BLOCK n                |       STATUS|
+	     * /  DATA | CRC0 | CRC1 | CRC2 | CRC3 | 0x80? | 0x00 | 0x00 | ... | 0x00 | 0x91 | 0x00 |
+	     * `----------------------------+-----------------------------------------+-------------+
+	     * <------------------------------ DATA --------------------------------->|
+	     *
+	     *         <----------------- DATA ---------------->
+	     * FRAME = PAYLOAD + CRC(PAYLOAD + STATUS) + PADDING + STATUS
+	     *                                    ^                  |
+	     *                                    |                  |
+	     *                                    `------------------'
+	     */
+
+	    /* Move status between payload and CRC */
+	    res = assert_crypto_buffer_size (tag, (*nbytes) + 1);
+	    memcpy (res, data, *nbytes);
+
+	    int crc_pos = (*nbytes) - 16 - 3;
+	    if (crc_pos < 0) {
+		/* Single block */
+		crc_pos = 0;
 	    }
-	    if (0x80 == *p)
-		p--;
-	    p -= 3;
+	    memmove (res + crc_pos + 1, res + crc_pos, *nbytes - crc_pos);
+	    ((uint8_t *)res)[crc_pos] = 0x00;
+	    crc_pos++;
+	    *nbytes += 1;
 
-	    uint8_t crc_ref[4];
-	    memcpy (crc_ref, p, 4);
-	    *p++ = ((uint8_t *)res)[*nbytes];
+	    do {
+		uint32_t crc;
+		end_crc_pos = crc_pos + 4;
+		desfire_crc32 (res, end_crc_pos, (uint8_t *)&crc);
+		if (!crc) {
+		    verified = true;
+		    for (int n = end_crc_pos; n < *nbytes - 1; n++) {
+			uint8_t byte = ((uint8_t *)res)[n];
+			if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
+			    verified = false;
+		    }
+		}
+		if (verified) {
+		    *nbytes = crc_pos - 1;
+		    ((uint8_t *)data)[(*nbytes)++] = 0x00;
+		} else {
+		    uint8_t x = ((uint8_t *)res)[crc_pos - 1];
+		    ((uint8_t *)res)[crc_pos - 1] = ((uint8_t *)res)[crc_pos];
+		    ((uint8_t *)res)[crc_pos] = x;
+		    crc_pos++;
+		}
+	    } while (!verified && (end_crc_pos < *nbytes));
 
-	    uint8_t crc[4];
-	    desfire_crc32 (res, p - (uint8_t *)res, crc);
-
-	    if (memcmp (crc, crc_ref, 4)) {
+	    if (!verified) {
 #if WITH_DEBUG
-		warnx ("AES CRC32 not verified in AES stream");
-		hexdump (crc_ref, 4, "Expect ", 0);
-		hexdump (crc, 4, "Actual ", 0);
+		hexdump (res, *nbytes, "KO ", 0);
+		warnx ("AES not verified");
 #endif
 		MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		*nbytes = -1;
 		res = NULL;
 	    }
-	    *nbytes = p - (uint8_t *)res;
 	}
 	break;
     default:
@@ -717,16 +753,7 @@ mifare_cypher_blocks_chained (MifareTag tag, MifareDESFireKey key, uint8_t *ivec
     if (!key || !ivect)
 	abort();
 
-    switch (key->type) {
-    case T_DES:
-    case T_3DES:
-    case T_3K3DES:
-	block_size = 8;
-	break;
-    case T_AES:
-	block_size = 16;
-	break;
-    }
+    block_size = key_block_size (key);
 
     size_t offset = 0;
     while (offset < data_size) {
