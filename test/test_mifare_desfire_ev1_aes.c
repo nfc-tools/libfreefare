@@ -855,6 +855,10 @@ test_mifare_desfire_ev1_aes_write_data_encyphered (void)
     res = mifare_desfire_write_data (tag, 9, 0, 5, "Hello");
     cut_assert_equal_int (5, res, cut_message ("Wrong value returned"));
 
+    uint8_t data[30];
+    res = mifare_desfire_read_data (tag, 9, 0, 0, data);
+    cut_assert_equal_int (7, res, cut_message ("Can't read written data"));
+
     res = mifare_desfire_select_application (tag, NULL);
     cut_assert_success ("mifare_desfire_select_application()");
 
