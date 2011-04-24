@@ -32,7 +32,7 @@ clean-local-coverage:
 	-rm -rf coverage
 
 SVN_KEYWORDS_FILES_LIST_CMD = find $(top_srcdir) -name '*.[hc]' -a ! -name config.h \
-			      -o -name Makefile.am
+			      -o -name Makefile.am -o -name '*.cmake' -o -name 'CMakeLists.txt'
 svn-keywords:
 	@echo Update files svn:keywords...
 	@$(SVN_KEYWORDS_FILES_LIST_CMD) | xargs svn propset -q svn:keywords Id

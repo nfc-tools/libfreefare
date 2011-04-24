@@ -14,6 +14,7 @@ Changes between 0.3.1 and 0.3.2  [XX xxx XXXX]
      mifare_desfire_create_backup_data_file_iso(),
      mifare_desfire_create_linear_record_file_iso(),
      mifare_desfire_create_cyclic_record_file_iso().
+  *) Microsoft Windows support.
 
 Changes between 0.3.0 and 0.3.1  [23 feb 2011]
 
