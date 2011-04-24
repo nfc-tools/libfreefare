@@ -550,89 +550,89 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	 *                                    `------------------'
 	 */
 
-	    mifare_cypher_blocks_chained (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
+	mifare_cypher_blocks_chained (tag, NULL, NULL, res, *nbytes, MCD_RECEIVE, MCO_DECYPHER);
 
-	    /*
-	     * Look for the CRC and ensure it is followed by NULL padding.  We
-	     * can't start by the end because the CRC is supposed to be 0 when
-	     * verified, and accumulating 0's in it should not change it.
-	     */
+	/*
+	 * Look for the CRC and ensure it is followed by NULL padding.  We
+	 * can't start by the end because the CRC is supposed to be 0 when
+	 * verified, and accumulating 0's in it should not change it.
+	 */
+	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+	case AS_LEGACY:
+	    crc_pos = *nbytes - 8 - 1; // The CRC can be over two blocks
+	    break;
+	case AS_NEW:
+	    /* Move status between payload and CRC */
+	    res = assert_crypto_buffer_size (tag, (*nbytes) + 1);
+	    memcpy (res, data, *nbytes);
+
+	    crc_pos = (*nbytes) - 16 - 3;
+	    if (crc_pos < 0) {
+		/* Single block */
+		crc_pos = 0;
+	    }
+	    memmove (res + crc_pos + 1, res + crc_pos, *nbytes - crc_pos);
+	    ((uint8_t *)res)[crc_pos] = 0x00;
+	    crc_pos++;
+	    *nbytes += 1;
+	    break;
+	}
+
+	do {
+	    uint16_t crc16;
+	    uint32_t crc;
 	    switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
 	    case AS_LEGACY:
-	    crc_pos = *nbytes - 8 - 1; // The CRC can be over two blocks
+		end_crc_pos = crc_pos + 2;
+		iso14443a_crc (res, end_crc_pos, (uint8_t *)&crc16);
+		crc = crc16;
 		break;
 	    case AS_NEW:
-		/* Move status between payload and CRC */
-		res = assert_crypto_buffer_size (tag, (*nbytes) + 1);
-		memcpy (res, data, *nbytes);
-
-		crc_pos = (*nbytes) - 16 - 3;
-		if (crc_pos < 0) {
-		    /* Single block */
-		    crc_pos = 0;
-		}
-		memmove (res + crc_pos + 1, res + crc_pos, *nbytes - crc_pos);
-		((uint8_t *)res)[crc_pos] = 0x00;
-		crc_pos++;
-		*nbytes += 1;
+		end_crc_pos = crc_pos + 4;
+		desfire_crc32 (res, end_crc_pos, (uint8_t *)&crc);
 		break;
 	    }
-
-	    do {
-		uint16_t crc16;
-		uint32_t crc;
+	    if (!crc) {
+		verified = true;
+		for (int n = end_crc_pos; n < *nbytes - 1; n++) {
+		    uint8_t byte = ((uint8_t *)res)[n];
+		    if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
+			verified = false;
+		}
+	    }
+	    if (verified) {
+		*nbytes = crc_pos;
 		switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
 		case AS_LEGACY:
-		    end_crc_pos = crc_pos + 2;
-		iso14443a_crc (res, end_crc_pos, (uint8_t *)&crc16);
-		    crc = crc16;
+		    ((uint8_t *)data)[(*nbytes)++] = 0x00;
 		    break;
 		case AS_NEW:
-		    end_crc_pos = crc_pos + 4;
-		    desfire_crc32 (res, end_crc_pos, (uint8_t *)&crc);
+		    /* The status byte was already before the CRC */
 		    break;
 		}
-		if (!crc) {
-		    verified = true;
-		    for (int n = end_crc_pos; n < *nbytes - 1; n++) {
-			uint8_t byte = ((uint8_t *)res)[n];
-			if (!( (0x00 == byte) || ((0x80 == byte) && (n == end_crc_pos)) ))
-			    verified = false;
-		    }
+	    } else {
+		switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
+		case AS_LEGACY:
+		    break;
+		case AS_NEW:
+		    x = ((uint8_t *)res)[crc_pos - 1];
+		    ((uint8_t *)res)[crc_pos - 1] = ((uint8_t *)res)[crc_pos];
+		    ((uint8_t *)res)[crc_pos] = x;
+		    break;
 		}
-		if (verified) {
-		    *nbytes = crc_pos;
-		    switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
-		    case AS_LEGACY:
-		    ((uint8_t *)data)[(*nbytes)++] = 0x00;
-			break;
-		    case AS_NEW:
-			/* The status byte was already before the CRC */
-			break;
-		    }
-		} else {
-		    switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
-		    case AS_LEGACY:
-			break;
-		    case AS_NEW:
-			x = ((uint8_t *)res)[crc_pos - 1];
-			((uint8_t *)res)[crc_pos - 1] = ((uint8_t *)res)[crc_pos];
-			((uint8_t *)res)[crc_pos] = x;
-			break;
-		    }
-		    crc_pos++;
-		}
-	    } while (!verified && (end_crc_pos < *nbytes));
-
-	    if (!verified) {
-#if WITH_DEBUG
-		/* FIXME In some configurations, the file is transmitted PLAIN */
-		warnx ("CRC not verified in decyphered stream");
-#endif
-		MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
-		*nbytes = -1;
-		res = NULL;
+		crc_pos++;
 	    }
+	} while (!verified && (end_crc_pos < *nbytes));
+
+	if (!verified) {
+#if WITH_DEBUG
+	    /* FIXME In some configurations, the file is transmitted PLAIN */
+	    warnx ("CRC not verified in decyphered stream");
+#endif
+	    MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
+	    *nbytes = -1;
+	    res = NULL;
+	}
 
 	break;
     default:
