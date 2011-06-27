@@ -12,6 +12,7 @@ set(LIBRARY_SOURCES
 		mifare_desfire_key
 		mifare_ultralight
 		tlv
+		../contrib/libutil/hexdump
 		)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

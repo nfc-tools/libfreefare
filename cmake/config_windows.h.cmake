@@ -20,6 +20,8 @@
 #ifndef __CONFIG_WINDOWS_H__
 #define __CONFIG_WINDOWS_H__
 
+#cmakedefine WITH_DEBUG
+
 #include <winsock2.h>
 
 #define htole32(x) (x)

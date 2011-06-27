@@ -2,7 +2,7 @@
 project(libfreefare C)
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/")
 
 add_definitions("-std=c99")
 
@@ -26,13 +26,10 @@ endif(MINGW)
 message("CMAKE_C_FLAGS: " ${CMAKE_C_FLAGS})
 message("CMAKE_SHARED_LINKER_FLAGS: " ${CMAKE_SHARED_LINKER_FLAGS})
 
-include_directories(${LIBNFC_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${LIBNFC_INCLUDE_DIRS} ${OPENSSL_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/contrib/libutil)
 set(LIBS ${LIBS} ${LIBNFC_LIBRARIES} ${OPENSSL_LIBRARIES})
 
-if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  message("CMAKE_INSTALL_PREFIX not defined")
-  set(CMAKE_INSTALL_PREFIX "c:/projects/EVENT/install") # TODO
-endif(NOT DEFINED CMAKE_INSTALL_PREFIX)
+option(WITH_DEBUG "Extra debug information is outputted when this is turned on" OFF)
 
 if(DEFINED CMAKE_INSTALL_LIBDIR)
   set(libdir ${CMAKE_INSTALL_LIBDIR})

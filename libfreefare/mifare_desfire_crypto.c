@@ -423,7 +423,7 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	break;
     default:
 	warnx ("Unknown communication settings");
-#if WITH_DEBUG
+#ifdef WITH_DEBUG
 	abort ();
 #endif
 	*nbytes = -1;
@@ -473,7 +473,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		mifare_cypher_blocks_chained (tag, NULL, NULL, edata, edl, MCD_SEND, MCO_ENCYPHER);
 
 		if (0 != memcmp ((uint8_t *)data + *nbytes - 1, (uint8_t *)edata + edl - 8, 4)) {
-#if WITH_DEBUG
+#ifdef WITH_DEBUG
 		    warnx ("MACing not verified");
 		    hexdump ((uint8_t *)data + *nbytes - 1, key_macing_length (key), "Expect ", 0);
 		    hexdump ((uint8_t *)edata + edl - 8, key_macing_length (key), "Actual ", 0);
@@ -503,7 +503,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	    if (communication_settings & CMAC_VERIFY) {
 		((uint8_t *)data)[*nbytes - 9] = first_cmac_byte;
 		if (0 != memcmp (MIFARE_DESFIRE (tag)->cmac, (uint8_t *)data + *nbytes - 9, 8)) {
-#if WITH_DEBUG
+#ifdef WITH_DEBUG
 		    warnx ("CMAC NOT verified :-(");
 		    hexdump ((uint8_t *)data + *nbytes - 9, 8, "Expect ", 0);
 		    hexdump (MIFARE_DESFIRE (tag)->cmac, 8, "Actual ", 0);
@@ -625,7 +625,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	} while (!verified && (end_crc_pos < *nbytes));
 
 	if (!verified) {
-#if WITH_DEBUG
+#ifdef WITH_DEBUG
 	    /* FIXME In some configurations, the file is transmitted PLAIN */
 	    warnx ("CRC not verified in decyphered stream");
 #endif
@@ -637,7 +637,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	break;
     default:
 	warnx ("Unknown communication settings");
-#if WITH_DEBUG
+#ifdef WITH_DEBUG
 	abort ();
 #endif
 	*nbytes = -1;
