@@ -2,7 +2,7 @@ Source: libfreefare
 Section: libs
 Priority: extra
 Maintainer: Romuald Conty <rconty@il4p.fr>
-Build-Depends: debhelper (>= 7), dh-autoreconf, libnfc-dev (>=1.5.0), pkg-config, libssl-dev
+Build-Depends: debhelper (>= 7.0.50~), dh-autoreconf, libnfc-dev (>= 1.5.0), pkg-config, libssl-dev
 Standards-Version: 3.9.1
 Homepage: http://code.google.com/p/nfc-tools/wiki/libfreefare
 Vcs-Svn: http://nfc-tools.googlecode.com/svn/trunk/libfreefare
@@ -14,7 +14,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libnfc2
 Description: MIFARE card manipulations library
  The libfreefare project aims to provide a convenient API for MIFARE
- card manipulations.
+ card manipulations. This package contains the libfreefare library.
 
 Package: libfreefare-dev
 Section: libdevel
@@ -22,18 +22,21 @@ Architecture: any
 Depends: ${misc:Depends}, libfreefare0 (= ${binary:Version}), libnfc-dev
 Description: MIFARE card manipulations library (development files)
  The libfreefare project aims to provide a convenient API for MIFARE
- card manipulations.
+ card manipulations. This package contains development files.
 
 Package: libfreefare-bin
 Section: utils
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libfreefare0 (>= ${binary:Version})
 Description: MIFARE card manipulations binaries
- Some binaries are provided with libfreefare useful for development
- purposes.
+ The libfreefare project aims to provide a convenient API for MIFARE
+ card manipulations. This package includes some binaries that are
+ useful for development purposes.
 
 Package: libfreefare-doc
 Architecture: all
+Section: doc
+Depends: ${misc:Depends}
 Description: documentation for libfreefare
  The libfreefare project aims to provide a convenient API for MIFARE
  card manipulations.
