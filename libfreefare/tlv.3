@@ -47,7 +47,7 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Ft "uint8_t *"
 .Fn tlv_encode "const uint8_t type" "const uint8_t *istream" "uint16_t isize" "size_t *osize"
 .Ft "uint8_t *"
-.Fn tlv_decode "const uint8_t *istream" "const uint8_t *type" "uint16_t *size"
+.Fn tlv_decode "const uint8_t *istream" "uint8_t *type" "uint16_t *size"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
