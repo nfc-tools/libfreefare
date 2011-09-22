@@ -62,7 +62,7 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, NULL))) { \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
@@ -76,7 +76,7 @@
 	    return -1; \
 	} \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, NULL))) { \
 	    nfc_configure (tag->device, NDO_EASY_FRAMING, true); \
 	    return errno = EIO, -1; \
 	} \
@@ -323,7 +323,7 @@ is_mifare_ultralightc_on_reader (nfc_device_t *device, nfc_iso14443a_info_t nai)
     nfc_initiator_select_passive_target (device, modulation, nai.abtUid, nai.szUidLen, &pnti);
     nfc_configure (device, NDO_EASY_FRAMING, false);
     size_t n;
-    ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, &n);
+    ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, &n, NULL);
     nfc_configure (device, NDO_EASY_FRAMING, true);
     nfc_initiator_deselect_target (device);
     return ret;

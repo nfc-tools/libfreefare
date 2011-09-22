@@ -89,7 +89,7 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n))) { \
+	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, NULL))) { \
 	    if (disconnect) { \
 		tag->active = false; \
 	    } \
