@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  * 
- * $Id: mifare-classic-write-ndef.c 581 2010-09-07 14:29:11Z rtartiere@il4p.fr $
+ * $Id $
  */
 
 /*
