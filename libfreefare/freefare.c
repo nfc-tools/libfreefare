@@ -40,7 +40,7 @@ struct supported_tag supported_tags[] = {
 /*
  * Automagically allocate a MifareTag given a device and target info.
  */
-static MifareTag
+MifareTag
 freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
 {
     bool found = false;
