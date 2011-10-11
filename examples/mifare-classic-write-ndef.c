@@ -17,11 +17,14 @@
  * $Id$
  */
 
+#include "config.h"
+
 #include <err.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <unistd.h>
 
 #include <nfc/nfc.h>
 
@@ -49,13 +52,15 @@ const MifareClassicKey default_keyb = {
     0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7
 };
 
-const uint8_t ndef_msg[33] = {
+const uint8_t ndef_default_msg[33] = {
     0xd1, 0x02, 0x1c, 0x53, 0x70, 0x91, 0x01, 0x09,
     0x54, 0x02, 0x65, 0x6e, 0x4c, 0x69, 0x62, 0x6e,
     0x66, 0x63, 0x51, 0x01, 0x0b, 0x55, 0x03, 0x6c,
     0x69, 0x62, 0x6e, 0x66, 0x63, 0x2e, 0x6f, 0x72,
     0x67
 };
+uint8_t *ndef_msg;
+size_t  ndef_msg_len;
 
 int
 search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey *key, MifareClassicKeyType *key_type)
@@ -111,6 +116,14 @@ fix_mad_trailer_block (nfc_device_t *device, MifareTag tag, MifareClassicSectorN
     return 0;
 }
 
+void
+usage(char *progname)
+{
+    fprintf (stderr, "usage: %s -i FILE\n", progname);
+    fprintf (stderr, "\nOptions:\n");
+    fprintf (stderr, "  -i     Use FILE as NDEF message to write on card\n");
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -120,8 +133,58 @@ main(int argc, char *argv[])
     Mad mad;
     MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-    (void)argc;
-    (void)argv;
+    int ch;
+    char *ndef_input = NULL;
+    while ((ch = getopt (argc, argv, "hi:")) != -1) {
+	switch (ch) {
+	case 'h':
+	    usage(argv[0]);
+	    exit (EXIT_SUCCESS);
+	    break;
+	case 'i':
+	    ndef_input = optarg;
+	    break;
+	case '?':
+	    if (optopt == 'i')
+		fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+	default:
+	    usage (argv[0]);
+	    exit (EXIT_FAILURE);
+	}
+    }
+
+    if (ndef_input == NULL) {
+        ndef_msg = (uint8_t*)ndef_default_msg;
+        ndef_msg_len = sizeof(ndef_default_msg);
+    } else {
+	FILE* ndef_stream = NULL;
+	if ((strlen (ndef_input) == 1) && (ndef_input[0] == '-')) {
+            // FIXME stdin as input have to be readed and buffered in ndef_msg
+	    ndef_stream = stdin;
+            fprintf (stderr, "stdin as NDEF is not implemented");
+            exit (EXIT_FAILURE);
+	} else {
+	    ndef_stream = fopen(ndef_input, "rb");
+	    if (!ndef_stream) {
+		fprintf (stderr, "Could not open file %s.\n", ndef_input);
+		exit (EXIT_FAILURE);
+	    }
+	    fseek(ndef_stream, 0L, SEEK_END);
+	    ndef_msg_len = ftell(ndef_stream);
+            fseek(ndef_stream, 0L, SEEK_SET);
+
+	    if (!(ndef_msg = malloc (ndef_msg_len))) {
+		err (EXIT_FAILURE, "malloc");
+	    }
+	    if (fread (ndef_msg, 1, ndef_msg_len, ndef_stream) != ndef_msg_len) {
+		fprintf (stderr, "Could not read NDEF from file: %s\n", ndef_input);
+		fclose (ndef_stream);
+		exit (EXIT_FAILURE);
+	    }
+	    fclose (ndef_stream);
+	}
+    }
+    printf ("NDEF file is %zu bytes long.\n", ndef_msg_len);
 
     struct mifare_classic_key_and_type *card_write_keys;
     if (!(card_write_keys = malloc (40 * sizeof (*card_write_keys)))) {
@@ -219,7 +282,7 @@ main(int argc, char *argv[])
 		}
 
 		size_t encoded_size;
-		uint8_t *tlv_data = tlv_encode (3, ndef_msg, sizeof (ndef_msg), &encoded_size);
+		uint8_t *tlv_data = tlv_encode (3, ndef_msg, ndef_msg_len, &encoded_size);
 
 		/*
 		 * At his point, we should have collected all information needed to
