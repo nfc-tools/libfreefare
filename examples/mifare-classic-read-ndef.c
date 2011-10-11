@@ -204,7 +204,7 @@ main(int argc, char *argv[])
 error:
 	    free (tag_uid);
 	}
-
+    fclose (ndef_stream);
 	freefare_free_tags (tags);
 	nfc_disconnect (device);
     }
