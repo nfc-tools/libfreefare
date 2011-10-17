@@ -4,9 +4,12 @@ manipulations.
 Supported tags:
   - Mifare Classic 1k
   - Mifare Classic 4k
-  - Mifare DESFire 4K
+  - Mifare DESFire 2K/4K/8K
+  - Mifare DESFire EV1
   - Mifare Ultralight
+  - Mifare UltralightC
 
 Supported features:
   - Mifare Application Directory (MAD) v1
   - Mifare Application Directory (MAD) v2
+  - Mifare Application Directory (MAD) v3 (part of DESFire support)
