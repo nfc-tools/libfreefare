@@ -52,25 +52,25 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .\"        |___/            |_|
 .Sh SYNOPSIS
 .In freefare.h
-.Ft Mad
+.Ft "Mad"
 .Fn mad_new "uint8_t version"
-.Ft Mad
+.Ft "Mad"
 .Fn mad_read "MifareTag tag"
-.Ft int
+.Ft "int"
 .Fn mad_write "MifareTag tag" "Mad mad" "MifareClassicKey key_b_sector_00" "MifareClassicKey key_b_sector_10"
-.Ft int
+.Ft "int"
 .Fn mad_get_version "Mad mad"
-.Ft void
+.Ft "void"
 .Fn mad_set_version "Mad mad" "uint8_t version"
-.Ft MifareClassicSectorNumber
+.Ft "MifareClassicSectorNumber"
 .Fn mad_get_card_publisher_sector "Mad mad"
-.Ft int
+.Ft "int"
 .Fn mad_set_card_publisher_sector "Mad mad" "MifareClassicSectorNumber cps"
-.Ft int
+.Ft "int"
 .Fn mad_get_aid "Mad mad" "MifareClassicSectorNumber sector" "MadAid *aid"
-.Ft int
+.Ft "int"
 .Fn mad_set_aid "Mad mad" "MifareClassicSectorNumber sector" "MadAid aid"
-.Ft void
+.Ft "void"
 .Fn mad_free "Mad mad"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
