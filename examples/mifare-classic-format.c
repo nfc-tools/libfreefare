@@ -58,7 +58,7 @@ struct {
 };
 
 void
-display_progress ()
+display_progress (void)
 {
     at_block++;
     if (0 == (at_block % mod_block)) {

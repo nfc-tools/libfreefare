@@ -27,7 +27,7 @@ static MifareTag *tags = NULL;
 MifareTag tag = NULL;
 
 void
-cut_setup ()
+cut_setup (void)
 {
     int res;
     nfc_device_desc_t devices[8];
@@ -75,7 +75,7 @@ cut_setup ()
 }
 
 void
-cut_teardown ()
+cut_teardown (void)
 {
     if (tag)
 	mifare_desfire_disconnect (tag);
