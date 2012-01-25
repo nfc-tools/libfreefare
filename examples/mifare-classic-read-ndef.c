@@ -112,12 +112,12 @@ main(int argc, char *argv[])
 	errx (EXIT_FAILURE, "No NFC device found.");
 
     for (size_t d = 0; d < device_count; d++) {
-  device = nfc_open (NULL, devices[d]);
-  if (!device) {
-      warnx ("nfc_open() failed.");
-	    error = EXIT_FAILURE;
-	    continue;
-	}
+        device = nfc_open (NULL, devices[d]);
+        if (!device) {
+            warnx ("nfc_open() failed.");
+            error = EXIT_FAILURE;
+            continue;
+        }
 
 	tags = freefare_get_tags (device);
 	if (!tags) {
