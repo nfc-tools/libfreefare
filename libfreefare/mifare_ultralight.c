@@ -62,7 +62,7 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, NULL))) { \
+	if ((nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, 0)) < 0) { \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
@@ -71,17 +71,17 @@
 #define ULTRALIGHT_TRANSCEIVE_RAW(tag, msg, res) \
     do { \
 	errno = 0; \
-	if (!nfc_configure (tag->device, NDO_EASY_FRAMING, false)) { \
+	if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, false) < 0) { \
 	    errno = EIO; \
 	    return -1; \
 	} \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, NULL))) { \
-	    nfc_configure (tag->device, NDO_EASY_FRAMING, true); \
+	if ((nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, 0)) < 0) { \
+	    nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true); \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
-	if (!nfc_configure (tag->device, NDO_EASY_FRAMING, true)) { \
+	if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true) < 0) { \
 	    errno = EIO; \
 	    return -1; \
 	} \
@@ -129,12 +129,12 @@ mifare_ultralight_connect (MifareTag tag)
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
 
-    nfc_target_t pnti;
-    nfc_modulation_t modulation = {
+    nfc_target pnti;
+    nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
 	tag->active = 1;
 	for (int i = 0; i < MIFARE_ULTRALIGHT_MAX_PAGE_COUNT; i++)
 	    MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
@@ -154,7 +154,7 @@ mifare_ultralight_disconnect (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
 
-    if (nfc_initiator_deselect_target (tag->device)) {
+    if (nfc_initiator_deselect_target (tag->device) >= 0) {
 	tag->active = 0;
     } else {
 	errno = EIO;
@@ -307,7 +307,7 @@ mifare_ultralightc_authenticate (MifareTag tag, const MifareDESFireKey key)
  * Callback for freefare_tag_new to test presence of a MIFARE UltralightC on the reader.
  */
 bool
-is_mifare_ultralightc_on_reader (nfc_device_t *device, nfc_iso14443a_info_t nai)
+is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai)
 {
     bool ret;
     uint8_t cmd_step1[2];
@@ -315,16 +315,16 @@ is_mifare_ultralightc_on_reader (nfc_device_t *device, nfc_iso14443a_info_t nai)
     cmd_step1[0] = 0x1A;
     cmd_step1[1] = 0x00;
 
-    nfc_target_t pnti;
-    nfc_modulation_t modulation = {
+    nfc_target pnti;
+    nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
     nfc_initiator_select_passive_target (device, modulation, nai.abtUid, nai.szUidLen, &pnti);
-    nfc_configure (device, NDO_EASY_FRAMING, false);
+    nfc_device_set_property_bool (device, NP_EASY_FRAMING, false);
     size_t n;
-    ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, &n, NULL);
-    nfc_configure (device, NDO_EASY_FRAMING, true);
+    ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, &n, 0);
+    nfc_device_set_property_bool (device, NP_EASY_FRAMING, true);
     nfc_initiator_deselect_target (device);
     return ret;
 }

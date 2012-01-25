@@ -48,7 +48,7 @@ int
 main(int argc, char *argv[])
 {
     int error = EXIT_SUCCESS;
-    nfc_device_t *device = NULL;
+    nfc_device *device = NULL;
     MifareTag *tags = NULL;
 
     printf ("NOTE: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
@@ -56,24 +56,27 @@ main(int argc, char *argv[])
     if (argc > 1)
 	errx (EXIT_FAILURE, "usage: %s", argv[0]);
 
-    nfc_device_desc_t devices[8];
+    nfc_connstring devices[8];
     size_t device_count;
+    
+    nfc_init(NULL);
 
-    nfc_list_devices (devices, 8, &device_count);
-    if (!device_count)
+    device_count = nfc_list_devices (NULL, devices, 8);
+    if (device_count <= 0)
 	errx (EXIT_FAILURE, "No NFC device found.");
 
     for (size_t d = 0; d < device_count; d++) {
-	device = nfc_connect (&(devices[d]));
-	if (!device) {
-	    warnx ("nfc_connect() failed.");
+  device = nfc_open (NULL, devices[d]);
+  
+  if (!device) {
+      warnx ("nfc_open() failed.");
 	    error = EXIT_FAILURE;
 	    continue;
 	}
 
 	tags = freefare_get_tags (device);
 	if (!tags) {
-	    nfc_disconnect (device);
+	    nfc_close (device);
 	    errx (EXIT_FAILURE, "Error listing tags.");
 	}
 
@@ -159,7 +162,7 @@ main(int argc, char *argv[])
 		// Mapping Version equal to 10h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
 		// equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0E E0 (NDEF File size =3808 Bytes) 00 (free read access)
 		// 00 free write access
-		byte_t capability_container_file_content[15] = {
+		uint8_t capability_container_file_content[15] = {
 		    0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
 		    0x10,                       // Mapping version
 		    0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
@@ -193,7 +196,8 @@ main(int argc, char *argv[])
 	    free (tag_uid);
 	}
 	freefare_free_tags (tags);
-	nfc_disconnect (device);
+	nfc_close (device);
     }
+    nfc_exit(NULL);
     exit (error);
 }

@@ -89,7 +89,7 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, NULL))) { \
+	if ((nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, 0) < 0)) { \
 	    if (disconnect) { \
 		tag->active = false; \
 	    } \
@@ -228,12 +228,12 @@ mifare_classic_connect (MifareTag tag)
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    nfc_target_t pnti;
-    nfc_modulation_t modulation = {
+    nfc_target pnti;
+    nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
 	tag->active = 1;
     } else {
 	errno = EIO;
@@ -251,7 +251,7 @@ mifare_classic_disconnect (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    if (nfc_initiator_deselect_target (tag->device)) {
+    if (nfc_initiator_deselect_target (tag->device) >= 0) {
 	tag->active = 0;
     } else {
 	errno = EIO;

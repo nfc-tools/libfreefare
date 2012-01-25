@@ -172,7 +172,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
-	if (!(nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, &__##res##_n, NULL))) { \
+	if ((nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, &__##res##_n, 0)) < 0) { \
 	    return errno = EIO, -1; \
 	} \
 	DEBUG_XFER (__res, __##res##_n, "<=== "); \
@@ -276,12 +276,12 @@ mifare_desfire_connect (MifareTag tag)
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    nfc_target_t pnti;
-    nfc_modulation_t modulation = {
+    nfc_target pnti;
+    nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti)) {
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
 	tag->active = 1;
 	free (MIFARE_DESFIRE (tag)->session_key);
 	MIFARE_DESFIRE (tag)->session_key = NULL;
@@ -308,7 +308,7 @@ mifare_desfire_disconnect (MifareTag tag)
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE(tag)->session_key = NULL;
 
-    if (nfc_initiator_deselect_target (tag->device)) {
+    if (nfc_initiator_deselect_target (tag->device) >= 0) {
 	tag->active = 0;
     }
     return 0;

@@ -173,7 +173,7 @@ struct supported_tag {
     uint8_t ATS_min_length;
     uint8_t ATS_compare_length;
     uint8_t ATS[5];
-    bool (*check_tag_on_reader) (nfc_device_t *, nfc_iso14443a_info_t);
+    bool (*check_tag_on_reader) (nfc_device *, nfc_iso14443a_info);
 };
 
 /*
@@ -185,8 +185,8 @@ struct supported_tag {
  * mifare_*_connect() function.
  */
 struct mifare_tag {
-    nfc_device_t *device;
-    nfc_iso14443a_info_t info;
+    nfc_device *device;
+    nfc_iso14443a_info info;
     const struct supported_tag *tag_info;
     int active;
 };

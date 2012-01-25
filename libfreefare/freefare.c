@@ -41,7 +41,7 @@ struct supported_tag supported_tags[] = {
  * Automagically allocate a MifareTag given a device and target info.
  */
 MifareTag
-freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
+freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 {
     bool found = false;
     struct supported_tag *tag_info;
@@ -110,7 +110,7 @@ freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai)
  * The list has to be freed using the freefare_free_tags() function.
  */
 MifareTag *
-freefare_get_tags (nfc_device_t *device)
+freefare_get_tags (nfc_device *device)
 {
     MifareTag *tags = NULL;
     int tag_count = 0;
@@ -118,24 +118,24 @@ freefare_get_tags (nfc_device_t *device)
     nfc_initiator_init(device);
 
     // Drop the field for a while
-    nfc_configure(device,NDO_ACTIVATE_FIELD,false);
+    nfc_device_set_property_bool(device,NP_ACTIVATE_FIELD,false);
 
     // Configure the CRC and Parity settings
-    nfc_configure(device,NDO_HANDLE_CRC,true);
-    nfc_configure(device,NDO_HANDLE_PARITY,true);
-    nfc_configure(device,NDO_AUTO_ISO14443_4,true);
+    nfc_device_set_property_bool(device,NP_HANDLE_CRC,true);
+    nfc_device_set_property_bool(device,NP_HANDLE_PARITY,true);
+    nfc_device_set_property_bool(device,NP_AUTO_ISO14443_4,true);
 
     // Enable field so more power consuming cards can power themselves up
-    nfc_configure(device,NDO_ACTIVATE_FIELD,true);
+    nfc_device_set_property_bool(device,NP_ACTIVATE_FIELD,true);
 
     // Poll for a ISO14443A (MIFARE) tag
-    nfc_target_t candidates[MAX_CANDIDATES];
+    nfc_target candidates[MAX_CANDIDATES];
     size_t candidates_count;
-    nfc_modulation_t modulation = {
+    nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (!nfc_initiator_list_passive_targets(device, modulation, candidates, MAX_CANDIDATES, &candidates_count))
+    if ((candidates_count = nfc_initiator_list_passive_targets(device, modulation, candidates, MAX_CANDIDATES)) < 0)
 	return NULL;
 
     tags = malloc(sizeof (void *));
@@ -185,7 +185,7 @@ freefare_get_tag_uid (MifareTag tag)
 {
     char *res = malloc (2 * tag->info.szUidLen + 1);
     for (size_t i =0; i < tag->info.szUidLen; i++)
-	snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
+        snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
     return res;
 }
 
@@ -196,19 +196,19 @@ void
 freefare_free_tag (MifareTag tag)
 {
     if (tag) {
-	switch (tag->tag_info->type) {
-	case CLASSIC_1K:
-	case CLASSIC_4K:
-	    mifare_classic_tag_free (tag);
-	    break;
-	case DESFIRE:
-	    mifare_desfire_tag_free (tag);
-	    break;
-	case ULTRALIGHT:
-	case ULTRALIGHT_C:
-	    mifare_ultralight_tag_free (tag);
-	    break;
-	}
+        switch (tag->tag_info->type) {
+        case CLASSIC_1K:
+        case CLASSIC_4K:
+            mifare_classic_tag_free (tag);
+            break;
+        case DESFIRE:
+            mifare_desfire_tag_free (tag);
+            break;
+        case ULTRALIGHT:
+        case ULTRALIGHT_C:
+            mifare_ultralight_tag_free (tag);
+            break;
+        }
     }
 }
 
@@ -216,18 +216,17 @@ const char *
 freefare_strerror (MifareTag tag)
 {
     const char *p = "Unkown error";
-    if (tag->device->iLastError > 0) {
-	p = nfc_strerror (tag->device);
+    if (nfc_device_get_last_error (tag->device) < 0) {
+      p = nfc_strerror (tag->device);
     } else {
-	if (tag->tag_info->type == DESFIRE) {
-	    if (MIFARE_DESFIRE (tag)->last_pcd_error) {
-		p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
-	    } else if (MIFARE_DESFIRE (tag)->last_picc_error) {
-		p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
-	    }
-	}
+      if (tag->tag_info->type == DESFIRE) {
+        if (MIFARE_DESFIRE (tag)->last_pcd_error) {
+          p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
+        } else if (MIFARE_DESFIRE (tag)->last_picc_error) {
+          p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
+        }
+      }
     }
-
     return p;
 }
 
@@ -257,7 +256,6 @@ freefare_free_tags (MifareTag *tags)
     }
 }
 
-
 
 /*
  * Low-level API

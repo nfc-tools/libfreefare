@@ -52,8 +52,8 @@ typedef struct mifare_desfire_key *MifareDESFireKey;
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
-MifareTag	*freefare_get_tags (nfc_device_t *device);
-MifareTag	 freefare_tag_new (nfc_device_t *device, nfc_iso14443a_info_t nai);
+MifareTag	*freefare_get_tags (nfc_device *device);
+MifareTag	 freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai);
 enum mifare_tag_type freefare_get_tag_type (MifareTag tag);
 const char	*freefare_get_tag_friendly_name (MifareTag tag);
 char		*freefare_get_tag_uid (MifareTag tag);
@@ -71,7 +71,7 @@ int		 mifare_ultralight_read (MifareTag tag, const MifareUltralightPageNumber pa
 int		 mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
 
 int		 mifare_ultralightc_authenticate (MifareTag tag, const MifareDESFireKey key);
-bool		 is_mifare_ultralightc_on_reader (nfc_device_t *device, nfc_iso14443a_info_t nai);
+bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai);
 
 typedef unsigned char MifareClassicBlock[16];
 

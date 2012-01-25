@@ -101,7 +101,7 @@ search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassi
 }
 
 int
-fix_mad_trailer_block (nfc_device_t *device, MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
+fix_mad_trailer_block (nfc_device *device, MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
 {
     MifareClassicBlock block;
     mifare_classic_trailer_block (&block, mad_public_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
@@ -128,7 +128,7 @@ int
 main(int argc, char *argv[])
 {
     int error = 0;
-    nfc_device_t *device = NULL;
+    nfc_device *device = NULL;
     MifareTag *tags = NULL;
     Mad mad;
     MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
@@ -191,24 +191,26 @@ main(int argc, char *argv[])
 	err (EXIT_FAILURE, "malloc");
     }
 
-    nfc_device_desc_t devices[8];
+    nfc_connstring devices[8];
     size_t device_count;
+    
+    nfc_init(NULL);
 
-    nfc_list_devices (devices, 8, &device_count);
-    if (!device_count)
+    device_count = nfc_list_devices (NULL, devices, 8);
+    if (device_count <= 0)
 	errx (EXIT_FAILURE, "No NFC device found.");
 
     for (size_t d = 0; d < device_count; d++) {
-	device = nfc_connect (&(devices[d]));
-	if (!device) {
-	    warnx ("nfc_connect() failed.");
+  device = nfc_open (NULL, devices[d]);
+  if (!device) {
+      warnx ("nfc_open() failed.");
 	    error = EXIT_FAILURE;
 	    continue;
 	}
 
 	tags = freefare_get_tags (device);
 	if (!tags) {
-	    nfc_disconnect (device);
+	    nfc_close (device);
 	    errx (EXIT_FAILURE, "Error listing MIFARE classic tag.");
 	}
 
@@ -399,10 +401,10 @@ error:
 	}
 
 	freefare_free_tags (tags);
-	nfc_disconnect (device);
+	nfc_close (device);
     }
 
     free (card_write_keys);
-
+    nfc_exit(NULL);
     exit (error);
 }
