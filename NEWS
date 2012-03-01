@@ -1,3 +1,7 @@
+Changes between 0.3.3 and 0.3.4  [1 mar 2012]
+
+  *) Fix Mifare Ultralight C card detection routine
+
 Changes between 0.3.2 and 0.3.3  [1 mar 2012]
 
   *) Depends on libnfc 1.6.0
