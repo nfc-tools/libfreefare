@@ -1,3 +1,9 @@
+libfreefare (0.3.3-0) unstable; urgency=low
+
+  * New upstream version
+
+ -- Romuald Conty <rconty@il4p.fr>  Thu, 1 Mar 2012 16:42:42 +0200
+
 libfreefare (0.3.1-0) unstable; urgency=low
 
   * Initial debian package release

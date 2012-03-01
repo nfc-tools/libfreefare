@@ -1,3 +1,7 @@
+Changes between 0.3.2 and 0.3.3  [1 mar 2012]
+
+  *) Depends on libnfc 1.6.0
+
 Changes between 0.3.1 and 0.3.2  [17 oct 2011]
 
   *) New API functions to ease up creation of applications with strong
