@@ -309,7 +309,7 @@ mifare_ultralightc_authenticate (MifareTag tag, const MifareDESFireKey key)
 bool
 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai)
 {
-    bool ret;
+    int ret;
     uint8_t cmd_step1[2];
     uint8_t res_step1[9];
     cmd_step1[0] = 0x1A;
@@ -326,5 +326,5 @@ is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai)
     ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, &n, 0);
     nfc_device_set_property_bool (device, NP_EASY_FRAMING, true);
     nfc_initiator_deselect_target (device);
-    return ret;
+    return ret >= 0;
 }
