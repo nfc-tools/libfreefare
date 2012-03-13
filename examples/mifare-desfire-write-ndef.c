@@ -33,7 +33,8 @@
  */
 
 
-uint8_t key_data_null[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+uint8_t key_data_picc[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+uint8_t key_data_app[8]   = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 const uint8_t ndef_msg[35] = {
     0x00, 0x21,
@@ -107,11 +108,13 @@ main(int argc, char *argv[])
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Application selection failed");
 
-		MifareDESFireKey key;
-		key = mifare_desfire_des_key_new_with_version (key_data_null);
+		MifareDESFireKey key_picc;
+		MifareDESFireKey key_app;
+		key_picc = mifare_desfire_des_key_new_with_version (key_data_picc);
+		key_app  = mifare_desfire_des_key_new_with_version (key_data_app);
 
 		// Authentication with PICC master key MAY be needed to issue ChangeKeySettings command
-		res = mifare_desfire_authenticate (tags[i], 0, key);
+		res = mifare_desfire_authenticate (tags[i], 0, key_picc);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with PICC master key failed");
 
@@ -144,7 +147,7 @@ main(int argc, char *argv[])
 		free (aid);
 
 		// Authentication with NDEF Tag Application master key (Authentication with key 0)
-		res = mifare_desfire_authenticate (tags[i], 0, key);
+		res = mifare_desfire_authenticate (tags[i], 0, key_app);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
 		// Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
@@ -189,7 +192,8 @@ main(int argc, char *argv[])
 		} else {
 		    errx (EXIT_FAILURE, "Write CC file content failed");
 		}
-		mifare_desfire_key_free (key);
+		mifare_desfire_key_free (key_picc);
+		mifare_desfire_key_free (key_app);
 
 		mifare_desfire_disconnect (tags[i]);
 	    }
