@@ -29,6 +29,7 @@
 
 #include <freefare.h>
 
+// TODO: allow to read non-default key from options, also for the other mifare-desfire* tools
 uint8_t null_key_data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 struct {

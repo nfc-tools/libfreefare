@@ -33,9 +33,9 @@
  */
 
 
-uint8_t key_data_picc[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-uint8_t key_data_app[8]   = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+uint8_t key_data_app[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
+// TODO: allow NDEF payload to be provided e.g. via an external file
 const uint8_t ndef_msg[35] = {
     0x00, 0x21,
     0xd1, 0x02, 0x1c, 0x53, 0x70, 0x91, 0x01, 0x09,
@@ -52,7 +52,7 @@ main(int argc, char *argv[])
     nfc_device *device = NULL;
     MifareTag *tags = NULL;
 
-    printf ("NOTE: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
+    printf ("NOTE: This application writes a NDEF payload into a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
 
     if (argc > 1)
 	errx (EXIT_FAILURE, "usage: %s", argv[0]);
@@ -102,97 +102,33 @@ main(int argc, char *argv[])
 		    break;
 		}
 
-		/* Initialised Formatting Procedure. See section 6.5.1 and 8.1 of Mifare DESFire as Type 4 Tag document*/
-		// Send Mifare DESFire Select Application with AID equal to 000000h to select the PICC level
-		res = mifare_desfire_select_application(tags[i], NULL);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "Application selection failed");
-
-		MifareDESFireKey key_picc;
 		MifareDESFireKey key_app;
-		key_picc = mifare_desfire_des_key_new_with_version (key_data_picc);
 		key_app  = mifare_desfire_des_key_new_with_version (key_data_app);
 
-		// Authentication with PICC master key MAY be needed to issue ChangeKeySettings command
-		res = mifare_desfire_authenticate (tags[i], 0, key_picc);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "Authentication with PICC master key failed");
-
-		uint8_t key_settings;
-		uint8_t max_keys;
-		mifare_desfire_get_key_settings(tags[i], &key_settings,&max_keys);
-		if ((key_settings & 0x08) == 0x08){
-
-		    // Send Mifare DESFire ChangeKeySetting to change the PICC master key settings into :
-		    // bit7-bit4 equal to 0000b
-		    // bit3 equal to Xb, the configuration of the PICC master key MAY be changeable or frozen
-		    // bit2 equal to 0b, CreateApplication and DeleteApplication commands are allowed with PICC master key authentication
-		    // bit1 equal to 0b, GetApplicationIDs, and GetKeySettings are allowed with PICC master key authentication
-		    // bit0 equal to Xb, PICC masterkey MAY be frozen or changeable
-		    res = mifare_desfire_change_key_settings (tags[i],0x09);
-		    if (res < 0)
-			errx (EXIT_FAILURE, "ChangeKeySettings failed");
-		}
-
-		// Mifare DESFire Create Application with AID equal to EEEE10h, key settings equal to 09, NumOfKeys equal to 01h
+		// Mifare DESFire SelectApplication (Select application)
 		MifareDESFireAID aid = mifare_desfire_aid_new(0xEEEE10);
-		res = mifare_desfire_create_application (tags[i], aid, 0x09, 1);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "Application creation failed. Try mifare-desfire-format before running %s.", argv[0]);
-
-		// Mifare DESFire SelectApplication (Select previously creates application)
 		res = mifare_desfire_select_application(tags[i], aid);
 		if (res < 0)
-		    errx (EXIT_FAILURE, "Application selection failed");
+		    errx (EXIT_FAILURE, "Application selection failed. Try mifare-desfire-format-ndef before running %s.", argv[0]);
 		free (aid);
 
 		// Authentication with NDEF Tag Application master key (Authentication with key 0)
 		res = mifare_desfire_authenticate (tags[i], 0, key_app);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
-		// Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
-		res = mifare_desfire_change_key_settings (tags[i],0x09);
+
+// TODO: read and check Capability Container
+// Steps not implemented at this stage:
+// Read and parse CC (E103)
+// - Read NDEF file pointer (can be != E104)
+// - Check available space for storing NDEF
+// - Check is writing is allowed and propose to overrule it if needed
+
+		//Mifare DESFire WriteData to write the content of the NDEF File with NLEN equal to NDEF Message length and NDEF Message
+		res = mifare_desfire_write_data(tags[i], 0x04, 0, sizeof(ndef_msg), (uint8_t *) ndef_msg);
 		if (res < 0)
-		    errx (EXIT_FAILURE, "ChangeKeySettings failed");
+		    errx (EXIT_FAILURE, " Write data failed");
 
-		// Mifare DESFire CreateStdDataFile with FileNo equal to 03h (CC File DESFire FID), ComSet equal to 00h,
-		// AccesRights equal to E000h, File Size bigger equal to 00000Fh
-		res = mifare_desfire_create_std_data_file(tags[i],0x03,0x00,0xE000,0x00000F);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "CreateStdDataFile failed");
-
-		// Mifare DESFire WriteData to write the content of the CC File with CClEN equal to 000Fh,
-		// Mapping Version equal to 10h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
-		// equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0E E0 (NDEF File size =3808 Bytes) 00 (free read access)
-		// 00 free write access
-		uint8_t capability_container_file_content[15] = {
-		    0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
-		    0x10,                       // Mapping version
-		    0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
-		    0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
-		    0x04, 0x06, 0xE1, 0x04,     // TLV
-		    0x0E, 0xE0,                 // NDEF File size
-		    0x00,                       // free read access
-		    0x00                        // free write acces
-		};
-		res = mifare_desfire_write_data(tags[i],0x03,0,sizeof(capability_container_file_content),capability_container_file_content);
-		if (res>0){
-
-		    // Mifare DESFire CreateStdDataFile with FileNo equal to 04h (NDEF FileDESFire FID), CmmSet equal to 00h, AccessRigths
-		    // equal to EEE0h, FileSize equal to 000EE0h (3808 Bytes)
-		    res = mifare_desfire_create_std_data_file(tags[i],0x04,0x00,0xEEE0,0x000EE0);
-		    if (res < 0)
-			errx (EXIT_FAILURE, "CreateStdDataFile failed");
-
-		    //Mifare DESFire WriteData to write the content of the NDEF File with NLEN equal to NDEF Message length and NDEF Message
-
-		    res = mifare_desfire_write_data(tags[i], 0x04, 0, sizeof(ndef_msg), (uint8_t *) ndef_msg);
-		    if (res < 0)
-			errx (EXIT_FAILURE, " Write data failed");
-		} else {
-		    errx (EXIT_FAILURE, "Write CC file content failed");
-		}
-		mifare_desfire_key_free (key_picc);
 		mifare_desfire_key_free (key_app);
 
 		mifare_desfire_disconnect (tags[i]);
