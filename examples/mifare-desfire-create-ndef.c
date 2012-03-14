@@ -17,8 +17,12 @@
  * $Id$
  */
 
+#include "config.h"
+
 #include <err.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <freefare.h>
 
@@ -36,17 +40,58 @@
 uint8_t key_data_picc[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 uint8_t key_data_app[8]   = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
+struct {
+    bool interactive;
+} create_options = {
+    .interactive = true
+};
+
+void
+usage(char *progname)
+{
+    fprintf (stderr, "usage: %s [-y]\n", progname);
+    fprintf (stderr, "\nOptions:\n");
+    fprintf (stderr, "  -y     Do not ask for confirmation\n");
+    fprintf (stderr, "  -K 11223344AABBCCDD   Provide another PICC key than the default one\n");
+}
+
 int
 main(int argc, char *argv[])
 {
+    int ch;
     int error = EXIT_SUCCESS;
     nfc_device *device = NULL;
     MifareTag *tags = NULL;
 
-    printf ("NOTE: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
+    while ((ch = getopt (argc, argv, "hyK:")) != -1) {
+        switch (ch) {
+        case 'h':
+            usage(argv[0]);
+            exit (EXIT_SUCCESS);
+            break;
+        case 'y':
+            create_options.interactive = false;
+            break;
+        case 'K':
+            if (strlen(optarg) != 16) {
+                usage(argv[0]);
+                exit (EXIT_FAILURE);
+            }
+            uint64_t n = strtoull(optarg, NULL, 16);
+            int i;
+            for (i=7; i>=0; i--) {
+                key_data_picc[i] = (uint8_t) n;
+                n >>= 8;
+            }
+            break;
+        default:
+            usage(argv[0]);
+            exit (EXIT_FAILURE);
+        }
+    }
+    // Remaining args, if any, are in argv[optind .. (argc-1)]
 
-    if (argc > 1)
-	errx (EXIT_FAILURE, "usage: %s", argv[0]);
+    printf ("NOTE: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
 
     nfc_connstring devices[8];
     size_t device_count;
@@ -79,11 +124,17 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
-	    printf ("Found %s with UID %s.  Format as NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	    fgets (buffer, BUFSIZ, stdin);
-	    bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    bool create_ndef = true;
+	    if (create_options.interactive) {
+		printf ("Create NDEF app [yN] ");
+		fgets (buffer, BUFSIZ, stdin);
+		create_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    } else {
+		printf ("\n");
+	    }
 
-	    if (write_ndef) {
+	    if (create_ndef) {
 		int res;
 
 		res = mifare_desfire_connect (tags[i]);

@@ -3,8 +3,8 @@ set(EXAMPLES-SOURCES
         mifare-classic-format
         mifare-classic-write-ndef
         mifare-desfire-access
+        mifare-desfire-create-ndef
         mifare-desfire-format
-        mifare-desfire-format-ndef
         mifare-desfire-info
         mifare-desfire-write-ndef
         mifare-desfire-ev1-configure-ats

@@ -17,8 +17,12 @@
  * $Id$
  */
 
+#include "config.h"
+
 #include <err.h>
 #include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <freefare.h>
 
@@ -45,17 +49,58 @@ const uint8_t ndef_msg[35] = {
     0x67
 };
 
+struct {
+    bool interactive;
+} write_options = {
+    .interactive = true
+};
+
+void
+usage(char *progname)
+{
+    fprintf (stderr, "usage: %s [-y]\n", progname);
+    fprintf (stderr, "\nOptions:\n");
+    fprintf (stderr, "  -y     Do not ask for confirmation\n");
+    fprintf (stderr, "  -k 11223344AABBCCDD   Provide another NDEF Tag Application key than the default one\n");
+}
+
 int
 main(int argc, char *argv[])
 {
+    int ch;
     int error = EXIT_SUCCESS;
     nfc_device *device = NULL;
     MifareTag *tags = NULL;
 
-    printf ("NOTE: This application writes a NDEF payload into a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
+    while ((ch = getopt (argc, argv, "hyk:")) != -1) {
+        switch (ch) {
+        case 'h':
+            usage(argv[0]);
+            exit (EXIT_SUCCESS);
+            break;
+        case 'y':
+            write_options.interactive = false;
+            break;
+        case 'k':
+            if (strlen(optarg) != 16) {
+                usage(argv[0]);
+                exit (EXIT_FAILURE);
+            }
+            uint64_t n = strtoull(optarg, NULL, 16);
+            int i;
+            for (i=7; i>=0; i--) {
+                key_data_app[i] = (uint8_t) n;
+                n >>= 8;
+            }
+            break;
+        default:
+            usage(argv[0]);
+            exit (EXIT_FAILURE);
+        }
+    }
+    // Remaining args, if any, are in argv[optind .. (argc-1)]
 
-    if (argc > 1)
-	errx (EXIT_FAILURE, "usage: %s", argv[0]);
+    printf ("NOTE: This application writes a NDEF payload into a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
 
     nfc_connstring devices[8];
     size_t device_count;
@@ -88,9 +133,15 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
-	    printf ("Found %s with UID %s.  Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	    fgets (buffer, BUFSIZ, stdin);
-	    bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    bool write_ndef = true;
+	    if (write_options.interactive) {
+		printf ("Write NDEF [yN] ");
+		fgets (buffer, BUFSIZ, stdin);
+		write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    } else {
+		printf ("\n");
+	    }
 
 	    if (write_ndef) {
 		int res;
@@ -109,7 +160,7 @@ main(int argc, char *argv[])
 		MifareDESFireAID aid = mifare_desfire_aid_new(0xEEEE10);
 		res = mifare_desfire_select_application(tags[i], aid);
 		if (res < 0)
-		    errx (EXIT_FAILURE, "Application selection failed. Try mifare-desfire-format-ndef before running %s.", argv[0]);
+		    errx (EXIT_FAILURE, "Application selection failed. Try mifare-desfire-create-ndef before running %s.", argv[0]);
 		free (aid);
 
 		// Authentication with NDEF Tag Application master key (Authentication with key 0)

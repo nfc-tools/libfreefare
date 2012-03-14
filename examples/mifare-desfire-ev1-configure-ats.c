@@ -29,8 +29,9 @@
 
 #include <freefare.h>
 
-uint8_t null_key_data[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+uint8_t key_data_picc[8] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
+// TODO: Allow to pass another ATS as option
 // Default Mifare DESFire ATS
 uint8_t new_ats[] = { 0x06, 0x75, 0x77, 0x81, 0x02, 0x80 };
 
@@ -46,6 +47,7 @@ usage(char *progname)
     fprintf (stderr, "usage: %s [-y]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -y     Do not ask for confirmation (dangerous)\n");
+    fprintf (stderr, "  -K 11223344AABBCCDD   Provide another PICC key than the default one\n");
 }
 
 int
@@ -56,7 +58,7 @@ main(int argc, char *argv[])
     nfc_device *device = NULL;
     MifareTag *tags = NULL;
 
-    while ((ch = getopt (argc, argv, "hy")) != -1) {
+    while ((ch = getopt (argc, argv, "hyK:")) != -1) {
 	switch (ch) {
 	case 'h':
 	    usage(argv[0]);
@@ -65,13 +67,24 @@ main(int argc, char *argv[])
 	case 'y':
 	    configure_options.interactive = false;
 	    break;
+	case 'K':
+	    if (strlen(optarg) != 16) {
+		usage(argv[0]);
+		exit (EXIT_FAILURE);
+	    }
+	    uint64_t n = strtoull(optarg, NULL, 16);
+	    int i;
+	    for (i=7; i>=0; i--) {
+		key_data_picc[i] = (uint8_t) n;
+		n >>= 8;
+	    }
+	    break;
 	default:
 	    usage(argv[0]);
 	    exit (EXIT_FAILURE);
 	}
     }
-    argc -= optind;
-    argv += optind;
+    // Remaining args, if any, are in argv[optind .. (argc-1)]
 
     nfc_connstring devices[8];
     size_t device_count;
@@ -124,14 +137,14 @@ main(int argc, char *argv[])
 		    break;
 		}
 
-		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
-		res = mifare_desfire_authenticate (tags[i], 0, default_key);
+		MifareDESFireKey key_picc = mifare_desfire_des_key_new_with_version (key_data_picc);
+		res = mifare_desfire_authenticate (tags[i], 0, key_picc);
 		if (res < 0) {
 		    freefare_perror (tags[i], "mifare_desfire_authenticate");
 		    error = EXIT_FAILURE;
 		    break;
 		}
-		mifare_desfire_key_free (default_key);
+		mifare_desfire_key_free (key_picc);
 
 		res = mifare_desfire_set_ats (tags[i], new_ats);
 		if (res < 0) {

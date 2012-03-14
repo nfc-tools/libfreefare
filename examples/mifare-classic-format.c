@@ -159,8 +159,7 @@ main(int argc, char *argv[])
 	    exit (EXIT_FAILURE);
 	}
     }
-    argc -= optind;
-    argv += optind;
+    // Remaining args, if any, are in argv[optind .. (argc-1)]
     
     nfc_connstring devices[8];
 
