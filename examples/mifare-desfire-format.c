@@ -40,10 +40,10 @@ struct {
 void
 usage(char *progname)
 {
-    fprintf (stderr, "usage: %s [-y]\n", progname);
+    fprintf (stderr, "usage: %s [-y] [-K 11223344AABBCCDD]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -y     Do not ask for confirmation (dangerous)\n");
-    fprintf (stderr, "  -K 11223344AABBCCDD   Provide another PICC key than the default one\n");
+    fprintf (stderr, "  -K     Provide another PICC key than the default one\n");
 }
 
 int

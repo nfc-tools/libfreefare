@@ -121,7 +121,7 @@ usage(char *progname)
 {
     fprintf (stderr, "usage: %s -i FILE\n", progname);
     fprintf (stderr, "\nOptions:\n");
-    fprintf (stderr, "  -i     Use FILE as NDEF message to write on card\n");
+    fprintf (stderr, "  -i     Use FILE as NDEF message to write on card (\"-\" = stdin)\n");
 }
 
 int

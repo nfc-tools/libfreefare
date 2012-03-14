@@ -40,14 +40,16 @@
 uint8_t key_data_app[8]  = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 // TODO: allow NDEF payload to be provided e.g. via an external file
-const uint8_t ndef_msg[35] = {
-    0x00, 0x21,
+const uint8_t ndef_default_msg[33] = {
     0xd1, 0x02, 0x1c, 0x53, 0x70, 0x91, 0x01, 0x09,
     0x54, 0x02, 0x65, 0x6e, 0x4c, 0x69, 0x62, 0x6e,
     0x66, 0x63, 0x51, 0x01, 0x0b, 0x55, 0x03, 0x6c,
     0x69, 0x62, 0x6e, 0x66, 0x63, 0x2e, 0x6f, 0x72,
     0x67
 };
+
+uint8_t *ndef_msg;
+size_t  ndef_msg_len;
 
 struct {
     bool interactive;
@@ -58,10 +60,11 @@ struct {
 void
 usage(char *progname)
 {
-    fprintf (stderr, "usage: %s [-y]\n", progname);
+    fprintf (stderr, "usage: %s [-y] -i FILE [-k 11223344AABBCCDD]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -y     Do not ask for confirmation\n");
-    fprintf (stderr, "  -k 11223344AABBCCDD   Provide another NDEF Tag Application key than the default one\n");
+    fprintf (stderr, "  -i     Use FILE as NDEF message to write on card (\"-\" = stdin)\n");
+    fprintf (stderr, "  -k     Provide another NDEF Tag Application key than the default one\n");
 }
 
 int
@@ -72,7 +75,8 @@ main(int argc, char *argv[])
     nfc_device *device = NULL;
     MifareTag *tags = NULL;
 
-    while ((ch = getopt (argc, argv, "hyk:")) != -1) {
+    char *ndef_input = NULL;
+    while ((ch = getopt (argc, argv, "hyi:k:")) != -1) {
         switch (ch) {
         case 'h':
             usage(argv[0]);
@@ -80,6 +84,9 @@ main(int argc, char *argv[])
             break;
         case 'y':
             write_options.interactive = false;
+            break;
+        case 'i':
+            ndef_input = optarg;
             break;
         case 'k':
             if (strlen(optarg) != 16) {
@@ -101,6 +108,47 @@ main(int argc, char *argv[])
     // Remaining args, if any, are in argv[optind .. (argc-1)]
 
     printf ("NOTE: This application writes a NDEF payload into a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
+
+    if (ndef_input == NULL) {
+        ndef_msg = (uint8_t*)ndef_default_msg;
+        ndef_msg_len = sizeof(ndef_default_msg) + 2;
+        if (!(ndef_msg = malloc (ndef_msg_len))) {
+            err (EXIT_FAILURE, "malloc");
+        }
+        ndef_msg[0] = (uint8_t) ((ndef_msg_len - 2) >> 8);
+        ndef_msg[1] = (uint8_t) (ndef_msg_len - 2);
+        memcpy(ndef_msg + 2, ndef_default_msg, ndef_msg_len - 2);
+    } else {
+	FILE* ndef_stream = NULL;
+	if ((strlen (ndef_input) == 1) && (ndef_input[0] == '-')) {
+            // FIXME stdin as input have to be readed and buffered in ndef_msg
+	    ndef_stream = stdin;
+            fprintf (stderr, "stdin as NDEF is not implemented");
+            exit (EXIT_FAILURE);
+	} else {
+	    ndef_stream = fopen(ndef_input, "rb");
+	    if (!ndef_stream) {
+		fprintf (stderr, "Could not open file %s.\n", ndef_input);
+		exit (EXIT_FAILURE);
+	    }
+	    fseek(ndef_stream, 0L, SEEK_END);
+	    ndef_msg_len = ftell(ndef_stream) + 2;
+            fseek(ndef_stream, 0L, SEEK_SET);
+
+	    if (!(ndef_msg = malloc (ndef_msg_len))) {
+		err (EXIT_FAILURE, "malloc");
+	    }
+	    ndef_msg[0] = (uint8_t) ((ndef_msg_len - 2) >> 8);
+	    ndef_msg[1] = (uint8_t) (ndef_msg_len - 2);
+	    if (fread (ndef_msg + 2, 1, ndef_msg_len - 2, ndef_stream) != ndef_msg_len - 2) {
+		fprintf (stderr, "Could not read NDEF from file: %s\n", ndef_input);
+		fclose (ndef_stream);
+		exit (EXIT_FAILURE);
+	    }
+	    fclose (ndef_stream);
+	}
+    }
+    printf ("NDEF file is %zu bytes long.\n", ndef_msg_len);
 
     nfc_connstring devices[8];
     size_t device_count;
@@ -172,11 +220,13 @@ main(int argc, char *argv[])
 // Steps not implemented at this stage:
 // Read and parse CC (E103)
 // - Read NDEF file pointer (can be != E104)
+                uint8_t file_no = 0x04;
 // - Check available space for storing NDEF
+//              ndef_msg_len + 2 <= max_len ?
 // - Check is writing is allowed and propose to overrule it if needed
 
 		//Mifare DESFire WriteData to write the content of the NDEF File with NLEN equal to NDEF Message length and NDEF Message
-		res = mifare_desfire_write_data(tags[i], 0x04, 0, sizeof(ndef_msg), (uint8_t *) ndef_msg);
+		res = mifare_desfire_write_data(tags[i], file_no, 0, ndef_msg_len, (uint8_t *) ndef_msg);
 		if (res < 0)
 		    errx (EXIT_FAILURE, " Write data failed");
 
