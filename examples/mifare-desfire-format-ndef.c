@@ -79,7 +79,7 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
-	    printf ("Found %s with UID %s.  Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    printf ("Found %s with UID %s.  Format as NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
 	    fgets (buffer, BUFSIZ, stdin);
 	    bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 
@@ -161,10 +161,11 @@ main(int argc, char *argv[])
 		    0x10,                       // Mapping version
 		    0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
 		    0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
-		    0x04, 0x06, 0xE1, 0x04,     // TLV
-		    0x0E, 0xE0,                 // NDEF File size
-		    0x00,                       // free read access
-		    0x00                        // free write acces
+		    0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
+		    0xE1, 0x04,                 //   File Identifier of NDEF File
+		    0x0E, 0xE0,                 //   Maximum NDEF File size of 3808 bytes
+		    0x00,                       //   free read access
+		    0x00                        //   free write acces
 		};
 		res = mifare_desfire_write_data(tags[i],0x03,0,sizeof(capability_container_file_content),capability_container_file_content);
 		if (res>0){
