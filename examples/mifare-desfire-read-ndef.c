@@ -53,6 +53,7 @@ struct {
 void
 usage(char *progname)
 {
+    fprintf (stderr, "This application reads a NDEF payload from a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
     fprintf (stderr, "usage: %s [-y] -o FILE [-k 11223344AABBCCDD]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -y     Do not ask for confirmation\n");
@@ -99,8 +100,6 @@ main(int argc, char *argv[])
         }
     }
     // Remaining args, if any, are in argv[optind .. (argc-1)]
-
-    printf ("NOTE: This application reads a NDEF payload from a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
 
     if (ndef_output == NULL) {
 	usage (argv[0]);
@@ -156,11 +155,11 @@ main(int argc, char *argv[])
 
 	    bool read_ndef = true;
 	    if (read_options.interactive) {
-		printf ("Read NDEF [yN] ");
+		fprintf (message_stream, "Read NDEF [yN] ");
 		fgets (buffer, BUFSIZ, stdin);
 		read_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 	    } else {
-		printf ("\n");
+		fprintf (message_stream, "\n");
 	    }
 
 	    if (read_ndef) {

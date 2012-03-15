@@ -49,6 +49,7 @@ struct {
 void
 usage(char *progname)
 {
+    fprintf (stderr, "This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
     fprintf (stderr, "usage: %s [-y] [-K 11223344AABBCCDD]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -y     Do not ask for confirmation\n");
@@ -90,8 +91,6 @@ main(int argc, char *argv[])
         }
     }
     // Remaining args, if any, are in argv[optind .. (argc-1)]
-
-    printf ("NOTE: This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");
 
     nfc_connstring devices[8];
     size_t device_count;

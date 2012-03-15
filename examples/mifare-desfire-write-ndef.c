@@ -61,6 +61,7 @@ struct {
 void
 usage(char *progname)
 {
+    fprintf (stderr, "This application writes a NDEF payload into a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
     fprintf (stderr, "usage: %s [-y] -i FILE [-k 11223344AABBCCDD]\n", progname);
     fprintf (stderr, "\nOptions:\n");
     fprintf (stderr, "  -y     Do not ask for confirmation\n");
@@ -108,10 +109,7 @@ main(int argc, char *argv[])
     }
     // Remaining args, if any, are in argv[optind .. (argc-1)]
 
-    printf ("NOTE: This application writes a NDEF payload into a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
-
     if (ndef_input == NULL) {
-        ndef_msg = (uint8_t*)ndef_default_msg;
         ndef_msg_len = sizeof(ndef_default_msg) + 2;
         if (!(ndef_msg = malloc (ndef_msg_len))) {
             err (EXIT_FAILURE, "malloc");
@@ -243,8 +241,6 @@ main(int argc, char *argv[])
 		uint8_t file_no = cc_data[off+3];
 		uint16_t ndefmaxlen = (((uint16_t) cc_data[off+4]) << 8) + ((uint16_t) cc_data[off+5]);
 		fprintf (stdout, "Max NDEF size: %i bytes\n", ndefmaxlen);
-		if (!(ndef_msg = malloc(ndefmaxlen)))
-		    errx (EXIT_FAILURE, "malloc");
 		if (ndef_msg_len > ndefmaxlen)
 		    errx (EXIT_FAILURE, "Supplied NDEF larger than max NDEF size");
 

@@ -151,11 +151,11 @@ main(int argc, char *argv[])
 
 	    bool read_ndef = true;
 	    if (read_options.interactive) {
-		printf ("Read NDEF [yN] ");
+		fprintf (message_stream, "Read NDEF [yN] ");
 		fgets (buffer, BUFSIZ, stdin);
 		read_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 	    } else {
-		printf ("\n");
+		fprintf (message_stream, "\n");
 	    }
 
 	    if (read_ndef) {
