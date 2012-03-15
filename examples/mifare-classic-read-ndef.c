@@ -47,11 +47,18 @@
 
 #define MIN(a,b) ((a < b) ? a: b)
 
+struct {
+    bool interactive;
+} read_options = {
+    .interactive = true
+};
+
 void
 usage(char *progname)
 {
     fprintf (stderr, "usage: %s -o FILE\n", progname);
     fprintf (stderr, "\nOptions:\n");
+    fprintf (stderr, "  -y     Do not ask for confirmation\n");
     fprintf (stderr, "  -o     Extract NDEF message if available in FILE\n");
 }
 
@@ -65,13 +72,16 @@ main(int argc, char *argv[])
 
     int ch;
     char *ndef_output = NULL;
-    while ((ch = getopt (argc, argv, "ho:")) != -1) {
+    while ((ch = getopt (argc, argv, "hyo:")) != -1) {
 	switch (ch) {
 	case 'h':
 	    usage(argv[0]);
 	    exit (EXIT_SUCCESS);
 	    break;
-        case 'o':
+	case 'y':
+	    read_options.interactive = false;
+	    break;
+	case 'o':
 	    ndef_output = optarg;
 	    break;
 	case '?':
@@ -137,9 +147,16 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
-	    fprintf (message_stream, "Found %s with UID %s. Read NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	    fgets (buffer, BUFSIZ, stdin);
-	    bool read_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    fprintf (message_stream, "Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+
+	    bool read_ndef = true;
+	    if (read_options.interactive) {
+		printf ("Read NDEF [yN] ");
+		fgets (buffer, BUFSIZ, stdin);
+		read_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    } else {
+		printf ("\n");
+	    }
 
 	    if (read_ndef) {
 		// NFCForum card has a MAD, load it.

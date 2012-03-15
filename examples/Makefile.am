@@ -13,6 +13,7 @@ bin_PROGRAMS = mifare-classic-format \
 	       mifare-desfire-ev1-configure-random-uid \
 	       mifare-desfire-format \
 	       mifare-desfire-info \
+	       mifare-desfire-read-ndef \
 	       mifare-desfire-write-ndef
 
 mifare_classic_format_SOURCES = mifare-classic-format.c
@@ -44,6 +45,9 @@ mifare_desfire_format_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la
 
 mifare_desfire_info_SOURCES = mifare-desfire-info.c
 mifare_desfire_info_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la -lm
+
+mifare_desfire_read_ndef_SOURCES = mifare-desfire-read-ndef.c
+mifare_desfire_read_ndef_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la
 
 mifare_desfire_write_ndef_SOURCES = mifare-desfire-write-ndef.c
 mifare_desfire_write_ndef_LDADD = -lnfc $(top_builddir)/libfreefare/libfreefare.la

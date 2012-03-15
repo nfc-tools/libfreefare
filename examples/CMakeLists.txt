@@ -1,11 +1,13 @@
 # $Id$
 set(EXAMPLES-SOURCES
         mifare-classic-format
+        mifare-classic-read-ndef
         mifare-classic-write-ndef
         mifare-desfire-access
         mifare-desfire-create-ndef
         mifare-desfire-format
         mifare-desfire-info
+        mifare-desfire-read-ndef
         mifare-desfire-write-ndef
         mifare-desfire-ev1-configure-ats
         mifare-desfire-ev1-configure-default-key
