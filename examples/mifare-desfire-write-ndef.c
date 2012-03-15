@@ -256,6 +256,7 @@ main(int argc, char *argv[])
 	    }
 	    free (tag_uid);
 	}
+	free (ndef_msg);
 	freefare_free_tags (tags);
 	nfc_close (device);
     }

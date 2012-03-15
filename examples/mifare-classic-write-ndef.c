@@ -179,6 +179,7 @@ main(int argc, char *argv[])
 	    if (fread (ndef_msg, 1, ndef_msg_len, ndef_stream) != ndef_msg_len) {
 		fprintf (stderr, "Could not read NDEF from file: %s\n", ndef_input);
 		fclose (ndef_stream);
+		free (ndef_msg);
 		exit (EXIT_FAILURE);
 	    }
 	    fclose (ndef_stream);
@@ -400,6 +401,8 @@ error:
 	    free (tag_uid);
 	}
 
+	if (ndef_msg != ndef_default_msg)
+	    free (ndef_msg);
 	freefare_free_tags (tags);
 	nfc_close (device);
     }
