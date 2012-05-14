@@ -571,7 +571,7 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		/* Single block */
 		crc_pos = 0;
 	    }
-	    memmove (res + crc_pos + 1, res + crc_pos, *nbytes - crc_pos);
+	    memmove ((uint8_t *)res + crc_pos + 1, (uint8_t *)res + crc_pos, *nbytes - crc_pos);
 	    ((uint8_t *)res)[crc_pos] = 0x00;
 	    crc_pos++;
 	    *nbytes += 1;
