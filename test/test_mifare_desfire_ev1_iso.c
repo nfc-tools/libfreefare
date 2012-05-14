@@ -35,7 +35,6 @@ void
 test_mifare_desfire_ev1_iso (void)
 {
     int res;
-    MifareDESFireKey key;
 
     mifare_desfire_auto_authenticate (tag, 0);
 
