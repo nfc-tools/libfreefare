@@ -315,11 +315,11 @@ mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t o
 	/*
 	 * When using new authentication methods, PLAIN data transmission from
 	 * the PICC to the PCD are CMACed, so we have to maintain the
-	 * cruptographic initialisation vector up-to-date to chaeck data
+	 * cryptographic initialisation vector up-to-date to check data
 	 * integrity later.
 	 *
 	 * The only difference with CMACed data transmission is that the CMAC
-	 * is not addpended to the data send byt the PCD to the PICC.
+	 * is not apended to the data send by the PCD to the PICC.
 	 */
 
 	append_mac = false;
