@@ -130,7 +130,7 @@ freefare_get_tags (nfc_device *device)
 
     // Poll for a ISO14443A (MIFARE) tag
     nfc_target candidates[MAX_CANDIDATES];
-    size_t candidates_count;
+    int candidates_count;
     nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
@@ -142,7 +142,7 @@ freefare_get_tags (nfc_device *device)
     if(!tags) return NULL;
     tags[0] = NULL;
 
-    for (size_t c = 0; c < candidates_count; c++) {
+    for (int c = 0; c < candidates_count; c++) {
 	MifareTag t;
 	if ((t = freefare_tag_new(device, candidates[c].nti.nai))) {
 	    /* (Re)Allocate memory for the found MIFARE targets array */
