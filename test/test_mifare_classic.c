@@ -100,6 +100,61 @@ test_mifare_classic_get_trailer_permission (void)
 }
 
 void
+test_mifare_classic_format_first_sector (void)
+{
+    int res;
+
+    MifareClassicKey k = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+    res = mifare_classic_authenticate (tag, 0x00, k, MFC_KEY_A);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
+
+    MifareClassicBlock data = {
+	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+	0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+    };
+
+    MifareClassicBlock empty;
+    memset (empty, '\x00', sizeof (empty));
+
+    MifareClassicBlock b0;
+    res = mifare_classic_read (tag, 0x00, &b0);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
+
+    res = mifare_classic_write (tag, 0x00, data);
+    cut_assert_equal_int (-1, res, cut_message ("mifare_classic_write() succeeded"));
+
+    res = mifare_classic_disconnect (tag);
+    res = mifare_classic_connect (tag);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_connect() failed"));
+    res = mifare_classic_authenticate (tag, 0x00, k, MFC_KEY_A);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_authenticate() failed"));
+
+    res = mifare_classic_write (tag, 0x01, data);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_write() failed"));
+    res = mifare_classic_write (tag, 0x02, data);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_write() failed"));
+
+    res = mifare_classic_format_sector (tag, 0x00);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_format_sector() failed"));
+
+    res = mifare_classic_read (tag, 0x00, &data);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
+    cut_assert_equal_memory (data, sizeof (data), b0, sizeof (b0), cut_message ("Data changed in first block (block 1/3)"));
+
+    res = mifare_classic_read (tag, 0x01, &data);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
+    cut_assert_equal_memory (data, sizeof (data), empty, sizeof (data), cut_message ("Wrong data in formatted sector (block 2/3)"));
+
+    res = mifare_classic_read (tag, 0x02, &data);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
+    cut_assert_equal_memory (data, sizeof (data), empty, sizeof (data), cut_message ("Wrong data in formatted sector (block 3/3)"));
+
+    res = mifare_classic_read (tag, 0x03, &data);
+    cut_assert_equal_int (0, res, cut_message ("mifare_classic_read() failed"));
+    cut_assert_equal_memory (data, sizeof (data),  "\x00\x00\x00\x00\x00\x00\xff\x07\x80\x69\xff\xff\xff\xff\xff\xff", sizeof (data), cut_message ("Wrong permissions in formatted sector"));
+}
+
+void
 test_mifare_classic_format (void)
 {
     int res;
