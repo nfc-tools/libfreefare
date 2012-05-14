@@ -1329,7 +1329,7 @@ create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
-    if (iso_file_id)
+    if (has_iso_file_id)
 	BUFFER_APPEND_LE (cmd, iso_file_id, sizeof (iso_file_id), sizeof (iso_file_id));
     BUFFER_APPEND (cmd, communication_settings);
     BUFFER_APPEND_LE (cmd, access_rights, 2, sizeof (uint16_t));
