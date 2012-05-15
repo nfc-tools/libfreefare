@@ -33,6 +33,7 @@
  * Mifare DESFire as Type 4 Tag
  * NFC Forum Type 4 Tag Extensions for Mifare DESFire
  * Rev. 1.1 - 21 August 2007
+ * Rev. 2.2 - 4 January 2012
  *
  */
 
@@ -172,11 +173,26 @@ main(int argc, char *argv[])
 		    break;
 		}
 
+		// We've to track DESFire version as NDEF mapping is different
+		struct mifare_desfire_version_info info;
+		res = mifare_desfire_get_version (tags[i], &info);
+		if (res < 0) {
+		    freefare_perror (tags[i], "mifare_desfire_get_version");
+		    error = 1;
+		    break;
+		}
+
 		MifareDESFireKey key_app;
 		key_app  = mifare_desfire_des_key_new_with_version (key_data_app);
 
 		// Mifare DESFire SelectApplication (Select application)
-		MifareDESFireAID aid = mifare_desfire_aid_new(0xEEEE10);
+		MifareDESFireAID aid;
+		if (info.software.version_major==0)
+		    aid = mifare_desfire_aid_new(0xEEEE10);
+		else
+		    // There is no more relationship between DESFire AID and ISO AID...
+		    // Let's assume it's in AID 000001h as proposed in the spec
+		    aid = mifare_desfire_aid_new(0x000001);
 		res = mifare_desfire_select_application(tags[i], aid);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Application selection failed. Try mifare-desfire-create-ndef before running %s.", argv[0]);
@@ -189,7 +205,12 @@ main(int argc, char *argv[])
 
 		// Read Capability Container file E103
 		uint8_t lendata[2];
-		res = mifare_desfire_read_data (tags[i], 0x03, 0, 2, lendata);
+		if (info.software.version_major==0)
+		    res = mifare_desfire_read_data (tags[i], 0x03, 0, 2, lendata);
+		else
+		    // There is no more relationship between DESFire FID and ISO FileID...
+		    // Let's assume it's in FID 01h as proposed in the spec
+		    res = mifare_desfire_read_data (tags[i], 0x01, 0, 2, lendata);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Read CC len failed");
 		uint16_t cclen = (((uint16_t) lendata[0]) << 8) + ((uint16_t) lendata[1]);
@@ -197,7 +218,10 @@ main(int argc, char *argv[])
 		    errx (EXIT_FAILURE, "CC too short IMHO");
 		if (!(cc_data = malloc(cclen)))
 		    errx (EXIT_FAILURE, "malloc");
-		res = mifare_desfire_read_data (tags[i], 0x03, 0, cclen, cc_data);
+		if (info.software.version_major==0)
+		    res = mifare_desfire_read_data (tags[i], 0x03, 0, cclen, cc_data);
+		else
+		    res = mifare_desfire_read_data (tags[i], 0x01, 0, cclen, cc_data);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Read CC data failed");
 		// Search NDEF File Control TLV
@@ -210,7 +234,13 @@ main(int argc, char *argv[])
 		    errx (EXIT_FAILURE, "CC does not contain expected NDEF File Control TLV");
 		if (cc_data[off+2] != 0xE1)
 		    errx (EXIT_FAILURE, "Unknown NDEF File reference in CC");
-		uint8_t file_no = cc_data[off+3];
+		uint8_t file_no;
+		if (info.software.version_major==0)
+		    file_no = cc_data[off+3];
+		else
+		    // There is no more relationship between DESFire FID and ISO FileID...
+		    // Let's assume it's in FID 02h as proposed in the spec
+		    file_no = 2;
 		uint16_t ndefmaxlen = (((uint16_t) cc_data[off+4]) << 8) + ((uint16_t) cc_data[off+5]);
 		fprintf (message_stream, "Max NDEF size: %i bytes\n", ndefmaxlen);
 		if (!(ndef_msg = malloc(ndefmaxlen)))

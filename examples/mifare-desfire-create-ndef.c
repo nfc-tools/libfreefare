@@ -179,10 +179,6 @@ main(int argc, char *argv[])
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with PICC master key failed");
 
-		// TODO
-		if (info.software.version_major > 0)
-		    errx (EXIT_FAILURE, "Not implemented yet, sorry!");
-
 		uint8_t key_settings;
 		uint8_t max_keys;
 		mifare_desfire_get_key_settings(tags[i], &key_settings,&max_keys);
@@ -199,62 +195,124 @@ main(int argc, char *argv[])
 			errx (EXIT_FAILURE, "ChangeKeySettings failed");
 		}
 
-		// Mifare DESFire Create Application with AID equal to EEEE10h, key settings equal to 09, NumOfKeys equal to 01h
-		MifareDESFireAID aid = mifare_desfire_aid_new(0xEEEE10);
-		res = mifare_desfire_create_application (tags[i], aid, 0x09, 1);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "Application creation failed. Try mifare-desfire-format before running %s.", argv[0]);
-
-		// Mifare DESFire SelectApplication (Select previously creates application)
-		res = mifare_desfire_select_application(tags[i], aid);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "Application selection failed");
-		free (aid);
-
-		// Authentication with NDEF Tag Application master key (Authentication with key 0)
-		res = mifare_desfire_authenticate (tags[i], 0, key_app);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
-		// Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
-		res = mifare_desfire_change_key_settings (tags[i],0x09);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "ChangeKeySettings failed");
-
-		// Mifare DESFire CreateStdDataFile with FileNo equal to 03h (CC File DESFire FID), ComSet equal to 00h,
-		// AccesRights equal to E000h, File Size bigger equal to 00000Fh
-		res = mifare_desfire_create_std_data_file(tags[i],0x03,0x00,0xE000,0x00000F);
-		if (res < 0)
-		    errx (EXIT_FAILURE, "CreateStdDataFile failed");
-
-		// Mifare DESFire WriteData to write the content of the CC File with CClEN equal to 000Fh,
-		// Mapping Version equal to 10h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
-		// equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0E E0 (NDEF File size =3808 Bytes) 00 (free read access)
-		// 00 free write access
-		uint8_t capability_container_file_content[15] = {
-		    0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
-		    0x10,                       // Mapping version
-		    0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
-		    0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
-		    0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
-		    0xE1, 0x04,                 //   File Identifier of NDEF File
-		    0x0E, 0xE0,                 //   Maximum NDEF File size of 3808 bytes
-		    0x00,                       //   free read access
-		    0x00                        //   free write acces
-		};
-		res = mifare_desfire_write_data(tags[i],0x03,0,sizeof(capability_container_file_content),capability_container_file_content);
-		if (res>0){
-
-		    // Mifare DESFire CreateStdDataFile with FileNo equal to 04h (NDEF FileDESFire FID), CmmSet equal to 00h, AccessRigths
-		    // equal to EEE0h, FileSize equal to 000EE0h (3808 Bytes)
-		    res = mifare_desfire_create_std_data_file(tags[i],0x04,0x00,0xEEE0,0x000EE0);
+		MifareDESFireAID aid;
+		if (ndef_mapping == 1) {
+		    // Mifare DESFire Create Application with AID equal to EEEE10h, key settings equal to 0x09, NumOfKeys equal to 01h
+		    aid = mifare_desfire_aid_new(0xEEEE10);
+		    res = mifare_desfire_create_application (tags[i], aid, 0x09, 1);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "Application creation failed. Try mifare-desfire-format before running %s.", argv[0]);
+		    // Mifare DESFire SelectApplication (Select previously creates application)
+		    res = mifare_desfire_select_application(tags[i], aid);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "Application selection failed");
+		    free (aid);
+		    // Authentication with NDEF Tag Application master key (Authentication with key 0)
+		    res = mifare_desfire_authenticate (tags[i], 0, key_app);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
+		    // Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
+		    res = mifare_desfire_change_key_settings (tags[i],0x09);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "ChangeKeySettings failed");
+		    // Mifare DESFire CreateStdDataFile with FileNo equal to 03h (CC File DESFire FID), ComSet equal to 00h,
+		    // AccesRights equal to E000h, File Size bigger equal to 00000Fh
+		    res = mifare_desfire_create_std_data_file(tags[i],0x03,MDCM_PLAIN,0xE000,0x00000F);
 		    if (res < 0)
 			errx (EXIT_FAILURE, "CreateStdDataFile failed");
-		} else {
-		    errx (EXIT_FAILURE, "Write CC file content failed");
+		    // Mifare DESFire WriteData to write the content of the CC File with CClEN equal to 000Fh,
+		    // Mapping Version equal to 10h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
+		    // equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0E E0 (NDEF File size =3808 Bytes) 00 (free read access)
+		    // 00 free write access
+		    uint8_t capability_container_file_content[15] = {
+			0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
+			0x10,                       // Mapping version
+			0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
+			0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
+			0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
+			0xE1, 0x04,                 //   File Identifier of NDEF File
+			0x0E, 0xE0,                 //   Maximum NDEF File size of 3808 bytes
+			0x00,                       //   free read access
+			0x00                        //   free write acces
+		    };
+		    res = mifare_desfire_write_data(tags[i],0x03,0,sizeof(capability_container_file_content),capability_container_file_content);
+		    if (res>0){
+			// Mifare DESFire CreateStdDataFile with FileNo equal to 04h (NDEF FileDESFire FID), CmmSet equal to 00h, AccessRigths
+			// equal to EEE0h, FileSize equal to 000EE0h (3808 Bytes)
+			res = mifare_desfire_create_std_data_file(tags[i],0x04,MDCM_PLAIN,0xEEE0,0x000EE0);
+			if (res < 0)
+			    errx (EXIT_FAILURE, "CreateStdDataFile failed");
+		    } else {
+			errx (EXIT_FAILURE, "Write CC file content failed");
+		    }
+		}
+		else if (ndef_mapping == 2) {
+		    // Mifare DESFire Create Application with AID equal to 000001h, key settings equal to 0x0F, NumOfKeys equal to 01h,
+		    // 2 bytes File Identifiers supported, File-ID equal to E110h
+		    aid = mifare_desfire_aid_new(0x000001);
+		    uint8_t app[] = {0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01};
+		    res = mifare_desfire_create_application_iso (tags[i], aid, 0x0F, 0x21, 0, 0xE110, app, sizeof (app));
+		    if (res < 0)
+			errx (EXIT_FAILURE, "Application creation failed. Try mifare-desfire-format before running %s.", argv[0]);
+		    // Mifare DESFire SelectApplication (Select previously creates application)
+		    res = mifare_desfire_select_application(tags[i], aid);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "Application selection failed");
+		    free (aid);
+		    // Authentication with NDEF Tag Application master key (Authentication with key 0)
+		    res = mifare_desfire_authenticate (tags[i], 0, key_app);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
+		    // Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
+		    res = mifare_desfire_change_key_settings (tags[i],0x09);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "ChangeKeySettings failed");
+		    // Mifare DESFire CreateStdDataFile with FileNo equal to 01h (DESFire FID), ComSet equal to 00h,
+		    // AccesRights equal to E000h, File Size bigger equal to 00000Fh, ISO File ID equal to E103h
+		    res = mifare_desfire_create_std_data_file_iso(tags[i],0x01,MDCM_PLAIN,0xE000,0x00000F,0xE103);
+		    if (res < 0)
+			errx (EXIT_FAILURE, "CreateStdDataFileIso failed");
+		    // Mifare DESFire WriteData to write the content of the CC File with CClEN equal to 000Fh,
+		    // Mapping Version equal to 20h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
+		    // equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0xNNNN (NDEF File size = 0x0800/0x1000/0x1E00 bytes)
+		    // 00 (free read access) 00 free write access
+		    uint8_t capability_container_file_content[15] = {
+			0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
+			0x20,                       // Mapping version
+			0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
+			0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
+			0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
+			0xE1, 0x04,                 //   File Identifier of NDEF File
+			0x08, 0x00,                 //   Maximum NDEF File size of 2048 bytes
+			0x00,                       //   free read access
+			0x00                        //   free write acces
+		    };
+// TODO adapt max size
+		    res = mifare_desfire_write_data(tags[i],0x01,0,sizeof(capability_container_file_content),capability_container_file_content);
+		    if (res>0){
+			// Mifare DESFire CreateStdDataFile with FileNo equal to 02h (DESFire FID), CmmSet equal to 00h, AccessRigths
+			// equal to EEE0h, FileSize equal to 000800h (2048 Bytes)
+// TODO adapt max size
+			res = mifare_desfire_create_std_data_file_iso(tags[i],0x02,MDCM_PLAIN,0xEEE0,0x000800, 0xE104);
+			if (res < 0)
+			    errx (EXIT_FAILURE, "CreateStdDataFileIso failed");
+
+/*
+			uint8_t ndef_test[19] = {
+			    0x00, 0x11, 0xd1, 0x02, 0x0c, 0x53, 0x70, 0xd1, 0x01, 0x08, 0x55, 0x01, 0x6e, 0x78, 0x70, 0x2e, 0x63, 0x6f, 0x6d
+			};
+			res = mifare_desfire_write_data(tags[i],0x02,0,sizeof(ndef_test),ndef_test);
+			if (res < 0)
+			    errx (EXIT_FAILURE, "WriteStdDataFileIso failed");
+*/
+
+
+		    } else {
+			errx (EXIT_FAILURE, "Write CC file content failed");
+		    }
 		}
 		mifare_desfire_key_free (key_picc);
 		mifare_desfire_key_free (key_app);
-
 	    }
 	    mifare_desfire_disconnect (tags[i]);
 	    free (tag_uid);
