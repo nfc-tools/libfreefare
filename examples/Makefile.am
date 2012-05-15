@@ -1,6 +1,7 @@
 # $Id$
 
 AM_CFLAGS = -I. -I$(top_srcdir)/libfreefare @LIBNFC_CFLAGS@
+AM_LDFLAGS = @LIBNFC_LIBS@
 
 bin_PROGRAMS = mifare-classic-format \
 	       mifare-classic-write-ndef \
