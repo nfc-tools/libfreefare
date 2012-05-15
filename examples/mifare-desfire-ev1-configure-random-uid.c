@@ -112,9 +112,30 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
+	    int res;
+
+	    res = mifare_desfire_connect (tags[i]);
+	    if (res < 0) {
+		warnx ("Can't connect to Mifare DESFire target.");
+		error = EXIT_FAILURE;
+		break;
+	    }
+
+	    // Make sure we've at least an EV1 version
+	    struct mifare_desfire_version_info info;
+	    res = mifare_desfire_get_version (tags[i], &info);
+	    if (res < 0) {
+		freefare_perror (tags[i], "mifare_desfire_get_version");
+		error = 1;
+		break;
+	    }
+	    if (info.software.version_major < 1) {
+		warnx ("Found old DESFire, skipping");
+		continue;
+	    }
+
 	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
 	    bool do_it = true;
-	    int res;
 
 	    size_t tag_uid_len = strlen (tag_uid) / 2;
 	    switch (tag_uid_len) {
@@ -128,13 +149,6 @@ main(int argc, char *argv[])
 		}
 
 		if (do_it) {
-
-		    res = mifare_desfire_connect (tags[i]);
-		    if (res < 0) {
-			warnx ("Can't connect to Mifare DESFire target.");
-			error = EXIT_FAILURE;
-			break;
-		    }
 
 		    MifareDESFireKey key_picc = mifare_desfire_des_key_new_with_version (key_data_picc);
 		    res = mifare_desfire_authenticate (tags[i], 0, key_picc);
@@ -151,19 +165,10 @@ main(int argc, char *argv[])
 			error = EXIT_FAILURE;
 			break;
 		    }
-
-		    mifare_desfire_disconnect (tags[i]);
 		}
 		break;
 	    case 4: // Random UID
-
-		res = mifare_desfire_connect (tags[i]);
-		if (res < 0) {
-		    warnx ("Can't connect to Mifare DESFire target.");
-		    error = EXIT_FAILURE;
-		    break;
-		}
-
+		{} // Compilation fails if label is directly followed by the declaration rather than a statement
 		MifareDESFireKey key_picc = mifare_desfire_des_key_new_with_version (key_data_picc);
 		res = mifare_desfire_authenticate (tags[i], 0, key_picc);
 		if (res < 0) {
@@ -184,7 +189,6 @@ main(int argc, char *argv[])
 		printf ("Old card UID: %s\n", old_tag_uid);
 		free (old_tag_uid);
 
-		mifare_desfire_disconnect (tags[i]);
 		break;
 	    default: // Should not happen
 		warnx ("Unsupported UID length %d.", (int) tag_uid_len);
@@ -192,6 +196,7 @@ main(int argc, char *argv[])
 		break;
 	    }
 
+	    mifare_desfire_disconnect (tags[i]);
 	    free (tag_uid);
 	}
 

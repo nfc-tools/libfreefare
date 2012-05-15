@@ -102,9 +102,30 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
+	    int res;
+
+	    res = mifare_desfire_connect (tags[i]);
+	    if (res < 0) {
+		warnx ("Can't connect to Mifare DESFire target.");
+		error = EXIT_FAILURE;
+		break;
+	    }
+
+	    // Make sure we've at least an EV1 version
+	    struct mifare_desfire_version_info info;
+	    res = mifare_desfire_get_version (tags[i], &info);
+	    if (res < 0) {
+		freefare_perror (tags[i], "mifare_desfire_get_version");
+		error = 1;
+		break;
+	    }
+	    if (info.software.version_major < 1) {
+		warnx ("Found old DESFire, skipping");
+		continue;
+	    }
+
 	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
 	    bool do_it = true;
-	    int res;
 
 	    if (configure_options.interactive) {
 		printf ("Change default key? [yN] ");
@@ -115,13 +136,6 @@ main(int argc, char *argv[])
 	    }
 
 	    if (do_it) {
-
-		res = mifare_desfire_connect (tags[i]);
-		if (res < 0) {
-		    warnx ("Can't connect to Mifare DESFire target.");
-		    error = EXIT_FAILURE;
-		    break;
-		}
 
 		MifareDESFireKey default_key = mifare_desfire_des_key_new_with_version (null_key_data);
 		res = mifare_desfire_authenticate (tags[i], 0, default_key);
@@ -224,9 +238,9 @@ main(int argc, char *argv[])
 		    break;
 		}
 
-		mifare_desfire_disconnect (tags[i]);
 	    }
 
+	    mifare_desfire_disconnect (tags[i]);
 	    free (tag_uid);
 	}
 
