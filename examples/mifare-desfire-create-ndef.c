@@ -30,9 +30,10 @@
  * This example was written based on information provided by the
  * following documents:
  *
- * Mifare DESFire as Type 4 Tag
+ * AN11004 Mifare DESFire as Type 4 Tag
  * NFC Forum Type 4 Tag Extensions for Mifare DESFire
  * Rev. 1.1 - 21 August 2007
+ * Rev. 2.2 - 4 January 2012
  *
  */
 
@@ -122,11 +123,38 @@ main(int argc, char *argv[])
 
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
+	    int res;
 
-	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
+	    res = mifare_desfire_connect (tags[i]);
+	    if (res < 0) {
+		warnx ("Can't connect to Mifare DESFire target.");
+		error = EXIT_FAILURE;
+		break;
+	    }
+
+	    // We've to track DESFire version as NDEF mapping is different
+	    struct mifare_desfire_version_info info;
+	    res = mifare_desfire_get_version (tags[i], &info);
+	    if (res < 0) {
+		freefare_perror (tags[i], "mifare_desfire_get_version");
+		error = 1;
+		break;
+	    }
+
+	    printf ("Found %s with UID %s and software v%d.%d\n", freefare_get_tag_friendly_name (tags[i]), tag_uid, info.software.version_major, info.software.version_minor);
 	    bool create_ndef = true;
+	    int ndef_mapping;
+	    switch (info.software.version_major) {
+	    case 0:
+		ndef_mapping = 1;
+		break;
+	    case 1:
+		ndef_mapping = 2;
+	    default: // newer version? let's assume it supports latest mapping too
+		ndef_mapping = 2;
+	    }
 	    if (create_options.interactive) {
-		printf ("Create NDEF app [yN] ");
+		printf ("Create NDEF app v%d [yN] ", ndef_mapping);
 		fgets (buffer, BUFSIZ, stdin);
 		create_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 	    } else {
@@ -134,14 +162,6 @@ main(int argc, char *argv[])
 	    }
 
 	    if (create_ndef) {
-		int res;
-
-		res = mifare_desfire_connect (tags[i]);
-		if (res < 0) {
-		    warnx ("Can't connect to Mifare DESFire target.");
-		    error = EXIT_FAILURE;
-		    break;
-		}
 
 		/* Initialised Formatting Procedure. See section 6.5.1 and 8.1 of Mifare DESFire as Type 4 Tag document*/
 		// Send Mifare DESFire Select Application with AID equal to 000000h to select the PICC level
@@ -158,6 +178,10 @@ main(int argc, char *argv[])
 		res = mifare_desfire_authenticate (tags[i], 0, key_picc);
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with PICC master key failed");
+
+		// TODO
+		if (info.software.version_major > 0)
+		    errx (EXIT_FAILURE, "Not implemented yet, sorry!");
 
 		uint8_t key_settings;
 		uint8_t max_keys;
@@ -231,8 +255,8 @@ main(int argc, char *argv[])
 		mifare_desfire_key_free (key_picc);
 		mifare_desfire_key_free (key_app);
 
-		mifare_desfire_disconnect (tags[i]);
 	    }
+	    mifare_desfire_disconnect (tags[i]);
 	    free (tag_uid);
 	}
 	freefare_free_tags (tags);
