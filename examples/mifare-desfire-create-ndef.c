@@ -179,24 +179,23 @@ main(int argc, char *argv[])
 		if (res < 0)
 		    errx (EXIT_FAILURE, "Authentication with PICC master key failed");
 
-		uint8_t key_settings;
-		uint8_t max_keys;
-		mifare_desfire_get_key_settings(tags[i], &key_settings,&max_keys);
-		if ((key_settings & 0x08) == 0x08){
-
-		    // Send Mifare DESFire ChangeKeySetting to change the PICC master key settings into :
-		    // bit7-bit4 equal to 0000b
-		    // bit3 equal to Xb, the configuration of the PICC master key MAY be changeable or frozen
-		    // bit2 equal to 0b, CreateApplication and DeleteApplication commands are allowed with PICC master key authentication
-		    // bit1 equal to 0b, GetApplicationIDs, and GetKeySettings are allowed with PICC master key authentication
-		    // bit0 equal to Xb, PICC masterkey MAY be frozen or changeable
-		    res = mifare_desfire_change_key_settings (tags[i],0x09);
-		    if (res < 0)
-			errx (EXIT_FAILURE, "ChangeKeySettings failed");
-		}
-
 		MifareDESFireAID aid;
 		if (ndef_mapping == 1) {
+		    uint8_t key_settings;
+		    uint8_t max_keys;
+		    mifare_desfire_get_key_settings(tags[i], &key_settings,&max_keys);
+		    if ((key_settings & 0x08) == 0x08){
+
+			// Send Mifare DESFire ChangeKeySetting to change the PICC master key settings into :
+			// bit7-bit4 equal to 0000b
+			// bit3 equal to Xb, the configuration of the PICC master key MAY be changeable or frozen
+			// bit2 equal to 0b, CreateApplication and DeleteApplication commands are allowed with PICC master key authentication
+			// bit1 equal to 0b, GetApplicationIDs, and GetKeySettings are allowed with PICC master key authentication
+			// bit0 equal to Xb, PICC masterkey MAY be frozen or changeable
+			res = mifare_desfire_change_key_settings (tags[i],0x09);
+			if (res < 0)
+			    errx (EXIT_FAILURE, "ChangeKeySettings failed");
+		    }
 		    // Mifare DESFire Create Application with AID equal to EEEE10h, key settings equal to 0x09, NumOfKeys equal to 01h
 		    aid = mifare_desfire_aid_new(0xEEEE10);
 		    res = mifare_desfire_create_application (tags[i], aid, 0x09, 1);
@@ -263,10 +262,6 @@ main(int argc, char *argv[])
 		    res = mifare_desfire_authenticate (tags[i], 0, key_app);
 		    if (res < 0)
 			errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
-		    // Mifare DESFire ChangeKeySetting with key settings equal to 00001001b
-		    res = mifare_desfire_change_key_settings (tags[i],0x09);
-		    if (res < 0)
-			errx (EXIT_FAILURE, "ChangeKeySettings failed");
 		    // Mifare DESFire CreateStdDataFile with FileNo equal to 01h (DESFire FID), ComSet equal to 00h,
 		    // AccesRights equal to E000h, File Size bigger equal to 00000Fh, ISO File ID equal to E103h
 		    res = mifare_desfire_create_std_data_file_iso(tags[i],0x01,MDCM_PLAIN,0xE000,0x00000F,0xE103);
@@ -283,30 +278,25 @@ main(int argc, char *argv[])
 			0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
 			0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
 			0xE1, 0x04,                 //   File Identifier of NDEF File
-			0x08, 0x00,                 //   Maximum NDEF File size of 2048 bytes
+			0x04, 0x00,                 //   Maximum NDEF File size of 1024 bytes
 			0x00,                       //   free read access
 			0x00                        //   free write acces
 		    };
-// TODO adapt max size
+		    uint16_t ndefmaxsize = 0x0800;
+		    uint16_t announcedsize = 2 << ((info.software.storage_size >> 1) - 1);
+		    if (announcedsize >= 0x1000)
+			ndefmaxsize = 0x1000;
+		    if (announcedsize >= 0x1E00)
+			ndefmaxsize = 0x1E00;
+		    capability_container_file_content[11] = ndefmaxsize >> 8;
+		    capability_container_file_content[12] = ndefmaxsize & 0xFF;
 		    res = mifare_desfire_write_data(tags[i],0x01,0,sizeof(capability_container_file_content),capability_container_file_content);
 		    if (res>0){
 			// Mifare DESFire CreateStdDataFile with FileNo equal to 02h (DESFire FID), CmmSet equal to 00h, AccessRigths
-			// equal to EEE0h, FileSize equal to 000800h (2048 Bytes)
-// TODO adapt max size
-			res = mifare_desfire_create_std_data_file_iso(tags[i],0x02,MDCM_PLAIN,0xEEE0,0x000800, 0xE104);
+			// equal to EEE0h, FileSize equal to ndefmaxsize (0x000800, 0x001000 or 0x001E00)
+			res = mifare_desfire_create_std_data_file_iso(tags[i],0x02,MDCM_PLAIN,0xEEE0,ndefmaxsize, 0xE104);
 			if (res < 0)
 			    errx (EXIT_FAILURE, "CreateStdDataFileIso failed");
-
-/*
-			uint8_t ndef_test[19] = {
-			    0x00, 0x11, 0xd1, 0x02, 0x0c, 0x53, 0x70, 0xd1, 0x01, 0x08, 0x55, 0x01, 0x6e, 0x78, 0x70, 0x2e, 0x63, 0x6f, 0x6d
-			};
-			res = mifare_desfire_write_data(tags[i],0x02,0,sizeof(ndef_test),ndef_test);
-			if (res < 0)
-			    errx (EXIT_FAILURE, "WriteStdDataFileIso failed");
-*/
-
-
 		    } else {
 			errx (EXIT_FAILURE, "Write CC file content failed");
 		    }
