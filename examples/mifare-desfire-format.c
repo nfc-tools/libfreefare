@@ -141,6 +141,15 @@ main(int argc, char *argv[])
 		}
 		mifare_desfire_key_free (key_picc);
 
+		// Send Mifare DESFire ChangeKeySetting to change the PICC master key settings into :
+		// bit7-bit4 equal to 0000b
+		// bit3 equal to 1b, the configuration of the PICC master key MAY be changeable or frozen
+		// bit2 equal to 1b, CreateApplication and DeleteApplication commands are allowed without PICC master key authentication
+		// bit1 equal to 1b, GetApplicationIDs, and GetKeySettings are allowed without PICC master key authentication
+		// bit0 equal to 1b, PICC masterkey MAY be frozen or changeable
+		res = mifare_desfire_change_key_settings (tags[i],0x0F);
+		if (res < 0)
+		    errx (EXIT_FAILURE, "ChangeKeySettings failed");
 		res = mifare_desfire_format_picc (tags[i]);
 		if (res < 0) {
 		    warn ("Can't format PICC.");
