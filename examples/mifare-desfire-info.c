@@ -19,7 +19,6 @@
 
 #include <err.h>
 #include <errno.h>
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -92,14 +91,14 @@ main(int argc, char *argv[])
 	    printf ("    Type:                 0x%02x\n", info.hardware.type);
 	    printf ("    Subtype:              0x%02x\n", info.hardware.subtype);
 	    printf ("    Version:              %d.%d\n", info.hardware.version_major, info.hardware.version_minor);
-	    printf ("    Storage size:         0x%02x (%s%d bytes)\n", info.hardware.storage_size, (info.hardware.storage_size & 1) ? ">" : "=", (int)pow (2, info.hardware.storage_size >> 1));
+	    printf ("    Storage size:         0x%02x (%s%d bytes)\n", info.hardware.storage_size, (info.hardware.storage_size & 1) ? ">" : "=", 1 << (info.hardware.storage_size >> 1));
 	    printf ("    Protocol:             0x%02x\n", info.hardware.protocol);
 	    printf ("Software Information:\n");
 	    printf ("    Vendor ID:            0x%02x\n", info.software.vendor_id);
 	    printf ("    Type:                 0x%02x\n", info.software.type);
 	    printf ("    Subtype:              0x%02x\n", info.software.subtype);
 	    printf ("    Version:              %d.%d\n", info.software.version_major, info.software.version_minor);
-	    printf ("    Storage size:         0x%02x (%s%d bytes)\n", info.software.storage_size, (info.software.storage_size & 1) ? ">" : "=", (int)pow (2, info.software.storage_size >> 1));
+	    printf ("    Storage size:         0x%02x (%s%d bytes)\n", info.software.storage_size, (info.software.storage_size & 1) ? ">" : "=", 1 << (info.software.storage_size >> 1));
 	    printf ("    Protocol:             0x%02x\n", info.software.protocol);
 
 	    uint8_t settings;

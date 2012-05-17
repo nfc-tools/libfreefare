@@ -283,7 +283,7 @@ main(int argc, char *argv[])
 			0x00                        //   free write acces
 		    };
 		    uint16_t ndefmaxsize = 0x0800;
-		    uint16_t announcedsize = 2 << ((info.software.storage_size >> 1) - 1);
+		    uint16_t announcedsize = 1 << (info.software.storage_size >> 1);
 		    if (announcedsize >= 0x1000)
 			ndefmaxsize = 0x1000;
 		    if (announcedsize >= 0x1E00)
