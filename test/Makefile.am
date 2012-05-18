@@ -1,6 +1,6 @@
 # $Id$
 
-INCLUDES = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
+AM_CPPFLAGS = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
 LIBS = $(CUTTER_LIBS)
 
 SUBDIRS = common .
