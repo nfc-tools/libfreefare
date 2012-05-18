@@ -57,7 +57,7 @@ struct {
     .interactive = true
 };
 
-void
+static void
 display_progress (void)
 {
     at_block++;
