@@ -1626,13 +1626,13 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 }
 
 ssize_t
-mifare_desfire_write_data (MifareTag tag, uint8_t file_no, off_t offset, size_t length, void *data)
+mifare_desfire_write_data (MifareTag tag, uint8_t file_no, off_t offset, size_t length, const void *data)
 {
     return mifare_desfire_write_data_ex (tag, file_no, offset, length, data, madame_soleil_get_write_communication_settings (tag, file_no));
 }
 
 ssize_t
-mifare_desfire_write_data_ex (MifareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs)
+mifare_desfire_write_data_ex (MifareTag tag, uint8_t file_no, off_t offset, size_t length, const void *data, int cs)
 {
     return write_data (tag, 0x3D, file_no, offset, length, data, cs);
 }
