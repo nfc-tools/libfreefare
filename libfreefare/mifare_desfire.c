@@ -103,7 +103,7 @@ static bool cached_file_settings_current[MAX_FILE_COUNT];
 static int	 authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key);
 static int	 create_file1 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
 static int	 create_file2 (MifareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
-static ssize_t	 write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
+static ssize_t	 write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, const void *data, int cs);
 static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
 
 #define NOT_YET_AUTHENTICATED 255
@@ -1564,7 +1564,7 @@ mifare_desfire_read_data_ex (MifareTag tag, uint8_t file_no, off_t offset, size_
 }
 
 static ssize_t
-write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, void *data, int cs)
+write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t length, const void *data, int cs)
 {
     size_t bytes_left;
     size_t bytes_send = 0;
