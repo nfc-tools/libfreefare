@@ -116,7 +116,7 @@ fix_mad_trailer_block (nfc_device *device, MifareTag tag, MifareClassicSectorNum
     return 0;
 }
 
-void
+static void
 usage(char *progname)
 {
     fprintf (stderr, "usage: %s -i FILE\n", progname);

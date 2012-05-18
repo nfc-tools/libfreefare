@@ -125,7 +125,7 @@ try_format_sector (MifareTag tag, MifareClassicSectorNumber sector)
     return 0;
 }
 
-void
+static void
 usage(char *progname)
 {
     fprintf (stderr, "usage: %s [-fy]\n", progname);

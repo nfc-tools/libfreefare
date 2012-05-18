@@ -37,7 +37,7 @@ struct {
     .interactive = true
 };
 
-void
+static void
 usage(char *progname)
 {
     fprintf (stderr, "usage: %s [-y] [-K 11223344AABBCCDD]\n", progname);

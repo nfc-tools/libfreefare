@@ -47,7 +47,7 @@ struct {
     .interactive = true
 };
 
-void
+static void
 usage(char *progname)
 {
     fprintf (stderr, "This application turns Mifare DESFire targets into NFC Forum Type 4 Tags.\n");

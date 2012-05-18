@@ -51,7 +51,7 @@ struct {
     .interactive = true
 };
 
-void
+static void
 usage(char *progname)
 {
     fprintf (stderr, "This application reads a NDEF payload from a Mifare DESFire formatted as NFC Forum Type 4 Tag.\n");
