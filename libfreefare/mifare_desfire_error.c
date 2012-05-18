@@ -30,7 +30,7 @@
 
 static struct error_message {
     uint8_t code;
-    char *message;
+    const char *message;
 } error_messages[] = {
     EM(OPERATION_OK),
     EM(NO_CHANGES),
