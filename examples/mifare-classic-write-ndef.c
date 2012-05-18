@@ -62,7 +62,7 @@ const uint8_t ndef_default_msg[33] = {
 uint8_t *ndef_msg;
 size_t  ndef_msg_len;
 
-int
+static int
 search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey *key, MifareClassicKeyType *key_type)
 {
     MifareClassicBlockNumber block = mifare_classic_sector_last_block (sector);
@@ -100,7 +100,7 @@ search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassi
     return 0;
 }
 
-int
+static int
 fix_mad_trailer_block (nfc_device *device, MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
 {
     MifareClassicBlock block;
