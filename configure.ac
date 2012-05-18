@@ -1,11 +1,11 @@
-AC_INIT([libfreefare], [0.3.4])
+AC_INIT([libfreefare],[0.3.4])
 
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_PROG_CC
 AC_PROG_CXX
 
-AC_PROG_LIBTOOL
+LT_INIT
 
 AC_CONFIG_HEADERS([config.h])
 
@@ -76,7 +76,7 @@ if test x$cutter_enable_coverage = xyes; then
     CFLAGS="$CFLAGS -O0 -fprofile-arcs -ftest-coverage"
 fi
 
-AC_OUTPUT([Makefile
+AC_CONFIG_FILES([Makefile
 	   contrib/Makefile
 	   contrib/libutil/Makefile
 	   examples/Makefile
@@ -84,4 +84,5 @@ AC_OUTPUT([Makefile
 	   libfreefare.pc
 	   test/Makefile
 	   test/common/Makefile])
+AC_OUTPUT
 
