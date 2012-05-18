@@ -191,7 +191,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 
 static int32_t	 le24toh (uint8_t data[3]);
 
-int
+static int
 madame_soleil_get_read_communication_settings (MifareTag tag, uint8_t file_no)
 {
     struct mifare_desfire_file_settings settings;
@@ -205,7 +205,7 @@ madame_soleil_get_read_communication_settings (MifareTag tag, uint8_t file_no)
 	return 0;
 }
 
-int
+static int
 madame_soleil_get_write_communication_settings (MifareTag tag, uint8_t file_no)
 {
     struct mifare_desfire_file_settings settings;
@@ -637,7 +637,7 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
 
 
 
-int
+static int
 create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, int want_iso_application, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
 {
     ASSERT_ACTIVE (tag);
