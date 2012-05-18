@@ -215,7 +215,7 @@ freefare_free_tag (MifareTag tag)
 const char *
 freefare_strerror (MifareTag tag)
 {
-    const char *p = "Unkown error";
+    const char *p = "Unknown error";
     if (nfc_device_get_last_error (tag->device) < 0) {
       p = nfc_strerror (tag->device);
     } else {
