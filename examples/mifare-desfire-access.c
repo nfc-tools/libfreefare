@@ -99,7 +99,7 @@ main(int argc, char *argv[])
 	    if (res < 0)
 		errx (EXIT_FAILURE, "File creation failed");
 
-	    char *s= "Hello World";
+	    const char *s= "Hello World";
 	    res = mifare_desfire_write_data (tags[i], 1, 0, strlen (s), s);
 	    if (res < 0)
 		errx (EXIT_FAILURE, "File write failed");
