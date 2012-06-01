@@ -11,7 +11,7 @@ Vcs-Browser: http://code.google.com/p/nfc-tools/source/browse/#svn/trunk/libfree
 Package: libfreefare0
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libnfc2
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: MIFARE card manipulations library
  The libfreefare project aims to provide a convenient API for MIFARE
  card manipulations. This package contains the libfreefare library.
