@@ -172,9 +172,11 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
-	if ((nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, &__##res##_n, 0)) < 0) { \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size, 0)) < 0) { \
 	    return errno = EIO, -1; \
 	} \
+	__##res##_n = _res; \
 	DEBUG_XFER (__res, __##res##_n, "<=== "); \
 	res[__##res##_n-2] = __res[__##res##_n-1]; \
 	__##res##_n--; \

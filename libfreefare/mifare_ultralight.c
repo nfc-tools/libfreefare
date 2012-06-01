@@ -62,9 +62,11 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if ((nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, 0)) < 0) { \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
 	    return errno = EIO, -1; \
 	} \
+	__##res##_n = _res; \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
     } while (0)
 
@@ -76,10 +78,12 @@
 	    return -1; \
 	} \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if ((nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, 0)) < 0) { \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
 	    nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true); \
 	    return errno = EIO, -1; \
 	} \
+	__##res##_n = _res; \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
 	if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true) < 0) { \
 	    errno = EIO; \
@@ -183,7 +187,7 @@ mifare_ultralight_read (MifareTag tag, MifareUltralightPageNumber page, MifareUl
 
     if (!MIFARE_ULTRALIGHT(tag)->cached_pages[page]) {
 	BUFFER_INIT (cmd, 2);
-	BUFFER_ALIAS (res, MIFARE_ULTRALIGHT(tag)->cache[page]);
+	BUFFER_ALIAS (res, MIFARE_ULTRALIGHT(tag)->cache[page], sizeof(MifareUltralightPage));
 
 	BUFFER_APPEND (cmd, 0x30);
 	BUFFER_APPEND (cmd, page);
@@ -322,8 +326,7 @@ is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai)
     };
     nfc_initiator_select_passive_target (device, modulation, nai.abtUid, nai.szUidLen, &pnti);
     nfc_device_set_property_bool (device, NP_EASY_FRAMING, false);
-    size_t n;
-    ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, &n, 0);
+    ret = nfc_initiator_transceive_bytes (device, cmd_step1, sizeof (cmd_step1), res_step1, sizeof(res_step1), 0);
     nfc_device_set_property_bool (device, NP_EASY_FRAMING, true);
     nfc_initiator_deselect_target (device);
     return ret >= 0;

@@ -89,12 +89,14 @@
     do { \
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	if ((nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, &__##res##_n, 0) < 0)) { \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
 	    if (disconnect) { \
 		tag->active = false; \
 	    } \
 	    return errno = EIO, -1; \
 	} \
+	__##res##_n = _res; \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
     } while (0)
 
@@ -308,7 +310,7 @@ mifare_classic_read (MifareTag tag, const MifareClassicBlockNumber block, Mifare
     ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 2);
-    BUFFER_ALIAS (res, data);
+    BUFFER_ALIAS (res, data, sizeof(MifareClassicBlock));
 
     BUFFER_APPEND (cmd, MC_READ);
     BUFFER_APPEND (cmd, block);

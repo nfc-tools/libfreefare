@@ -315,14 +315,16 @@ struct mifare_ultralight_tag {
  */
 #define BUFFER_INIT(buffer_name, size) \
     uint8_t buffer_name[size]; \
+    size_t __##buffer_name##_size = size; \
     size_t __##buffer_name##_n = 0
 
 /*
  * Create a wrapper for an existing buffer.
  * BEWARE!  It eats children!
  */
-#define BUFFER_ALIAS(buffer_name, origin) \
+#define BUFFER_ALIAS(buffer_name, origin, origin_size) \
     uint8_t *buffer_name = (void *)origin; \
+    size_t __##buffer_name##_size = origin_size; \
     size_t __##buffer_name##_n = 0;
 
 #define BUFFER_SIZE(buffer_name) (__##buffer_name##_n)
