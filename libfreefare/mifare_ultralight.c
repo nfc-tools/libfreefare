@@ -187,7 +187,7 @@ mifare_ultralight_read (MifareTag tag, MifareUltralightPageNumber page, MifareUl
 
     if (!MIFARE_ULTRALIGHT(tag)->cached_pages[page]) {
 	BUFFER_INIT (cmd, 2);
-	BUFFER_ALIAS (res, MIFARE_ULTRALIGHT(tag)->cache[page], sizeof(MifareUltralightPage));
+	BUFFER_ALIAS (res, MIFARE_ULTRALIGHT(tag)->cache[page], sizeof(MifareUltralightPage) * 4);
 
 	BUFFER_APPEND (cmd, 0x30);
 	BUFFER_APPEND (cmd, page);
