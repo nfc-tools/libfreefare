@@ -36,14 +36,15 @@ main (int argc, char *argv[])
     nfc_connstring devices[8];
     size_t device_count;
 
-    nfc_init (NULL);
+    nfc_context *context;
+    nfc_init (&context);
 
-    device_count = nfc_list_devices (NULL, devices, sizeof (devices) / sizeof (*devices));
+    device_count = nfc_list_devices (context, devices, sizeof (devices) / sizeof (*devices));
     if (device_count <= 0)
 	errx (EXIT_FAILURE, "No NFC device found");
 
     for (size_t d = 0; d < device_count; d++) {
-	if (!(device = nfc_open (NULL, devices[d]))) {
+	if (!(device = nfc_open (context, devices[d]))) {
 	    warnx ("nfc_open() failed.");
 	    error = EXIT_FAILURE;
 	    continue;
@@ -85,6 +86,6 @@ main (int argc, char *argv[])
 	nfc_close (device);
     }
 
-    nfc_exit (NULL);
+    nfc_exit (context);
     exit(error);
 }

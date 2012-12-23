@@ -1,4 +1,4 @@
-AC_INIT([libfreefare],[0.3.4])
+AC_INIT([libfreefare],[0.3.5])
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -58,7 +58,7 @@ AC_CHECK_LIB([crypto], [DES_ecb_encrypt], [], [AC_MSG_ERROR([Cannot find libcryp
 AC_CHECK_HEADERS([openssl/aes.h openssl/des.h openssl/rand.h], [], [AC_MSG_ERROR([Cannot find openssl headers.])])
 
 # Checks for pkg-config modules.
-LIBNFC_REQUIRED_VERSION="1.6.0"
+LIBNFC_REQUIRED_VERSION="1.7.0"
 PKG_CHECK_MODULES([LIBNFC], [libnfc >= $LIBNFC_REQUIRED_VERSION], [], [AC_MSG_ERROR([libnfc >= $LIBNFC_REQUIRED_VERSION is mandatory.])])
 
 PKG_CONFIG_REQUIRES="libnfc"
