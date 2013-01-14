@@ -12,6 +12,7 @@ set(EXAMPLES-SOURCES
         mifare-desfire-ev1-configure-ats
         mifare-desfire-ev1-configure-default-key
         mifare-desfire-ev1-configure-random-uid
+        mifare-ultralight-info
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libfreefare)

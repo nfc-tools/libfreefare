@@ -1,2 +1,1 @@
-debian/tmp/usr/bin/mifare-classic*
-debian/tmp/usr/bin/mifare-desfire*
+debian/tmp/usr/bin/mifare-*
