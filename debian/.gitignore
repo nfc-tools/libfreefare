@@ -1,0 +1,8 @@
+*.debhelper
+*.log
+*.substvars
+autoreconf.after
+autoreconf.before
+files
+libfreefare*/
+tmp/
