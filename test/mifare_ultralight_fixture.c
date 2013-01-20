@@ -1,5 +1,6 @@
 /*-
- * Copyright (C) 2010, Romain Tartiere.
+ * Copyright (C) 2010, Romain Tartiere
+ * Copyright (C) 2013, Romuald Conty
  * 
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
@@ -22,6 +23,7 @@
 
 #include "mifare_ultralight_fixture.h"
 
+static nfc_context *context;
 static nfc_device *device = NULL;
 static MifareTag *tags = NULL;
 MifareTag tag = NULL;
@@ -33,15 +35,15 @@ cut_setup (void)
     nfc_connstring devices[8];
     size_t device_count;
     
-    nfc_init(NULL);
+    nfc_init(&context);
 
-    device_count = nfc_list_devices (NULL, devices, 8);
+    device_count = nfc_list_devices (context, devices, 8);
     if (device_count <= 0)
         cut_omit ("No device found");
 
     for (size_t i = 0; i < device_count; i++) {
 
-        device = nfc_open (NULL, devices[i]);
+        device = nfc_open (context, devices[i]);
         if (!device) 
             cut_omit ("nfc_open() failed.");
 
@@ -81,6 +83,6 @@ cut_teardown (void)
     if (device)
         nfc_close (device);
   
-    nfc_exit(NULL);
+    nfc_exit (context);
 }
 
