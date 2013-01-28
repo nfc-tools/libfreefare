@@ -142,7 +142,14 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  * Convenience macros.
  */
 
-#define FRAME_PAYLOAD_SIZE (MAX_FRAME_SIZE - 5)
+/* Max APDU sizes to be ISO encapsulated by DESFIRE_TRANSCEIVE()
+   From MIFARE DESFire Functional specification:
+   MAX_CAPDU_SIZE:   "The length of the total wrapped DESFire
+                      command is not longer than 55 byte long."
+   MAX_RAPDU_SIZE:   1 status byte + 59 bytes
+ */
+#define MAX_CAPDU_SIZE 55
+#define MAX_RAPDU_SIZE 60
 
 /*
  * Transmit the message msg to the NFC tag and receive the response res.  The
@@ -153,11 +160,15 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  */
 #define DESFIRE_TRANSCEIVE(tag, msg, res) \
     DESFIRE_TRANSCEIVE2 (tag, msg, __##msg##_n, res)
+/* Native DESFire APDUs will be wrapped in ISO7816-4 APDUs:
+   CAPDUs will be 5 bytes longer (CLA+P1+P2+Lc+Le)
+   RAPDUs will be 1 byte longer  (SW1 SW2 instead of 1 status byte)
+ */
 #define DESFIRE_TRANSCEIVE2(tag, msg, msg_len, res) \
     do { \
-	static uint8_t __msg[MAX_FRAME_SIZE] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 }; \
+	static uint8_t __msg[MAX_CAPDU_SIZE + 5] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 }; \
 	/*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/ \
-	static uint8_t __res[MAX_FRAME_SIZE]; \
+	static uint8_t __res[MAX_RAPDU_SIZE + 1]; \
 	size_t __len = 5; \
 	errno = 0; \
 	if (!msg) return errno = EINVAL, -1; \
@@ -173,7 +184,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
 	int _res; \
-	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size, 0)) < 0) { \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
 	    return errno = EIO, -1; \
 	} \
 	__##res##_n = _res; \
@@ -753,7 +764,7 @@ mifare_desfire_get_application_ids (MifareTag tag, MifareDESFireAID *aids[], siz
     ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, MAX_FRAME_SIZE);
+    BUFFER_INIT (res, MAX_RAPDU_SIZE);
 
     BUFFER_APPEND (cmd, 0x6A);
 
@@ -1506,7 +1517,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 8);
-    BUFFER_INIT (res, MAX_FRAME_SIZE);
+    BUFFER_INIT (res, MAX_RAPDU_SIZE);
 
     BUFFER_APPEND (cmd, command);
     BUFFER_APPEND (cmd, file_no);
@@ -1587,8 +1598,8 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
     uint8_t *p = mifare_cryto_preprocess_data (tag, cmd, &__cmd_n, 8, cs | MAC_COMMAND | CMAC_COMMAND | ENC_COMMAND);
     size_t overhead_size = __cmd_n - length; // (CRC | padding) + headers
 
-    BUFFER_INIT(d, FRAME_PAYLOAD_SIZE);
-    bytes_left = FRAME_PAYLOAD_SIZE - 8;
+    BUFFER_INIT(d, MAX_CAPDU_SIZE);
+    bytes_left = __d_size;
 
     while (bytes_send < __cmd_n) {
 	size_t frame_bytes = MIN(bytes_left, __cmd_n - bytes_send);
@@ -1603,8 +1614,9 @@ write_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_
 
 	// PICC returned 0xAF and expects more data
 	BUFFER_CLEAR (d);
+	bytes_left = __d_size;
 	BUFFER_APPEND (d, 0xAF);
-	bytes_left = FRAME_PAYLOAD_SIZE - 1;
+	bytes_left--;
     }
 
     ssize_t sn = __res_n;

@@ -97,7 +97,6 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 
 #define MAX_CRYPTO_BLOCK_SIZE 16
-#define MAX_FRAME_SIZE 60
 
 void		*memdup (const void *p, const size_t n);
 
