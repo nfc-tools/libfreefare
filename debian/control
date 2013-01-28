@@ -1,7 +1,7 @@
 Source: libfreefare
 Section: libs
 Priority: extra
-Maintainer: Romuald Conty <rconty@il4p.fr>
+Maintainer: Romuald Conty <romuald@libnfc.org>
 Build-Depends: debhelper (>= 7.0.50~), dh-autoreconf, libnfc-dev (>= 1.7.0~rc7), pkg-config, libssl-dev
 Standards-Version: 3.9.1
 Homepage: http://code.google.com/p/nfc-tools/wiki/libfreefare
