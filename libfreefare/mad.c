@@ -126,7 +126,7 @@ mad_new (uint8_t version)
 /*
  * Compute CRC.
  */
-static void
+void
 nxp_crc (uint8_t *crc, const uint8_t value)
 {
     /* x^8 + x^4 + x^3 + x^2 + 1 => 0x11d */
@@ -142,7 +142,7 @@ nxp_crc (uint8_t *crc, const uint8_t value)
     }
 }
 
-static uint8_t
+uint8_t
 sector_0x00_crc8 (Mad mad)
 {
     uint8_t crc = CRC_PRESET;
@@ -157,7 +157,7 @@ sector_0x00_crc8 (Mad mad)
     return crc;
 }
 
-static uint8_t
+uint8_t
 sector_0x10_crc8 (Mad mad)
 {
     uint8_t crc = CRC_PRESET;
