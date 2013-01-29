@@ -942,7 +942,7 @@ mifare_desfire_get_version (MifareTag tag, struct mifare_desfire_version_info *v
     ASSERT_NOT_NULL (version_info);
 
     BUFFER_INIT (cmd, 1);
-    BUFFER_INIT (res, 14 + CMAC_LENGTH); /* 8, 8, then 15 byte results */
+    BUFFER_INIT (res, 15 + CMAC_LENGTH); /* 8, 8, then 15 byte results */
 
     char buffer[28 + CMAC_LENGTH + 1];
 
