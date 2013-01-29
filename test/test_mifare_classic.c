@@ -361,7 +361,7 @@ test_mifare_classic_get_uid (void)
     uid = freefare_get_tag_uid (tag);
 
     cut_assert_not_null (uid, cut_message ("freefare_get_tag_uid() failed"));
-    cut_assert_equal_int (8, strlen (uid), cut_message ("Wrong UID length"));
+    cut_assert (((strlen (uid) == 8)||(strlen (uid) == 14)), cut_message ("Wrong UID length"));
 
     free (uid);
 }

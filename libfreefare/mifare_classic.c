@@ -289,7 +289,8 @@ mifare_classic_authenticate (MifareTag tag, const MifareClassicBlockNumber block
 
     BUFFER_APPEND(cmd, block);
     BUFFER_APPEND_BYTES (cmd, key, 6);
-    BUFFER_APPEND_BYTES (cmd, tag->info.abtUid, 4);
+    // To support both 4-byte & 7-byte UID cards:
+    BUFFER_APPEND_BYTES (cmd, tag->info.abtUid + tag->info.szUidLen - 4, 4);
 
     CLASSIC_TRANSCEIVE_EX (tag, cmd, res, 1);
 
