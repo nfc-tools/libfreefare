@@ -56,6 +56,15 @@ cut_setup (void)
         tag = tags[i];
         res = mifare_desfire_connect (tag);
         cut_assert_equal_int (0, res, cut_message ("mifare_desfire_connect() failed"));
+
+        struct mifare_desfire_version_info version_info;
+        res = mifare_desfire_get_version (tag, &version_info);
+        cut_assert_equal_int (0, res, cut_message ("mifare_desfire_get_version"));
+
+        if (version_info.hardware.storage_size < 0x18) {
+          cut_omit ("DESFire tests require at least a 4K card");
+        }
+
         return;
       }
     }

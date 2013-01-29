@@ -61,6 +61,10 @@ cut_setup (void)
                 res = mifare_desfire_get_version (tag, &version_info);
                 cut_assert_equal_int (0, res, cut_message ("mifare_desfire_get_version"));
 
+                if (version_info.hardware.storage_size < 0x18) {
+                    cut_omit ("DESFire EV1 tests require at least a 4K card");
+                }
+
                 if ((version_info.hardware.version_major >= 1) &&
                     (version_info.software.version_major >= 1)) {
                     return;
