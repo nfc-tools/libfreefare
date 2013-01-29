@@ -11,6 +11,10 @@ you started:
      the regression tests suite (`make check') and ensure that your code does
      not break other features.
      http://cutter.sourceforge.net/
+     To cover all tests you'll need some blank cards with default settings:
+     * DESFire EV1 4k or larger (2k is too small)
+     * MIFARE Ultralight C
+     * MIFARE Classic
 
   2. Follow style conventions
      The source code of the library trend to follow some conventions so that it
