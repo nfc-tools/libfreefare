@@ -1,0 +1,1047 @@
+TBD, 2013 - 0.3.5
+-----------------
+
+Fixes:
+
+Improvements:
+
+Changes:
+
+2013-01-29  Philippe Teuwen <yobibe@gmail.com>
+
+	* libfreefare/mifare_classic.c, test/test_mifare_classic.c: Add
+	support for 7-byte UID MIFARE Classic cards
+
+2013-01-29  Philippe Teuwen <yobibe@gmail.com>
+
+	* test/mifare_desfire_ev1_fixture.c, test/mifare_desfire_fixture.c: 
+	DF cutter tests: detect if DF is too small for tests
+
+2013-01-29  Philippe Teuwen <yobibe@gmail.com>
+
+	* HACKING: Document how to run cutter tests, all pass now
+
+2013-01-29  Philippe Teuwen <yobibe@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix buffer size in
+	desfire_get_version, now cutter is happy on DF EV1 38 test(s), 8120 assertion(s), 0 failure(s), 0 error(s), 0
+	pending(s), 19 omission(s), 0 notification(s) 100% passed
+
+2013-01-29  Philippe Teuwen <yobibe@gmail.com>
+
+	* HACKING: DF EV1 Cutter tests must be done with at least a 4k card,
+	still 2 tests failed 38 test(s), 8041 assertion(s), 2 failure(s), 0 error(s), 0
+	pending(s), 19 omission(s), 0 notification(s) 94.7368% passed .errorlibnfc.chip.pn53xBuffer size is too short: 23o available(s),
+	24o needed F
+
+	===============================================================================Failure: test_mifare_desfire_ev1_aes2 Wrong return value <-1 != res>
+	expected: <-1>   actual: <-1> ./test_mifare_desfire_ev1.c:75:
+	test_mifare_desfire_ev1_aes2(): cut_assert_not_equal_int(-1, res)
+
+	===============================================================================F
+
+	===============================================================================Failure: test_mifare_desfire_ev1_iso Wrong DF count <count == 0>
+	expected: <1>   actual: <0> ./test_mifare_desfire_ev1_iso.c:48:
+	test_mifare_desfire_ev1_iso(): cut_assert_equal_int(count, 0,
+	cut_test_context_set_current_result_user_message(
+	cut_test_context_current_
+
+	===============================================================================
+
+2013-01-29  Philippe Teuwen <yobibe@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c: 
+	Adjusting DESFire frame sizes, cutter still not entirely satisfied Desfire (old) 4k: write large ndef OK read large ndef OK cutter: OK 31 test(s), 2576
+	assertion(s), 0 failure(s), 0 error(s), 0 pending(s), 26
+	omission(s), 0 notification(s) 100% passed Desfire EV1 2k: write large ndef OK read large ndef OK cutter: FAIL 38 test(s), 5257
+	assertion(s), 6 failure(s), 0 error(s), 0 pending(s), 19
+	omission(s), 0 notification(s) 84.2105% passed
+
+2013-01-28  Romain Tartière <romain@blogreen.org>
+
+	* libfreefare/mad.c: Remove a few static.  Cutter can't test suche methods.
+
+2013-01-20  Romuald Conty <romuald@libnfc.org>
+
+	* NEWS: Updates NEWS file
+
+2013-01-20  Romuald Conty <romuald@libnfc.org>
+
+	* test/mifare_classic_fixture.c, test/mifare_desfire_ev1_fixture.c,
+	test/mifare_desfire_fixture.c, test/mifare_ultralight_fixture.c: 
+	Updates unit tests to use libnfc 1.7.0
+
+2013-01-16  Philippe Teuwen <yobibe@gmail.com>
+
+	* debian/control: Debian: bump dev dep to libnfc-dev to 1.7.0
+
+2013-01-16  Philippe Teuwen <yobibe@gmail.com>
+
+	* debian/.gitignore: Add debian/.gitignore
+
+2013-01-14  Philippe Teuwen <yobibe@gmail.com>
+
+	* .gitignore, m4/.gitignore: Add .gitignore
+
+2013-01-14  Philippe Teuwen <yobibe@gmail.com>
+
+	* debian/libfreefare-bin.install, examples/CMakeLists.txt: Add
+	mifare-ultralight-info to dpkg & CMakeList
+
+2012-12-23  Romuald Conty <romuald@libnfc.org>
+
+	* configure.ac, examples/mifare-classic-format.c,
+	examples/mifare-classic-read-ndef.c,
+	examples/mifare-classic-write-ndef.c,
+	examples/mifare-desfire-access.c,
+	examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	examples/mifare-desfire-format.c, examples/mifare-desfire-info.c,
+	examples/mifare-desfire-read-ndef.c,
+	examples/mifare-desfire-write-ndef.c,
+	examples/mifare-ultralight-info.c: updates library examples to use
+	libnfc 1.7.0 API
+
+2012-11-13  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-ultralight-info.c: add test default ULC key in
+	mifare-ultralight-info
+
+2012-11-13  Philippe Teuwen <yobibe@gmail.com>
+
+	* libfreefare/mifare_ultralight.c: fix bug in
+	mifare_ultralight_read()
+
+2012-11-13  Philippe Teuwen <yobibe@gmail.com>
+
+	* test/test_mifare_ultralight.c: fix typo
+
+2012-06-28  Philippe Teuwen <yobibe@gmail.com>
+
+	* configure.ac: Tolerate older autotools
+
+2012-06-01  Philippe Teuwen <yobibe@gmail.com>
+
+	* debian/rules: debian/rules don't mandate to run cutter tests when
+	creating .deb
+
+2012-06-01  Philippe Teuwen <yobibe@gmail.com>
+
+	* debian/control: debian/control: remove dependence on libnfc2
+	(libnfc3 dependence is automatically created)
+
+2012-06-01  Romuald Conty <romuald@libnfc.org>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_classic.c,
+	libfreefare/mifare_desfire.c, libfreefare/mifare_ultralight.c: 
+	Update to current libnfc devel API.  libnfc changed its nfc_initiator_transceive_bytes(): it now takes a
+	const size_t used as maximal allowed rx bytes.  libnfc now checks if
+	rx buffer is large enough to get the full response, so libfreefare
+	should take care about whole size of its buffers.
+
+2012-06-01  Romuald Conty <romuald@libnfc.org>
+
+	* libfreefare/freefare.c: Support Infineon Mifare Classic 1k. (Fixes
+	Issue 88) Thanks to Gernoth!
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/freefare.c, libfreefare/freefare_error.3,
+	libfreefare/mifare_application.3, libfreefare/mifare_classic.3,
+	libfreefare/mifare_desfire.3, libfreefare/mifare_desfire_aid.3: Fix
+	spelling mistakes in manpages Closes Issue #90
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Update write_data() prototype so
+	that the data buffer is constant
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix compiler warnings mifare_desfire.c:196: warning: no previous prototype for
+	'madame_soleil_get_read_communication_settings'
+	mifare_desfire.c:210: warning: no previous prototype for
+	'madame_soleil_get_write_communication_settings'
+	mifare_desfire.c:642: warning: no previous prototype for
+	'create_application'
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/mifare_desfire_error.c: Fix compiler warning mifare_desfire_error.c:35: warning: initialization discards
+	qualifiers from pointer target type mifare_desfire_error.c:36:
+	warning: initialization discards qualifiers from pointer target type
+	etc...
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* examples/mifare-desfire-access.c: Fix compiler warning
+	mifare-desfire-access.c:102: warning: initialization discards
+	qualifiers from pointer target type
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/freefare.h, libfreefare/mifare_desfire.c: Update
+	mifare_desfire_write_data() and mifare_desfire_write_data_ex()
+	prototypes so that the data buffer is constant
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* examples/mifare-classic-format.c: Fix compiler warning mifare-classic-format.c:62: warning: no previous prototype for
+	‘display_progress’
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* examples/mifare-classic-write-ndef.c: Fix compiler warnings mifare-classic-write-ndef.c:67: warning: no previous prototype for
+	‘search_sector_key’ mifare-classic-write-ndef.c:105: warning: no
+	previous prototype for ‘fix_mad_trailer_block’
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* examples/mifare-classic-format.c,
+	examples/mifare-classic-read-ndef.c,
+	examples/mifare-classic-write-ndef.c,
+	examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	examples/mifare-desfire-format.c,
+	examples/mifare-desfire-read-ndef.c,
+	examples/mifare-desfire-write-ndef.c: Declare internal function
+	usage() as static
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/freefare_internal.h: Fix compiler warning freefare_internal.h:359:5: warning: "_BYTE_ORDER" is not defined
+	freefare_internal.h:359:20: warning: "_LITTLE_ENDIAN" is not defined
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* libfreefare/mad.c: Fix compiler warnings mad.c:131: warning: no previous prototype for 'nxp_crc' mad.c:147:
+	warning: no previous prototype for 'sector_0x00_crc8' mad.c:162:
+	warning: no previous prototype for 'sector_0x10_crc8'
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* test/Makefile.am, test/common/Makefile.am: warning: 'INCLUDES' is
+	the old name for 'AM_CPPFLAGS' (or '*_CPPFLAGS')
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* configure.ac: warning: 'libutil.la': linking libtool libraries
+	using a non-POSIX archiver requires 'AM_PROG_AR' in 'configure.ac'
+
+2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
+
+	* configure.ac: autoupdate using autoupdate (GNU Autoconf) 2.69
+
+2012-05-17  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-access.c,
+	examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-info.c: examples remove math.h and replace
+	pow(2, x) by 1 << x
+
+2012-05-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-create-ndef.c: 
+	examples/mifare-desfire-create-ndef.c EV1: don't change key settings
+	and set dynamically ndef size
+
+2012-05-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-read-ndef.c,
+	examples/mifare-desfire-write-ndef.c: examples/mifare-desfire-*-ndef
+	add support for mapping v2.0 and EV1
+
+2012-05-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-format.c: examples/mifare-desfire-format
+	also resets key settings
+
+2012-05-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/Makefile.am: Restore explicit linkage to libnfc (revert
+	partially r1011)
+
+2012-05-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-create-ndef.c: 
+	examples/mifare-desfire-create-ndef.c prepare for DF EV1 NDEF
+	mapping
+
+2012-05-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c: 
+	examples/mifare-desfire-ev1*: test version to ensure we've at least
+	an EV1
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Typos
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/Makefile.am, examples/mifare-ultralight-info.c: Add new
+	example: mifare-ultralight-info.
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/Makefile.am: Don't link to the libnfc (twice) since the
+	libfreefare itself is linked against it.
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_classic.c: New test:
+	test_mifare_classic_format_first_sector().
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/Makefile.am: Consistently sort out targets.
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_ev1_iso.c: Remove unused variable.
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Avoid void* arithmetic GCC
+	extension.
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix wrong variable usage.
+
+2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.c: Fix signed/unsigned comparison.
+
+2012-05-10  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* COPYING: Add an exception to the LGPL.
+
+2012-03-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-classic-write-ndef.c,
+	examples/mifare-desfire-write-ndef.c: few missing free()
+
+2012-03-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-classic-read-ndef.c,
+	examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-read-ndef.c,
+	examples/mifare-desfire-write-ndef.c: fix issues in spilling ndef
+	data to stdout and fix bug in mifare-desfire-write-ndef
+
+2012-03-15  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/CMakeLists.txt, examples/Makefile.am,
+	examples/mifare-classic-read-ndef.c,
+	examples/mifare-desfire-read-ndef.c,
+	examples/mifare-desfire-write-ndef.c: add mifare-desfire-read-ndef,
+	read CC in mifare-desfire-write-ndef
+
+2012-03-14  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-classic-write-ndef.c,
+	examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	examples/mifare-desfire-format.c,
+	examples/mifare-desfire-write-ndef.c: allow input file for
+	mifare-desfire-write-ndef & small fixes
+
+2012-03-14  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/CMakeLists.txt, examples/Makefile.am,
+	examples/mifare-classic-format.c,
+	examples/mifare-desfire-create-ndef.c,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	examples/mifare-desfire-format-ndef.c,
+	examples/mifare-desfire-format.c,
+	examples/mifare-desfire-write-ndef.c: add non-default key option to
+	mifare-desfire-* examples
+
+2012-03-14  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-format-ndef.c: minor changes
+
+2012-03-13  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/CMakeLists.txt, examples/Makefile.am,
+	examples/mifare-desfire-format-ndef.c,
+	examples/mifare-desfire-format.c,
+	examples/mifare-desfire-write-ndef.c: split
+	mifare-desfire-write-ndef into format-ndef & write-ndef
+
+2012-03-13  Philippe Teuwen <yobibe@gmail.com>
+
+	* examples/mifare-desfire-write-ndef.c: mifare-desfire-write-ndef:
+	split PICC key & Tag app key
+
+Mar 1, 2012 - 0.3.4
+-------------------
+
+Fixes:
+
+Improvements:
+
+Changes:
+
+2012-03-01  Romuald Conty <romuald@libnfc.org>
+
+	* NEWS, configure.ac, debian/changelog: prepare libfreefare 0.3.4
+
+2012-03-01  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_ultralight.c: Fix Mifare Ultralight C card
+	detection routine (Fixes Issue 86).
+
+Mar 1, 2012 - 0.3.3
+-------------------
+
+Fixes:
+
+Improvements:
+
+Changes:
+
+2012-03-01  Romuald Conty <romuald@libnfc.org>
+
+	* NEWS, configure.ac, debian/changelog, debian/control: prepare
+	libfreefare 0.3.3
+
+2012-01-25  Audrey Diacre <adiacre@il4p.fr>
+
+	* examples/mifare-classic-read-ndef.c,
+	examples/mifare-classic-write-ndef.c,
+	examples/mifare-desfire-access.c,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	examples/mifare-desfire-format.c, examples/mifare-desfire-info.c,
+	examples/mifare-desfire-write-ndef.c: fix some indentations.
+
+2012-01-25  Audrey Diacre <adiacre@il4p.fr>
+
+	* examples/mifare-classic-format.c,
+	examples/mifare-classic-read-ndef.c,
+	examples/mifare-classic-write-ndef.c,
+	examples/mifare-desfire-access.c,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	examples/mifare-desfire-format.c, examples/mifare-desfire-info.c,
+	examples/mifare-desfire-write-ndef.c, libfreefare/freefare.c,
+	libfreefare/freefare.h, libfreefare/freefare_internal.h,
+	libfreefare/mifare_classic.c, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_ultralight.c, test/mifare_classic_fixture.c,
+	test/mifare_desfire_ev1_fixture.c, test/mifare_desfire_fixture.c,
+	test/mifare_ultralight_fixture.c: update to use libnfc's trunk
+
+2012-01-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/mifare-classic-format.c, test/mifare_classic_fixture.c,
+	test/mifare_desfire_ev1_fixture.c, test/mifare_desfire_fixture.c,
+	test/mifare_ultralight_fixture.c: Make these functions accept no
+	argument (instead of any).
+
+2012-01-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.3, libfreefare/freefare_error.3,
+	libfreefare/mad.3, libfreefare/mifare_application.3: Fix
+	inconsistencies in man pages (missing quotes, typos).
+
+Oct 10, 2011 - 0.3.2
+--------------------
+
+Fixes:
+
+Improvements:
+
+Changes:
+
+2011-10-17  Romuald Conty <romuald@libnfc.org>
+
+	* NEWS, README, configure.ac, examples/mifare-classic-read-ndef.c: 
+	Prepare libfreefare 0.3.2
+
+2011-10-11  Romuald Conty <romuald@libnfc.org>
+
+	* examples/mifare-classic-write-ndef.c: mifare-classic-write-ndef
+	could use file as NDEF content (BTW, stdin as input is not yet implemented, any contributions are
+	welcome.)
+
+2011-10-11  Romuald Conty <romuald@libnfc.org>
+
+	* examples/mifare-classic-read-ndef.c: mifare-classic-read-ndef now
+	close kindly the output stream.
+
+2011-09-29  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/freefare.c, libfreefare/freefare.h: Make
+	freefare_tag_new() public (Fixes issue 64).
+
+2011-09-28  Romuald Conty <romuald@libnfc.org>
+
+	* examples/mifare-classic-read-ndef.c: svn:keywords fix on
+	examples/mifare-classic-read-ndef.c .
+
+2011-09-22  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* configure.ac, libfreefare/mifare_classic.c,
+	libfreefare/mifare_desfire.c, libfreefare/mifare_ultralight.c: Sync
+	w/ libnfc-1.5.1.
+
+2011-09-22  Romuald Conty <romuald@libnfc.org>
+
+	* examples/Makefile.am, examples/mifare-classic-read-ndef.c: Add a
+	new example to extract NDEF Message from a "MIFARE Classic as NFC
+	Forum enable tag".
+
+2011-09-22  Romuald Conty <romuald@libnfc.org>
+
+	* libfreefare/tlv.3: Minor TLV manpage fix.
+
+2011-09-13  Romuald Conty <romuald@libnfc.org>
+
+	* debian/control: Improve devian package (Thanks to Thomas Hood)
+
+2011-09-12  Romuald Conty <romuald@libnfc.org>
+
+	* debian/control: add libssl-dev to Build-Depends (in
+	debian/control). (Fixes Issue 73)
+
+2011-09-12  Romuald Conty <romuald@libnfc.org>
+
+	* debian/control: add pkg-config to Build-Depends (in
+	debian/control). (Fixes Issue 72)
+
+2011-09-12  Romuald Conty <romuald@libnfc.org>
+
+	* debian/rules: autoreconf is needed by debian build process when
+	using svn version.
+
+2011-06-27  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* CMakeLists.txt, cmake/config_windows.h.cmake,
+	libfreefare/CMakeLists.txt, libfreefare/mifare_desfire_crypto.c: 
+	Enable WITH_DEBUG for Windows (Fixes issue 65) PR:		Issue 65 Submitted by:	glenn.ergeerts
+
+2011-05-20  Romuald Conty <romuald@libnfc.org>
+
+	* debian/control, debian/watch: debian: update pam_nfc, mfoc and
+	libfreefare packages to use dh7.
+
+2011-05-18  Romuald Conty <romuald@libnfc.org>
+
+	* debian/README.Debian, debian/README.source, debian/changelog,
+	debian/compat, debian/control, debian/copyright,
+	debian/libfreefare-bin.install, debian/libfreefare-dev.install,
+	debian/libfreefare-doc.install, debian/libfreefare0.install,
+	debian/rules, debian/source/format: import debian files
+
+2011-05-11  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* configure.ac: Fix code coverage with cutter.
+
+2011-04-25  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* FindLIBNFC.cmake, cmake/config_windows.h.cmake,
+	cmake/modules/FindLIBNFC.cmake, config_windows.h.cmake,
+	contrib/win32/err.h, err.h: Move cmake files around.  Update issue 62 Looks like I missed the -p0 argument to patch.  Can
+	you please update and test? Thanks!
+
+2011-04-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Indent after last commit.
+
+2011-04-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Merge CRC location /
+	verification in mifare_cryto_postprocess_data().  Fix issue 52.
+
+2011-04-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* CMakeLists.txt, FindLIBNFC.cmake, Makefile.am, NEWS,
+	config_windows.h.cmake, err.h, examples/CMakeLists.txt,
+	libfreefare/CMakeLists.txt: Add Microsoft Windows support.  Update issue 62 Status: Feedback Gleen, I slightly modified your
+	patches to better stick with the style of the rest of the project,
+	Can you please confirm that it does not break? PR:		Issue 62 Submitted by:	glenn.ergeerts
+
+2011-04-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Return error if something bad happen
+	in mifare_cryto_preprocess_data() / mifare_cryto_postprocess_data().  Fixes issue 60.  PR:		Issue 60 Submitted by:	ervin.kaljola
+
+2011-04-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c, test/test_mifare_desfire_ev1_aes.c: 
+	Fix mifare_desfire_create_value_file().  Fixes issue 59 Committed, thanks! PR:		Issue 59 Submitted by:	ervin.kaljola
+
+2011-04-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Enhance the
+	mifare_cryto_postprocess_data() function.  Update issue 52 Both code snippets are now similar and it should be
+	possible to merge them together.
+
+2011-04-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_ev1_aes.c: Read written data to check
+	that everything is fine.
+
+2011-04-05  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_ultralight.c: Implement
+	mifare_ultralight_write() using macros.  Update issue 58 I can't reproduce this bug, but saw that the
+	mifare_ultralight_write() was implemented in an old-school way.  I
+	updated the code so that you should have better traces when
+	compiling the library in debug mode and running: romain@marvin ~/Projects/libfreefare % cutter -n
+	test_mifare_ultralight_write test ===> 0000   30 07
+	|0.              | <=== 0000   00 00 00 00 00 00 00 00 00 00 00 00
+	00 00 00 00  |................| ===> 0000   a2 07 12 34 56 78
+	|...4Vx          | ===> 0000   30 07
+	|0.              | <=== 0000   12 34 56 78 00 00 00 00 00 00 00 00
+	00 00 00 00  |.4Vx............| ===> 0000   a2 07 aa 55 00 ff
+	|...U..          | ===> 0000   30 07
+	|0.              | <=== 0000   aa 55 00 ff 00 00 00 00 00 00 00 00
+	00 00 00 00  |.U..............| ===> 0000   a2 07 00 00 00 00
+	|......          | ===> 0000   30 07
+	|0.              | <=== 0000   00 00 00 00 00 00 00 00 00 00 00 00
+	00 00 00 00  |................| .  Finished in 0,548238 seconds (total: 0,069079 seconds) 1 test(s), 12 assertion(s), 0 failure(s), 0 error(s), 0 pending(s),
+	0 omission(s), 0 notification(s) 100% passed
+
+2011-03-26  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix invalid test.
+
+2011-03-26  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/Makefile.am, test/common/Makefile.am: Build unit-tests as
+	part of all-am if DEBUG is enabled, otherwise at check-am before
+	running the test suite.
+
+2011-03-26  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/freefare.h, libfreefare/mifare_desfire.3,
+	libfreefare/mifare_desfire.c, test/test_mifare_desfire_ev1_iso.c: 
+	Complete ISO 7816 compatibility for Mifare DESFire EV1 Fixes issue 37
+
+2011-03-25  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.h, libfreefare/mifare_desfire.c,
+	test/Makefile.am, test/test_mifare_desfire_ev1_iso.c: Start support
+	of ISO files for Mifare DESFire EV1.  Fixes issue 57 New API functions:   * mifare_desfire_create_application_iso()   * mifare_desfire_create_application_3k3des_iso()   * mifare_desfire_create_application_aes_iso()   * mifare_desfire_get_df_names() Plus unit test to check this.
+
+2011-03-25  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/freefare.h, libfreefare/mifare_desfire.3,
+	libfreefare/mifare_desfire.c,
+	test/test_mifare_desfire_ev1_3k3des.c,
+	test/test_mifare_desfire_ev1_aes.c: New API functions
+	mifare_desfire_create_application_3k3des(),
+	mifare_desfire_create_application_aes().  Update issue 37 Only ISO application creation as requested by Issue
+	57 is lacking now.
+
+Feb 23, 2011 - 0.3.1
+--------------------
+
+Fixes:
+
+Improvements:
+
+Changes:
+
+2011-02-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, configure.ac: Update for 0.3.1.
+
+2011-02-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: R is const.
+
+2011-02-13  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/Makefile.am, test/common/Makefile.am: Do not systematically
+	build the tests if cutter is installed.  Building them only when running the test-suite is probably enough.
+
+2011-02-13  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* Makefile.am: Shorter is better.
+
+2011-02-13  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/Makefile.am, libfreefare/freefare.h,
+	libfreefare/freefare_error.3, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_crypto.c,
+	libfreefare/mifare_desfire_error.c, test/test_mifare_desfire.c: Do
+	not abort on crypto error.  Because in some circumstances the crypto is skipped regardless of
+	the communication settings by the Mifare DESFire (e.g. when reading
+	a file which is writable with any key), do not abort if the crypto
+	fail, and make it possible to the user to catch such an event to fix
+	his code accordingly.  Only display crypto diagnostic if compiled with debug support.
+
+2011-02-13  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* Makefile.am: prevent myself from shooting in my own foot.
+
+2011-02-13  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/mifare_classic.c: Fix mifare_classic_transfer()
+	with some readers.
+
+2011-01-01  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Fix CRC localisation code.  New issue Summary: Add regression tests for CRC location in
+	encyphered data files.  The CRC position location code in
+	mifare_cryto_postprocess_data() shall be checked.  new issue Summary: Rework mifare_cryto_postprocess_data() CRC
+	localisations The function has two different implementation of the
+	same feature: locate a CRC at the end of a decyphered stream and
+	check it.  The crc32 will fail if the last CRC byte is 0x80, and the
+	crc16 code looks awful.  A refactoring would make our life easier.
+
+2011-01-01  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/mifare-desfire-info.c: Do not exit if the master key
+	settings are not readable.
+
+2010-12-31  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Make mifare_desfire_authenticate() a
+	bit more magic.  If the provided key is a 3K3DES key, authenticate in ISO mode.  If
+	the key is an AES one, authenticate in AES mode.  This sugar should
+	help third party applications to handle authentication in a more
+	generic way.
+
+2010-12-31  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Move away global variables.
+
+2010-12-29  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix create_file2().  ECOPYPASTETOOFAST | EBADLUCKITSVALID: The argument
+	communication_settings is not to be used to construct the parameters
+	passed to the crypto functions mifare_cryto_preprocess_data() &
+	mifare_cryto_postprocess_data(), but only for building the frame.
+
+2010-12-29  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c, test/test_mifare_desfire_ev1_aes.c: 
+	Fix write_data() return value when data is enciphered.  We only have to return the number of bytes of raw data which are
+	sent.
+
+2010-12-29  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix usage of a potentially
+	reallocated memory area.
+
+2010-12-28  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.c: Fix parenthesis position.
+
+2010-12-28  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/Makefile.am, libfreefare/freefare.c,
+	libfreefare/freefare.h, libfreefare/freefare_internal.h,
+	libfreefare/mifare_desfire_crypto.c,
+	libfreefare/mifare_ultralight.c, test/mifare_ultralight_fixture.c,
+	test/test_mifare_ultralight.c: Merge de libfreefare-ultralight
+	branch into trunk (Mifare UltraLightC support).
+
+2010-12-26  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/Makefile.am, libfreefare/mifare_desfire.3: 
+	Update man pages.
+
+2010-12-25  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/mifare-desfire-ev1-configure-ats.c: Set the default ATS
+	instead of a custom one.  This prevent some tools to work properly with a card afterthat.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.c, libfreefare/freefare_internal.h: Detect
+	Mifare DESFire targets with more than one historical character.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, examples/Makefile.am,
+	examples/mifare-desfire-ev1-configure-ats.c,
+	libfreefare/freefare.h, libfreefare/mifare_desfire.c: New API
+	function mifare_desfire_set_ats().
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_crypto.c: Simplify redundant code.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/mifare-desfire-ev1-configure-default-key.c: Fix example.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, examples/Makefile.am,
+	examples/mifare-desfire-ev1-configure-default-key.c,
+	libfreefare/freefare.h, libfreefare/mifare_desfire.c: New API
+	function mifare_desfire_set_default_key().
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_des.c: Commit files forgotten as part of
+	r733.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_crypto.c: Rename some internal functions.  A function with DES in its name that can perform AES crypto is
+	somewhat disturbing.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire.c, test/test_mifare_desfire_ev1.c,
+	test/test_mifare_desfire_ev1_3des.c,
+	test/test_mifare_desfire_ev1_3k3des.c,
+	test/test_mifare_desfire_ev1_aes.c: Freshen out cut_assert_success()
+	macro.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_aes.c: Fix headers for memset().
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/Makefile.am, libfreefare/mifare_desfire.3,
+	libfreefare/mifare_desfire_key.3: Sync man pages.
+
+2010-12-24  Audrey Diacre <adiacre@il4p.fr>
+
+	* libfreefare/mifare_desfire_crypto.c,
+	test/test_mifare_desfire_aes.c,
+	test/test_mifare_desfire_ev1_3des.c,
+	test/test_mifare_desfire_ev1_3k3des.c,
+	test/test_mifare_desfire_ev1_aes.c: replace last deprecated bzero
+	function by memset.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/Makefile.am: Create forgotten man pages symlinks.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_crypto.c, test/Makefile.am,
+	test/test_mifare_desfire_ev1_3des.c: Add support for ISO
+	authentication with 3DES keys.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_des.c: libfrefare: Use local ivect in
+	test.  It looks like finally a global variable modified by a test can
+	impact another test.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h,
+	libfreefare/mifare_desfire_crypto.c: Change the
+	enciphered_data_length() internal function prototype.
+
+2010-12-24  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_crypto.c, test/test_mifare_desfire_des.c: 
+	Change the mifare_cbc_des() internal function prototype.
+
+Dec 23, 2010 - 0.3.0
+--------------------
+
+Fixes:
+
+Improvements:
+
+Changes:
+
+2010-12-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS: Update the NEWS file regarding the
+	mifare_desfire_get_file_settings() buffer overflow fixed in 0.2.3
+	(update versions).
+
+2010-12-23  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* configure.ac: Bump version for the 0.3.x series.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.c, libfreefare/mad.c,
+	libfreefare/mifare_desfire.c, libfreefare/mifare_desfire_crypto.c: 
+	Reindent.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_crypto.c, test/test_mifare_desfire_des.c: 
+	Update the MifareDirection structure for consistency.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_crypto.c, test/test_mifare_desfire_des.c: 
+	Switch from obscure 'int mac' argument to 'MifareCryptoOperation
+	operation'.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* TODO, libfreefare/Makefile.am,
+	libfreefare/mifare_desfire_authenticate.c,
+	libfreefare/mifare_desfire_crypto.c: Rename
+	mifare_desfire_authenticate.c to mifare_desfire_crypto.c.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare.h, libfreefare/freefare_internal.h,
+	libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_authenticate.c,
+	libfreefare/mifare_desfire_key.c, test/Makefile.am,
+	test/common/mifare_desfire_auto_authenticate.c,
+	test/common/mifare_desfire_auto_authenticate.h,
+	test/test_mifare_desfire_ev1_3k3des.c: Add support for
+	authentication using 3K3DES.  Please note that according to the NXP documentation of the Mifare
+	DESFire EV1, the mifare_desfire_authenticate_iso() function can be
+	used using either 3DES or 3K3DES keys.  The former has not been
+	tested yet and is likely not to work. To word it differently, this
+	is a 3K3DES crypto support, not a ISO authentication support...
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_authenticate.c: Ignore the status code
+	when deciphering (3)DES data.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* HACKING, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_authenticate.c: Rewrite some tests using
+	switch statements.  Add a note for the reason I do this in the HACKING file.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h,
+	libfreefare/mifare_desfire_authenticate.c: Improve the way data with
+	already a CRC is preprocessed.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h,
+	libfreefare/mifare_desfire_authenticate.c,
+	test/test_mifare_desfire_aes.c: Update CMAC code to handle 64 and
+	128 bit keys.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_ev1_aes.c: Enlarge another buffer to
+	workaround the read_data() buffer overrun.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Invalidate authentication when
+	changing the currently used key.
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_authenticate.c: Remove weird code.  I should quit coding drunk... or maybe start to...
+
+2010-12-18  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c, test/test_mifare_desfire.c: 
+	Workaround invalid write in read_data () (sic) This has to be improved to some extend in the near future (hence the
+	FIXME).
+
+2010-12-17  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire_authenticate.c,
+	test/test_mifare_desfire_des.c: Fix key_macing_length() return value
+	when nbytes is 0.
+
+2010-12-17  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Silent down the compiler.  The create_application() function has iso_ parameters for creating
+	ISO application but this mode is not available yet so the code is
+	unused which annoys the compiler when told to be somewhat strict.
+
+2010-12-17  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_ev1_aes.c: Fix the fix introduced at
+	r697.  Yes, this type I typed 'make' before committing...
+
+2010-12-17  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* test/test_mifare_desfire_ev1_aes.c: Fix freed memory usage.
+
+2010-12-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix a brunch of potentially
+	reallocated memory areas.
+
+2010-12-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c, test/test_mifare_desfire_ev1_aes.c: 
+	Fix mifare_desfire_get_key_version() when authenticated with an AES
+	key.
+
+2010-12-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/Makefile.am, libfreefare/freefare.h,
+	libfreefare/mifare_desfire.c: Enable the
+	mifare-desfire-ev1-configure-random-uid example.
+
+2010-12-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* libfreefare/mifare_desfire.c: Fix mifare_desfire_free_mem().
+
+2010-12-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* examples/mifare-desfire-info.c: Display additional Mifare DESFire
+	EV1 information if applicable.
+
+2010-12-15  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, TODO, configure.ac,
+	examples/mifare-desfire-ev1-configure-random-uid.c,
+	libfreefare/freefare.c, libfreefare/freefare.h,
+	libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_authenticate.c,
+	libfreefare/mifare_desfire_key.c, test/Makefile.am,
+	test/common/mifare_desfire_auto_authenticate.c,
+	test/common/mifare_desfire_auto_authenticate.h,
+	test/mifare_desfire_ev1_fixture.c,
+	test/mifare_desfire_ev1_fixture.h, test/test_mifare_desfire.c,
+	test/test_mifare_desfire_aes.c, test/test_mifare_desfire_ev1.c,
+	test/test_mifare_desfire_ev1_aes.c: Add support for Mifare DESFire
+	EV1 with AES encryption.
+
+2010-12-13  Audrey Diacre <adiacre@il4p.fr>
+
+	* libfreefare/mifare_desfire.c: fix buffer overflow.
+
+2010-12-10  Audrey Diacre <adiacre@il4p.fr>
+
+	* configure.ac, libfreefare/mad.c, libfreefare/mifare_classic.c,
+	libfreefare/mifare_desfire.c,
+	libfreefare/mifare_desfire_authenticate.c,
+	test/test_mifare_classic.c, test/test_mifare_desfire.c: replace
+	deprecated bzero function by memset.
+
+2010-12-10  Romain Tartiere <romain.tartiere@gmail.com>
+
+	* NEWS, libfreefare/mifare_desfire.c: Discard authentication
+	information after deleting the currently selected application.
+
+=============================================================================
+For older, see https://code.google.com/p/libfreefare/issues/list
+
