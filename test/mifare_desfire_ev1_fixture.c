@@ -36,6 +36,7 @@ cut_setup (void)
     size_t device_count;
     
     nfc_init (&context);
+    cut_assert_not_null (context, cut_message ("Unable to init libnfc (malloc)"));
 
     device_count = nfc_list_devices (context, devices, 8);
     if (device_count <= 0)

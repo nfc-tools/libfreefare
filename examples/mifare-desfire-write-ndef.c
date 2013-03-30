@@ -155,6 +155,8 @@ main(int argc, char *argv[])
     
     nfc_context *context;
     nfc_init (&context);
+    if (context == NULL)
+	errx(EXIT_FAILURE, "Unable to init libnfc (malloc)");
 
     device_count = nfc_list_devices (context, devices, 8);
     if (device_count <= 0)
