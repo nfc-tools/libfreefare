@@ -207,7 +207,7 @@ main(int argc, char *argv[])
 		    errx (EXIT_FAILURE, "Authentication with NDEF Tag Application master key failed");
 
 		// Read Capability Container file E103
-		uint8_t lendata[2];
+		uint8_t lendata[20]; // cf FIXME in mifare_desfire.c read_data()
 		if (info.software.version_major==0)
 		    res = mifare_desfire_read_data (tags[i], 0x03, 0, 2, lendata);
 		else
@@ -219,7 +219,7 @@ main(int argc, char *argv[])
 		uint16_t cclen = (((uint16_t) lendata[0]) << 8) + ((uint16_t) lendata[1]);
 		if (cclen < 15)
 		    errx (EXIT_FAILURE, "CC too short IMHO");
-		if (!(cc_data = malloc(cclen)))
+		if (!(cc_data = malloc(cclen+20))) // cf FIXME in mifare_desfire.c read_data()
 		    errx (EXIT_FAILURE, "malloc");
 		if (info.software.version_major==0)
 		    res = mifare_desfire_read_data (tags[i], 0x03, 0, cclen, cc_data);
@@ -246,7 +246,7 @@ main(int argc, char *argv[])
 		    file_no = 2;
 		uint16_t ndefmaxlen = (((uint16_t) cc_data[off+4]) << 8) + ((uint16_t) cc_data[off+5]);
 		fprintf (message_stream, "Max NDEF size: %i bytes\n", ndefmaxlen);
-		if (!(ndef_msg = malloc(ndefmaxlen)))
+		if (!(ndef_msg = malloc(ndefmaxlen+20))) // cf FIXME in mifare_desfire.c read_data()
 		    errx (EXIT_FAILURE, "malloc");
 
 		res = mifare_desfire_read_data (tags[i], file_no, 0, 2, lendata);
