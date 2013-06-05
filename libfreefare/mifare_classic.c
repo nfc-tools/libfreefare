@@ -346,12 +346,10 @@ mifare_classic_init_value (MifareTag tag, const MifareClassicBlockNumber block, 
 int
 mifare_classic_read_value (MifareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr)
 {
-    MifareClassicBlock data;
-    if (mifare_classic_read (tag, block, &data) < 0)
+    union mifare_classic_block b;
+
+    if (mifare_classic_read (tag, block, &b.data) < 0)
 	return -1;
-
-    union mifare_classic_block b = *((union mifare_classic_block *)(&data));
-
 
     if ((b.value.value ^ (uint32_t)~b.value.value_) || (b.value.value != b.value.value__)) {
 	errno = EIO;
