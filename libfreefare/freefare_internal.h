@@ -161,7 +161,7 @@ void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT  0x10
 #define MIFARE_ULTRALIGHT_C_PAGE_COUNT 0x30
-#define MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ 0x2B
+#define MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ 0x2C
 // Max PAGE_COUNT of the Ultralight Family:
 #define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
 
