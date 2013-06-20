@@ -33,7 +33,8 @@
 #define START_FORMAT_N	"Formatting %d sectors ["
 #define DONE_FORMAT	"] done.\n"
 
-MifareClassicKey default_keys[] = {
+MifareClassicKey default_keys[40];
+MifareClassicKey default_keys_int[] = {
     { 0xff,0xff,0xff,0xff,0xff,0xff },
     { 0xd3,0xf7,0xd3,0xf7,0xd3,0xf7 },
     { 0xa0,0xa1,0xa2,0xa3,0xa4,0xa5 },
@@ -129,10 +130,11 @@ try_format_sector (MifareTag tag, MifareClassicSectorNumber sector)
 static void
 usage(char *progname)
 {
-    fprintf (stderr, "usage: %s [-fy]\n", progname);
+    fprintf (stderr, "usage: %s [-fy] [keyfile]\n", progname);
     fprintf (stderr, "\nOptions:\n");
-    fprintf (stderr, "  -f     Fast format (only erase MAD)\n");
-    fprintf (stderr, "  -y     Do not ask for confirmation (dangerous)\n");
+    fprintf (stderr, "  -f      Fast format (only erase MAD)\n");
+    fprintf (stderr, "  -y      Do not ask for confirmation (dangerous)\n");
+    fprintf (stderr, "  keyfile Use keys from dump in addition to internal default keys\n");
 }
 
 int
@@ -162,6 +164,30 @@ main(int argc, char *argv[])
     }
     // Remaining args, if any, are in argv[optind .. (argc-1)]
     
+    memcpy(default_keys, default_keys_int, sizeof(default_keys_int));
+
+    if ((argc - optind) > 0)
+    {
+        int i, rc;
+        char kbuffer[1024] = {0};
+        memset ( kbuffer, 0, sizeof kbuffer);
+        FILE *fp = fopen(argv[optind], "rb");
+        if (fp == NULL)
+            errx(EXIT_FAILURE, "Unable to open file");
+        for (i = 0; (rc = getc(fp)) != EOF && i < 1024; kbuffer[i++] = rc) { }
+        fclose(fp);
+
+        i = sizeof(default_keys_int) / 6;
+        for(int s = 0; s<16; s++)
+        {
+            int startblock = s * 4;
+            int pos_a = (startblock + 3) * 16;
+            int pos_b = (startblock + 3) * 16 + 10;
+            memcpy((default_keys + i++), kbuffer + pos_a, 6);
+            memcpy((default_keys + i++), kbuffer + pos_b, 6);
+        }
+    }
+
     nfc_connstring devices[8];
 
     size_t device_count;
