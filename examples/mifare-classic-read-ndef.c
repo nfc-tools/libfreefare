@@ -177,29 +177,39 @@ main(int argc, char *argv[])
 		    if ((len = mifare_application_read (tags[i], mad, mad_nfcforum_aid, buffer, sizeof(buffer), mifare_classic_nfcforum_public_key_a, MFC_KEY_A)) != -1) {
 			uint8_t tlv_type;
 			uint16_t tlv_data_len;
-			
-			uint8_t * tlv_data = tlv_decode (buffer, &tlv_type, &tlv_data_len);
+			uint8_t * tlv_data;
+			uint8_t * pbuffer = buffer;
+decode_tlv:
+			tlv_data = tlv_decode (pbuffer, &tlv_type, &tlv_data_len);
 			switch (tlv_type) {
 			    case 0x00:
-				fprintf (stderr, "NFCForum application contains a \"NULL TLV\".\n");	// FIXME: According to [ANNFC1K4K], we should skip this TLV to read further TLV blocks.
-				error = EXIT_FAILURE;
-				goto error;
+				fprintf (message_stream, "NFC Forum application contains a \"NULL TLV\", Skipping...\n");	// According to [ANNFC1K4K], we skip this Tag to read further TLV blocks.
+				pbuffer += tlv_record_length(pbuffer, NULL, NULL);
+				if (pbuffer >= buffer + sizeof(buffer)) {
+					error = EXIT_FAILURE;
+					goto error;
+				}
+				goto decode_tlv;
 				break;
 			    case 0x03:
-				fprintf (message_stream, "NFCForum application contains a \"NDEF Message TLV\".\n");
+				fprintf (message_stream, "NFC Forum application contains a \"NDEF Message TLV\".\n");
 				break;
 			    case 0xFD:
-				fprintf (stderr, "NFCForum application contains a \"Proprietary TLV\".\n");	// FIXME: According to [ANNFC1K4K], we should skip this TLV to read further TLV blocks.
-				error = EXIT_FAILURE;
-				goto error;
+				fprintf (message_stream, "NFC Forum application contains a \"Proprietary TLV\", Skipping...\n");	// According to [ANNFC1K4K], we can skip this TLV to read further TLV blocks.
+				pbuffer += tlv_record_length(pbuffer, NULL, NULL);
+				if (pbuffer >= buffer + sizeof(buffer)) {
+					error = EXIT_FAILURE;
+					goto error;
+				}
+				goto decode_tlv;
 				break;
 			    case 0xFE:
-				fprintf (stderr, "NFCForum application contains a \"Terminator TLV\", no available data.\n");
+				fprintf (stderr, "NFC Forum application contains a \"Terminator TLV\", no available data.\n");
 				error = EXIT_FAILURE;
 				goto error;
 				break;
 			    default:
-				fprintf (stderr, "NFCForum application contains an invalid TLV.\n");
+				fprintf (stderr, "NFC Forum application contains an invalid TLV.\n");
 				error = EXIT_FAILURE;
 				goto error;
 				break;

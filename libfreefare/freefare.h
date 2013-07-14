@@ -402,6 +402,7 @@ void		 mifare_desfire_key_free (MifareDESFireKey key);
 
 uint8_t		*tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
 uint8_t		*tlv_decode (const uint8_t *istream, uint8_t *type, uint16_t *size);
+size_t		tlv_record_length (const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
 uint8_t		*tlv_append (uint8_t *a, uint8_t *b);
 
 #ifdef __cplusplus
