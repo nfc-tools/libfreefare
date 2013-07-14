@@ -48,6 +48,12 @@ struct mifare_classic_key_and_type {
     MifareClassicKeyType type;
 };
 
+struct {
+    bool interactive;
+} write_options = {
+    .interactive = true
+};
+
 const MifareClassicKey default_keyb = {
     0xd3, 0xf7, 0xd3, 0xf7, 0xd3, 0xf7
 };
@@ -121,6 +127,7 @@ usage(char *progname)
 {
     fprintf (stderr, "usage: %s -i FILE\n", progname);
     fprintf (stderr, "\nOptions:\n");
+    fprintf (stderr, "  -y     Do not ask for confirmation\n");
     fprintf (stderr, "  -i     Use FILE as NDEF message to write on card (\"-\" = stdin)\n");
 }
 
@@ -135,11 +142,14 @@ main(int argc, char *argv[])
 
     int ch;
     char *ndef_input = NULL;
-    while ((ch = getopt (argc, argv, "hi:")) != -1) {
+    while ((ch = getopt (argc, argv, "hyi:")) != -1) {
 	switch (ch) {
 	case 'h':
 	    usage(argv[0]);
 	    exit (EXIT_SUCCESS);
+	    break;
+	case 'y':
+	    write_options.interactive = false;
 	    break;
 	case 'i':
 	    ndef_input = optarg;
@@ -230,10 +240,17 @@ main(int argc, char *argv[])
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    char buffer[BUFSIZ];
 
-	    printf ("Found %s with UID %s. Write NDEF [yN] ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
-	    fgets (buffer, BUFSIZ, stdin);
-	    bool write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    printf ("Found %s with UID %s. ", freefare_get_tag_friendly_name (tags[i]), tag_uid);
 
+	    bool write_ndef = true;
+	    if (write_options.interactive) {
+	    	printf ("Write NDEF [yN] ");
+	    	fgets (buffer, BUFSIZ, stdin);
+	    	write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+	    } else {
+	    	printf ("\n");
+	    }
+	    	   
 	    for (int n = 0; n < 40; n++) {
 		memcpy(card_write_keys[n].key, transport_key, sizeof (transport_key));
 		card_write_keys[n].type = MFC_KEY_A;
