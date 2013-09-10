@@ -298,12 +298,39 @@ mifare_desfire_connect (MifareTag tag)
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
 
-    nfc_target pnti;
-    nfc_modulation modulation = {
-	.nmt = NMT_ISO14443A,
-	.nbr = NBR_106
-    };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+    if(NULL != tag->device) // nfc way
+    {
+	nfc_target pnti;
+	nfc_modulation modulation = {
+	    .nmt = NMT_ISO14443A,
+	    .nbr = NBR_106
+	};
+	if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+	    tag->active = 1;
+		free (MIFARE_DESFIRE (tag)->session_key);
+		MIFARE_DESFIRE (tag)->session_key = NULL;
+		MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
+		MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
+		MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
+		MIFARE_DESFIRE (tag)->selected_application = 0;
+    	} else {
+	    errno = EIO;
+	    return -1;
+    	}
+    }
+    else	// pcsc way
+    {
+	DWORD	dwActiveProtocol;
+	SCARDHANDLE hCard;
+
+    	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
+						SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
+	if(SCARD_S_SUCCESS != tag->lastPCSCerror)
+	{
+	    errno = EIO;
+	    return -1;
+	}
+
 	tag->active = 1;
 	free (MIFARE_DESFIRE (tag)->session_key);
 	MIFARE_DESFIRE (tag)->session_key = NULL;
@@ -311,10 +338,7 @@ mifare_desfire_connect (MifareTag tag)
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
 	MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
 	MIFARE_DESFIRE (tag)->selected_application = 0;
-    } else {
-	errno = EIO;
-	return -1;
-    }
+    }  
     return 0;
 }
 
