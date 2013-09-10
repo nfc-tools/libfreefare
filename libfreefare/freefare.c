@@ -23,15 +23,12 @@
 #include <freefare.h>
 #include <pcsclite.h>
 #include <winscard.h>
+#include <reader.h>
 #include "freefare_internal.h"
 
 #define MAX_CANDIDATES 16
 
 #define NXP_MANUFACTURER_CODE 0x04
-
-#include <winscard.h>
-#include <pcsclite.h>
-#include <reader.h>
 
 struct supported_tag supported_tags[] = {
     { CLASSIC_1K,   "Mifare Classic 1k",            0x08, 0, 0, { 0x00 }, NULL },
