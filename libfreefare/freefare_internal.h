@@ -190,6 +190,7 @@ struct mifare_tag {
     // PCSC things
     SCARDCONTEXT 	hContext;
     SCARDHANDLE		hCard;
+    LPCSTR		szReader;
     LONG		lastPCSCerror;
     // End of PCSC things
     const struct supported_tag *tag_info;
