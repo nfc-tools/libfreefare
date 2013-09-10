@@ -426,7 +426,6 @@ pcsc_init(struct pcsc_context** context)
 {
 	LONG err;
 	struct pcsc_context *con =  malloc(sizeof(struct pcsc_context));
-	con->scard_err = 0;
 	err = SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &con->context);
 	if (err < 0)
 	{
