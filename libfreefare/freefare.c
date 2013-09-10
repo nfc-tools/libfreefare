@@ -265,14 +265,14 @@ freefare_get_tags (nfc_device *device)
  * The list has to be freed using the freefare_free_tags() function.
  */
 MifareTag *
-freefare_get_tags_pcsc (LPSCARDCONTEXT phContext, LPCSTR szReader)
+freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 {
     MifareTag 	*tags = NULL;
     DWORD	dwActiveProtocol;
     LONG	rv;
     SCARDHANDLE hCard;
 
-    rv = SCardConnect(*phContext, szReader, SCARD_SHARE_SHARED, 
+    rv = SCardConnect(context->context, szReader, SCARD_SHARE_SHARED, 
 			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
     if(SCARD_S_SUCCESS != rv)
     {

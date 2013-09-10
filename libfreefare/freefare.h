@@ -64,7 +64,7 @@ void		 pcsc_exit(struct pcsc_context*);
 LPSTR		 pcsc_list_devices(struct pcsc_context*);
 
 MifareTag	*freefare_get_tags (nfc_device *device);
-MifareTag 	*freefare_get_tags_pcsc (LPSCARDCONTEXT phContext, LPCSTR szReader);
+MifareTag 	*freefare_get_tags_pcsc (struct pcsc_context *ontext, LPCSTR szReader);
 MifareTag	 freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai);
 MifareTag	 freefare_tag_new_pcsc(LPSCARDHANDLE phCard);
 enum mifare_tag_type freefare_get_tag_type (MifareTag tag);
