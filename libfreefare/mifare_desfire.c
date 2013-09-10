@@ -320,14 +320,23 @@ mifare_desfire_disconnect (MifareTag tag)
 
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE(tag)->session_key = NULL;
-
-    if (nfc_initiator_deselect_target (tag->device) >= 0) {
-	tag->active = 0;
+    
+    if(NULL != tag->device) // nfclib way
+    {
+ 	if (nfc_initiator_deselect_target (tag->device) >= 0) {
+	    tag->active = 0;
+	}
+    }
+    else // pcsc way
+    {
+	tag->lastPCSCerror = SCardDisconnect(tag->hCard, SCARD_LEAVE_CARD);
+	if(SCARD_S_SUCCESS == tag->lastPCSCerror) 
+	{
+	    tag->active = 0;
+	}
     }
     return 0;
 }
-
-
 
 #define AUTHENTICATE_LEGACY 0x0A
 #define AUTHENTICATE_ISO 0x1A
