@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <openssl/des.h>
+#include <pcsclite.h>
 
 /*
  * Endienness macros

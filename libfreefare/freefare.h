@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 #include <nfc/nfc.h>
+#include <pcsclite.h>
 
 #ifdef __cplusplus
     extern "C" {
