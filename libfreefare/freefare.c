@@ -28,6 +28,10 @@
 
 #define NXP_MANUFACTURER_CODE 0x04
 
+#include <winscard.h>
+#include <pcsclite.h>
+#include <reader.h>
+
 struct supported_tag supported_tags[] = {
     { CLASSIC_1K,   "Mifare Classic 1k",            0x08, 0, 0, { 0x00 }, NULL },
     { CLASSIC_1K,   "Infineon Mifare Classic 1k",   0x88, 0, 0, { 0x00 }, NULL },
@@ -97,13 +101,100 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 }
 
 MifareTag
-freefare_tag_new_pcsc(LPSCARDHANDLE phCard)
+freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
 {
-	MifareTag t;
-	return t;
+    SCARDHANDLE handle = *handleptr;
+
+    bool found = false;
+    struct supported_tag *tag_info;
+    MifareTag tag;
+
+
+
+    /* Ensure the target is supported */
+//    for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
+//	size_t i = 0;
+//	if (((nai.szUidLen == 4) || (nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
+//	    (nai.btSak == supported_tags[i].SAK) &&
+//	    (!supported_tags[i].ATS_min_length || ((nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
+//						   (0 == memcmp (nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length)))) &&
+//	    ((supported_tags[i].check_tag_on_reader == NULL) ||
+//	     supported_tags[i].check_tag_on_reader(device, nai))) {
+//
+//	    tag_info = &(supported_tags[i]);
+//	    found = true;
+//	    break;
+//	}
+//    }
+//
+//    if (!found)
+//	return NULL;
+
+
+
+
+    LONG l;
+    LPBYTE pbAttr;
+    LPDWORD pcbAttrLen;
+
+/*
+    if (l = SCardGetAttrib ( handle, SCARD_ATTR_ICC_TYPE_PER_ATR, pbAttr, pcbAttrLen)){
+	// error handling ? 
+    }
+
+// TODO REMOVE ME!!!!
+	fprintf(stderr, "DEBUG: typelength=%d\n", pcbAttrLen);
+	for (int i = 0; i < pcbAttrLen; i++){
+	    fprintf(stderr, "%d", pbAttr[i]);
+	}	
+    
+
+// TODO insert right numbers here 
+    const char* desfire_type = "\x00"
+    if ((pcbAttrLen == 1) && ( ! strncmp(pbAttr, desfire_type ,1))){
+	
+    }
+*/ 
+    if (l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen )) {
+	/* error handling ? */
+    }
+
+    const char* desfire_tag = "\x3b\x81\x80\x01\x80\x80";
+    if ((*pcbAttrLen == 6) && (! strncmp(pbAttr, desfire_tag, 6))){
+	tag = mifare_desfire_tag_new ();
+    }
+
+ /* Allocate memory for the found MIFARE target */
+/*    switch (tag_info->type) {
+
+   case CLASSIC_1K:
+    case CLASSIC_4K:
+	tag = mifare_classic_tag_new ();
+	break;
+    case DESFIRE:
+	tag = mifare_desfire_tag_new ();
+	break;
+    case ULTRALIGHT:
+    case ULTRALIGHT_C:
+	tag = mifare_ultralight_tag_new ();
+	break;
+    }
+*/
+    if (!tag)
+	return NULL;
+
+    /*
+     * Initialize common fields
+     * (Target specific fields are initialized in mifare_*_tag_new())
+     */
+    tag->device = NULL;
+//    tag->info = NULL //&supported_tags[5];
+    tag->active = 0;
+    tag->tag_info = tag_info;
+
+    return tag;
 }
 
-
 /*
  * MIFARE card common functions
  *
