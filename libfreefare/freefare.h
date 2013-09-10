@@ -54,6 +54,15 @@ typedef struct mifare_desfire_key *MifareDESFireKey;
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
+struct pcsc_context {
+	SCARDCONTEXT context;
+	LPSTR readers;
+};
+
+void		 pcsc_init(struct pcsc_context**);
+void		 pcsc_exit(struct pcsc_context*);
+LPSTR		 pcsc_list_devices(struct pcsc_context*);
+
 MifareTag	*freefare_get_tags (nfc_device *device);
 MifareTag 	*freefare_get_tags_pcsc (LPSCARDCONTEXT phContext, LPCSTR szReader);
 MifareTag	 freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai);

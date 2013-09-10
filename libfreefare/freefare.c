@@ -21,7 +21,8 @@
 #include <string.h>
 
 #include <freefare.h>
-
+#include <pcsclite.h>
+#include <winscard.h>
 #include "freefare_internal.h"
 
 #define MAX_CANDIDATES 16
@@ -416,6 +417,56 @@ freefare_free_tags (MifareTag *tags)
     }
 }
 
+/*
+ * create context for pcsc readers
+ */
+
+void
+pcsc_init(struct pcsc_context** context)
+{
+	LONG err;
+	struct pcsc_context *con =  malloc(sizeof(struct pcsc_context));
+	con->scard_err = 0;
+	err = SCardEstablishContext(SCARD_SCOPE_SYSTEM, NULL, NULL, &con->context);
+	if (err < 0)
+	{
+		*context = NULL;
+		return;
+	}
+	*context = con;
+}
+
+/*
+ * destroy context for pcsc readers
+ */
+void
+pcsc_exit(struct pcsc_context* context)
+{
+	if (context->readers)
+		SCardFreeMemory(context->context, context->readers);
+	SCardReleaseContext(context->context);
+}
+
+/*
+ * list pcsc devices
+ */
+
+LPSTR
+pcsc_list_devices(struct pcsc_context* context)
+{
+	LONG err;
+	LPSTR str;
+	DWORD size;
+	size = SCARD_AUTOALLOCATE;
+	err = SCardListReaders(context->context, NULL, (LPSTR)&str, &size);
+	if (err < 0)
+	{
+		context->readers = NULL;
+		return NULL;
+	}
+	context->readers = str;
+	return str;
+}
 
 /*
  * Low-level API
