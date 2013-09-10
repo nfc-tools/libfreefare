@@ -186,9 +186,9 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
      * (Target specific fields are initialized in mifare_*_tag_new())
      */
     tag->device = NULL;
-//    tag->info = NULL //&supported_tags[5];
+//    tag->info = &supported_tags[4];
     tag->active = 0;
-    tag->tag_info = tag_info;
+    tag->tag_info = &supported_tags[4];
 
     return tag;
 }
