@@ -96,6 +96,13 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
     return tag;
 }
 
+MifareTag
+freefare_tag_new_pcsc(LPSCARDHANDLE phCard)
+{
+	MifareTag t;
+	return t;
+}
+
 
 /*
  * MIFARE card common functions
@@ -155,6 +162,55 @@ freefare_get_tags (nfc_device *device)
 	    tags[tag_count++] = t;
 	    tags[tag_count] = NULL;
 	}
+    }
+
+    return tags;
+}
+
+/*
+ * Get a list of the MIFARE targets near to the provided NFC initiator.
+ * (Usally its just one tag, because pcsc can not detect more)
+ * phContext must be established with SCardEstablishContext before 
+ * calling this function.
+ * mszReader is the Name of the SmartCard Reader to use
+ * The list has to be freed using the freefare_free_tags() function.
+ */
+MifareTag *
+freefare_get_tags_pcsc (LPSCARDCONTEXT phContext, LPCSTR szReader)
+{
+    MifareTag 	*tags = NULL;
+    DWORD	dwActiveProtocol;
+    SCARDHANDLE hCard;
+
+    if(SCARD_S_SUCCESS != SCardConnect(*phContext, szReader, SCARD_SHARE_SHARED, 
+			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol))
+    {
+	return tags;
+    }
+
+    // MAYBE TODO: ?! does pcsc set it also this way, is it unnecessary for pcsc ?!
+    /*
+    	// Configure the CRC and Parity settings
+    	nfc_device_set_property_bool(device,NP_HANDLE_CRC,true);
+    	nfc_device_set_property_bool(device,NP_HANDLE_PARITY,true);
+    	nfc_device_set_property_bool(device,NP_AUTO_ISO14443_4,true);
+    */
+
+    tags = malloc(sizeof (void *));
+    if(!tags) return NULL;
+    tags[0] = NULL;
+
+    MifareTag t;
+    if(t = freefare_tag_new_pcsc(&hCard))
+    {
+	MifareTag *p = realloc (tags, 2 * sizeof (MifareTag));
+	if (p)
+	    tags = p;
+	else
+	    return tags; // FAIL! Return what has been found so far.
+	t->hCard = hCard;
+	tags[0] = t;
+	tags[1] = NULL;
     }
 
     return tags;
