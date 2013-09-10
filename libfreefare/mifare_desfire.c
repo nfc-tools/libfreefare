@@ -184,8 +184,17 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
 	int _res; \
-	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
-	    return errno = EIO, -1; \
+	if (tag->device == NULL) { \
+		SCARD_IO_REQUEST __pcsc_rcv_pci; \
+		DWORD __pcsc_recv_len = __##res##_size + 1; \
+		if ((_res = SCardTransmit(tag->hCard, SCARD_PCI_T0, __msg, __len, &__pcsc_rcv_pci, __res, &__pcsc_recv_len)) < 0) { \
+			return errno = EIO, -1; \
+		} \
+	} \
+	else { \
+		if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
+	    	return errno = EIO, -1; \
+		} \
 	} \
 	__##res##_n = _res; \
 	DEBUG_XFER (__res, __##res##_n, "<=== "); \
@@ -197,7 +206,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	memcpy (res, __res, __##res##_n - 1); \
     } while (0)
 
-
+
 /*
  * Miscellaneous low-level memory manipulation functions.
  */
