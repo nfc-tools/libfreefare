@@ -187,8 +187,11 @@ struct supported_tag {
 struct mifare_tag {
     nfc_device *device;
     nfc_iso14443a_info info;
+    // PCSC things
     SCARDCONTEXT 	hContext;
     SCARDHANDLE		hCard;
+    LONG		lastPCSCerror;
+    // End of PCSC things
     const struct supported_tag *tag_info;
     int active;
 };

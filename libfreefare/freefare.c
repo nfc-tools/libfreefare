@@ -180,10 +180,12 @@ freefare_get_tags_pcsc (LPSCARDCONTEXT phContext, LPCSTR szReader)
 {
     MifareTag 	*tags = NULL;
     DWORD	dwActiveProtocol;
+    LONG	rv;
     SCARDHANDLE hCard;
 
-    if(SCARD_S_SUCCESS != SCardConnect(*phContext, szReader, SCARD_SHARE_SHARED, 
-			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol))
+    rv = SCardConnect(*phContext, szReader, SCARD_SHARE_SHARED, 
+			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
+    if(SCARD_S_SUCCESS != rv)
     {
 	return tags;
     }
@@ -208,7 +210,10 @@ freefare_get_tags_pcsc (LPSCARDCONTEXT phContext, LPCSTR szReader)
 	    tags = p;
 	else
 	    return tags; // FAIL! Return what has been found so far.
+
+	t->device = NULL;	// we dont wanna use nfclib, so device is not needed !
 	t->hCard = hCard;
+	t->lastPCSCerror = rv;
 	tags[0] = t;
 	tags[1] = NULL;
     }
@@ -273,16 +278,23 @@ const char *
 freefare_strerror (MifareTag tag)
 {
     const char *p = "Unknown error";
-    if (nfc_device_get_last_error (tag->device) < 0) {
-      p = nfc_strerror (tag->device);
-    } else {
-      if (tag->tag_info->type == DESFIRE) {
-        if (MIFARE_DESFIRE (tag)->last_pcd_error) {
-          p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
-        } else if (MIFARE_DESFIRE (tag)->last_picc_error) {
-          p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
-        }
-      }
+    if(tag->device != NULL) // we use libnfc
+    {
+	if (nfc_device_get_last_error (tag->device) < 0) {
+	    p = nfc_strerror (tag->device);
+	} else {
+	    if (tag->tag_info->type == DESFIRE) {
+	    	if (MIFARE_DESFIRE (tag)->last_pcd_error) {
+		    p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
+	    	} else if (MIFARE_DESFIRE (tag)->last_picc_error) {
+	            p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_picc_error);
+	    	}
+	    }
+	}
+    }
+    else // we use the pcsc protocol
+    {
+	p = (const char*) pcsc_stringify_error(tag->lastPCSCerror);
     }
     return p;
 }
