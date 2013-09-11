@@ -229,7 +229,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     SCARDHANDLE hCard;
 
     rv = SCardConnect(context->context, szReader, SCARD_SHARE_SHARED, 
-			SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &hCard, &dwActiveProtocol);
+			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
     if(SCARD_S_SUCCESS != rv)
     {
 	#ifdef PASST_DEBUG
@@ -274,7 +274,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	LONG err;
 	SCARD_IO_REQUEST ioreq;
 	DWORD retlen = sizeof(ret);
-	err = SCardTransmit(hCard, SCARD_PCI_T1, buf, sizeof(buf), &ioreq, ret, &retlen);
+	err = SCardTransmit(hCard, SCARD_PCI_T0, buf, sizeof(buf), &ioreq, ret, &retlen);
 	// TODO: proper error handling
 	if (err != SCARD_S_SUCCESS)
 	{
