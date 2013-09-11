@@ -243,7 +243,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     tags[0] = NULL;
 
     MifareTag t;
-    if(t = freefare_tag_new_pcsc(context->context, hCard))
+    if(NULL != (t = freefare_tag_new_pcsc(context->context, hCard)))
     {
 	MifareTag *p = realloc (tags, 2 * sizeof (MifareTag));
 	if (p)
