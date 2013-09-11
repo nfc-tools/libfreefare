@@ -322,8 +322,7 @@ mifare_desfire_connect (MifareTag tag)
     {
 	DWORD	dwActiveProtocol;
 	SCARDHANDLE hCard;
-printf("reader: %s\n", tag->szReader);
-    	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
+    tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
 						SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
 	if(SCARD_S_SUCCESS != tag->lastPCSCerror)
 	{
