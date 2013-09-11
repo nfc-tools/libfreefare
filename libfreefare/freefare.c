@@ -366,10 +366,24 @@ freefare_get_tag_friendly_name (MifareTag tag)
 char *
 freefare_get_tag_uid (MifareTag tag)
 {
-    char *res = malloc (2 * tag->info.szUidLen + 1);
-    for (size_t i =0; i < tag->info.szUidLen; i++)
-        snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
-    return res;
+	if (tag->device != NULL)
+	{
+    	char *res = malloc (2 * tag->info.szUidLen + 1);
+    	for (size_t i =0; i < tag->info.szUidLen; i++)
+        	snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
+    	return res;
+	}
+	else
+	{
+		char buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
+		char ret[13];
+		LONG err;
+		SCARD_IO_REQUEST ioreq;
+		DWORD retlen = sizeof(ret);
+		err = SCardTransmit(tag->hCard, SCARD_PCI_T0, buf, sizeof(buf), &ioreq, ret, &retlen);
+printf("%ld, %s\n", err, buf);
+	return buf;
+	}
 }
 
 /*
