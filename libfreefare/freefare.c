@@ -99,10 +99,8 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 }
 
 MifareTag
-freefare_tag_new_pcsc (SCARDCONTEXT context, LPSCARDHANDLE handleptr)
+freefare_tag_new_pcsc (SCARDCONTEXT context, SCARDHANDLE handle)
 {
-    SCARDHANDLE handle = *handleptr;
-
     bool found = false;
     struct supported_tag *tag_info;
     MifareTag tag;
@@ -253,7 +251,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     tags[0] = NULL;
 
     MifareTag t;
-    if(t = freefare_tag_new_pcsc(context->context, &hCard))
+    if(t = freefare_tag_new_pcsc(context->context, hCard))
     {
 	MifareTag *p = realloc (tags, 2 * sizeof (MifareTag));
 	if (p)
