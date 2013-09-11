@@ -153,10 +153,12 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
 	
     }
 */ 
-    if (l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen )) {
+    l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen );
+    if (l != SCARD_S_SUCCESS) {
 	/* error handling ? */
 	fprintf(stderr, "SCardGetAttribi\n");
-    }
+	return 0; 
+   }
 
     const char* desfire_tag = "\x3b\x81\x80\x01\x80\x80";
     if ((*pcbAttrLen == 6) && (! strncmp(pbAttr, desfire_tag, 6))){
