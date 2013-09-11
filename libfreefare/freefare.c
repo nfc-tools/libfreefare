@@ -99,7 +99,7 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 }
 
 MifareTag
-freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
+freefare_tag_new_pcsc (SCARDCONTEXT context, LPSCARDHANDLE handleptr)
 {
     SCARDHANDLE handle = *handleptr;
 
@@ -132,8 +132,8 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
 
 
     LONG l;
-    LPBYTE pbAttr;
-    LPDWORD pcbAttrLen;
+    LPBYTE pbAttr = NULL;
+    LPDWORD pcbAttrLen = (LPDWORD) SCARD_AUTOALLOCATE;
 
 /*
     if (l = SCardGetAttrib ( handle, SCARD_ATTR_ICC_TYPE_PER_ATR, pbAttr, pcbAttrLen)){
@@ -153,7 +153,7 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
 	
     }
 */ 
-    l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen );
+    l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen);
     if (l != SCARD_S_SUCCESS) {
 	/* error handling ? */
 	fprintf(stderr, "Handle was: 0x%lx dSCardGetAttrib\n", handle);
@@ -166,6 +166,11 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
  	fprintf(stderr, "valid TAG\n");
     } else {
 	fprintf(stderr, "invalid TAG\n");
+    }
+
+    if(SCARD_S_SUCCESS != SCardFreeMemory(context, pbAttr))
+    {
+	fprintf(stderr, "SCardFreeMemory failed.\n");
     }
 
  /* Allocate memory for the found MIFARE target */
@@ -307,7 +312,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     tags[0] = NULL;
 
     MifareTag t;
-    if(t = freefare_tag_new_pcsc(&hCard))
+    if(t = freefare_tag_new_pcsc(context->context, &hCard))
     {
 	MifareTag *p = realloc (tags, 2 * sizeof (MifareTag));
 	if (p)
