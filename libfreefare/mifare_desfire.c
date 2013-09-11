@@ -187,7 +187,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	if (tag->device == NULL) { \
 		SCARD_IO_REQUEST __pcsc_rcv_pci; \
 		DWORD __pcsc_recv_len = __##res##_size + 1; \
-		if ((SCardTransmit(tag->hCard, SCARD_PCI_T0, __msg, __len, &__pcsc_rcv_pci, __res, &__pcsc_recv_len)) < 0) { \
+		if ((SCARD_S_SUCCESS != SCardTransmit(tag->hCard, SCARD_PCI_T0, __msg, __len, &__pcsc_rcv_pci, __res, &__pcsc_recv_len)) < 0) { \
 			return errno = EIO, -1; \
 		} \
 		_res = __pcsc_recv_len; \
