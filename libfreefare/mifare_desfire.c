@@ -324,7 +324,7 @@ mifare_desfire_connect (MifareTag tag)
 	SCARDHANDLE hCard;
 
     	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
-						SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
+						SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &(tag->hCard), &dwActiveProtocol);
 	if(SCARD_S_SUCCESS != tag->lastPCSCerror)
 	{
 	    errno = EIO;

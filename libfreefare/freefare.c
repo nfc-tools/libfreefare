@@ -279,7 +279,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     SCARDHANDLE hCard;
 
     rv = SCardConnect(context->context, szReader, SCARD_SHARE_SHARED, 
-			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
+			SCARD_PROTOCOL_T0 | SCARD_PROTOCOL_T1, &hCard, &dwActiveProtocol);
     if(SCARD_S_SUCCESS != rv)
     {
 	#ifdef PASST_DEBUG
