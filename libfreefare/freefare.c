@@ -156,7 +156,7 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
     l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen );
     if (l != SCARD_S_SUCCESS) {
 	/* error handling ? */
-	fprintf(stderr, "SCardGetAttribi\n");
+	fprintf(stderr, "Handle was: 0x%lx dSCardGetAttrib\n", handle);
 	return 0; 
    }
 
