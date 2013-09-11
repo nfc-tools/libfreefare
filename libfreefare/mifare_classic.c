@@ -230,16 +230,23 @@ mifare_classic_connect (MifareTag tag)
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    nfc_target pnti;
-    nfc_modulation modulation = {
-	.nmt = NMT_ISO14443A,
-	.nbr = NBR_106
-    };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
-	tag->active = 1;
-    } else {
-	errno = EIO;
-	return -1;
+    if(NULL != tag->device) // nfc way
+    {
+	nfc_target pnti;
+	nfc_modulation modulation = {
+	    .nmt = NMT_ISO14443A,
+	    .nbr = NBR_106
+	};
+	if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+	    tag->active = 1;
+	} else {
+	    errno = EIO;
+	    return -1;
+	}
+    }
+    else // pcsc way
+    {
+	
     }
     return 0;
 }

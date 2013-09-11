@@ -210,7 +210,7 @@ struct mifare_tag {
     if(NULL != szRd) \
     { \
     	free(szRd); \
-	tag->szReader = NULL; \
+	szRd = NULL; \
     }
 
 
