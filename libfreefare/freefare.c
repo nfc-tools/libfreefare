@@ -162,7 +162,8 @@ freefare_tag_new_pcsc (SCARDCONTEXT context, LPSCARDHANDLE handleptr)
    }
 
     const char* desfire_tag = "\x3b\x81\x80\x01\x80\x80";
-    if ((*pcbAttrLen == 6) && (! strncmp(pbAttr, desfire_tag, 6))){
+    
+    if ((*pcbAttrLen == 6) && (! memcmp(pbAttr, desfire_tag, 6))){
 	tag = mifare_desfire_tag_new ();
  	fprintf(stderr, "valid TAG\n");
     } else {
