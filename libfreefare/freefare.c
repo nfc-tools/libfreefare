@@ -377,12 +377,13 @@ freefare_get_tag_uid (MifareTag tag)
 	{
 		char buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
 		char ret[13];
+		static char test[] = "test";
 		LONG err;
 		SCARD_IO_REQUEST ioreq;
 		DWORD retlen = sizeof(ret);
 		err = SCardTransmit(tag->hCard, SCARD_PCI_T0, buf, sizeof(buf), &ioreq, ret, &retlen);
 printf("%ld, %s\n", err, buf);
-	return buf;
+	return test;
 	}
 }
 
