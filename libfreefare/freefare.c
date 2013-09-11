@@ -280,6 +280,9 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
     if(SCARD_S_SUCCESS != rv)
     {
+	#ifdef PASST_DEBUG
+	printf("ERROR: SCardConnect failed !! (in freefare_get_tags_pcsc)");
+	#endif
 	return tags;
     }
 
@@ -292,7 +295,13 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     */
 
     tags = malloc(sizeof (void *));
-    if(!tags) return NULL;
+    if(!tags)
+    {
+	#ifdef PASST_DEBUG
+	printf("ERROR: malloc failed !! (in freefare_get_tags_pcsc)");
+	#endif 
+	return NULL;
+    }
     tags[0] = NULL;
 
     MifareTag t;
@@ -302,13 +311,24 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	if (p)
 	    tags = p;
 	else
+	{
+	    #ifdef PASST_DEBUG
+	    printf("ERROR: realloc failed !! (in freefare_get_tags_pcsc)");
+	    #endif 
 	    return tags; // FAIL! Return what has been found so far.
+	}
 
 	t->device = NULL;	// we dont wanna use nfclib, so device is not needed !
 	t->hCard = hCard;
 	t->lastPCSCerror = rv;
 	tags[0] = t;
 	tags[1] = NULL;
+    }
+    else
+    {
+	#ifdef PASST_DEBUG
+	printf("ERROR: freefare_tag_new_pcsc call failed !! (in freefare_get_tags_pcsc)");
+	#endif 
     }
 
     return tags;
