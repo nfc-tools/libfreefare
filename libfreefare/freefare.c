@@ -154,10 +154,10 @@ freefare_tag_new_pcsc (SCARDCONTEXT context, LPSCARDHANDLE handleptr)
 	
     }
 */ 
-    l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen);
+    l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , (unsigned char*)&pbAttr, pcbAttrLen);
     if (l != SCARD_S_SUCCESS) {
 	/* error handling ? */
-	fprintf(stderr, "Handle was: 0x%lx dSCardGetAttrib\n", handle);
+	fprintf(stderr, "Handle was: 0x%lx dSCardGetAttrib %lx\n", handle, l);
 	return 0; 
    }
 
@@ -292,7 +292,9 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	printf("ERROR: SCardConnect failed !! (in freefare_get_tags_pcsc)");
 	#endif
 	return tags;
-    }
+	}
+
+	
 
     // MAYBE TODO: ?! does pcsc set it also this way, is it unnecessary for pcsc ?!
     /*
@@ -303,7 +305,9 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
     */
 
     tags = malloc(sizeof (void *));
-    if(!tags)
+
+	    
+	if(!tags)
     {
 	#ifdef PASST_DEBUG
 	printf("ERROR: malloc failed !! (in freefare_get_tags_pcsc)");
@@ -326,6 +330,25 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	    return tags; // FAIL! Return what has been found so far.
 	}
 
+	/* set info data for pcsc , can we do this earlier? */
+
+	/* get and set card uid */
+	uint8_t buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
+	uint8_t ret[12];
+	LONG err;
+	SCARD_IO_REQUEST ioreq;
+	DWORD retlen = sizeof(ret);
+	err = SCardTransmit(hCard, SCARD_PCI_T1, buf, sizeof(buf), &ioreq, ret, &retlen);
+	// TODO: proper error handling
+	if (err != SCARD_S_SUCCESS)
+	{
+fprintf(stderr, "getting uid failed\n");
+	return tags;
+	}
+	memcpy(t->info.abtUid, ret, retlen - 2);
+	t->info.szUidLen = retlen - 2;
+
+
 	t->device = NULL;	// we dont wanna use nfclib, so device is not needed !
 	t->hCard = hCard;
 	t->lastPCSCerror = rv;
@@ -338,7 +361,6 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	printf("ERROR: freefare_tag_new_pcsc call failed !! (in freefare_get_tags_pcsc)");
 	#endif 
     }
-
     return tags;
 }
 
@@ -366,25 +388,10 @@ freefare_get_tag_friendly_name (MifareTag tag)
 char *
 freefare_get_tag_uid (MifareTag tag)
 {
-	if (tag->device != NULL)
-	{
-    	char *res = malloc (2 * tag->info.szUidLen + 1);
-    	for (size_t i =0; i < tag->info.szUidLen; i++)
-        	snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
-    	return res;
-	}
-	else
-	{
-		char buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
-		char ret[13];
-		static char test[] = "test";
-		LONG err;
-		SCARD_IO_REQUEST ioreq;
-		DWORD retlen = sizeof(ret);
-		err = SCardTransmit(tag->hCard, SCARD_PCI_T0, buf, sizeof(buf), &ioreq, ret, &retlen);
-printf("%ld, %s\n", err, buf);
-	return test;
-	}
+   	char *res = malloc (2 * tag->info.szUidLen + 1);
+   	for (size_t i =0; i < tag->info.szUidLen; i++)
+       	snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
+   	return res;
 }
 
 /*
