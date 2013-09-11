@@ -155,11 +155,15 @@ freefare_tag_new_pcsc (LPSCARDHANDLE handleptr)
 */ 
     if (l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , pbAttr, pcbAttrLen )) {
 	/* error handling ? */
+	fprintf("SCardGetAttribi\n");
     }
 
     const char* desfire_tag = "\x3b\x81\x80\x01\x80\x80";
     if ((*pcbAttrLen == 6) && (! strncmp(pbAttr, desfire_tag, 6))){
 	tag = mifare_desfire_tag_new ();
+ 	fprintf("valid TAG\n");
+    } else {
+	fprintf("invalid TAG\n");
     }
 
  /* Allocate memory for the found MIFARE target */
