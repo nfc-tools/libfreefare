@@ -184,7 +184,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
 	int _res; \
-	if (tag->device == NULL) { \
+	if (tag->device == NULL) { /* pcsc branch */ \
 		SCARD_IO_REQUEST __pcsc_rcv_pci; \
 		DWORD __pcsc_recv_len = __##res##_size + 1; \
 		if ((SCARD_S_SUCCESS != SCardTransmit(tag->hCard, SCARD_PCI_T0, __msg, __len, &__pcsc_rcv_pci, __res, &__pcsc_recv_len)) < 0) { \
@@ -192,7 +192,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 		} \
 		_res = __pcsc_recv_len; \
 	} \
-	else { \
+	else { /* nfc branch */ \
 		if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
 	    	return errno = EIO, -1; \
 		} \
@@ -324,15 +324,17 @@ mifare_desfire_connect (MifareTag tag)
     {
 	DWORD	dwActiveProtocol;
 	SCARDHANDLE hCard;
-/*	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
+	// TODO: disconnect in the get_tags function freefare_get_tags_pcsc and connect here again
+	/*
+	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
 						SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
 	if(SCARD_S_SUCCESS != tag->lastPCSCerror)
 	{
 	    errno = EIO;
-fprintf(stderr, "borked %lx\n", tag->lastPCSCerror);
+	    fprintf(stderr, "borked %lx\n", tag->lastPCSCerror);
 	    return -1;
 	}
-*/
+	*/
 	tag->active = 1;
 	free (MIFARE_DESFIRE (tag)->session_key);
 	MIFARE_DESFIRE (tag)->session_key = NULL;
@@ -369,9 +371,11 @@ mifare_desfire_disconnect (MifareTag tag)
 	{
 	    tag->active = 0;
 	}
+
+	FREE_SZREADER(tag->szReader);
     }
 
-    FREE_SZREADER(tag->szReader);
+    
 
     return 0;
 }

@@ -90,11 +90,30 @@
 	errno = 0; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
 	int _res; \
-	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
-	    if (disconnect) { \
-		tag->active = false; \
+	if (tag->device != NULL) /* nfc way */  \
+	{ \
+	    if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0)  \
+	    { \
+	    	if (disconnect) \
+		{ \
+		    tag->active = false; \
+	    	} \
+	        return errno = EIO, -1; \
 	    } \
-	    return errno = EIO, -1; \
+	} \
+	else /* pcsc way */ \
+	{ \
+	    SCARD_IO_REQUEST __pcsc_rcv_pci; \
+	    DWORD __pcsc_recv_len = __##res##_size + 1; \
+	    if ((SCARD_S_SUCCESS != SCardTransmit(tag->hCard, SCARD_PCI_T0, msg, __##msg##_n, &__pcsc_rcv_pci, (LPBYTE)&_res, &__pcsc_recv_len)) < 0) \
+	    { \
+	    	if (disconnect) \
+		{ \
+		    tag->active = false; \
+	    	} \
+		return errno = EIO, -1; \
+	    } \
+	    _res = __pcsc_recv_len; \
 	} \
 	__##res##_n = _res; \
 	DEBUG_XFER (res, __##res##_n, "<=== "); \
@@ -246,7 +265,21 @@ mifare_classic_connect (MifareTag tag)
     }
     else // pcsc way
     {
-	
+	// TODO: disconnect in the get_tags function freefare_get_tags_pcsc and connect here again
+	/*
+	DWORD	dwActiveProtocol;
+	SCARDHANDLE hCard;
+	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
+						SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
+	if(SCARD_S_SUCCESS != tag->lastPCSCerror)
+	{
+	    errno = EIO;
+	    fprintf(stderr, "borked %lx\n", tag->lastPCSCerror);
+	    return -1;
+	}
+	*/
+	tag->active = 1;
+
     }
     return 0;
 }
@@ -260,12 +293,30 @@ mifare_classic_disconnect (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
 
-    if (nfc_initiator_deselect_target (tag->device) >= 0) {
-	tag->active = 0;
-    } else {
-	errno = EIO;
-	return -1;
+    if(NULL != tag->device) // nfclib way
+    {
+	if (nfc_initiator_deselect_target (tag->device) >= 0) {
+	    tag->active = 0;
+	} else {
+	    errno = EIO;
+	    return -1;
+	}
     }
+    else // pcsc way
+    {
+	tag->lastPCSCerror = SCardDisconnect(tag->hCard, SCARD_LEAVE_CARD);
+	if(SCARD_S_SUCCESS == tag->lastPCSCerror) 
+	{
+	    tag->active = 0;
+	}
+	else {
+	    errno = EIO;
+	    return -1;
+	}
+
+	FREE_SZREADER(tag->szReader);
+    }
+
     return 0;
 }
 
