@@ -112,7 +112,7 @@ freefare_tag_new_pcsc (SCARDCONTEXT context, SCARDHANDLE handle)
 
     l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , (unsigned char*)&pbAttr, pcbAttrLen);
   
-   if (l != SCARD_S_SUCCESS) {
+    if (l != SCARD_S_SUCCESS) {
 	/* error handling ? */
 	fprintf(stderr, "Handle was: 0x%lx SCardGetAttrib %lx\n", handle, l);
 	return 0; 
@@ -230,22 +230,14 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
     if(SCARD_S_SUCCESS != rv)
     {
-	#ifdef PASST_DEBUG
-	printf("ERROR: SCardConnect failed !! (in freefare_get_tags_pcsc)");
-	#endif
+	fprintf(stderr, "freefare_get_tags_pcsc: SCardConnect failed !!\n");
 	return tags;
-	}
+    }
 
-	
-
-    tags = malloc(sizeof (void *));
-
-	    
-	if(!tags)
+    tags = malloc(sizeof (void *));    
+    if(!tags)
     {
-	#ifdef PASST_DEBUG
-	printf("ERROR: malloc failed !! (in freefare_get_tags_pcsc)");
-	#endif 
+	fprintf(stderr, "freefare_get_tags_pcsc: malloc failed !!\n");
 	return NULL;
     }
     tags[0] = NULL;
@@ -258,14 +250,11 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	    tags = p;
 	else
 	{
-	    #ifdef PASST_DEBUG
-	    printf("ERROR: realloc failed !! (in freefare_get_tags_pcsc)");
-	    #endif 
+    	    fprintf(stderr, "freefare_get_tags_pcsc: realloc failed !!\n");
 	    return tags; // FAIL! Return what has been found so far.
 	}
 
 	/* set info data for pcsc , can we do this earlier? */
-
 	/* get and set card uid */
 	uint8_t buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
 	uint8_t ret[12];
@@ -276,8 +265,8 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	// TODO: proper error handling
 	if (err != SCARD_S_SUCCESS)
 	{
-fprintf(stderr, "getting uid failed\n");
-	return tags;
+	    fprintf(stderr, "getting uid failed\n");
+	    return tags;
 	}
 	memcpy(t->info.abtUid, ret, retlen - 2);
 	t->info.szUidLen = retlen - 2;
@@ -291,9 +280,7 @@ fprintf(stderr, "getting uid failed\n");
     }
     else
     {
-	#ifdef PASST_DEBUG
-	printf("ERROR: freefare_tag_new_pcsc call failed !! (in freefare_get_tags_pcsc)\n");
-	#endif 
+	fprintf(stderr, "freefare_get_tags_pcsc: freefare_tag_new_pcsc call failed !!\n"); 
     }
 
     tags[0]->szReader = malloc(strlen(szReader) * sizeof(char) + 1);
