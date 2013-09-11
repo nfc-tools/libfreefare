@@ -133,7 +133,8 @@ freefare_tag_new_pcsc (SCARDCONTEXT context, LPSCARDHANDLE handleptr)
 
     LONG l;
     LPBYTE pbAttr = NULL;
-    LPDWORD pcbAttrLen = (LPDWORD) SCARD_AUTOALLOCATE;
+    DWORD value = SCARD_AUTOALLOCATE;
+    LPDWORD pcbAttrLen = &value;
 
 /*
     if (l = SCardGetAttrib ( handle, SCARD_ATTR_ICC_TYPE_PER_ATR, pbAttr, pcbAttrLen)){
