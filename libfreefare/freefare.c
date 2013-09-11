@@ -277,13 +277,14 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	t->lastPCSCerror = rv;
 	tags[0] = t;
 	tags[1] = NULL;
+
+	FILL_SZREADER(szReader);
     }
     else
     {
 	fprintf(stderr, "freefare_get_tags_pcsc: freefare_tag_new_pcsc call failed !!\n"); 
+	return NULL;
     }
-
-    FILL_SZREADER(szReader);
 
     return tags;
 }
