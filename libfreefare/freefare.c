@@ -283,13 +283,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 	fprintf(stderr, "freefare_get_tags_pcsc: freefare_tag_new_pcsc call failed !!\n"); 
     }
 
-    tags[0]->szReader = malloc(strlen(szReader) * sizeof(char) + 1);
-    if(NULL == tags[0]->szReader)
-    {
-	fprintf(stderr, "malloc failed !! (in freefare_get_tags_pcsc)\n");
-	exit(EXIT_FAILURE);
-    }
-    strcpy(tags[0]->szReader, (const char *)szReader);
+    FILL_SZREADER(szReader);
 
     return tags;
 }

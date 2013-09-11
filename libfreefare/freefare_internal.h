@@ -197,6 +197,24 @@ struct mifare_tag {
     int active;
 };
 
+#define FILL_SZREADER(szRd) \
+    tags[0]->szReader = malloc(strlen(szRd) * sizeof(char) + 1); \
+    if(NULL == tags[0]->szReader) \
+    { \
+	fprintf(stderr, "malloc failed !! (in freefare_get_tags_pcsc)\n"); \
+	exit(EXIT_FAILURE); \
+    } \
+    strcpy(tags[0]->szReader, (const char *)szRd)
+
+#define FREE_SZREADER(szRd) \
+    if(NULL != szRd) \
+    { \
+    	free(szRd); \
+	tag->szReader = NULL; \
+    }
+
+
+
 struct mifare_classic_tag {
     struct mifare_tag __tag;
 

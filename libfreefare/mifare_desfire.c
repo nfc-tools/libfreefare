@@ -371,11 +371,7 @@ mifare_desfire_disconnect (MifareTag tag)
 	}
     }
 
-    if(NULL != tag->szReader)
-    {
-    	free(tag->szReader);
-	tag->szReader = NULL;
-    }
+    FREE_SZREADER(tag->szReader);
 
     return 0;
 }
