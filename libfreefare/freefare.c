@@ -297,14 +297,6 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 
 	
 
-    // MAYBE TODO: ?! does pcsc set it also this way, is it unnecessary for pcsc ?!
-    /*
-    	// Configure the CRC and Parity settings
-    	nfc_device_set_property_bool(device,NP_HANDLE_CRC,true);
-    	nfc_device_set_property_bool(device,NP_HANDLE_PARITY,true);
-    	nfc_device_set_property_bool(device,NP_AUTO_ISO14443_4,true);
-    */
-
     tags = malloc(sizeof (void *));
 
 	    
@@ -359,9 +351,18 @@ fprintf(stderr, "getting uid failed\n");
     else
     {
 	#ifdef PASST_DEBUG
-	printf("ERROR: freefare_tag_new_pcsc call failed !! (in freefare_get_tags_pcsc)");
+	printf("ERROR: freefare_tag_new_pcsc call failed !! (in freefare_get_tags_pcsc)\n");
 	#endif 
     }
+
+    tags[0]->szReader = malloc(strlen(szReader) * sizeof(char) + 1);
+    if(NULL == tags[0]->szReader)
+    {
+	fprintf(stderr, "malloc failed !! (in freefare_get_tags_pcsc)\n");
+	exit(EXIT_FAILURE);
+    }
+    strcpy(tags[0]->szReader, (const char *)szReader);
+
     return tags;
 }
 
