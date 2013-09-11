@@ -473,21 +473,26 @@ pcsc_exit(struct pcsc_context* context)
  * list pcsc devices
  */
 
-LPSTR
-pcsc_list_devices(struct pcsc_context* context)
+LONG
+pcsc_list_devices(struct pcsc_context* context, LPSTR *string)
 {
 	LONG err;
-	LPSTR str;
+	LPSTR str = NULL;
 	DWORD size;
+	static char empty[] = "\0";
 	size = SCARD_AUTOALLOCATE;
 	err = SCardListReaders(context->context, NULL, (LPSTR)&str, &size);
-	if (err < 0)
+	if (err != SCARD_S_SUCCESS)
 	{
 		context->readers = NULL;
-		return NULL;
+		*string = empty;
 	}
-	context->readers = str;
-	return str;
+	else
+	{
+		*string = str;
+		context->readers = str;
+	}
+	return err;
 }
 
 /*

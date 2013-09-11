@@ -59,9 +59,9 @@ struct pcsc_context {
 	LPSTR readers;
 };
 
-void		 pcsc_init(struct pcsc_context**);
-void		 pcsc_exit(struct pcsc_context*);
-LPSTR		 pcsc_list_devices(struct pcsc_context*);
+void		 pcsc_init(struct pcsc_context** context);
+void		 pcsc_exit(struct pcsc_context* context);
+LONG		 pcsc_list_devices(struct pcsc_context* context, LPSTR* string);
 
 MifareTag	*freefare_get_tags (nfc_device *device);
 MifareTag 	*freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader);
