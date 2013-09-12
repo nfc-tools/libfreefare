@@ -137,7 +137,6 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	} \
     } while (0)
 
-
 /*
  * Convenience macros.
  */
@@ -249,7 +248,7 @@ le24toh (uint8_t data[3])
     return (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
-
+
 /*
  * Memory management functions.
  */
@@ -282,7 +281,6 @@ mifare_desfire_tag_free (MifareTag tag)
     free (tag);
 }
 
-
 /*
  * MIFARE card communication preparation functions
  *
@@ -699,7 +697,6 @@ mifare_desfire_get_key_version (MifareTag tag, uint8_t key_no, uint8_t *version)
     return 0;
 }
 
-
 
 static int
 create_application (MifareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, int want_iso_application, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
@@ -1187,7 +1184,6 @@ mifare_desfire_get_card_uid (MifareTag tag, char **uid)
     return 0;
 }
 
-
 
 /* Application level commands */
 
@@ -1553,7 +1549,6 @@ mifare_desfire_delete_file (MifareTag tag, uint8_t file_no)
     return 0;
 }
 
-
 /*
  * Data manipulation commands.
  */
