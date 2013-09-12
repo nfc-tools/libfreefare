@@ -61,13 +61,24 @@
 #define ULTRALIGHT_TRANSCEIVE(tag, msg, res) \
     do { \
 	errno = 0; \
+	int _res ; \
 	DEBUG_XFER (msg, __##msg##_n, "===> "); \
-	int _res; \
-	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
-	    return errno = EIO, -1; \
+	if (tag->device == NULL) {\
+	/* PCSC branch */\
+	    SCARD_IO_REQUEST __pcsc_rcv_pci; \
+	    DWORD __pcsc_recv_len = __##res##_size; \
+	    if ((SCARD_S_SUCCESS != SCardTransmit(tag->hCard, SCARD_PCI_T0, msg, __##msg##_n, &__pcsc_rcv_pci, res, &__pcsc_recv_len)) < 0) { \
+		return errno = EIO, -1; \
+	    } \
+	_res = __pcsc_recv_len; \
+	} else { \
+	/* nfc branch */ \
+	    if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
+		return errno = EIO, -1; \
+	    } \
+	    __##res##_n = _res; \
+	    DEBUG_XFER (res, __##res##_n, "<=== "); \
 	} \
-	__##res##_n = _res; \
-	DEBUG_XFER (res, __##res##_n, "<=== "); \
     } while (0)
 
 #define ULTRALIGHT_TRANSCEIVE_RAW(tag, msg, res) \
@@ -91,7 +102,7 @@
 	} \
     } while (0)
 
-
+
 /*
  * Memory management functions.
  */
