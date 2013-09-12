@@ -315,18 +315,18 @@ mifare_desfire_connect (MifareTag tag)
     else	// pcsc way
     {
 	DWORD	dwActiveProtocol;
-	SCARDHANDLE hCard;
-	// TODO: disconnect in the get_tags function freefare_get_tags_pcsc and connect here again
-	/*
+	
 	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, 
 						SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
+
 	if(SCARD_S_SUCCESS != tag->lastPCSCerror)
 	{
 	    errno = EIO;
+	    fprintf(stderr, "szReader: %s\n", tag->szReader);
 	    fprintf(stderr, "borked %lx\n", tag->lastPCSCerror);
 	    return -1;
 	}
-	*/
+	
     }
   
     tag->active = 1;

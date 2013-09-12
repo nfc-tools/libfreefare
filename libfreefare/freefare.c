@@ -158,11 +158,14 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
     memcpy(tag->info.abtUid, ret, retlen - 2);
     tag->info.szUidLen = retlen - 2;
     tag->device = NULL;
+    tag->hContext = context->context;
     tag->hCard = hCard;
     tag->active = 0;
     tag->tag_info = tag_info;
     FILL_SZREADER(tag, reader);
 
+    tag->lastPCSCerror = SCardDisconnect(tag->hCard, SCARD_LEAVE_CARD);
+    
     return tag;
 }
 
