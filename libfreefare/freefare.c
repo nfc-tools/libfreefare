@@ -149,11 +149,13 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
 
     if ( (atrlen == 6) && (! memcmp (desfire_tag, pbAttr, 6) ) ){
 	tag_info->type = DESFIRE;
+	printf("desfire\n");
     }
 	else
 
     if ( (atrlen == 20) && (! memcmp (classic_tag, pbAttr, 20) ) ){
 	tag_info->type = CLASSIC_1K;
+	printf("classic\n");
     }
 	else
 
@@ -166,6 +168,7 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
 	}
 	if (0 == memcmp (pbAttr, current_tag, 20)){
 		tag_info->type = ULTRALIGHT;
+		printf("ULTRALIGHT\n");
 	}	
     }
 	
