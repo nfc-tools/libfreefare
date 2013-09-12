@@ -189,28 +189,31 @@ mifare_ultralight_disconnect (MifareTag tag)
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
 
-if (tag->device == NULL) {
+    if (tag->device == NULL) {
 	/* pcsc branch */
 
-	if ( (tag->lastPCSCerror = SCardDisconnect (tag->hCard, SCARD_LEAVE_CARD) ) == SCARD_S_SUCCESS ) {
-		tag->active = 0;
-		return 0;
-	} else {
-		errno = EIO;
-		return -1;	
+	if ( (tag->lastPCSCerror = SCardDisconnect (tag->hCard, SCARD_LEAVE_CARD) ) == SCARD_S_SUCCESS ) 
+	{
+	    tag->active = 0;
+	    return 0;
+	} 
+	else 
+	{
+	    errno = EIO;
+	    return -1;	
 	}
 
-} else {
-	/* nfc branch */
-    if (nfc_initiator_deselect_target (tag->device) >= 0) {
-	tag->active = 0;
-    } else {
-	errno = EIO;
-	return -1;
+    } 
+    else /* nfc branch */
+    { 
+    	if (nfc_initiator_deselect_target (tag->device) >= 0) {
+	    tag->active = 0;
+    	} else {
+	    errno = EIO;
+	    return -1;
+    	}
+        return 0;
     }
-    return 0;
-}
-
 }
 
 
