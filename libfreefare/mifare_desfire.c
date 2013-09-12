@@ -305,18 +305,12 @@ mifare_desfire_connect (MifareTag tag)
 	    .nmt = NMT_ISO14443A,
 	    .nbr = NBR_106
 	};
-	if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
-	    tag->active = 1;
-		free (MIFARE_DESFIRE (tag)->session_key);
-		MIFARE_DESFIRE (tag)->session_key = NULL;
-		MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
-		MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
-		MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
-		MIFARE_DESFIRE (tag)->selected_application = 0;
-    	} else {
+	int ret = nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti);
+	if( !(ret >= 0 )) // selecting a pasive target got some error
+	{
 	    errno = EIO;
 	    return -1;
-    	}
+	}
     }
     else	// pcsc way
     {
@@ -333,14 +327,16 @@ mifare_desfire_connect (MifareTag tag)
 	    return -1;
 	}
 	*/
-	tag->active = 1;
-	free (MIFARE_DESFIRE (tag)->session_key);
-	MIFARE_DESFIRE (tag)->session_key = NULL;
-	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
-	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
-	MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
-	MIFARE_DESFIRE (tag)->selected_application = 0;
-    }  
+    }
+  
+    tag->active = 1;
+    free (MIFARE_DESFIRE (tag)->session_key);
+    MIFARE_DESFIRE (tag)->session_key = NULL;
+    MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK;
+    MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK;
+    MIFARE_DESFIRE (tag)->authenticated_key_no = NOT_YET_AUTHENTICATED;
+    MIFARE_DESFIRE (tag)->selected_application = 0;	
+
     return 0;
 }
 
