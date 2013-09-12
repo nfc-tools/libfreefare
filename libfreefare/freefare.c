@@ -296,19 +296,21 @@ void
 freefare_free_tag (MifareTag tag)
 {
     if (tag) {
-        switch (tag->tag_info->type) {
-        case CLASSIC_1K:
-        case CLASSIC_4K:
-            mifare_classic_tag_free (tag);
-            break;
-        case DESFIRE:
-            mifare_desfire_tag_free (tag);
-            break;
-        case ULTRALIGHT:
-        case ULTRALIGHT_C:
-            mifare_ultralight_tag_free (tag);
-            break;
+        switch (tag->tag_info->type) 
+	{
+	    case CLASSIC_1K:
+	    case CLASSIC_4K:
+		mifare_classic_tag_free (tag);
+	    	break;
+	    case DESFIRE:
+		mifare_desfire_tag_free (tag);
+	    	break;
+	    case ULTRALIGHT:
+	    case ULTRALIGHT_C:
+		mifare_ultralight_tag_free (tag);
+		break;
         }
+	FREE_SZREADER(tag->szReader);
     }
 }
 

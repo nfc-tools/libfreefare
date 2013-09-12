@@ -365,8 +365,6 @@ mifare_desfire_disconnect (MifareTag tag)
 	{
 	    tag->active = 0;
 	}
-
-	FREE_SZREADER(tag->szReader);
     }
 
     

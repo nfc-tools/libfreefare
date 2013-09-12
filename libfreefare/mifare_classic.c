@@ -309,8 +309,6 @@ mifare_classic_disconnect (MifareTag tag)
 	    errno = EIO;
 	    return -1;
 	}
-
-	FREE_SZREADER(tag->szReader);
     }
 
     return 0;
