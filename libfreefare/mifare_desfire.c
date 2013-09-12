@@ -194,7 +194,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	} \
 	else { /* nfc branch */ \
 		if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
-	    	return errno = EIO, -1; \
+	    	    return errno = EIO, -1; \
 		} \
 	} \
 	__##res##_n = _res; \
