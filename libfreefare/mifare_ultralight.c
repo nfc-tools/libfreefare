@@ -144,45 +144,40 @@ mifare_ultralight_tag_free (MifareTag tag)
 int
 mifare_ultralight_connect (MifareTag tag)
 {
-
-
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
 
-if (tag->device == NULL) {
-    /* pcsc branch */
+    if (tag->device == NULL) { /* pcsc branch */
 
 	DWORD dwActiveProtocol;
 
 	tag->lastPCSCerror = SCardConnect(tag->hContext, tag->szReader, SCARD_SHARE_SHARED, SCARD_PROTOCOL_T0, &(tag->hCard), &dwActiveProtocol);
         if(SCARD_S_SUCCESS != tag->lastPCSCerror){
-		return errno = EIO, -1;
+	    return errno = EIO, -1;
 	}
 	
 	tag->active = 1;
 	for (int i = 0; i < MIFARE_ULTRALIGHT_MAX_PAGE_COUNT; i++)
 	    MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
-	
-	return 0;
+
+    } 
+    else { /* nfc branch */
+    	nfc_target pnti;
+    	nfc_modulation modulation = {
+	    .nmt = NMT_ISO14443A,
+	    .nbr = NBR_106
+    	};
+    	if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+	    tag->active = 1;
+	    for (int i = 0; i < MIFARE_ULTRALIGHT_MAX_PAGE_COUNT; i++)
+	    	MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
+    	} else {
+	    errno = EIO;
+	    return -1;
+    	}
     
-} else {
-    /* nfc branch */
-    nfc_target pnti;
-    nfc_modulation modulation = {
-	.nmt = NMT_ISO14443A,
-	.nbr = NBR_106
-    };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
-	tag->active = 1;
-	for (int i = 0; i < MIFARE_ULTRALIGHT_MAX_PAGE_COUNT; i++)
-	    MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
-    } else {
-	errno = EIO;
-	return -1;
     }
     return 0;
-}
-
 }
 
 /*
