@@ -101,13 +101,11 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 MifareTag
 freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mifare_tag_type type)
 {
-    bool found = false;
     struct supported_tag *tag_info;
     MifareTag tag;
     LONG l;
     LPBYTE pbAttr = NULL;
-    DWORD value = SCARD_AUTOALLOCATE;
-    LPDWORD pcbAttrLen = &value;
+    DWORD atrlen = SCARD_AUTOALLOCATE;
     DWORD dwActiveProtocol;
     SCARDHANDLE hCard;
     uint8_t buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
@@ -132,6 +130,46 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
 	fprintf(stderr, "freefare_tag_new_pcsc: getting uid failed\n");
 	return NULL;
     }
+
+    LONG err;
+    err = SCardGetAttrib ( hCard , SCARD_ATTR_ATR_STRING, pbAttr, &atrlen );
+    
+
+
+    char*         desfire_tag = "\x3b\x81\x80\x01\x80\x80";
+    
+    char*         classic_tag = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x01\x00\x00\x00\x00\x6a";
+
+    char*      ultralight_tag = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x03\x00\x00\x00\x00\x68";
+
+    char* ultralight_bitmask1 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\x00";
+    char* ultralight_bitmask2 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\xff\xff\xff\xff\x00";
+
+//    tag_info->type = NULL;
+
+    if ( (atrlen == 6) && (! memcmp (desfire_tag, pbAttr, 6) ) ){
+	tag_info->type = DESFIRE;
+    }
+	else
+
+    if ( (atrlen == 20) && (! memcmp (classic_tag, pbAttr, 20) ) ){
+	tag_info->type = CLASSIC_1K;
+    }
+	else
+
+    if ( (atrlen == 20) && (1 /*FIXME*/)){
+	/*zero everything out, what might be variable*/
+	char current_tag[20];
+	for (int z = 0; z < 20; z++){
+	    pbAttr[z] &= ultralight_bitmask1[z];
+	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
+	}
+	if (0 == memcmp (pbAttr, current_tag, 20)){
+		tag_info->type = ULTRALIGHT;
+	}	
+    }
+	
+
 
     /* Allocate memory for the found MIFARE target */
     switch (tag_info->type) {
@@ -255,6 +293,8 @@ freefare_get_tags_pcsc (struct pcsc_context *context, const char *reader, enum m
     tags[1] = NULL;
     if(tags[0] == NULL)
     	return NULL;
+
+    
 
     return tags;
 }
