@@ -230,7 +230,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
 			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
     if(SCARD_S_SUCCESS != rv)
     {
-	fprintf(stderr, "freefare_get_tags_pcsc: SCardConnect failed !!\n");
+//	fprintf(stderr, "freefare_get_tags_pcsc: SCardConnect failed !!\n");
 	return tags;
     }
 
