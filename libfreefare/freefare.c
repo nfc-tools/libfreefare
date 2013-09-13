@@ -163,11 +163,12 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
     if ( (atrlen == 20) && (1 /*FIXME*/)){
 	/*zero everything out, what might be variable*/
 	char current_tag[20];
+	char pbAttr_copy[20];
 	for (int z = 0; z < 20; z++){
-	    pbAttr[z] &= ultralight_bitmask1[z];
+	    pbAttr_copy[z] &= ultralight_bitmask1[z];
 	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
 	}
-	if (0 == memcmp (pbAttr, current_tag, 20)){
+	if (0 == memcmp (pbAttr_copy, current_tag, 20)){
 		tag_info = &(supported_tags[ULTRALIGHT]);
 		printf("ULTRALIGHT\n");
 	}	
