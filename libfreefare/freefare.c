@@ -99,7 +99,7 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 }
 
 MifareTag
-freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mifare_tag_type type)
+freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 {
     struct supported_tag *tag_info;
     MifareTag tag;
@@ -112,8 +112,6 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
     uint8_t ret[12];
     SCARD_IO_REQUEST ioreq;
     DWORD retlen;
-
-    tag_info = &(supported_tags[type]);
 
     l = SCardConnect(context->context, reader, SCARD_SHARE_SHARED, 
 			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
@@ -149,8 +147,6 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
 
     char* ultralight_bitmask1 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\x00";
     char* ultralight_bitmask2 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\xff\xff\xff\xff\x00";
-
-//    tag_info->type = NULL;
 
     if ( (atrlen == 6) && (! memcmp (desfire_tag, pbAttr, 6) ) ){
 	tag_info->type = DESFIRE;
@@ -305,7 +301,7 @@ freefare_get_tags (nfc_device *device)
  * The list has to be freed using the freefare_free_tags() function.
  */
 MifareTag *
-freefare_get_tags_pcsc (struct pcsc_context *context, const char *reader, enum mifare_tag_type type)
+freefare_get_tags_pcsc (struct pcsc_context *context, const char *reader)
 {
     MifareTag 	*tags = NULL;
     
@@ -315,7 +311,7 @@ freefare_get_tags_pcsc (struct pcsc_context *context, const char *reader, enum m
 	fprintf(stderr, "freefare_get_tags_pcsc: malloc failed !!\n");
 	return NULL;
     }
-    tags[0] = freefare_tag_new_pcsc(context, reader, type);
+    tags[0] = freefare_tag_new_pcsc(context, reader);
     tags[1] = NULL;
     if(tags[0] == NULL)
     	return NULL;
