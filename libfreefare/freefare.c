@@ -162,7 +162,7 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 					break;
 				}
 			}
-			if (c == pcsc_supported_atrs[i].len - 1) {
+			if (c == pcsc_supported_atrs[i].len) {
 				tagtype = pcsc_supported_atrs[i].type;
 				found = true;
 				break;
