@@ -48,7 +48,7 @@ main (int argc, char *argv[])
 
     for (reader = str; *reader != '\0'; reader += strlen(reader) + 1) {
         if (!(tags = freefare_get_tags_pcsc(context, reader))) {
-	    /* no tags found on this device*/
+	    /* no tags found on this reader */
 	    continue;
 	}
 
