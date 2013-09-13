@@ -46,7 +46,7 @@ main (int argc, char *argv[])
     if (err)
 	errx (EXIT_FAILURE, "No pcsc device found");
 
-    for (reader = str; *reader == '\0'; reader += strlen(reader) + 1) {
+    for (reader = str; *reader != '\0'; reader += strlen(reader) + 1) {
         if (!(tags = freefare_get_tags_pcsc(context, reader))) {
 	    errx (EXIT_FAILURE, "Error listing tags.");
 	}
