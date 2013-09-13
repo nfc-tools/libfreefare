@@ -187,7 +187,7 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
     {
 	crc ^= pbAttr[crc_count];
     }
-    printf("checking \"CRC\": %s\n (0x%2x)", (crc) ? "fail" : "succeed", crc);
+    printf("checking \"CRC\": %s (crc=0x%02x)\n", (crc) ? "fail" : "succeed", crc);
 
     err = SCardFreeMemory (context->context, pbAttr);
     if (err)
