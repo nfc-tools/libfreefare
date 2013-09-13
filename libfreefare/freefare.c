@@ -143,7 +143,8 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 
     char*         desfire_tag = "\x3b\x81\x80\x01\x80\x80";
     
-    char*         classic_tag = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x01\x00\x00\x00\x00\x6a";
+    char*      classic_tag_1k = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x01\x00\x00\x00\x00\x6a";
+    char*      classic_tag_4k = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x02\x00\x00\x00\x00\x6a";
 
     char*      ultralight_tag = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x03\x00\x00\x00\x00\x68";
 
@@ -156,9 +157,15 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
     }
 	else
 
-    if ( (atrlen == 20) && (! memcmp (classic_tag, pbAttr, 20) ) ){
+    if ( (atrlen == 20) && (! memcmp (classic_tag_1k, pbAttr, 20) ) ){
 	tagtype = CLASSIC_1K;
-	printf("classic\n");
+	printf("classic 1k\n");
+    }
+	else 
+
+    if ( (atrlen == 20) && (! memcmp (classic_tag_4k, pbAttr, 20) ) ){
+	tagtype = CLASSIC_4K;
+	printf("classic 4k\n");
     }
 	else
 
