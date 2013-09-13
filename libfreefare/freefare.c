@@ -181,6 +181,9 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	if (0 == memcmp (pbAttr_copy, current_tag, 20)){
 		tagtype = ULTRALIGHT;
 		printf("ULTRALIGHT\n");
+	} else {
+		printf("unknown tag\n");
+		return NULL;
 	}	
     }
 	else
