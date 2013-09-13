@@ -167,7 +167,7 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	char current_tag[20];
 	char pbAttr_copy[20];
 	for (int z = 0; z < 20; z++){
-	    pbAttr_copy[z] &= ultralight_bitmask1[z];
+	    pbAttr_copy[z] = ultralight_bitmask1[z] & pbAttr[z];
 	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
 	}
 
