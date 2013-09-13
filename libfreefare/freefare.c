@@ -142,57 +142,39 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	return NULL;
     }
 
-
-    char*         desfire_tag = "\x3b\x81\x80\x01\x80\x80";
-    
-    char*      classic_tag_1k = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x01\x00\x00\x00\x00\x6a";
-    char*      classic_tag_4k = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x02\x00\x00\x00\x00\x69";
-
-    char*      ultralight_tag = "\x3b\x8f\x80\x01\x80\x4f\x0c\xa0\x00\x00\x03\x06\x03\x00\x03\x00\x00\x00\x00\x68";
-
-    char* ultralight_bitmask1 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\x00";
-    char* ultralight_bitmask2 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\xff\xff\xff\xff\x00";
-
-    if ( (atrlen == 6) && (! memcmp (desfire_tag, pbAttr, 6) ) ){
-	tagtype = DESFIRE;
-	printf("desfire\n");
-    }
-	else
-
-    if ( (atrlen == 20) && (! memcmp (classic_tag_1k, pbAttr, 20) ) ){
-	tagtype = CLASSIC_1K;
-	printf("classic 1k\n");
-    }
-	else 
-
-    if ( (atrlen == 20) && (! memcmp (classic_tag_4k, pbAttr, 20) ) ){
-	tagtype = CLASSIC_4K;
-	printf("classic 4k\n");
-    }
-	else
-
-    if ( (atrlen == 20) && (1 /*FIXME*/)){
-	/*zero everything out, what might be variable*/
-	char current_tag[20];
-	char pbAttr_copy[20];
-	for (int z = 0; z < 20; z++){
-	    pbAttr_copy[z] = ultralight_bitmask1[z] & pbAttr[z];
-	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
+	found = false;
+	for (int i = 0; pcsc_supported_atrs[i].len != 0; i++){
+		if (atrlen != pcsc_supported_atrs[i].len) { 
+			continue;
+		}
+		if ( pcsc_supported_atrs[i].mask == NULL ){
+			/* no bitmask here */
+			if ( ! memcmp(pcsc_supported_atrs[i].tag ,pbAttr ,atrlen) ) {
+				tagtype = pcsc_supported_atrs[i].type;
+				found = true;
+				break;
+			}
+		} else {
+			/* bitmask case */
+			int c;
+			for (c = 0; c < pcsc_supported_atrs[i].len; c++){
+				if (pcsc_supported_atrs[i].tag[c] & pcsc_supported_atrs[i].mask[c] == pbAttr[c] & pcsc_supported_atrs[i].mask[c]){
+					break;
+				}
+			}
+			if (c == pcsc_supported_atrs[i].len - 1) {
+				tagtype = pcsc_supported_atrs[i].type;
+				found = true;
+				break;
+			}
+		}
+	}	
+	if (!found) { 
+		return NULL;
 	}
 
-	if (0 == memcmp (pbAttr_copy, current_tag, 20)){
-		tagtype = ULTRALIGHT;
-		printf("ULTRALIGHT\n");
-	} else {
-		printf("unknown tag\n");
-		return NULL;
-	}	
-    }
-	else
-    {
-	printf("unknown tag length: %ld", atrlen);
-	return NULL;
-    }	
+	found = false;
+	
     
     for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
     	if(supported_tags[i].type == tagtype) {
