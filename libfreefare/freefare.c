@@ -182,6 +182,14 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
     }	
 
 
+    char crc = 0x00;
+    for (int crc_count = 1 /*! 1. Byte wird ignoriert*/ ; crc_count < atrlen; crc_count++ )
+    {
+	crc ^= pbAttr[crc_count];
+    }
+    printf("checking \"CRC\": %s\n", (crc) ? "fail" : "succeed");
+
+
     /* Allocate memory for the found MIFARE target */
     switch (tag_info->type) {
     case CLASSIC_1K:
