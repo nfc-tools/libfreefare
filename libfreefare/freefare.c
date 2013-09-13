@@ -26,6 +26,8 @@
 #include <reader.h>
 #include "freefare_internal.h"
 
+#include "freefare_pcsc_tags.h"
+
 #define MAX_CANDIDATES 16
 
 #define NXP_MANUFACTURER_CODE 0x04
