@@ -132,11 +132,11 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
     }
 
     LONG err;
-    err = SCardGetAttrib ( hCard , SCARD_ATTR_ATR_STRING, pbAttr, &atrlen );
+    err = SCardGetAttrib ( hCard , SCARD_ATTR_ATR_STRING, (LPBYTE) &pbAttr, &atrlen );
     
     if (err)
     {
-	printf("SCardGetAttrib: err=%d  %s\n ", err, pcsc_stringify_error(err));
+	printf("SCardGetAttrib: err=%lx  %s\n ", err, pcsc_stringify_error(err));
 	return NULL;
     }
 
