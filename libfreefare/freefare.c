@@ -101,8 +101,10 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 MifareTag
 freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 {
-    struct supported_tag *tag_info;
+    struct supported_tag *tag_info = NULL;
+    enum mifare_tag_type tagtype;
     MifareTag tag;
+    bool found = false;
     LONG l;
     LPBYTE pbAttr = NULL;
     DWORD atrlen = SCARD_AUTOALLOCATE;
@@ -149,13 +151,13 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
     char* ultralight_bitmask2 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\xff\xff\xff\xff\x00";
 
     if ( (atrlen == 6) && (! memcmp (desfire_tag, pbAttr, 6) ) ){
-	tag_info = &(supported_tags[DESFIRE]);
+	tagtype = DESFIRE;
 	printf("desfire\n");
     }
 	else
 
     if ( (atrlen == 20) && (! memcmp (classic_tag, pbAttr, 20) ) ){
-	tag_info = &(supported_tags[CLASSIC_1K]);
+	tagtype = CLASSIC_1K;
 	printf("classic\n");
     }
 	else
@@ -168,16 +170,28 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	    pbAttr_copy[z] &= ultralight_bitmask1[z];
 	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
 	}
-	if (0 == memcmp (pbAttr_copy, current_tag, 20)){
-		tag_info = &(supported_tags[ULTRALIGHT]);
+
+	if (0 == memcmp (pbAttr, current_tag, 20)){
+		tagtype = ULTRALIGHT;
 		printf("ULTRALIGHT\n");
 	}	
     }
 	else
     {
 	printf("unknown tag length: %ld", atrlen);
+	return NULL;
     }	
-
+    
+    for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
+    	if(supported_tags[i].type == tagtype) {
+		tag_info = &(supported_tags[i]);
+		found = true;
+		break;
+	}
+    }
+    
+    if(!found)
+    	return NULL;
 
     char crc = 0x00;
     for (int crc_count = 1 /*! 1. Byte wird ignoriert*/ ; crc_count < atrlen; crc_count++ )
