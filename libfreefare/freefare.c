@@ -99,37 +99,53 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 }
 
 MifareTag
-freefare_tag_new_pcsc (SCARDCONTEXT context, SCARDHANDLE handle)
+freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mifare_tag_type type)
 {
     bool found = false;
     struct supported_tag *tag_info;
     MifareTag tag;
-
     LONG l;
     LPBYTE pbAttr = NULL;
     DWORD value = SCARD_AUTOALLOCATE;
     LPDWORD pcbAttrLen = &value;
+    DWORD dwActiveProtocol;
+    SCARDHANDLE hCard;
+    uint8_t buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
+    uint8_t ret[12];
+    SCARD_IO_REQUEST ioreq;
+    DWORD retlen;
 
-    l = SCardGetAttrib ( handle, SCARD_ATTR_ATR_STRING , (unsigned char*)&pbAttr, pcbAttrLen);
-  
-    if (l != SCARD_S_SUCCESS) {
-	/* error handling ? */
-	fprintf(stderr, "Handle was: 0x%lx SCardGetAttrib %lx\n", handle, l);
-	return 0; 
-    }
+    tag_info = &(supported_tags[type]);
 
-    const char* desfire_tag = "\x3b\x81\x80\x01\x80\x80";
-    
-    if ((*pcbAttrLen == 6) && (! memcmp(pbAttr, desfire_tag, 6))){
-	tag = mifare_desfire_tag_new ();
- 	fprintf(stderr, "valid TAG\n");
-    } else {
-	fprintf(stderr, "invalid TAG\n");
-    }
-
-    if(SCARD_S_SUCCESS != SCardFreeMemory(context, pbAttr))
+    l = SCardConnect(context->context, reader, SCARD_SHARE_SHARED, 
+			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
+    if(l != SCARD_S_SUCCESS)
     {
-	fprintf(stderr, "SCardFreeMemory failed.\n");
+	return NULL;
+    }
+
+    /* get and card uid */
+    retlen = sizeof(ret);
+    l = SCardTransmit(hCard, SCARD_PCI_T0, buf, sizeof(buf), &ioreq, ret, &retlen);
+    if (l != SCARD_S_SUCCESS)
+    {
+	fprintf(stderr, "freefare_tag_new_pcsc: getting uid failed\n");
+	return NULL;
+    }
+
+    /* Allocate memory for the found MIFARE target */
+    switch (tag_info->type) {
+    case CLASSIC_1K:
+    case CLASSIC_4K:
+	tag = mifare_classic_tag_new ();
+	break;
+    case DESFIRE:
+	tag = mifare_desfire_tag_new ();
+	break;
+    case ULTRALIGHT:
+    case ULTRALIGHT_C:
+	tag = mifare_ultralight_tag_new ();
+	break;
     }
 
     if (!tag)
@@ -139,10 +155,13 @@ freefare_tag_new_pcsc (SCARDCONTEXT context, SCARDHANDLE handle)
      * Initialize common fields
      * (Target specific fields are initialized in mifare_*_tag_new())
      */
+    memcpy(tag->info.abtUid, ret, retlen - 2);
+    tag->info.szUidLen = retlen - 2;
     tag->device = NULL;
+    tag->hCard = hCard;
     tag->active = 0;
-    tag->info; 
-    tag->tag_info = &supported_tags[4];
+    tag->tag_info = tag_info;
+    FILL_SZREADER(tag, reader);
 
     return tag;
 }
@@ -219,72 +238,20 @@ freefare_get_tags (nfc_device *device)
  * The list has to be freed using the freefare_free_tags() function.
  */
 MifareTag *
-freefare_get_tags_pcsc (struct pcsc_context *context, LPCSTR szReader)
+freefare_get_tags_pcsc (struct pcsc_context *context, const char *reader, enum mifare_tag_type type)
 {
     MifareTag 	*tags = NULL;
-    DWORD	dwActiveProtocol;
-    LONG	rv;
-    SCARDHANDLE hCard;
-
-    rv = SCardConnect(context->context, szReader, SCARD_SHARE_SHARED, 
-			SCARD_PROTOCOL_T0, &hCard, &dwActiveProtocol);
-    if(SCARD_S_SUCCESS != rv)
-    {
-//	fprintf(stderr, "freefare_get_tags_pcsc: SCardConnect failed !!\n");
-	return tags;
-    }
-
-    tags = malloc(sizeof (void *));    
+    
+    tags = malloc(2*sizeof (MifareTag));
     if(!tags)
     {
 	fprintf(stderr, "freefare_get_tags_pcsc: malloc failed !!\n");
 	return NULL;
     }
-    tags[0] = NULL;
-
-    MifareTag t;
-    if(NULL != (t = freefare_tag_new_pcsc(context->context, hCard)))
-    {
-	MifareTag *p = realloc (tags, 2 * sizeof (MifareTag));
-	if (p)
-	    tags = p;
-	else
-	{
-    	    fprintf(stderr, "freefare_get_tags_pcsc: realloc failed !!\n");
-	    return tags; // FAIL! Return what has been found so far.
-	}
-
-	/* set info data for pcsc , can we do this earlier? */
-	/* get and set card uid */
-	uint8_t buf[] = { 0xFF, 0xCA, 0x00, 0x00, 0x00 };
-	uint8_t ret[12];
-	LONG err;
-	SCARD_IO_REQUEST ioreq;
-	DWORD retlen = sizeof(ret);
-	err = SCardTransmit(hCard, SCARD_PCI_T0, buf, sizeof(buf), &ioreq, ret, &retlen);
-	// TODO: proper error handling
-	if (err != SCARD_S_SUCCESS)
-	{
-	    fprintf(stderr, "getting uid failed\n");
-	    return tags;
-	}
-	memcpy(t->info.abtUid, ret, retlen - 2);
-	t->info.szUidLen = retlen - 2;
-
-
-	t->device = NULL;	// we dont wanna use nfclib, so device is not needed !
-	t->hCard = hCard;
-	t->lastPCSCerror = rv;
-	tags[0] = t;
-	tags[1] = NULL;
-
-	FILL_SZREADER(szReader);
-    }
-    else
-    {
-	fprintf(stderr, "freefare_get_tags_pcsc: freefare_tag_new_pcsc call failed !!\n"); 
-	return NULL;
-    }
+    tags[0] = freefare_tag_new_pcsc(context, reader, type);
+    tags[1] = NULL;
+    if(tags[0] == NULL)
+    	return NULL;
 
     return tags;
 }
