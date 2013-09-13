@@ -149,13 +149,13 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
     char* ultralight_bitmask2 = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\x00\x00\xff\xff\xff\xff\x00";
 
     if ( (atrlen == 6) && (! memcmp (desfire_tag, pbAttr, 6) ) ){
-	tag_info->type = DESFIRE;
+	tag_info = &(supported_tags[DESFIRE]);
 	printf("desfire\n");
     }
 	else
 
     if ( (atrlen == 20) && (! memcmp (classic_tag, pbAttr, 20) ) ){
-	tag_info->type = CLASSIC_1K;
+	tag_info = &(supported_tags[CLASSIC_1K]);
 	printf("classic\n");
     }
 	else
@@ -168,13 +168,13 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
 	}
 	if (0 == memcmp (pbAttr, current_tag, 20)){
-		tag_info->type = ULTRALIGHT;
+		tag_info = &(supported_tags[ULTRALIGHT]);
 		printf("ULTRALIGHT\n");
 	}	
     }
 	else
     {
-	printf("unknown tag length: %d", atrlen);
+	printf("unknown tag length: %ld", atrlen);
     }	
 
 
