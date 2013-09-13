@@ -134,6 +134,11 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
     LONG err;
     err = SCardGetAttrib ( hCard , SCARD_ATTR_ATR_STRING, pbAttr, &atrlen );
     
+    if (err)
+    {
+	printf("SCardGetAttrib: err=%d  %s\n ", err, pcsc_stringify_error(err));
+	return NULL;
+    }
 
 
     char*         desfire_tag = "\x3b\x81\x80\x01\x80\x80";
@@ -171,7 +176,10 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader, enum mi
 		printf("ULTRALIGHT\n");
 	}	
     }
-	
+	else
+    {
+	printf("unknown tag length: %d", atrlen);
+    }	
 
 
     /* Allocate memory for the found MIFARE target */
