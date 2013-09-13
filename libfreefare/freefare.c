@@ -172,7 +172,8 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	if (!found) { 
 		return NULL;
 	}
-
+	printf("tagtype: %d\n", tagtype);
+	
 	found = false;
 	
     
