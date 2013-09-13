@@ -171,7 +171,7 @@ freefare_tag_new_pcsc (struct pcsc_context *context, const char *reader)
 	    current_tag[z] = ultralight_tag[z] & ultralight_bitmask1[z];
 	}
 
-	if (0 == memcmp (pbAttr, current_tag, 20)){
+	if (0 == memcmp (pbAttr_copy, current_tag, 20)){
 		tagtype = ULTRALIGHT;
 		printf("ULTRALIGHT\n");
 	}	
