@@ -71,6 +71,8 @@ if test x$ac_cv_with_cutter = xyes -a x$ac_cv_use_cutter = xno; then
 fi
 AM_CONDITIONAL([WITH_CUTTER], [test "$ac_cv_use_cutter" != "no"])
 
+PKG_CHECK_MODULES(PCSC, libpcsclite)
+
 m4_ifdef([AC_CHECK_COVERAGE], [AC_CHECK_COVERAGE])
 
 if test x$cutter_enable_coverage = xyes; then
