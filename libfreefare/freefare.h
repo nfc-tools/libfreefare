@@ -25,7 +25,6 @@
 #include <stdint.h>
 
 #include <nfc/nfc.h>
-#include <pcsclite.h>
 #include <winscard.h>
 
 #ifdef __cplusplus
