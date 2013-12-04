@@ -10,7 +10,7 @@ LT_INIT
 
 AC_CONFIG_HEADERS([config.h])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE(dist-bzip2 no-dist-gzip)
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
