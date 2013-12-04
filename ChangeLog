@@ -1,389 +1,46 @@
-TBD, 2013 - 0.3.5
------------------
+Dec 4, 2013 - 0.4.0
+-------------------
 
 Fixes:
+    fix spelling mistakes in manpages
+    fix some typo
+    fix bug in mifare_ultralight_read()
+    fix reading page 0x2b of an ULC
+    mifare-classic-read-ndef: skip NULL TLV & proprio TLV
+    mifare-desfire-write-ndef: split PICC key & Tag app key
+    mifare-desfire-write-ndef: fix issues in spilling ndef data to stdout and fix bug
+    fix few memory leaks
+    fix signed/unsigned comparison
+    fix wrong variable usage
+    remove unused variable
+    avoid void* arithmetic GCC extension
+    remove math.h dependency
+    fix various autotools warnings
+    fix many (but not all) compiler warnings
 
 Improvements:
+    add support for 7-byte UID MIFARE Classic cards
+    add support Infineon Mifare Classic 1k
+    add test default ULC key in mifare-ultralight-info
+    mifare-classic-format option: read keys from dump
+    mifare-classic-write-ndef: add -y flag to write without confirmation
+    split mifare-desfire-write-ndef into format-ndef & write-ndef
+    add new example: mifare-ultralight-info.
+    add mifare-desfire-read-ndef, read CC in mifare-desfire-write-ndef
+    allow input file for mifare-desfire-write-ndef & small fixes
+    add non-default key option to mifare-desfire-* examples
+
+    document how to run cutter tests
+    add new test: test_mifare_classic_format_first_sector().
 
 Changes:
-
-2013-01-29  Philippe Teuwen <yobibe@gmail.com>
-
-	* libfreefare/mifare_classic.c, test/test_mifare_classic.c: Add
-	support for 7-byte UID MIFARE Classic cards
-
-2013-01-29  Philippe Teuwen <yobibe@gmail.com>
-
-	* test/mifare_desfire_ev1_fixture.c, test/mifare_desfire_fixture.c: 
-	DF cutter tests: detect if DF is too small for tests
-
-2013-01-29  Philippe Teuwen <yobibe@gmail.com>
-
-	* HACKING: Document how to run cutter tests, all pass now
-
-2013-01-29  Philippe Teuwen <yobibe@gmail.com>
-
-	* libfreefare/mifare_desfire.c: Fix buffer size in
-	desfire_get_version, now cutter is happy on DF EV1 38 test(s), 8120 assertion(s), 0 failure(s), 0 error(s), 0
-	pending(s), 19 omission(s), 0 notification(s) 100% passed
-
-2013-01-29  Philippe Teuwen <yobibe@gmail.com>
-
-	* HACKING: DF EV1 Cutter tests must be done with at least a 4k card,
-	still 2 tests failed 38 test(s), 8041 assertion(s), 2 failure(s), 0 error(s), 0
-	pending(s), 19 omission(s), 0 notification(s) 94.7368% passed .errorlibnfc.chip.pn53xBuffer size is too short: 23o available(s),
-	24o needed F
-
-	===============================================================================Failure: test_mifare_desfire_ev1_aes2 Wrong return value <-1 != res>
-	expected: <-1>   actual: <-1> ./test_mifare_desfire_ev1.c:75:
-	test_mifare_desfire_ev1_aes2(): cut_assert_not_equal_int(-1, res)
-
-	===============================================================================F
-
-	===============================================================================Failure: test_mifare_desfire_ev1_iso Wrong DF count <count == 0>
-	expected: <1>   actual: <0> ./test_mifare_desfire_ev1_iso.c:48:
-	test_mifare_desfire_ev1_iso(): cut_assert_equal_int(count, 0,
-	cut_test_context_set_current_result_user_message(
-	cut_test_context_current_
-
-	===============================================================================
-
-2013-01-29  Philippe Teuwen <yobibe@gmail.com>
-
-	* libfreefare/freefare_internal.h, libfreefare/mifare_desfire.c: 
-	Adjusting DESFire frame sizes, cutter still not entirely satisfied Desfire (old) 4k: write large ndef OK read large ndef OK cutter: OK 31 test(s), 2576
-	assertion(s), 0 failure(s), 0 error(s), 0 pending(s), 26
-	omission(s), 0 notification(s) 100% passed Desfire EV1 2k: write large ndef OK read large ndef OK cutter: FAIL 38 test(s), 5257
-	assertion(s), 6 failure(s), 0 error(s), 0 pending(s), 19
-	omission(s), 0 notification(s) 84.2105% passed
-
-2013-01-28  Romain Tartière <romain@blogreen.org>
-
-	* libfreefare/mad.c: Remove a few static.  Cutter can't test suche methods.
-
-2013-01-20  Romuald Conty <romuald@libnfc.org>
-
-	* NEWS: Updates NEWS file
-
-2013-01-20  Romuald Conty <romuald@libnfc.org>
-
-	* test/mifare_classic_fixture.c, test/mifare_desfire_ev1_fixture.c,
-	test/mifare_desfire_fixture.c, test/mifare_ultralight_fixture.c: 
-	Updates unit tests to use libnfc 1.7.0
-
-2013-01-16  Philippe Teuwen <yobibe@gmail.com>
-
-	* debian/control: Debian: bump dev dep to libnfc-dev to 1.7.0
-
-2013-01-16  Philippe Teuwen <yobibe@gmail.com>
-
-	* debian/.gitignore: Add debian/.gitignore
-
-2013-01-14  Philippe Teuwen <yobibe@gmail.com>
-
-	* .gitignore, m4/.gitignore: Add .gitignore
-
-2013-01-14  Philippe Teuwen <yobibe@gmail.com>
-
-	* debian/libfreefare-bin.install, examples/CMakeLists.txt: Add
-	mifare-ultralight-info to dpkg & CMakeList
-
-2012-12-23  Romuald Conty <romuald@libnfc.org>
-
-	* configure.ac, examples/mifare-classic-format.c,
-	examples/mifare-classic-read-ndef.c,
-	examples/mifare-classic-write-ndef.c,
-	examples/mifare-desfire-access.c,
-	examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-ev1-configure-ats.c,
-	examples/mifare-desfire-ev1-configure-default-key.c,
-	examples/mifare-desfire-ev1-configure-random-uid.c,
-	examples/mifare-desfire-format.c, examples/mifare-desfire-info.c,
-	examples/mifare-desfire-read-ndef.c,
-	examples/mifare-desfire-write-ndef.c,
-	examples/mifare-ultralight-info.c: updates library examples to use
-	libnfc 1.7.0 API
-
-2012-11-13  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-ultralight-info.c: add test default ULC key in
-	mifare-ultralight-info
-
-2012-11-13  Philippe Teuwen <yobibe@gmail.com>
-
-	* libfreefare/mifare_ultralight.c: fix bug in
-	mifare_ultralight_read()
-
-2012-11-13  Philippe Teuwen <yobibe@gmail.com>
-
-	* test/test_mifare_ultralight.c: fix typo
-
-2012-06-28  Philippe Teuwen <yobibe@gmail.com>
-
-	* configure.ac: Tolerate older autotools
-
-2012-06-01  Philippe Teuwen <yobibe@gmail.com>
-
-	* debian/rules: debian/rules don't mandate to run cutter tests when
-	creating .deb
-
-2012-06-01  Philippe Teuwen <yobibe@gmail.com>
-
-	* debian/control: debian/control: remove dependence on libnfc2
-	(libnfc3 dependence is automatically created)
-
-2012-06-01  Romuald Conty <romuald@libnfc.org>
-
-	* libfreefare/freefare_internal.h, libfreefare/mifare_classic.c,
-	libfreefare/mifare_desfire.c, libfreefare/mifare_ultralight.c: 
-	Update to current libnfc devel API.  libnfc changed its nfc_initiator_transceive_bytes(): it now takes a
-	const size_t used as maximal allowed rx bytes.  libnfc now checks if
-	rx buffer is large enough to get the full response, so libfreefare
-	should take care about whole size of its buffers.
-
-2012-06-01  Romuald Conty <romuald@libnfc.org>
-
-	* libfreefare/freefare.c: Support Infineon Mifare Classic 1k. (Fixes
-	Issue 88) Thanks to Gernoth!
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/freefare.c, libfreefare/freefare_error.3,
-	libfreefare/mifare_application.3, libfreefare/mifare_classic.3,
-	libfreefare/mifare_desfire.3, libfreefare/mifare_desfire_aid.3: Fix
-	spelling mistakes in manpages Closes Issue #90
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/mifare_desfire.c: Update write_data() prototype so
-	that the data buffer is constant
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/mifare_desfire.c: Fix compiler warnings mifare_desfire.c:196: warning: no previous prototype for
-	'madame_soleil_get_read_communication_settings'
-	mifare_desfire.c:210: warning: no previous prototype for
-	'madame_soleil_get_write_communication_settings'
-	mifare_desfire.c:642: warning: no previous prototype for
-	'create_application'
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/mifare_desfire_error.c: Fix compiler warning mifare_desfire_error.c:35: warning: initialization discards
-	qualifiers from pointer target type mifare_desfire_error.c:36:
-	warning: initialization discards qualifiers from pointer target type
-	etc...
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* examples/mifare-desfire-access.c: Fix compiler warning
-	mifare-desfire-access.c:102: warning: initialization discards
-	qualifiers from pointer target type
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/freefare.h, libfreefare/mifare_desfire.c: Update
-	mifare_desfire_write_data() and mifare_desfire_write_data_ex()
-	prototypes so that the data buffer is constant
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* examples/mifare-classic-format.c: Fix compiler warning mifare-classic-format.c:62: warning: no previous prototype for
-	‘display_progress’
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* examples/mifare-classic-write-ndef.c: Fix compiler warnings mifare-classic-write-ndef.c:67: warning: no previous prototype for
-	‘search_sector_key’ mifare-classic-write-ndef.c:105: warning: no
-	previous prototype for ‘fix_mad_trailer_block’
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* examples/mifare-classic-format.c,
-	examples/mifare-classic-read-ndef.c,
-	examples/mifare-classic-write-ndef.c,
-	examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-ev1-configure-ats.c,
-	examples/mifare-desfire-ev1-configure-default-key.c,
-	examples/mifare-desfire-ev1-configure-random-uid.c,
-	examples/mifare-desfire-format.c,
-	examples/mifare-desfire-read-ndef.c,
-	examples/mifare-desfire-write-ndef.c: Declare internal function
-	usage() as static
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/freefare_internal.h: Fix compiler warning freefare_internal.h:359:5: warning: "_BYTE_ORDER" is not defined
-	freefare_internal.h:359:20: warning: "_LITTLE_ENDIAN" is not defined
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* libfreefare/mad.c: Fix compiler warnings mad.c:131: warning: no previous prototype for 'nxp_crc' mad.c:147:
-	warning: no previous prototype for 'sector_0x00_crc8' mad.c:162:
-	warning: no previous prototype for 'sector_0x10_crc8'
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* test/Makefile.am, test/common/Makefile.am: warning: 'INCLUDES' is
-	the old name for 'AM_CPPFLAGS' (or '*_CPPFLAGS')
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* configure.ac: warning: 'libutil.la': linking libtool libraries
-	using a non-POSIX archiver requires 'AM_PROG_AR' in 'configure.ac'
-
-2012-05-18  Ludovic Rousseau <ludovic.rousseau@gmail.com>
-
-	* configure.ac: autoupdate using autoupdate (GNU Autoconf) 2.69
-
-2012-05-17  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-access.c,
-	examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-info.c: examples remove math.h and replace
-	pow(2, x) by 1 << x
-
-2012-05-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-create-ndef.c: 
-	examples/mifare-desfire-create-ndef.c EV1: don't change key settings
-	and set dynamically ndef size
-
-2012-05-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-read-ndef.c,
-	examples/mifare-desfire-write-ndef.c: examples/mifare-desfire-*-ndef
-	add support for mapping v2.0 and EV1
-
-2012-05-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-format.c: examples/mifare-desfire-format
-	also resets key settings
-
-2012-05-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/Makefile.am: Restore explicit linkage to libnfc (revert
-	partially r1011)
-
-2012-05-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-create-ndef.c: 
-	examples/mifare-desfire-create-ndef.c prepare for DF EV1 NDEF
-	mapping
-
-2012-05-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-ev1-configure-ats.c,
-	examples/mifare-desfire-ev1-configure-default-key.c,
-	examples/mifare-desfire-ev1-configure-random-uid.c: 
-	examples/mifare-desfire-ev1*: test version to ensure we've at least
-	an EV1
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* libfreefare/mifare_desfire_crypto.c: Typos
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* examples/Makefile.am, examples/mifare-ultralight-info.c: Add new
-	example: mifare-ultralight-info.
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* examples/Makefile.am: Don't link to the libnfc (twice) since the
-	libfreefare itself is linked against it.
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* test/test_mifare_classic.c: New test:
-	test_mifare_classic_format_first_sector().
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* test/Makefile.am: Consistently sort out targets.
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* test/test_mifare_desfire_ev1_iso.c: Remove unused variable.
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* libfreefare/mifare_desfire_crypto.c: Avoid void* arithmetic GCC
-	extension.
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* libfreefare/mifare_desfire.c: Fix wrong variable usage.
-
-2012-05-14  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* libfreefare/freefare.c: Fix signed/unsigned comparison.
-
-2012-05-10  Romain Tartiere <romain.tartiere@gmail.com>
-
-	* COPYING: Add an exception to the LGPL.
-
-2012-03-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-classic-write-ndef.c,
-	examples/mifare-desfire-write-ndef.c: few missing free()
-
-2012-03-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-classic-read-ndef.c,
-	examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-read-ndef.c,
-	examples/mifare-desfire-write-ndef.c: fix issues in spilling ndef
-	data to stdout and fix bug in mifare-desfire-write-ndef
-
-2012-03-15  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/CMakeLists.txt, examples/Makefile.am,
-	examples/mifare-classic-read-ndef.c,
-	examples/mifare-desfire-read-ndef.c,
-	examples/mifare-desfire-write-ndef.c: add mifare-desfire-read-ndef,
-	read CC in mifare-desfire-write-ndef
-
-2012-03-14  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-classic-write-ndef.c,
-	examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-ev1-configure-ats.c,
-	examples/mifare-desfire-ev1-configure-random-uid.c,
-	examples/mifare-desfire-format.c,
-	examples/mifare-desfire-write-ndef.c: allow input file for
-	mifare-desfire-write-ndef & small fixes
-
-2012-03-14  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/CMakeLists.txt, examples/Makefile.am,
-	examples/mifare-classic-format.c,
-	examples/mifare-desfire-create-ndef.c,
-	examples/mifare-desfire-ev1-configure-ats.c,
-	examples/mifare-desfire-ev1-configure-default-key.c,
-	examples/mifare-desfire-ev1-configure-random-uid.c,
-	examples/mifare-desfire-format-ndef.c,
-	examples/mifare-desfire-format.c,
-	examples/mifare-desfire-write-ndef.c: add non-default key option to
-	mifare-desfire-* examples
-
-2012-03-14  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-format-ndef.c: minor changes
-
-2012-03-13  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/CMakeLists.txt, examples/Makefile.am,
-	examples/mifare-desfire-format-ndef.c,
-	examples/mifare-desfire-format.c,
-	examples/mifare-desfire-write-ndef.c: split
-	mifare-desfire-write-ndef into format-ndef & write-ndef
-
-2012-03-13  Philippe Teuwen <yobibe@gmail.com>
-
-	* examples/mifare-desfire-write-ndef.c: mifare-desfire-write-ndef:
-	split PICC key & Tag app key
+    update code to use libnfc 1.7.0
+
+Special thanks to:
+ - Ludovic Rousseau
+ - Don Coleman <dcoleman@chariotsolutions.com>
+ - Gernoth
+ - Jan Engelhardt <jengelh@inai.de>
 
 Mar 1, 2012 - 0.3.4
 -------------------

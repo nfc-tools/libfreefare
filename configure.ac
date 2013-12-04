@@ -1,4 +1,4 @@
-AC_INIT([libfreefare],[0.3.5])
+AC_INIT([libfreefare],[0.4.0])
 
 AC_CONFIG_MACRO_DIR([m4])
 
