@@ -36,6 +36,8 @@ struct supported_tag supported_tags[] = {
     { CLASSIC_4K,   "Mifare Classic 4k",            0x18, 0, 0, { 0x00 }, NULL },
     { CLASSIC_4K,   "Mifare Classic 4k (Emulated)", 0x38, 0, 0, { 0x00 }, NULL },
     { DESFIRE,      "Mifare DESFire",               0x20, 5, 4, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }, NULL},
+    { DESFIRE,      "Cyanogenmod card emulation",   0x60, 4, 3, { 0x78, 0x33, 0x88 /*, 0xXX */ }, NULL},
+    { DESFIRE,      "Android HCE",                  0x60, 4, 3, { 0x78, 0x80, 0x70 /*, 0xXX */ }, NULL},
     { ULTRALIGHT_C, "Mifare UltraLightC",           0x00, 0, 0, { 0x00 }, is_mifare_ultralightc_on_reader },
     { ULTRALIGHT,   "Mifare UltraLight",            0x00, 0, 0, { 0x00 }, NULL },
 };
