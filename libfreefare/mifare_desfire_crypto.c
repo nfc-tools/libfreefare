@@ -463,6 +463,15 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	case AS_LEGACY:
 	    if (communication_settings & MAC_VERIFY) {
 		*nbytes -= key_macing_length (key);
+		if (*nbytes <= 0) {
+		    *nbytes = -1;
+		    res = NULL;
+#ifdef WITH_DEBUG
+		    warnx ("No room for MAC!");
+		    abort ();
+#endif
+		    break;
+		}
 
 		edl = enciphered_data_length (tag, *nbytes - 1, communication_settings);
 		edata = malloc (edl);
@@ -489,9 +498,13 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		break;
 	    if (communication_settings & CMAC_VERIFY) {
 		if (*nbytes < 9) {
-		    // XXX: Can't we avoid abort() -ing?
+		    *nbytes = -1;
+		    res = NULL;
+#ifdef WITH_DEBUG
 		    warnx ("No room for CMAC!");
 		    abort ();
+#endif
+		    break;
 		}
 		first_cmac_byte = ((uint8_t *)data)[*nbytes - 9];
 		((uint8_t *)data)[*nbytes - 9] = ((uint8_t *)data)[*nbytes-1];
@@ -560,6 +573,10 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
 	case AS_LEGACY:
 	    crc_pos = *nbytes - 8 - 1; // The CRC can be over two blocks
+	    if (crc_pos < 0) {
+		/* Single block */
+		crc_pos = 0;
+	    }
 	    break;
 	case AS_NEW:
 	    /* Move status between payload and CRC */
