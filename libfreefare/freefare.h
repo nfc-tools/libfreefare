@@ -59,6 +59,7 @@ const char	*freefare_get_tag_friendly_name (MifareTag tag);
 char		*freefare_get_tag_uid (MifareTag tag);
 void		 freefare_free_tag (MifareTag tag);
 void		 freefare_free_tags (MifareTag *tags);
+bool		 freefare_selected_tag_is_present(nfc_device *device);
 
 const char	*freefare_strerror (MifareTag tag);
 int		 freefare_strerror_r (MifareTag tag, char *buffer, size_t len);

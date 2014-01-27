@@ -193,6 +193,14 @@ freefare_get_tag_uid (MifareTag tag)
 }
 
 /*
+ * Returns true if last selected tag is still present.
+ */
+bool freefare_selected_tag_is_present(nfc_device *device)
+{
+    return (nfc_initiator_target_is_present(device, NULL) == NFC_SUCCESS);
+}
+
+/*
  * Free the provided tag.
  */
 void
