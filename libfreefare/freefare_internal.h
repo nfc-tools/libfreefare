@@ -328,6 +328,8 @@ struct mifare_ultralight_tag {
 
 #define BUFFER_SIZE(buffer_name) (__##buffer_name##_n)
 
+#define BUFFER_MAXSIZE(buffer_name) (__##buffer_name##_size)
+
 #define BUFFER_CLEAR(buffer_name) (__##buffer_name##_n = 0)
 /*
  * Append one byte of data to the buffer buffer_name.

@@ -295,6 +295,21 @@ mifare_desfire_connect (MifareTag tag)
 	.nbr = NBR_106
     };
     if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+	// The registered ISO AID of DESFire D2760000850100
+	// Selecting this AID selects the MF
+	BUFFER_INIT (cmd, 12);
+	BUFFER_INIT (res, 2);
+	BUFFER_APPEND (cmd, 0x00);
+	BUFFER_APPEND (cmd, 0xa4);
+	BUFFER_APPEND (cmd, 0x04);
+	BUFFER_APPEND (cmd, 0x00);
+	uint8_t AID[]={ 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x00};
+	BUFFER_APPEND (cmd, sizeof (AID));
+	BUFFER_APPEND_BYTES (cmd, AID, sizeof (AID));
+	if ((nfc_initiator_transceive_bytes(tag->device, cmd, BUFFER_SIZE(cmd), res, BUFFER_MAXSIZE(cmd), 0) < 0) || (res[0] != 0x90 || res[1] != 0x00)) {
+	    errno = EIO;
+	    return -1;
+	}
 	tag->active = 1;
 	free (MIFARE_DESFIRE (tag)->session_key);
 	MIFARE_DESFIRE (tag)->session_key = NULL;
