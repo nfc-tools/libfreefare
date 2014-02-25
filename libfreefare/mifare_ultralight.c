@@ -301,6 +301,7 @@ mifare_ultralightc_authenticate (MifareTag tag, const MifareDESFireKey key)
     rol (PCD_RndA_s, 8);
 
     if (0 != memcmp (PCD_RndA_s, PICC_RndA_s, 8)) {
+	errno = EACCES;
 	return -1;
     }
     // XXX Should we store the state "authenticated" in the tag struct??
