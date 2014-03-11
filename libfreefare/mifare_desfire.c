@@ -292,7 +292,7 @@ mifare_desfire_connect (MifareTag tag)
     nfc_target pnti;
     nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
-	.nbr = NBR_847
+	.nbr = NBR_424
     };
     if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
 	// The registered ISO AID of DESFire D2760000850100
