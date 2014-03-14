@@ -192,6 +192,8 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
 	res[__##res##_n-2] = __res[__##res##_n-1]; \
 	__##res##_n--; \
 	if ((1 == __##res##_n) && (ADDITIONAL_FRAME != res[__##res##_n-1]) && (OPERATION_OK != res[__##res##_n-1])) { \
+	    if (res[0] == AUTHENTICATION_ERROR) \
+		errno = EACCES; \
 	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
 	} \
 	memcpy (res, __res, __##res##_n - 1); \
@@ -416,6 +418,7 @@ authenticate (MifareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 	hexdump (PCD_RndA_s, key_length, "PCD  ", 0);
 	hexdump (PICC_RndA_s, key_length, "PICC ", 0);
 #endif
+	errno = EACCES;
 	return -1;
     }
 
