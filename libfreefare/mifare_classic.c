@@ -94,6 +94,8 @@
 	    if (disconnect) { \
 		tag->active = false; \
 	    } \
+	    if (_res == NFC_EMFCAUTHFAIL) \
+		return errno = EACCES, -1; \
 	    return errno = EIO, -1; \
 	} \
 	__##res##_n = _res; \
