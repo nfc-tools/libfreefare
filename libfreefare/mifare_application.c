@@ -265,8 +265,11 @@ mifare_application_write (MifareTag tag, Mad mad, const MadAid aid, const void *
     MifareClassicSectorNumber *sectors = mifare_application_find (mad, aid);
     MifareClassicSectorNumber *s = sectors;
 
-    if (!sectors)
-	return errno = EBADF, -1;
+    if (!sectors) {
+	/* mifare_application_find may also fail if malloc() fails */
+	if (errno != ENOMEM) errno = EBADF;
+	return -1;
+    }
 
     while (*s && nbytes && (res >= 0)) {
 	MifareClassicBlockNumber first_block = mifare_classic_sector_first_block (*s);
