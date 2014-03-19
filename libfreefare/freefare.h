@@ -171,7 +171,7 @@ void		 mad_free (Mad mad);
 MifareClassicSectorNumber *mifare_application_alloc (Mad mad, const MadAid aid, const size_t size);
 ssize_t		 mifare_application_read (MifareTag tag, Mad mad, const MadAid aid, void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
 ssize_t		 mifare_application_write (MifareTag tag, Mad mad, const MadAid aid, const void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
-void		 mifare_application_free (Mad mad, const MadAid aid);
+int		 mifare_application_free (Mad mad, const MadAid aid);
 
 MifareClassicSectorNumber *mifare_application_find (Mad mad, const MadAid aid);
 

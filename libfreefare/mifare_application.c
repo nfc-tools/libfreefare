@@ -158,18 +158,24 @@ mifare_application_alloc (Mad mad, MadAid aid, size_t size)
 /*
  * Remove an application from a MAD.
  */
-void
+int
 mifare_application_free (Mad mad, MadAid aid)
 {
     MifareClassicSectorNumber *sectors = mifare_application_find (mad, aid);
     MifareClassicSectorNumber *p = sectors;
     MadAid free_aid = { 0x00, 0x00 };
+
+    /* figure out if malloc() in mifare_application_find() failed */
+    if (sectors == NULL) return count_aids (mad, aid) ? -1 : 0;
+
     while (*p) {
 	mad_set_aid (mad, *p, free_aid);
 	p++;
     }
 
     free (sectors);
+
+    return 0;
 }
 
 
