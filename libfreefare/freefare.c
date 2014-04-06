@@ -190,8 +190,8 @@ freefare_get_tag_uid (MifareTag tag)
 {
     char *res;
     if ((res = malloc (2 * tag->info.szUidLen + 1))) {
-    for (size_t i =0; i < tag->info.szUidLen; i++)
-        snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
+	for (size_t i =0; i < tag->info.szUidLen; i++)
+	    snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
     }
     return res;
 }
