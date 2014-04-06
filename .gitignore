@@ -4,13 +4,14 @@
 *.Plo
 *.pc
 */.deps/
-*/.libs/
+**/.libs/
 autom4te.cache/
 Makefile
 Makefile.in
 INSTALL
 aclocal.m4
 ar-lib
+compile
 config.*
 configure
 depcomp
@@ -19,6 +20,7 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+test-driver
 examples/mifare-classic-format
 examples/mifare-classic-read-ndef
 examples/mifare-classic-write-ndef
@@ -32,3 +34,6 @@ examples/mifare-desfire-info
 examples/mifare-desfire-read-ndef
 examples/mifare-desfire-write-ndef
 examples/mifare-ultralight-info
+test/test-suite.log
+test/run-test.sh.log
+test/run-test.sh.trs
