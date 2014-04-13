@@ -157,6 +157,7 @@ main(int argc, char *argv[])
 	case '?':
 	    if (optopt == 'i')
 		fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+	    /* FALLTHROUGH */
 	default:
 	    usage (argv[0]);
 	    exit (EXIT_FAILURE);
