@@ -38,7 +38,7 @@ update_key_schedules (MifareDESFireKey key)
 }
 
 MifareDESFireKey
-mifare_desfire_des_key_new (uint8_t value[8])
+mifare_desfire_des_key_new (const uint8_t value[8])
 {
     uint8_t data[8];
     memcpy (data, value, 8);
@@ -48,7 +48,7 @@ mifare_desfire_des_key_new (uint8_t value[8])
 }
 
 MifareDESFireKey
-mifare_desfire_des_key_new_with_version (uint8_t value[8])
+mifare_desfire_des_key_new_with_version (const uint8_t value[8])
 {
     MifareDESFireKey key;
 
@@ -62,7 +62,7 @@ mifare_desfire_des_key_new_with_version (uint8_t value[8])
 }
 
 MifareDESFireKey
-mifare_desfire_3des_key_new (uint8_t value[16])
+mifare_desfire_3des_key_new (const uint8_t value[16])
 {
     uint8_t data[16];
     memcpy (data, value, 16);
@@ -74,7 +74,7 @@ mifare_desfire_3des_key_new (uint8_t value[16])
 }
 
 MifareDESFireKey
-mifare_desfire_3des_key_new_with_version (uint8_t value[16])
+mifare_desfire_3des_key_new_with_version (const uint8_t value[16])
 {
     MifareDESFireKey key;
 
@@ -87,7 +87,7 @@ mifare_desfire_3des_key_new_with_version (uint8_t value[16])
 }
 
 MifareDESFireKey
-mifare_desfire_3k3des_key_new (uint8_t value[24])
+mifare_desfire_3k3des_key_new (const uint8_t value[24])
 {
     uint8_t data[24];
     memcpy (data, value, 24);
@@ -97,7 +97,7 @@ mifare_desfire_3k3des_key_new (uint8_t value[24])
 }
 
 MifareDESFireKey
-mifare_desfire_3k3des_key_new_with_version (uint8_t value[24])
+mifare_desfire_3k3des_key_new_with_version (const uint8_t value[24])
 {
     MifareDESFireKey key;
 
@@ -110,13 +110,13 @@ mifare_desfire_3k3des_key_new_with_version (uint8_t value[24])
 }
 
 MifareDESFireKey
-mifare_desfire_aes_key_new (uint8_t value[16])
+mifare_desfire_aes_key_new (const uint8_t value[16])
 {
     return mifare_desfire_aes_key_new_with_version (value, 0);
 }
 
 MifareDESFireKey
-mifare_desfire_aes_key_new_with_version (uint8_t value[16], uint8_t version)
+mifare_desfire_aes_key_new_with_version (const uint8_t value[16], uint8_t version)
 {
     MifareDESFireKey key;
 
@@ -158,7 +158,7 @@ mifare_desfire_key_set_version (MifareDESFireKey key, uint8_t version)
 }
 
 MifareDESFireKey
-mifare_desfire_session_key_new (uint8_t rnda[], uint8_t rndb[], MifareDESFireKey authentication_key)
+mifare_desfire_session_key_new (const uint8_t rnda[], const uint8_t rndb[], MifareDESFireKey authentication_key)
 {
     MifareDESFireKey key = NULL;
 
