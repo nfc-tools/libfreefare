@@ -158,7 +158,7 @@ mifare_desfire_key_set_version (MifareDESFireKey key, uint8_t version)
 }
 
 MifareDESFireKey
-mifare_desfire_session_key_new (uint8_t rnda[8], uint8_t rndb[8], MifareDESFireKey authentication_key)
+mifare_desfire_session_key_new (uint8_t rnda[], uint8_t rndb[], MifareDESFireKey authentication_key)
 {
     MifareDESFireKey key = NULL;
 
