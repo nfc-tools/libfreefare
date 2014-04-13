@@ -153,7 +153,9 @@ main(int argc, char *argv[])
 		break;
 	    case 1:
 		ndef_mapping = 2;
+		break;
 	    default: // newer version? let's assume it supports latest mapping too
+		warnx("Software version not supported. Assuming backward compatibility with version 1.");
 		ndef_mapping = 2;
 	    }
 	    if (create_options.interactive) {
