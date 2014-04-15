@@ -1542,6 +1542,19 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     BUFFER_APPEND_LE (cmd, offset, 3, sizeof (off_t));
     BUFFER_APPEND_LE (cmd, length, 3, sizeof (size_t));
 
+    /*
+     * In case no length is provided (whole file is to be read) get the file's
+     * length in order to allocate a large enought buffer for crypto
+     * post-processing.
+     */
+    if (!length) {
+	struct mifare_desfire_file_settings settings;
+	int res = mifare_desfire_get_file_settings (tag, file_no, &settings);
+	if (res < 0)
+	    return res;
+	length = settings.settings.standard_file.file_size;
+    }
+
     uint8_t ocs = cs;
     if ((MIFARE_DESFIRE (tag)->session_key) && (cs | MDCM_MACED)) {
 	switch (MIFARE_DESFIRE (tag)->authentication_scheme) {
@@ -1556,25 +1569,37 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
     cs = ocs;
 
     /*
-     * FIXME: This is bogus: the user has to provide a data buffer with enougth
-     * room to store CRC + padding or MAC.  If the user wants to read 1 byte,
-     * there is no reason to provide a 16 bytes buffer.
+     * Depending on the communication settings, we might read more bytes than
+     * the actual data length (a MAC or padding padding might follow).  This
+     * can be a problem if the destination buffer is long enouth for the data
+     * but the MAC / padding overflows.
+     *
+     * Create a temporary read buffer to collect all read data, post-process it
+     * through the cryptography code and copy the actual data to the
+     * destination buffer.
      */
+    uint8_t *read_buffer = malloc (enciphered_data_length (tag, length, 0) + 1);
+
     do {
 	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
 
 	size_t frame_bytes = BUFFER_SIZE (res) - 1;
-	memcpy ((uint8_t *)data + bytes_received, res, frame_bytes);
+	memcpy (read_buffer + bytes_received, res, frame_bytes);
 	bytes_received += frame_bytes;
 
 	p[0] = 0xAF;
 	__cmd_n = 1;
     } while (0xAF == res[__res_n-1]);
 
-    ((uint8_t *)data)[bytes_received++] = 0x00;
+    read_buffer[bytes_received++] = 0x00;
 
     ssize_t sr = bytes_received;
-    p = mifare_cryto_postprocess_data (tag, data, &sr, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
+    p = mifare_cryto_postprocess_data (tag, read_buffer, &sr, cs | CMAC_COMMAND | CMAC_VERIFY | MAC_VERIFY);
+
+    if (sr > 0)
+	memcpy(data, read_buffer, sr - 1);
+
+    free (read_buffer);
 
     if (!p)
 	return errno = EINVAL, -1;

@@ -122,6 +122,13 @@ test_mifare_desfire_ev1_aes2 (void)
     cut_assert_success ("mifare_desfire_read_data");
     cut_assert_equal_memory (buffer, res, sample_data, 27, cut_message ("AES crypto failed"));
 
+    char canaries[] = "Canaries Canaries Canaries Canaries Canaries";
+
+    res = mifare_desfire_read_data_ex (tag, 1, 0, 1, canaries, MDCM_MACED);
+    cut_assert_success ("mifare_desfire_read_data");
+    cut_assert_equal_int (1, res, cut_message ("Reading 1 byte should return 1 byte"));
+    cut_assert_equal_memory (canaries, 44, "Hanaries Canaries Canaries Canaries Canaries", 44, cut_message ("Canaries got smashed!"));
+
     uint8_t s, c;
     res = mifare_desfire_get_key_settings (tag, &s, &c);
     cut_assert_success ("mifare_desfire_get__key_settings");

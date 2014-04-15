@@ -273,7 +273,7 @@ enciphered_data_length (const MifareTag tag, const size_t nbytes, int communicat
 	}
     }
 
-    size_t block_size = key_block_size (MIFARE_DESFIRE (tag)->session_key);
+    size_t block_size = MIFARE_DESFIRE(tag)->session_key ? key_block_size (MIFARE_DESFIRE (tag)->session_key) : 1;
 
     return padded_data_length (nbytes + crc_length, block_size);
 }
