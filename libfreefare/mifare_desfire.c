@@ -166,6 +166,7 @@ static ssize_t	 read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_
  */
 #define DESFIRE_TRANSCEIVE2(tag, msg, msg_len, res) \
     do { \
+	DEBUG_FUNCTION(); \
 	static uint8_t __msg[MAX_CAPDU_SIZE + 5] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 }; \
 	/*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/ \
 	static uint8_t __res[MAX_RAPDU_SIZE + 1]; \

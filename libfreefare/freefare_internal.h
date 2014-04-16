@@ -286,8 +286,10 @@ struct mifare_ultralight_tag {
 #define TB_AB(ab) ((ab == C_DEFAULT) ? C_100 : ab)
 
 #ifdef WITH_DEBUG
+#define DEBUG_FUNCTION() do { printf("*** \033[033;1m%s\033[0m ***\n", __FUNCTION__); } while (0)
 #define DEBUG_XFER(data, nbytes, hint) do { hexdump (data, nbytes, hint, 0); } while (0)
 #else
+#define DEBUG_FUNCTION() do {} while (0)
 #define DEBUG_XFER(data, nbytes, hint) do {} while (0)
 #endif
 
