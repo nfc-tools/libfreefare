@@ -1160,7 +1160,7 @@ mifare_desfire_get_card_uid (MifareTag tag, char **uid)
 /* Application level commands */
 
 int
-mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count)
+mifare_desfire_get_file_ids (MifareTag tag, uint8_t **files, size_t *count)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
@@ -1193,7 +1193,7 @@ mifare_desfire_get_file_ids (MifareTag tag, uint8_t *files[], size_t *count)
 }
 
 int
-mifare_desfire_get_iso_file_ids (MifareTag tag, uint16_t *files[], size_t *count)
+mifare_desfire_get_iso_file_ids (MifareTag tag, uint16_t **files, size_t *count)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_DESFIRE (tag);
