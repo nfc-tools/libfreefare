@@ -1548,12 +1548,40 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
      * length in order to allocate a large enought buffer for crypto
      * post-processing.
      */
+    int record_size = 1;
+
+    struct mifare_desfire_file_settings settings;
+    int r = mifare_desfire_get_file_settings (tag, file_no, &settings);
+    if (r < 0)
+	return r;
+
+    switch (settings.file_type) {
+    case MDFT_STANDARD_DATA_FILE:
+    case MDFT_BACKUP_DATA_FILE:
+    case MDFT_VALUE_FILE_WITH_BACKUP:
+	/* NOOP */
+	break;
+    case MDFT_LINEAR_RECORD_FILE_WITH_BACKUP:
+    case MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP:
+	// length indicates a number of records, we need the record size to
+	// allocate enougth memory.
+	record_size = settings.settings.linear_record_file.record_size;
+	break;
+    }
     if (!length) {
-	struct mifare_desfire_file_settings settings;
-	int res = mifare_desfire_get_file_settings (tag, file_no, &settings);
-	if (res < 0)
-	    return res;
-	length = settings.settings.standard_file.file_size;
+	switch (settings.file_type) {
+	case MDFT_STANDARD_DATA_FILE:
+	case MDFT_BACKUP_DATA_FILE:
+	    length = settings.settings.standard_file.file_size;
+	    break;
+	case MDFT_VALUE_FILE_WITH_BACKUP:
+	    abort();
+	    break;
+	case MDFT_LINEAR_RECORD_FILE_WITH_BACKUP:
+	case MDFT_CYCLIC_RECORD_FILE_WITH_BACKUP:
+	    length = settings.settings.linear_record_file.current_number_of_records;
+	    break;
+	}
     }
 
     uint8_t ocs = cs;
@@ -1579,7 +1607,7 @@ read_data (MifareTag tag, uint8_t command, uint8_t file_no, off_t offset, size_t
      * through the cryptography code and copy the actual data to the
      * destination buffer.
      */
-    uint8_t *read_buffer = malloc (enciphered_data_length (tag, length, 0) + 1);
+    uint8_t *read_buffer = malloc (enciphered_data_length (tag, length * record_size, 0) + 1);
 
     do {
 	DESFIRE_TRANSCEIVE2 (tag, p, __cmd_n, res);
