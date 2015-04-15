@@ -474,7 +474,8 @@ mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int c
 		}
 
 		edl = enciphered_data_length (tag, *nbytes - 1, communication_settings);
-		edata = malloc (edl);
+		if (!(edata = malloc (edl)))
+		    abort ();
 
 		memcpy (edata, data, *nbytes - 1);
 		memset ((uint8_t *)edata + *nbytes - 1, 0, edl - *nbytes + 1);
