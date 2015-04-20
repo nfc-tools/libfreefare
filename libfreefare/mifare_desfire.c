@@ -1235,6 +1235,8 @@ mifare_desfire_get_iso_file_ids (MifareTag tag, uint16_t **files, size_t *count)
 	(*files)[i] = le16toh (*(uint16_t *)(p + (2*i)));
     }
 
+    free (data);
+
     return 0;
 }
 
