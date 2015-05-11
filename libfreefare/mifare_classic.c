@@ -237,7 +237,7 @@ mifare_classic_connect (FreefareTag tag)
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.nti.nai.abtUid, tag->info.nti.nai.szUidLen, &pnti) >= 0) {
 	tag->active = 1;
     } else {
 	errno = EIO;
@@ -292,7 +292,7 @@ mifare_classic_authenticate (FreefareTag tag, const MifareClassicBlockNumber blo
     BUFFER_APPEND(cmd, block);
     BUFFER_APPEND_BYTES (cmd, key, 6);
     // To support both 4-byte & 7-byte UID cards:
-    BUFFER_APPEND_BYTES (cmd, tag->info.abtUid + tag->info.szUidLen - 4, 4);
+    BUFFER_APPEND_BYTES (cmd, tag->info.nti.nai.abtUid + tag->info.nti.nai.szUidLen - 4, 4);
 
     CLASSIC_TRANSCEIVE_EX (tag, cmd, res, 1);
 

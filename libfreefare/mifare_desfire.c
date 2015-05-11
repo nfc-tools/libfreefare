@@ -297,7 +297,7 @@ mifare_desfire_connect (FreefareTag tag)
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_424
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.nti.nai.abtUid, tag->info.nti.nai.szUidLen, &pnti) >= 0) {
 	// The registered ISO AID of DESFire D2760000850100
 	// Selecting this AID selects the MF
 	BUFFER_INIT (cmd, 12);

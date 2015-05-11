@@ -56,7 +56,7 @@ typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
 FreefareTag	*freefare_get_tags (nfc_device *device);
-FreefareTag	 freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai);
+FreefareTag	 freefare_tag_new (nfc_device *device, nfc_target target);
 enum freefare_tag_type freefare_get_tag_type (FreefareTag tag);
 const char	*freefare_get_tag_friendly_name (FreefareTag tag);
 char		*freefare_get_tag_uid (FreefareTag tag);

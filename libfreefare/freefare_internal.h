@@ -185,7 +185,7 @@ struct supported_tag {
  */
 struct freefare_tag {
     nfc_device *device;
-    nfc_iso14443a_info info;
+    nfc_target info;
     const struct supported_tag *tag_info;
     int active;
 };

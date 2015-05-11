@@ -46,7 +46,7 @@ struct supported_tag supported_tags[] = {
  * Automagically allocate a FreefareTag given a device and target info.
  */
 FreefareTag
-freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
+freefare_tag_new (nfc_device *device, nfc_target target)
 {
     bool found = false;
     struct supported_tag *tag_info;
@@ -54,12 +54,12 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 
     /* Ensure the target is supported */
     for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	if (((nai.szUidLen == 4) || (nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
-	    (nai.btSak == supported_tags[i].SAK) &&
-	    (!supported_tags[i].ATS_min_length || ((nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
-						   (0 == memcmp (nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length)))) &&
+	if ((target.nm.nmt == NMT_ISO14443A) && ((target.nti.nai.szUidLen == 4) || (target.nti.nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
+	    (target.nti.nai.btSak == supported_tags[i].SAK) &&
+	    (!supported_tags[i].ATS_min_length || ((target.nti.nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
+						   (0 == memcmp (target.nti.nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length)))) &&
 	    ((supported_tags[i].check_tag_on_reader == NULL) ||
-	     supported_tags[i].check_tag_on_reader(device, nai))) {
+	     supported_tags[i].check_tag_on_reader(device, target.nti.nai))) {
 
 	    tag_info = &(supported_tags[i]);
 	    found = true;
@@ -93,7 +93,7 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
      * (Target specific fields are initialized in mifare_*_tag_new())
      */
     tag->device = device;
-    tag->info = nai;
+    tag->info = target;
     tag->active = 0;
     tag->tag_info = tag_info;
 
@@ -149,7 +149,7 @@ freefare_get_tags (nfc_device *device)
 
     for (int c = 0; c < candidates_count; c++) {
 	FreefareTag t;
-	if ((t = freefare_tag_new(device, candidates[c].nti.nai))) {
+	if ((t = freefare_tag_new(device, candidates[c]))) {
 	    /* (Re)Allocate memory for the found MIFARE targets array */
 	    FreefareTag *p = realloc (tags, (tag_count + 2) * sizeof (FreefareTag));
 	    if (p)
@@ -189,9 +189,9 @@ char *
 freefare_get_tag_uid (FreefareTag tag)
 {
     char *res;
-    if ((res = malloc (2 * tag->info.szUidLen + 1))) {
-	for (size_t i =0; i < tag->info.szUidLen; i++)
-	    snprintf (res + 2*i, 3, "%02x", tag->info.abtUid[i]);
+    if ((res = malloc (2 * tag->info.nti.nai.szUidLen + 1))) {
+	for (size_t i =0; i < tag->info.nti.nai.szUidLen; i++)
+	    snprintf (res + 2*i, 3, "%02x", tag->info.nti.nai.abtUid[i]);
     }
     return res;
 }

@@ -138,7 +138,7 @@ mifare_ultralight_connect (FreefareTag tag)
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.abtUid, tag->info.szUidLen, &pnti) >= 0) {
+    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.nti.nai.abtUid, tag->info.nti.nai.szUidLen, &pnti) >= 0) {
 	tag->active = 1;
 	for (int i = 0; i < MIFARE_ULTRALIGHT_MAX_PAGE_COUNT; i++)
 	    MIFARE_ULTRALIGHT(tag)->cached_pages[i] = 0;
