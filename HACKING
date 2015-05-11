@@ -47,13 +47,13 @@ Adding a new supported card to the libfreefare requires a few modification in
 multiple places.  Here is a list of the things to do in order to have the
 infrastructure ready for hacking the new card support:
   - Edit libfreefare/freefare.h:
-      - Add your tag to the `mifare_tag_type' enum;
+      - Add your tag to the `freefare_tag_type' enum;
       - Add a <tag>_connect() and a <tag>_disconnect() function prototype;
   - Edit libfreefare/freefare.3:
-      - Add your tag to the `mifare_tag_type' enum documentation;
+      - Add your tag to the `freefare_tag_type' enum documentation;
   - Edit libfreefare/freefare_internal.h:
       - Add a new <tag>_tag struct.  It's very first member SHALL be `struct
-	mifare_tag __tag';
+	freefare_tag __tag';
       - Add a <tag>_tag_new() and a <tag>_tag_free() function prototype;
       - Add a ASSERT_<TAG>() macro to check the tag's type;
       - Add a <TAG>() macro to cast a generic tag to your type.

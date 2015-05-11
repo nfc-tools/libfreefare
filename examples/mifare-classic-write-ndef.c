@@ -69,7 +69,7 @@ uint8_t *ndef_msg;
 size_t  ndef_msg_len;
 
 static int
-search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey *key, MifareClassicKeyType *key_type)
+search_sector_key (FreefareTag tag, MifareClassicSectorNumber sector, MifareClassicKey *key, MifareClassicKeyType *key_type)
 {
     MifareClassicBlockNumber block = mifare_classic_sector_last_block (sector);
 
@@ -107,7 +107,7 @@ search_sector_key (MifareTag tag, MifareClassicSectorNumber sector, MifareClassi
 }
 
 static int
-fix_mad_trailer_block (nfc_device *device, MifareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
+fix_mad_trailer_block (nfc_device *device, FreefareTag tag, MifareClassicSectorNumber sector, MifareClassicKey key, MifareClassicKeyType key_type)
 {
     MifareClassicBlock block;
     mifare_classic_trailer_block (&block, mad_public_key_a, 0x0, 0x1, 0x1, 0x6, 0x00, default_keyb);
@@ -136,7 +136,7 @@ main(int argc, char *argv[])
 {
     int error = 0;
     nfc_device *device = NULL;
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
     Mad mad;
     MifareClassicKey transport_key = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 

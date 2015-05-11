@@ -188,7 +188,7 @@ uint16_t mifare_trailer_access_permissions[] = {
  */
 
 int		 get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockNumber trailer);
-int		 get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits);
+int		 get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits);
 
 
 /*
@@ -199,7 +199,7 @@ int		 get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block
  * Allocates and initialize a MIFARE Classic tag.
  */
 
-MifareTag
+FreefareTag
 mifare_classic_tag_new (void)
 {
     return malloc (sizeof (struct mifare_classic_tag));
@@ -209,7 +209,7 @@ mifare_classic_tag_new (void)
  * Free the provided tag.
  */
 void
-mifare_classic_tag_free (MifareTag tag)
+mifare_classic_tag_free (FreefareTag tag)
 {
     free (tag);
 }
@@ -227,7 +227,7 @@ mifare_classic_tag_free (MifareTag tag)
  * Establish connection to the provided tag.
  */
 int
-mifare_classic_connect (MifareTag tag)
+mifare_classic_connect (FreefareTag tag)
 {
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -250,7 +250,7 @@ mifare_classic_connect (MifareTag tag)
  * Terminate connection with the provided tag.
  */
 int
-mifare_classic_disconnect (MifareTag tag)
+mifare_classic_disconnect (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -276,7 +276,7 @@ mifare_classic_disconnect (MifareTag tag)
  * Send an authentification command to the provided MIFARE target.
  */
 int
-mifare_classic_authenticate (MifareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type)
+mifare_classic_authenticate (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -307,7 +307,7 @@ mifare_classic_authenticate (MifareTag tag, const MifareClassicBlockNumber block
  * Read data from the provided MIFARE target.
  */
 int
-mifare_classic_read (MifareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data)
+mifare_classic_read (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -324,7 +324,7 @@ mifare_classic_read (MifareTag tag, const MifareClassicBlockNumber block, Mifare
 }
 
 int
-mifare_classic_init_value (MifareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr)
+mifare_classic_init_value (FreefareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr)
 {
     union mifare_classic_block b;
 
@@ -346,7 +346,7 @@ mifare_classic_init_value (MifareTag tag, const MifareClassicBlockNumber block, 
 }
 
 int
-mifare_classic_read_value (MifareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr)
+mifare_classic_read_value (FreefareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr)
 {
     union mifare_classic_block b;
 
@@ -376,7 +376,7 @@ mifare_classic_read_value (MifareTag tag, const MifareClassicBlockNumber block, 
  * Write data to the provided MIFARE target.
  */
 int
-mifare_classic_write (MifareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data)
+mifare_classic_write (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -398,7 +398,7 @@ mifare_classic_write (MifareTag tag, const MifareClassicBlockNumber block, const
  * data register.
  */
 int
-mifare_classic_increment (MifareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
+mifare_classic_increment (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -420,7 +420,7 @@ mifare_classic_increment (MifareTag tag, const MifareClassicBlockNumber block, c
  * data register.
  */
 int
-mifare_classic_decrement (MifareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
+mifare_classic_decrement (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -441,7 +441,7 @@ mifare_classic_decrement (MifareTag tag, const MifareClassicBlockNumber block, c
  * Store the provided block to the internal data register.
  */
 int
-mifare_classic_restore (MifareTag tag, const MifareClassicBlockNumber block)
+mifare_classic_restore (FreefareTag tag, const MifareClassicBlockNumber block)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -470,7 +470,7 @@ mifare_classic_restore (MifareTag tag, const MifareClassicBlockNumber block)
  * Store the internal data register to the provided block.
  */
 int
-mifare_classic_transfer (MifareTag tag, const MifareClassicBlockNumber block)
+mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_CLASSIC (tag);
@@ -539,7 +539,7 @@ get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockN
  * block.
  */
 int
-get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits)
+get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits)
 {
     /*
      * The first block which holds the manufacturer block seems to have
@@ -620,7 +620,7 @@ get_block_access_bits (MifareTag tag, const MifareClassicBlockNumber block, Mifa
  * Get information about the trailer block.
  */
 int
-mifare_classic_get_trailer_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type)
+mifare_classic_get_trailer_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type)
 {
     MifareClassicAccessBits access_bits;
     if (get_block_access_bits (tag, block, &access_bits) < 0) {
@@ -639,7 +639,7 @@ mifare_classic_get_trailer_block_permission (MifareTag tag, const MifareClassicB
  * Get information about data blocks.
  */
 int
-mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type)
+mifare_classic_get_data_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type)
 {
     MifareClassicAccessBits access_bits;
     if (get_block_access_bits (tag, block, &access_bits) < 0) {
@@ -663,7 +663,7 @@ mifare_classic_get_data_block_permission (MifareTag tag, const MifareClassicBloc
  * Reset a MIFARE target sector to factory default.
  */
 int
-mifare_classic_format_sector (MifareTag tag, const MifareClassicSectorNumber sector)
+mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber sector)
 {
     MifareClassicBlockNumber first_sector_block = mifare_classic_sector_first_block (sector);
     MifareClassicBlockNumber last_sector_block = mifare_classic_sector_last_block (sector);

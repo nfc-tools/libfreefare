@@ -33,7 +33,7 @@ uint8_t key_data_3k3des[24]  = { 0x00, 0x01, 0x00, 0x01, 0x00, 0x01, 0x00, 0x01,
 const uint8_t key_data_aes_version = 0x42;
 
 void
-mifare_desfire_auto_authenticate (MifareTag tag, uint8_t key_no)
+mifare_desfire_auto_authenticate (FreefareTag tag, uint8_t key_no)
 {
     /* Determine which key is currently the master one */
     uint8_t key_version;

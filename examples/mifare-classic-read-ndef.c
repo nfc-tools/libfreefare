@@ -67,7 +67,7 @@ main(int argc, char *argv[])
 {
     int error = 0;
     nfc_device *device = NULL;
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
     Mad mad;
 
     int ch;

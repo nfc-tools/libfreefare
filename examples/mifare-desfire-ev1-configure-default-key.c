@@ -54,7 +54,7 @@ main(int argc, char *argv[])
     int ch;
     int error = EXIT_SUCCESS;
     nfc_device *device = NULL;
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
 
     while ((ch = getopt (argc, argv, "hy")) != -1) {
 	switch (ch) {

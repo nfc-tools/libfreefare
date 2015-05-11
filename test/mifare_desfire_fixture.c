@@ -25,8 +25,8 @@
 
 static nfc_context *context;
 static nfc_device *device = NULL;
-static MifareTag *tags = NULL;
-MifareTag tag = NULL;
+static FreefareTag *tags = NULL;
+FreefareTag tag = NULL;
 
 void
 cut_setup (void)

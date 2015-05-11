@@ -76,7 +76,7 @@ main(int argc, char *argv[])
     int ch;
     int error = EXIT_SUCCESS;
     nfc_device *device = NULL;
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
 
     char *ndef_input = NULL;
     while ((ch = getopt (argc, argv, "hyi:k:")) != -1) {

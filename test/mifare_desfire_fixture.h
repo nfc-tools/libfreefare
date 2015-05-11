@@ -17,4 +17,4 @@
  * $Id$
  */
 
-extern MifareTag tag;
+extern FreefareTag tag;

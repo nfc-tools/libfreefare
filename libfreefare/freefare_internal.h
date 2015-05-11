@@ -104,12 +104,12 @@ struct mad_sector_0x00;
 struct mad_sector_0x10;
 
 void		 nxp_crc (uint8_t *crc, const uint8_t value);
-MifareTag	 mifare_classic_tag_new (void);
-void		 mifare_classic_tag_free (MifareTag tag);
-MifareTag	 mifare_desfire_tag_new (void);
-void		 mifare_desfire_tag_free (MifareTag tags);
-MifareTag	 mifare_ultralight_tag_new (void);
-void		 mifare_ultralight_tag_free (MifareTag tag);
+FreefareTag	 mifare_classic_tag_new (void);
+void		 mifare_classic_tag_free (FreefareTag tag);
+FreefareTag	 mifare_desfire_tag_new (void);
+void		 mifare_desfire_tag_free (FreefareTag tags);
+FreefareTag	 mifare_ultralight_tag_new (void);
+void		 mifare_ultralight_tag_free (FreefareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
 
@@ -143,21 +143,21 @@ typedef enum {
 #define MAC_MASK   0x0F0
 #define CMAC_MACK  0xF00
 
-void		*mifare_cryto_preprocess_data (MifareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
-void		*mifare_cryto_postprocess_data (MifareTag tag, void *data, ssize_t *nbytes, int communication_settings);
+void		*mifare_cryto_preprocess_data (FreefareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
+void		*mifare_cryto_postprocess_data (FreefareTag tag, void *data, ssize_t *nbytes, int communication_settings);
 void		 mifare_cypher_single_block (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDirection direction, MifareCryptoOperation operation, size_t block_size);
-void		 mifare_cypher_blocks_chained (MifareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation);
+void		 mifare_cypher_blocks_chained (FreefareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation);
 void		 rol (uint8_t *data, const size_t len);
 void		 desfire_crc32 (const uint8_t *data, const size_t len, uint8_t *crc);
 void		 desfire_crc32_append (uint8_t *data, const size_t len);
 size_t		 key_block_size (const MifareDESFireKey key);
 size_t		 padded_data_length (const size_t nbytes, const size_t block_size);
 size_t		 maced_data_length (const MifareDESFireKey key, const size_t nbytes);
-size_t		 enciphered_data_length (const MifareTag tag, const size_t nbytes, int communication_settings);
+size_t		 enciphered_data_length (const FreefareTag tag, const size_t nbytes, int communication_settings);
 
 void		 cmac_generate_subkeys (MifareDESFireKey key);
 void		 cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
-void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
+void		*assert_crypto_buffer_size (FreefareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT  0x10
 #define MIFARE_ULTRALIGHT_C_PAGE_COUNT 0x30
@@ -166,7 +166,7 @@ void		*assert_crypto_buffer_size (MifareTag tag, size_t nbytes);
 #define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
 
 struct supported_tag {
-    enum mifare_tag_type type;
+    enum freefare_tag_type type;
     const char *friendly_name;
     uint8_t SAK;
     uint8_t ATS_min_length;
@@ -183,7 +183,7 @@ struct supported_tag {
  * Extra members in derived classes are initialized in the correpsonding
  * mifare_*_connect() function.
  */
-struct mifare_tag {
+struct freefare_tag {
     nfc_device *device;
     nfc_iso14443a_info info;
     const struct supported_tag *tag_info;
@@ -191,7 +191,7 @@ struct mifare_tag {
 };
 
 struct mifare_classic_tag {
-    struct mifare_tag __tag;
+    struct freefare_tag __tag;
 
     MifareClassicKeyType last_authentication_key_type;
 
@@ -228,7 +228,7 @@ struct mifare_desfire_key {
 };
 
 struct mifare_desfire_tag {
-    struct mifare_tag __tag;
+    struct freefare_tag __tag;
 
     uint8_t last_picc_error;
     uint8_t last_internal_error;
@@ -247,7 +247,7 @@ MifareDESFireKey mifare_desfire_session_key_new (const uint8_t rnda[], const uin
 const char	*mifare_desfire_error_lookup (uint8_t error);
 
 struct mifare_ultralight_tag {
-    struct mifare_tag __tag;
+    struct freefare_tag __tag;
 
     /* mifare_ultralight_read() reads 4 pages at a time (wrapping) */
     MifareUltralightPage cache[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT + 3];
@@ -255,7 +255,7 @@ struct mifare_ultralight_tag {
 };
 
 /*
- * MifareTag assertion macros
+ * FreefareTag assertion macros
  *
  * This macros provide a simple and unified way to perform various tests at the
  * beginning of the different targets functions.
@@ -270,10 +270,10 @@ struct mifare_ultralight_tag {
 #define ASSERT_MIFARE_ULTRALIGHT_C(tag) do { if (! IS_MIFARE_ULTRALIGHT_C(tag)) return errno = ENODEV, -1; } while (0)
 
 /* 
- * MifareTag cast macros 
+ * FreefareTag cast macros 
  *
  * This macros are intended to provide a convenient way to cast abstract
- * MifareTag structures to concrete Tags (e.g. MIFARE Classic tag).
+ * FreefareTag structures to concrete Tags (e.g. MIFARE Classic tag).
  */
 #define MIFARE_CLASSIC(tag) ((struct mifare_classic_tag *) tag)
 #define MIFARE_DESFIRE(tag) ((struct mifare_desfire_tag *) tag)

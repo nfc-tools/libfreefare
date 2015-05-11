@@ -31,7 +31,7 @@ main(int argc, char *argv[])
 {
     int error = EXIT_SUCCESS;
     nfc_device *device = NULL;
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
 
     if (argc > 1)
 	errx (EXIT_FAILURE, "usage: %s", argv[0]);

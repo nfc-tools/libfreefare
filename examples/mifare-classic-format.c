@@ -44,9 +44,9 @@ MifareClassicKey default_keys_int[] = {
     { 0xaa,0xbb,0xcc,0xdd,0xee,0xff },
     { 0x00,0x00,0x00,0x00,0x00,0x00 }
 };
-int		 format_mifare_classic_1k (MifareTag tag);
-int		 format_mifare_classic_4k (MifareTag tag);
-int		 try_format_sector (MifareTag tag, MifareClassicSectorNumber sector);
+int		 format_mifare_classic_1k (FreefareTag tag);
+int		 format_mifare_classic_4k (FreefareTag tag);
+int		 try_format_sector (FreefareTag tag, MifareClassicSectorNumber sector);
 
 static int at_block = 0;
 static int mod_block = 10;
@@ -73,7 +73,7 @@ display_progress (void)
 }
 
 int
-format_mifare_classic_1k (MifareTag tag)
+format_mifare_classic_1k (FreefareTag tag)
 {
     printf (START_FORMAT_N, 16);
     for (int sector = 0; sector < 16; sector++) {
@@ -85,7 +85,7 @@ format_mifare_classic_1k (MifareTag tag)
 }
 
 int
-format_mifare_classic_4k (MifareTag tag)
+format_mifare_classic_4k (FreefareTag tag)
 {
     printf (START_FORMAT_N, 32 + 8);
     for (int sector = 0; sector < (32 + 8); sector++) {
@@ -97,7 +97,7 @@ format_mifare_classic_4k (MifareTag tag)
 }
 
 int
-try_format_sector (MifareTag tag, MifareClassicSectorNumber sector)
+try_format_sector (FreefareTag tag, MifareClassicSectorNumber sector)
 {
     display_progress ();
     for (size_t i = 0; i < (sizeof (default_keys) / sizeof (MifareClassicKey)); i++) {
@@ -143,7 +143,7 @@ main(int argc, char *argv[])
     int ch;
     int error = EXIT_SUCCESS;
     nfc_device *device = NULL;
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
 
     while ((ch = getopt (argc, argv, "fhy")) != -1) {
 	switch (ch) {
@@ -238,7 +238,7 @@ main(int argc, char *argv[])
 	    }
 
 	    if (format) {
-		enum mifare_tag_type tt = freefare_get_tag_type (tags[i]);
+		enum freefare_tag_type tt = freefare_get_tag_type (tags[i]);
 		at_block = 0;
 
 		if (format_options.fast) {

@@ -43,14 +43,14 @@ struct supported_tag supported_tags[] = {
 };
 
 /*
- * Automagically allocate a MifareTag given a device and target info.
+ * Automagically allocate a FreefareTag given a device and target info.
  */
-MifareTag
+FreefareTag
 freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
 {
     bool found = false;
     struct supported_tag *tag_info;
-    MifareTag tag;
+    FreefareTag tag;
 
     /* Ensure the target is supported */
     for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
@@ -114,10 +114,10 @@ freefare_tag_new (nfc_device *device, nfc_iso14443a_info nai)
  *
  * The list has to be freed using the freefare_free_tags() function.
  */
-MifareTag *
+FreefareTag *
 freefare_get_tags (nfc_device *device)
 {
-    MifareTag *tags = NULL;
+    FreefareTag *tags = NULL;
     int tag_count = 0;
 
     nfc_initiator_init(device);
@@ -148,10 +148,10 @@ freefare_get_tags (nfc_device *device)
     tags[0] = NULL;
 
     for (int c = 0; c < candidates_count; c++) {
-	MifareTag t;
+	FreefareTag t;
 	if ((t = freefare_tag_new(device, candidates[c].nti.nai))) {
 	    /* (Re)Allocate memory for the found MIFARE targets array */
-	    MifareTag *p = realloc (tags, (tag_count + 2) * sizeof (MifareTag));
+	    FreefareTag *p = realloc (tags, (tag_count + 2) * sizeof (FreefareTag));
 	    if (p)
 		tags = p;
 	    else
@@ -167,8 +167,8 @@ freefare_get_tags (nfc_device *device)
 /*
  * Returns the type of the provided tag.
  */
-enum mifare_tag_type
-freefare_get_tag_type (MifareTag tag)
+enum freefare_tag_type
+freefare_get_tag_type (FreefareTag tag)
 {
     return tag->tag_info->type;
 }
@@ -177,7 +177,7 @@ freefare_get_tag_type (MifareTag tag)
  * Returns the friendly name of the provided tag.
  */
 const char *
-freefare_get_tag_friendly_name (MifareTag tag)
+freefare_get_tag_friendly_name (FreefareTag tag)
 {
     return tag->tag_info->friendly_name;
 }
@@ -186,7 +186,7 @@ freefare_get_tag_friendly_name (MifareTag tag)
  * Returns the UID of the provided tag.
  */
 char *
-freefare_get_tag_uid (MifareTag tag)
+freefare_get_tag_uid (FreefareTag tag)
 {
     char *res;
     if ((res = malloc (2 * tag->info.szUidLen + 1))) {
@@ -208,7 +208,7 @@ bool freefare_selected_tag_is_present(nfc_device *device)
  * Free the provided tag.
  */
 void
-freefare_free_tag (MifareTag tag)
+freefare_free_tag (FreefareTag tag)
 {
     if (tag) {
         switch (tag->tag_info->type) {
@@ -228,7 +228,7 @@ freefare_free_tag (MifareTag tag)
 }
 
 const char *
-freefare_strerror (MifareTag tag)
+freefare_strerror (FreefareTag tag)
 {
     const char *p = "Unknown error";
     if (nfc_device_get_last_error (tag->device) < 0) {
@@ -246,13 +246,13 @@ freefare_strerror (MifareTag tag)
 }
 
 int
-freefare_strerror_r (MifareTag tag, char *buffer, size_t len)
+freefare_strerror_r (FreefareTag tag, char *buffer, size_t len)
 {
     return (snprintf (buffer, len, "%s", freefare_strerror (tag)) < 0) ? -1 : 0;
 }
 
 void
-freefare_perror (MifareTag tag, const char *string)
+freefare_perror (FreefareTag tag, const char *string)
 {
     fprintf (stderr, "%s: %s\n", string, freefare_strerror (tag));
 }
@@ -261,7 +261,7 @@ freefare_perror (MifareTag tag, const char *string)
  * Free the provided tag list.
  */
 void
-freefare_free_tags (MifareTag *tags)
+freefare_free_tags (FreefareTag *tags)
 {
     if (tags) {
 	for (int i=0; tags[i]; i++) {

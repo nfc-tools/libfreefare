@@ -99,7 +99,7 @@
 /*
  * Allocates and initialize a MIFARE UltraLight tag.
  */
-MifareTag
+FreefareTag
 mifare_ultralight_tag_new (void)
 {
     return malloc (sizeof (struct mifare_ultralight_tag));
@@ -109,7 +109,7 @@ mifare_ultralight_tag_new (void)
  * Free the provided tag.
  */
 void
-mifare_ultralight_tag_free (MifareTag tag)
+mifare_ultralight_tag_free (FreefareTag tag)
 {
     free (tag);
 }
@@ -128,7 +128,7 @@ mifare_ultralight_tag_free (MifareTag tag)
  * Establish connection to the provided tag.
  */
 int
-mifare_ultralight_connect (MifareTag tag)
+mifare_ultralight_connect (FreefareTag tag)
 {
     ASSERT_INACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
@@ -153,7 +153,7 @@ mifare_ultralight_connect (MifareTag tag)
  * Terminate connection with the provided tag.
  */
 int
-mifare_ultralight_disconnect (MifareTag tag)
+mifare_ultralight_disconnect (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
@@ -179,7 +179,7 @@ mifare_ultralight_disconnect (MifareTag tag)
  * Read data from the provided MIFARE tag.
  */
 int
-mifare_ultralight_read (MifareTag tag, MifareUltralightPageNumber page, MifareUltralightPage *data)
+mifare_ultralight_read (FreefareTag tag, MifareUltralightPageNumber page, MifareUltralightPage *data)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
@@ -219,7 +219,7 @@ mifare_ultralight_read (MifareTag tag, MifareUltralightPageNumber page, MifareUl
  * Read data to the provided MIFARE tag.
  */
 int
-mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data)
+mifare_ultralight_write (FreefareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT (tag);
@@ -244,7 +244,7 @@ mifare_ultralight_write (MifareTag tag, const MifareUltralightPageNumber page, c
  * Authenticate to the provided MIFARE tag.
  */
 int
-mifare_ultralightc_authenticate (MifareTag tag, const MifareDESFireKey key)
+mifare_ultralightc_authenticate (FreefareTag tag, const MifareDESFireKey key)
 {
     ASSERT_ACTIVE (tag);
     ASSERT_MIFARE_ULTRALIGHT_C (tag);

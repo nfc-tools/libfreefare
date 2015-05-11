@@ -72,7 +72,7 @@ mifare_desfire_error_lookup (uint8_t code)
 }
 
 uint8_t
-mifare_desfire_last_pcd_error (MifareTag tag)
+mifare_desfire_last_pcd_error (FreefareTag tag)
 {
     if (tag->tag_info->type != DESFIRE)
 	return 0;
@@ -81,7 +81,7 @@ mifare_desfire_last_pcd_error (MifareTag tag)
 }
 
 uint8_t
-mifare_desfire_last_picc_error (MifareTag tag)
+mifare_desfire_last_picc_error (FreefareTag tag)
 {
     if (tag->tag_info->type != DESFIRE)
 	return 0;

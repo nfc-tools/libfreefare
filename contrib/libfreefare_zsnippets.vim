@@ -54,7 +54,7 @@ exec "Snippet MD   MIFARE_DESFIRE".st.et
 exec "Snippet MDA  MifareDESFireAID".st.et
 exec "Snippet MDK  MifareDESFireKey".st.et
 
-exec "Snippet MT  MifareTag".st.et
+exec "Snippet MT  FreefareTag".st.et
 
 exec "Snippet MU   MIFARE_ULTRALIGHT".st.et
 exec "Snippet MUP  MifareUltralightPage".st.et

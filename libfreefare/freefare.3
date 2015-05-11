@@ -48,25 +48,25 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .\"        |___/            |_|
 .Sh SYNOPSIS
 .In freefare.h
-.Ft "MifareTag *"
+.Ft "FreefareTag *"
 .Fn freefare_get_tags "nfc_device_t *device"
 .Bd -literal
-enum mifare_tag_type {
+enum freefare_tag_type {
     ULTRALIGHT,
     CLASSIC_1K,
     CLASSIC_4K
 };
 .Ed
-.Ft "enum mifare_tag_type"
-.Fn freefare_get_tag_type "MifareTag tag"
+.Ft "enum freefare_tag_type"
+.Fn freefare_get_tag_type "FreefareTag tag"
 .Ft "const char *"
-.Fn freefare_get_tag_friendly_name "MifareTag tag"
+.Fn freefare_get_tag_friendly_name "FreefareTag tag"
 .Ft "char *"
-.Fn freefare_get_tag_uid "MifareTag tag"
+.Fn freefare_get_tag_uid "FreefareTag tag"
 .Ft "void"
-.Fn freefare_free_tag "MifareTag tags"
+.Fn freefare_free_tag "FreefareTag tags"
 .Ft "void"
-.Fn freefare_free_tags "MifareTag *tags"
+.Fn freefare_free_tags "FreefareTag *tags"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
@@ -77,12 +77,12 @@ enum mifare_tag_type {
 The
 .Fn freefare_*
 family of functions allow agnostic access to the
-.Vt MifareTag
+.Vt FreefareTag
 present on a given NFC device.
 .Pp
 .Fn freefare_get_tags
 returns a NULL-terminated list of
-.Vt MifareTag
+.Vt FreefareTag
 present on
 .Vt device .
 This list has to be freed after usage by either:
@@ -108,7 +108,7 @@ It is the programmer's responsibility to free these targets before calling the
 function.
 .Pp
 Information about a given
-.Vt MifareTag
+.Vt FreefareTag
 can be gathered using the
 .Fn freefare_get_tag_type ,
 .Fn freefare_get_tag_uid

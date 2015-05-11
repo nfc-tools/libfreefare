@@ -47,15 +47,15 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Sh SYNOPSIS
 .In freefare.h
 .Ft "const char *"
-.Fn freefare_strerror "MifareTag tag"
+.Fn freefare_strerror "FreefareTag tag"
 .Ft "int"
-.Fn freefare_strerror_r "MifareTag tag" "char *buffer" "size_t len"
+.Fn freefare_strerror_r "FreefareTag tag" "char *buffer" "size_t len"
 .Ft "void"
-.Fn freefare_strerror "MifareTag tag" "char *string"
+.Fn freefare_strerror "FreefareTag tag" "char *string"
 .Ft "uint8_t"
-.Fn mifare_desfire_last_pcd_error "MifareTag tag"
+.Fn mifare_desfire_last_pcd_error "FreefareTag tag"
 .Ft "uint8_t"
-.Fn mifare_desfire_last_picc_error "MifareTag tag"
+.Fn mifare_desfire_last_picc_error "FreefareTag tag"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \

@@ -47,13 +47,13 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Sh SYNOPSIS
 .In freefare.h
 .Ft int
-.Fn mifare_ultralight_connect "MifareTag tag"
+.Fn mifare_ultralight_connect "FreefareTag tag"
 .Ft int
-.Fn mifare_ultralight_disconnect "MifareTag tag"
+.Fn mifare_ultralight_disconnect "FreefareTag tag"
 .Ft int
-.Fn mifare_ultralight_read "MifareTag tag" "const MifareUltralightPageNumber page" "MifareUltralightPage *data"
+.Fn mifare_ultralight_read "FreefareTag tag" "const MifareUltralightPageNumber page" "MifareUltralightPage *data"
 .Ft int
-.Fn mifare_ultralight_write "MifareTag tag" "const MifareUltralightPageNumber page" "const MifareUltralightPage data"
+.Fn mifare_ultralight_write "FreefareTag tag" "const MifareUltralightPageNumber page" "const MifareUltralightPage data"
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
