@@ -344,7 +344,7 @@ main(int argc, char *argv[])
 			goto error;
 		    }
 
-		    MifareClassicSectorNumber max_s;
+		    MifareClassicSectorNumber max_s = 0;
 		    switch (freefare_get_tag_type (tags[i])) {
 		    case CLASSIC_1K:
 			max_s = 15;
