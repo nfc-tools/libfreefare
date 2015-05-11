@@ -52,9 +52,11 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Fn freefare_get_tags "nfc_device_t *device"
 .Bd -literal
 enum freefare_tag_type {
-    ULTRALIGHT,
     CLASSIC_1K,
-    CLASSIC_4K
+    CLASSIC_4K,
+    DESFIRE,
+    ULTRALIGHT,
+    ULTRALIGHT_C,
 };
 .Ed
 .Ft "enum freefare_tag_type"
