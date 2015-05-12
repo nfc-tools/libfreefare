@@ -61,7 +61,7 @@ main(int argc, char *argv[])
 	}
 
 	for (int i = 0; (!error) && tags[i]; i++) {
-	    if (DESFIRE != freefare_get_tag_type (tags[i]))
+	    if (MIFARE_DESFIRE != freefare_get_tag_type (tags[i]))
 		continue;
 
 	    int res;

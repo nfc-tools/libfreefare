@@ -124,7 +124,7 @@ test_mifare_classic_mad (void)
      * | |\/| |/ _ \| |) \ V // /
      * |_|  |_/_/ \_\___/ \_//___|
      */
-    if (freefare_get_tag_type (tag) != CLASSIC_4K) {
+    if (freefare_get_tag_type (tag) != MIFARE_CLASSIC_4K) {
 	cut_omit ("MADv2 requires a MIFARE Classic 4K to be tested");
     }
 

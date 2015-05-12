@@ -229,8 +229,8 @@ main(int argc, char *argv[])
 
 	for (int i = 0; (!error) && tags[i]; i++) {
 	    switch (freefare_get_tag_type (tags[i])) {
-	    case CLASSIC_1K:
-	    case CLASSIC_4K:
+	    case MIFARE_CLASSIC_1K:
+	    case MIFARE_CLASSIC_4K:
 		break;
 	    default:
 		continue;
@@ -257,13 +257,13 @@ main(int argc, char *argv[])
 
 	    if (write_ndef) {
 		switch (freefare_get_tag_type (tags[i])) {
-		case CLASSIC_4K:
+		case MIFARE_CLASSIC_4K:
 		    if (!search_sector_key (tags[i], 0x10, &(card_write_keys[0x10].key), &(card_write_keys[0x10].type))) {
 			error = 1;
 			goto error;
 		    }
 		    /* fallthrough */
-		case CLASSIC_1K:
+		case MIFARE_CLASSIC_1K:
 		    if (!search_sector_key (tags[i], 0x00, &(card_write_keys[0x00].key), &(card_write_keys[0x00].type))) {
 			error = 1;
 			goto error;
@@ -277,7 +277,7 @@ main(int argc, char *argv[])
 		if (!error) {
 		    /* Ensure the auth key is always a B one. If not, change it! */
 		    switch (freefare_get_tag_type (tags[i])) {
-		    case CLASSIC_4K:
+		    case MIFARE_CLASSIC_4K:
 			if (card_write_keys[0x10].type != MFC_KEY_B) {
 			    if( 0 != fix_mad_trailer_block (device, tags[i], 0x10, card_write_keys[0x10].key, card_write_keys[0x10].type)) {
 				error = 1;
@@ -287,7 +287,7 @@ main(int argc, char *argv[])
 			    card_write_keys[0x10].type = MFC_KEY_B;
 			}
 			/* fallthrough */
-		    case CLASSIC_1K:
+		    case MIFARE_CLASSIC_1K:
 			if (card_write_keys[0x00].type != MFC_KEY_B) {
 			    if( 0 != fix_mad_trailer_block (device, tags[i], 0x00, card_write_keys[0x00].key, card_write_keys[0x00].type)) {
 				error = 1;
@@ -336,7 +336,7 @@ main(int argc, char *argv[])
 		} else {
 
 		    // Create a MAD and mark unaccessible sectors in the card
-		    if (!(mad = mad_new ((freefare_get_tag_type (tags[i]) == CLASSIC_4K) ? 2 : 1))) {
+		    if (!(mad = mad_new ((freefare_get_tag_type (tags[i]) == MIFARE_CLASSIC_4K) ? 2 : 1))) {
 			perror ("mad_new");
 			error = 1;
 			goto error;
@@ -344,10 +344,10 @@ main(int argc, char *argv[])
 
 		    MifareClassicSectorNumber max_s = 0;
 		    switch (freefare_get_tag_type (tags[i])) {
-		    case CLASSIC_1K:
+		    case MIFARE_CLASSIC_1K:
 			max_s = 15;
 			break;
-		    case CLASSIC_4K:
+		    case MIFARE_CLASSIC_4K:
 			max_s = 39;
 			break;
 		    default:

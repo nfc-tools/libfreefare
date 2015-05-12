@@ -29,16 +29,16 @@
 #endif // __cplusplus
 
 enum freefare_tag_type {
-//    MINI,
-    CLASSIC_1K,
-    CLASSIC_4K,
-    DESFIRE,
-//    PLUS_S2K,
-//    PLUS_S4K,
-//    PLUS_X2K,
-//    PLUS_X4K,
-    ULTRALIGHT,
-    ULTRALIGHT_C,
+//    MIFARE_MINI,
+    MIFARE_CLASSIC_1K,
+    MIFARE_CLASSIC_4K,
+    MIFARE_DESFIRE,
+//    MIFARE_PLUS_S2K,
+//    MIFARE_PLUS_S4K,
+//    MIFARE_PLUS_X2K,
+//    MIFARE_PLUS_X4K,
+    MIFARE_ULTRALIGHT,
+    MIFARE_ULTRALIGHT_C,
 };
 
 struct freefare_tag;

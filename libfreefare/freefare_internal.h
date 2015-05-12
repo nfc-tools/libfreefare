@@ -262,10 +262,10 @@ struct mifare_ultralight_tag {
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
-#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != CLASSIC_1K) && (tag->tag_info->type != CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != DESFIRE) return errno = ENODEV, -1; } while (0)
-#define IS_MIFARE_ULTRALIGHT_C(tag) (tag->tag_info->type == ULTRALIGHT_C)
-#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if ((tag->tag_info->type != ULTRALIGHT) && (! IS_MIFARE_ULTRALIGHT_C(tag))) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != MIFARE_CLASSIC_1K) && (tag->tag_info->type != MIFARE_CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
+#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != MIFARE_DESFIRE) return errno = ENODEV, -1; } while (0)
+#define IS_MIFARE_ULTRALIGHT_C(tag) (tag->tag_info->type == MIFARE_ULTRALIGHT_C)
+#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if ((tag->tag_info->type != MIFARE_ULTRALIGHT) && (! IS_MIFARE_ULTRALIGHT_C(tag))) return errno = ENODEV, -1; } while (0)
 #define ASSERT_MIFARE_ULTRALIGHT_C(tag) do { if (! IS_MIFARE_ULTRALIGHT_C(tag)) return errno = ENODEV, -1; } while (0)
 
 /* 

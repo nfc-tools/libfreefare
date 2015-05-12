@@ -57,8 +57,8 @@ main (int argc, char *argv[])
 
 	for (int i = 0; (!error) && tags[i]; i++) {
 	    switch (freefare_get_tag_type (tags[i])) {
-	    case ULTRALIGHT:
-	    case ULTRALIGHT_C:
+	    case MIFARE_ULTRALIGHT:
+	    case MIFARE_ULTRALIGHT_C:
 		break;
 	    default:
 		continue;
@@ -66,7 +66,7 @@ main (int argc, char *argv[])
 
 	    char *tag_uid = freefare_get_tag_uid (tags[i]);
 	    printf ("Tag with UID %s is a %s\n", tag_uid, freefare_get_tag_friendly_name (tags[i]));
-	    if (freefare_get_tag_type (tags[i]) == ULTRALIGHT_C) {
+	    if (freefare_get_tag_type (tags[i]) == MIFARE_ULTRALIGHT_C) {
 		FreefareTag tag = tags[i];
 		int res;
 		MifareDESFireKey key;

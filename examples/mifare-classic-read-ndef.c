@@ -139,8 +139,8 @@ main(int argc, char *argv[])
 
 	for (int i = 0; (!error) && tags[i]; i++) {
 	    switch (freefare_get_tag_type (tags[i])) {
-	    case CLASSIC_1K:
-	    case CLASSIC_4K:
+	    case MIFARE_CLASSIC_1K:
+	    case MIFARE_CLASSIC_4K:
 		break;
 	    default:
 		continue;

@@ -51,8 +51,8 @@ cut_setup (void)
 
         tag = NULL;
         for (int i=0; tags[i]; i++) {
-            if ((freefare_get_tag_type(tags[i]) == ULTRALIGHT) ||
-                (freefare_get_tag_type(tags[i]) == ULTRALIGHT_C)) {
+            if ((freefare_get_tag_type(tags[i]) == MIFARE_ULTRALIGHT) ||
+                (freefare_get_tag_type(tags[i]) == MIFARE_ULTRALIGHT_C)) {
                 tag = tags[i];
                 res = mifare_ultralight_connect (tag);
                 cut_assert_equal_int (0, res, cut_message ("mifare_ultralight_connect() failed"));

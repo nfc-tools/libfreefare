@@ -27,17 +27,17 @@
 #define NXP_MANUFACTURER_CODE 0x04
 
 struct supported_tag supported_tags[] = {
-    { CLASSIC_1K,   "Mifare Classic 1k",            NMT_ISO14443A, 0x08, 0, 0, { 0x00 }, NULL },
-    { CLASSIC_1K,   "Mifare Classic 1k (Emulated)", NMT_ISO14443A, 0x28, 0, 0, { 0x00 }, NULL },
-    { CLASSIC_1K,   "Mifare Classic 1k (Emulated)", NMT_ISO14443A, 0x68, 0, 0, { 0x00 }, NULL },
-    { CLASSIC_1K,   "Infineon Mifare Classic 1k",   NMT_ISO14443A, 0x88, 0, 0, { 0x00 }, NULL },
-    { CLASSIC_4K,   "Mifare Classic 4k",            NMT_ISO14443A, 0x18, 0, 0, { 0x00 }, NULL },
-    { CLASSIC_4K,   "Mifare Classic 4k (Emulated)", NMT_ISO14443A, 0x38, 0, 0, { 0x00 }, NULL },
-    { DESFIRE,      "Mifare DESFire",               NMT_ISO14443A, 0x20, 5, 4, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }, NULL},
-    { DESFIRE,      "Cyanogenmod card emulation",   NMT_ISO14443A, 0x60, 4, 3, { 0x78, 0x33, 0x88 /*, 0xXX */ }, NULL},
-    { DESFIRE,      "Android HCE",                  NMT_ISO14443A, 0x60, 4, 3, { 0x78, 0x80, 0x70 /*, 0xXX */ }, NULL},
-    { ULTRALIGHT_C, "Mifare UltraLightC",           NMT_ISO14443A, 0x00, 0, 0, { 0x00 }, is_mifare_ultralightc_on_reader },
-    { ULTRALIGHT,   "Mifare UltraLight",            NMT_ISO14443A, 0x00, 0, 0, { 0x00 }, NULL },
+    { MIFARE_CLASSIC_1K,   "Mifare Classic 1k",            NMT_ISO14443A, 0x08, 0, 0, { 0x00 }, NULL },
+    { MIFARE_CLASSIC_1K,   "Mifare Classic 1k (Emulated)", NMT_ISO14443A, 0x28, 0, 0, { 0x00 }, NULL },
+    { MIFARE_CLASSIC_1K,   "Mifare Classic 1k (Emulated)", NMT_ISO14443A, 0x68, 0, 0, { 0x00 }, NULL },
+    { MIFARE_CLASSIC_1K,   "Infineon Mifare Classic 1k",   NMT_ISO14443A, 0x88, 0, 0, { 0x00 }, NULL },
+    { MIFARE_CLASSIC_4K,   "Mifare Classic 4k",            NMT_ISO14443A, 0x18, 0, 0, { 0x00 }, NULL },
+    { MIFARE_CLASSIC_4K,   "Mifare Classic 4k (Emulated)", NMT_ISO14443A, 0x38, 0, 0, { 0x00 }, NULL },
+    { MIFARE_DESFIRE,      "Mifare DESFire",               NMT_ISO14443A, 0x20, 5, 4, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }, NULL},
+    { MIFARE_DESFIRE,      "Cyanogenmod card emulation",   NMT_ISO14443A, 0x60, 4, 3, { 0x78, 0x33, 0x88 /*, 0xXX */ }, NULL},
+    { MIFARE_DESFIRE,      "Android HCE",                  NMT_ISO14443A, 0x60, 4, 3, { 0x78, 0x80, 0x70 /*, 0xXX */ }, NULL},
+    { MIFARE_ULTRALIGHT_C, "Mifare UltraLightC",           NMT_ISO14443A, 0x00, 0, 0, { 0x00 }, is_mifare_ultralightc_on_reader },
+    { MIFARE_ULTRALIGHT,   "Mifare UltraLight",            NMT_ISO14443A, 0x00, 0, 0, { 0x00 }, NULL },
 };
 
 /*
@@ -73,15 +73,15 @@ freefare_tag_new (nfc_device *device, nfc_target target)
 
     /* Allocate memory for the found MIFARE target */
     switch (tag_info->type) {
-    case CLASSIC_1K:
-    case CLASSIC_4K:
+    case MIFARE_CLASSIC_1K:
+    case MIFARE_CLASSIC_4K:
 	tag = mifare_classic_tag_new ();
 	break;
-    case DESFIRE:
+    case MIFARE_DESFIRE:
 	tag = mifare_desfire_tag_new ();
 	break;
-    case ULTRALIGHT:
-    case ULTRALIGHT_C:
+    case MIFARE_ULTRALIGHT:
+    case MIFARE_ULTRALIGHT_C:
 	tag = mifare_ultralight_tag_new ();
 	break;
     }
@@ -213,15 +213,15 @@ freefare_free_tag (FreefareTag tag)
 {
     if (tag) {
         switch (tag->tag_info->type) {
-        case CLASSIC_1K:
-        case CLASSIC_4K:
+        case MIFARE_CLASSIC_1K:
+        case MIFARE_CLASSIC_4K:
             mifare_classic_tag_free (tag);
             break;
-        case DESFIRE:
+        case MIFARE_DESFIRE:
             mifare_desfire_tag_free (tag);
             break;
-        case ULTRALIGHT:
-        case ULTRALIGHT_C:
+        case MIFARE_ULTRALIGHT:
+        case MIFARE_ULTRALIGHT_C:
             mifare_ultralight_tag_free (tag);
             break;
         }
@@ -235,7 +235,7 @@ freefare_strerror (FreefareTag tag)
     if (nfc_device_get_last_error (tag->device) < 0) {
       p = nfc_strerror (tag->device);
     } else {
-      if (tag->tag_info->type == DESFIRE) {
+      if (tag->tag_info->type == MIFARE_DESFIRE) {
         if (MIFARE_DESFIRE (tag)->last_pcd_error) {
           p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
         } else if (MIFARE_DESFIRE (tag)->last_picc_error) {
