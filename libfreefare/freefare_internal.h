@@ -166,6 +166,7 @@ void		*assert_crypto_buffer_size (FreefareTag tag, size_t nbytes);
 struct supported_tag {
     enum freefare_tag_type type;
     const char *friendly_name;
+    uint8_t modulation_type;
     uint8_t SAK;
     uint8_t ATS_min_length;
     uint8_t ATS_compare_length;
