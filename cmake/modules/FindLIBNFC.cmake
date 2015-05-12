@@ -1,4 +1,3 @@
-# $Id$
 # TODO locate using pkg-config for linux/bsd
 
 #set(LIBNFC_INCLUDE_DIRS "")

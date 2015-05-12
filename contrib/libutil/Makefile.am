@@ -1,5 +1,3 @@
-# $Id$
-
 if WITH_DEBUG
 if !HAS_LIBUTIL
 noinst_LTLIBRARIES = libutil.la

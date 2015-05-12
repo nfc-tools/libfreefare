@@ -1,4 +1,3 @@
-# $Id$
 set(LIBRARY_SOURCES
 		freefare
 		freefare_internal

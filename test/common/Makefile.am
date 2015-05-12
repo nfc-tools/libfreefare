@@ -1,5 +1,3 @@
-# $Id$
-
 AM_CPPFLAGS = $(CUTTER_CFLAGS) -I$(top_srcdir)/libfreefare
 AM_CFLAGS = @LIBNFC_CFLAGS@
 

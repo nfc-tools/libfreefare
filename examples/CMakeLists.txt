@@ -1,4 +1,3 @@
-# $Id$
 set(EXAMPLES-SOURCES
         mifare-classic-format
         mifare-classic-read-ndef

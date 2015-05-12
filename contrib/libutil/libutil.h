@@ -34,7 +34,6 @@
  * SUCH DAMAGE.
  *
  * $FreeBSD: stable/8/lib/libutil/libutil.h 185548 2008-12-02 06:50:26Z peter $
- * $Id$
  */
 
 #ifndef _LIBUTIL_H_

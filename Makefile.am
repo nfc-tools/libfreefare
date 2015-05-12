@@ -1,5 +1,3 @@
-# $Id$
-
 ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = contrib libfreefare test examples
