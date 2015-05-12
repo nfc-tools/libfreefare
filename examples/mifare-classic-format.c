@@ -161,7 +161,7 @@ main(int argc, char *argv[])
 	}
     }
     // Remaining args, if any, are in argv[optind .. (argc-1)]
-    
+
     memcpy(default_keys, default_keys_int, sizeof(default_keys_int));
 
     if ((argc - optind) > 0)

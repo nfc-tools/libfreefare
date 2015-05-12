@@ -269,7 +269,7 @@ struct mifare_ultralight_tag {
 #define ASSERT_MIFARE_ULTRALIGHT_C(tag) do { if (! IS_MIFARE_ULTRALIGHT_C(tag)) return errno = ENODEV, -1; } while (0)
 
 /* 
- * FreefareTag cast macros 
+ * FreefareTag cast macros
  *
  * This macros are intended to provide a convenient way to cast abstract
  * FreefareTag structures to concrete Tags (e.g. MIFARE Classic tag).

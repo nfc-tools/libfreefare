@@ -121,7 +121,7 @@ main(int argc, char *argv[])
 
     nfc_connstring devices[8];
     size_t device_count;
-    
+
     nfc_context *context;
     nfc_init (&context);
     if (context == NULL)
@@ -133,7 +133,7 @@ main(int argc, char *argv[])
 
     for (size_t d = 0; d < device_count; d++) {
         device = nfc_open (context, devices[d]);
-        
+
         if (!device) {
             warnx ("nfc_open() failed.");
             error = EXIT_FAILURE;

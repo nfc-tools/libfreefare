@@ -82,7 +82,7 @@ main(int argc, char *argv[])
 
     nfc_connstring devices[8];
     size_t device_count;
-    
+
     nfc_context *context;
     nfc_init (&context);
     if (context == NULL)

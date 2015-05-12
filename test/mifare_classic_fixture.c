@@ -32,7 +32,7 @@ cut_setup (void)
     int res;
     nfc_connstring devices[8];
     size_t device_count;
-    
+
     nfc_init (&context);
     cut_assert_not_null (context, cut_message ("Unable to init libnfc (malloc)"));
 
@@ -42,7 +42,7 @@ cut_setup (void)
 
     for (size_t i = 0; i < device_count; i++) {
         device = nfc_open (context, devices[i]);
-        if (!device) 
+        if (!device)
             cut_omit ("nfc_open() failed.");
 
         tags = freefare_get_tags (device);
@@ -79,7 +79,7 @@ cut_teardown (void)
 
     if (device)
         nfc_close (device);
-  
+
     nfc_exit (context);
 }
 

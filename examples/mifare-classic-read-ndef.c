@@ -239,7 +239,7 @@ error:
 	freefare_free_tags (tags);
 	nfc_close (device);
     }
-  
+
     nfc_exit (context);
     exit (error);
 }
