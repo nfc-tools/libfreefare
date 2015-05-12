@@ -243,13 +243,13 @@ main(int argc, char *argv[])
 
 	    bool write_ndef = true;
 	    if (write_options.interactive) {
-	    	printf ("Write NDEF [yN] ");
-	    	fgets (buffer, BUFSIZ, stdin);
-	    	write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
+		printf ("Write NDEF [yN] ");
+		fgets (buffer, BUFSIZ, stdin);
+		write_ndef = ((buffer[0] == 'y') || (buffer[0] == 'Y'));
 	    } else {
-	    	printf ("\n");
+		printf ("\n");
 	    }
-	    	   
+
 	    for (int n = 0; n < 40; n++) {
 		memcpy(card_write_keys[n].key, transport_key, sizeof (transport_key));
 		card_write_keys[n].type = MFC_KEY_A;

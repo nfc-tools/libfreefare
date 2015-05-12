@@ -100,7 +100,7 @@ int		 mifare_classic_decrement (FreefareTag tag, const MifareClassicBlockNumber 
 int		 mifare_classic_restore (FreefareTag tag, const MifareClassicBlockNumber block);
 int		 mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block);
 
-int 		 mifare_classic_get_trailer_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
+int		 mifare_classic_get_trailer_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
 int		 mifare_classic_get_data_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
 int		 mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber sector);
