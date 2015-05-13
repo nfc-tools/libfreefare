@@ -51,8 +51,6 @@ cut_setup (void)
         for (int i=0; tags[i]; i++) {
             if (freefare_get_tag_type(tags[i]) == FELICA) {
                 tag = tags[i];
-                res = felica_connect (tag);
-                cut_assert_equal_int (0, res, cut_message ("felica_connect() failed"));
                 return;
             }
         }
@@ -67,9 +65,6 @@ cut_setup (void)
 void
 cut_teardown (void)
 {
-    if (tag)
-        mifare_classic_disconnect (tag);
-
     if (tags) {
         freefare_free_tags (tags);
         tags = NULL;

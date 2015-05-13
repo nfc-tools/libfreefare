@@ -91,10 +91,6 @@ main (int argc, char *argv[])
 	}
 
 	for (int i = 0; (!error) && tags[i]; i++) {
-	    int r = felica_connect (tags[i]);
-	    if (r < 0)
-		errx (EXIT_FAILURE, "Cannot connect to FeliCa target");
-
 	    int block = 1;
 	    uint8_t ndef_message[NDEF_BUFFER_SIZE];
 	    int ndef_space_left = NDEF_BUFFER_SIZE;
@@ -153,8 +149,6 @@ main (int argc, char *argv[])
 		err (EXIT_FAILURE, "Can't write NDEF message");
 
 	    fclose (f);
-
-	    felica_disconnect (tags[i]);
 	}
 
 	freefare_free_tags (tags);

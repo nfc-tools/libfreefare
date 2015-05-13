@@ -51,10 +51,6 @@ main (void)
 	}
 
 	for (int i = 0; tags[i]; i++) {
-	    int r = felica_connect (tags[i]);
-	    if (r < 0)
-		errx (EXIT_FAILURE, "Cannot connect to FeliCa target");
-
 	    printf ("Dumping %s tag %s\n", freefare_get_tag_friendly_name (tags[i]), freefare_get_tag_uid (tags[i]));
 	    printf ("Number\tName\tData\n");
 
@@ -92,8 +88,6 @@ main (void)
 		}
 		printf ("\n");
 	    }
-
-	    felica_disconnect (tags[i]);
 	}
 
 	freefare_free_tags (tags);

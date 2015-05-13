@@ -70,9 +70,6 @@ void		 freefare_perror (FreefareTag tag, const char *string);
 #define FELICA_SC_RW 0x0009
 #define FELICA_SC_RO 0x000b
 
-int		 felica_connect (FreefareTag tag);
-int		 felica_disconnect (FreefareTag tag);
-
 ssize_t		 felica_read (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
 ssize_t		 felica_read_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
 ssize_t		 felica_write (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);

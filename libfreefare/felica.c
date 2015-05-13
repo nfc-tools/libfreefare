@@ -64,47 +64,9 @@ felica_tag_free (FreefareTag tag)
 
 
 
-int
-felica_connect (FreefareTag tag)
-{
-    ASSERT_INACTIVE (tag);
-    ASSERT_FELICA (tag);
-
-    nfc_target pnti;
-    nfc_modulation modulation = {
-	.nmt = NMT_FELICA,
-	.nbr = NBR_212,
-    };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.nti.nfi.abtId, 0, &pnti) >= 0) {
-	tag->active = 1;
-    } else {
-	errno = EIO;
-	return -1;
-    }
-    return 0;
-}
-
-int
-felica_disconnect (FreefareTag tag)
-{
-    ASSERT_ACTIVE (tag);
-    ASSERT_FELICA (tag);
-
-    if (nfc_initiator_deselect_target (tag->device) >= 0) {
-	tag->active = 0;
-    } else {
-	errno = EIO;
-	return -1;
-    }
-    return 0;
-}
-
-
-
 ssize_t
 felica_read_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length)
 {
-    ASSERT_ACTIVE (tag);
     ASSERT_FELICA (tag);
 
     assert (block_count <= MAX_BLOCK_COUNT);
@@ -158,7 +120,6 @@ felica_read (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, si
 ssize_t
 felica_write_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length)
 {
-    ASSERT_ACTIVE (tag);
     ASSERT_FELICA (tag);
 
     DEBUG_FUNCTION();
