@@ -57,6 +57,7 @@ main (int argc, char *argv[])
 	switch (ch) {
 	case 'o':
 	    ndef_file = optarg;
+	    break;
 	case '?':
 	    usage (argv[0]);
 	    exit (EXIT_FAILURE);
