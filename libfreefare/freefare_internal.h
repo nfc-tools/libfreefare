@@ -102,6 +102,8 @@ struct mad_sector_0x00;
 struct mad_sector_0x10;
 
 void		 nxp_crc (uint8_t *crc, const uint8_t value);
+FreefareTag	 felica_tag_new (void);
+void		 felica_tag_free (FreefareTag tag);
 FreefareTag	 mifare_classic_tag_new (void);
 void		 mifare_classic_tag_free (FreefareTag tag);
 FreefareTag	 mifare_desfire_tag_new (void);
@@ -189,6 +191,10 @@ struct freefare_tag {
     int active;
 };
 
+struct felica_tag {
+    struct freefare_tag __tag;
+};
+
 struct mifare_classic_tag {
     struct freefare_tag __tag;
 
@@ -262,6 +268,7 @@ struct mifare_ultralight_tag {
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
+#define ASSERT_FELICA(tag) do { if (tag->tag_info->type != FELICA) return errno = ENODEV, -1; } while (0)
 #define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != MIFARE_CLASSIC_1K) && (tag->tag_info->type != MIFARE_CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
 #define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != MIFARE_DESFIRE) return errno = ENODEV, -1; } while (0)
 #define IS_MIFARE_ULTRALIGHT_C(tag) (tag->tag_info->type == MIFARE_ULTRALIGHT_C)
@@ -274,6 +281,7 @@ struct mifare_ultralight_tag {
  * This macros are intended to provide a convenient way to cast abstract
  * FreefareTag structures to concrete Tags (e.g. MIFARE Classic tag).
  */
+#define FELICA(tag) ((struct felica_tag *) tag)
 #define MIFARE_CLASSIC(tag) ((struct mifare_classic_tag *) tag)
 #define MIFARE_DESFIRE(tag) ((struct mifare_desfire_tag *) tag)
 #define MIFARE_ULTRALIGHT(tag) ((struct mifare_ultralight_tag *) tag)

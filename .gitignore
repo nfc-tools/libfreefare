@@ -21,6 +21,8 @@ ltmain.sh
 missing
 stamp-h1
 test-driver
+examples/felica-lite-dump
+examples/felica-read-ndef
 examples/mifare-classic-format
 examples/mifare-classic-read-ndef
 examples/mifare-classic-write-ndef

@@ -1,7 +1,9 @@
 AM_CFLAGS = -I. -I$(top_srcdir)/libfreefare @LIBNFC_CFLAGS@
 AM_LDFLAGS = @LIBNFC_LIBS@
 
-bin_PROGRAMS = mifare-classic-format \
+bin_PROGRAMS = felica-lite-dump \
+	       felica-read-ndef \
+	       mifare-classic-format \
 	       mifare-classic-write-ndef \
 	       mifare-classic-read-ndef \
 	       mifare-desfire-access \
@@ -14,6 +16,12 @@ bin_PROGRAMS = mifare-classic-format \
 	       mifare-desfire-read-ndef \
 	       mifare-desfire-write-ndef \
 	       mifare-ultralight-info
+
+felica_lite_dump_SOURCES = felica-lite-dump.c
+felica_lite_dump_LDADD = $(top_builddir)/libfreefare/libfreefare.la
+
+felica_read_ndef_SOURCES = felica-read-ndef.c
+felica_read_ndef_LDADD = $(top_builddir)/libfreefare/libfreefare.la
 
 mifare_classic_format_SOURCES = mifare-classic-format.c
 mifare_classic_format_LDADD = $(top_builddir)/libfreefare/libfreefare.la

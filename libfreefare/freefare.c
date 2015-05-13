@@ -27,6 +27,7 @@
 #define NXP_MANUFACTURER_CODE 0x04
 
 struct supported_tag supported_tags[] = {
+    { FELICA,              "FeliCA",                       NMT_FELICA,    0x00, 0, 0, { 0x00 }, NULL },
     { MIFARE_CLASSIC_1K,   "Mifare Classic 1k",            NMT_ISO14443A, 0x08, 0, 0, { 0x00 }, NULL },
     { MIFARE_CLASSIC_1K,   "Mifare Classic 1k (Emulated)", NMT_ISO14443A, 0x28, 0, 0, { 0x00 }, NULL },
     { MIFARE_CLASSIC_1K,   "Mifare Classic 1k (Emulated)", NMT_ISO14443A, 0x68, 0, 0, { 0x00 }, NULL },
@@ -55,6 +56,11 @@ freefare_tag_new (nfc_device *device, nfc_target target)
 	if (target.nm.nmt != supported_tags[i].modulation_type)
 	    continue;
 
+	if (target.nm.nmt == NMT_FELICA) {
+	    tag_info = &(supported_tags[i]);
+	    found = true;
+	    break;
+	}
 	if ((target.nm.nmt == NMT_ISO14443A) && ((target.nti.nai.szUidLen == 4) || (target.nti.nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
 	    (target.nti.nai.btSak == supported_tags[i].SAK) &&
 	    (!supported_tags[i].ATS_min_length || ((target.nti.nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
@@ -73,6 +79,9 @@ freefare_tag_new (nfc_device *device, nfc_target target)
 
     /* Allocate memory for the found MIFARE target */
     switch (tag_info->type) {
+    case FELICA:
+	tag = felica_tag_new ();
+	break;
     case MIFARE_CLASSIC_1K:
     case MIFARE_CLASSIC_4K:
 	tag = mifare_classic_tag_new ();
@@ -162,6 +171,26 @@ freefare_get_tags (nfc_device *device)
 	}
     }
 
+    // Poll for a FELICA tag
+    modulation.nmt = NMT_FELICA;
+    modulation.nbr = NBR_424; // FIXME NBR_212 should also be supported
+    if ((candidates_count = nfc_initiator_list_passive_targets(device, modulation, candidates, MAX_CANDIDATES)) < 0)
+	return NULL;
+
+    for (int c = 0; c < candidates_count; c++) {
+	FreefareTag t;
+	if ((t = freefare_tag_new(device, candidates[c]))) {
+	    /* (Re)Allocate memory for the found FELICA targets array */
+	    FreefareTag *p = realloc (tags, (tag_count + 2) * sizeof (FreefareTag));
+	    if (p)
+		tags = p;
+	    else
+		return tags; // FAIL! Return what has been found so far.
+	    tags[tag_count++] = t;
+	    tags[tag_count] = NULL;
+	}
+    }
+
     return tags;
 }
 
@@ -189,10 +218,27 @@ freefare_get_tag_friendly_name (FreefareTag tag)
 char *
 freefare_get_tag_uid (FreefareTag tag)
 {
-    char *res;
-    if ((res = malloc (2 * tag->info.nti.nai.szUidLen + 1))) {
-	for (size_t i =0; i < tag->info.nti.nai.szUidLen; i++)
-	    snprintf (res + 2*i, 3, "%02x", tag->info.nti.nai.abtUid[i]);
+    char *res = NULL;
+    switch (tag->info.nm.nmt) {
+    case NMT_FELICA:
+	if ((res = malloc (16))) {
+	    for (size_t i = 0; i < 8; i++)
+		snprintf (res + 2*i, 3, "%02x", tag->info.nti.nfi.abtId[i]);
+	}
+	break;
+    case NMT_ISO14443A:
+	if ((res = malloc (2 * tag->info.nti.nai.szUidLen + 1))) {
+	    for (size_t i = 0; i < tag->info.nti.nai.szUidLen; i++)
+		snprintf (res + 2*i, 3, "%02x", tag->info.nti.nai.abtUid[i]);
+	}
+	break;
+    case NMT_DEP:
+    case NMT_ISO14443B2CT:
+    case NMT_ISO14443B2SR:
+    case NMT_ISO14443B:
+    case NMT_ISO14443BI:
+    case NMT_JEWEL:
+	res = strdup ("UNKNOWN");
     }
     return res;
 }
@@ -213,6 +259,9 @@ freefare_free_tag (FreefareTag tag)
 {
     if (tag) {
         switch (tag->tag_info->type) {
+	case FELICA:
+	    felica_tag_free (tag);
+	    break;
         case MIFARE_CLASSIC_1K:
         case MIFARE_CLASSIC_4K:
             mifare_classic_tag_free (tag);

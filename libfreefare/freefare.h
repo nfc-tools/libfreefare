@@ -29,6 +29,7 @@
 #endif // __cplusplus
 
 enum freefare_tag_type {
+    FELICA,
 //    MIFARE_MINI,
     MIFARE_CLASSIC_1K,
     MIFARE_CLASSIC_4K,
@@ -65,6 +66,17 @@ bool		 freefare_selected_tag_is_present(nfc_device *device);
 const char	*freefare_strerror (FreefareTag tag);
 int		 freefare_strerror_r (FreefareTag tag, char *buffer, size_t len);
 void		 freefare_perror (FreefareTag tag, const char *string);
+
+#define FELICA_SC_RW 0x0009
+#define FELICA_SC_RO 0x000b
+
+int		 felica_connect (FreefareTag tag);
+int		 felica_disconnect (FreefareTag tag);
+
+ssize_t		 felica_read (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
+ssize_t		 felica_read_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
+ssize_t		 felica_write (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
+ssize_t		 felica_write_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
 
 int		 mifare_ultralight_connect (FreefareTag tag);
 int		 mifare_ultralight_disconnect (FreefareTag tag);

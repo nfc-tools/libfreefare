@@ -8,21 +8,22 @@ If you are new to _libfreefare_ or the _nfc-tools_, you should collect useful in
 
 # Feature matrix
 ## Tags
-| Tag                | Status        |
-|:-------------------|:--------------|
-| MIFARE Classic 1k  | Supported     |
-| MIFARE Classic 4k  | Supported     |
-| MIFARE DESFire 2k  | Supported     |
-| MIFARE DESFire 4k  | Supported     |
-| MIFARE DESFire 8k  | Supported     |
-| MIFARE DESFire EV1 | Supported     |
-| MIFARE Mini        | Not supported |
-| MIFARE Plus S 2k   | Not supported |
-| MIFARE Plus S 4k   | Not supported |
-| MIFARE Plus X 2k   | Not supported |
-| MIFARE Plus X 4k   | Not supported |
-| MIFARE Ultralight  | Supported     |
-| MIFARE UltralightC | Supported     |
+| Tag                 | Status        |
+|:--------------------|:--------------|
+| FeliCa Lite         | Supported     |
+| MIFARE Classic 1k   | Supported     |
+| MIFARE Classic 4k   | Supported     |
+| MIFARE DESFire 2k   | Supported     |
+| MIFARE DESFire 4k   | Supported     |
+| MIFARE DESFire 8k   | Supported     |
+| MIFARE DESFire EV1  | Supported     |
+| MIFARE Mini         | Not supported |
+| MIFARE Plus S 2k    | Not supported |
+| MIFARE Plus S 4k    | Not supported |
+| MIFARE Plus X 2k    | Not supported |
+| MIFARE Plus X 4k    | Not supported |
+| MIFARE Ultralight   | Supported     |
+| MIFARE Ultralight C | Supported     |
 
 ## Specifications
 | Specification                         | Status    |

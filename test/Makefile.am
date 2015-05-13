@@ -11,6 +11,7 @@ TESTS = run-test.sh
 TESTS_ENVIRONMENT = NO_MAKE=yes CUTTER="$(CUTTER)"
 
 cutter_unit_test_libs = \
+			test_felica.la \
 			test_mad.la \
 			test_mifare_application.la \
 			test_mifare_classic.la \
@@ -32,6 +33,11 @@ check_LTLIBRARIES = $(cutter_unit_test_libs)
 endif
 
 AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
+
+test_felica_la_SOURCES = test_felica.c \
+			 felica_fixture.c \
+			 felica_fixture.h
+test_felica_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mad_la_SOURCES = test_mad.c
 test_mad_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
