@@ -51,7 +51,9 @@ main (void)
 	}
 
 	for (int i = 0; tags[i]; i++) {
-	    printf ("Dumping %s tag %s\n", freefare_get_tag_friendly_name (tags[i]), freefare_get_tag_uid (tags[i]));
+	    char *uid = freefare_get_tag_uid (tags[i]);
+	    printf ("Dumping %s tag %s\n", freefare_get_tag_friendly_name (tags[i]), uid);
+	    free (uid);
 	    printf ("Number\tName\tData\n");
 
 	    for (int block = 0x00; block < 0x0f; block++) {
