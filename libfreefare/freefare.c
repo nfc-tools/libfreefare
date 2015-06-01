@@ -221,7 +221,7 @@ freefare_get_tag_uid (FreefareTag tag)
     char *res = NULL;
     switch (tag->info.nm.nmt) {
     case NMT_FELICA:
-	if ((res = malloc (16))) {
+	if ((res = malloc (17))) {
 	    for (size_t i = 0; i < 8; i++)
 		snprintf (res + 2*i, 3, "%02x", tag->info.nti.nfi.abtId[i]);
 	}
