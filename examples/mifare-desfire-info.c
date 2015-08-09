@@ -132,7 +132,7 @@ main(int argc, char *argv[])
 		printf ("unknown\n");
 	    }
 
-	    printf ("Use random UID: %s\n", (strlen (tag_uid) / 2 == 4) ? "yes" : "no");
+	    printf ("Use random UID: %s\n", (strncmp (tag_uid, "08", 2) == 0) ? "yes" : "no");
 
 	    free (tag_uid);
 
