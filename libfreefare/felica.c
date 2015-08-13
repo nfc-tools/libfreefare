@@ -44,7 +44,7 @@
 inline static
 ssize_t felica_transceive (FreefareTag tag, uint8_t *data_in, uint8_t *data_out, size_t data_out_length)
 {
-    DEBUG_XFER (data_in, data_in_length, "===> ");
+    DEBUG_XFER (data_in, data_in[0], "===> ");
     ssize_t res = nfc_initiator_transceive_bytes (tag->device, data_in, data_in[0], data_out, data_out_length, 0);
     DEBUG_XFER (data_out, res, "<=== ");
     return res;
