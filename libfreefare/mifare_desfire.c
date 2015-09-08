@@ -812,7 +812,6 @@ mifare_desfire_get_application_ids (FreefareTag tag, MifareDESFireAID *aids[], s
 
     *count = (sn - 1)/3;
 
-    *aids = malloc (sn - 1);
     if (!(*aids = malloc ((*count + 1) * sizeof (MifareDESFireAID))))
 	return -1;
 
