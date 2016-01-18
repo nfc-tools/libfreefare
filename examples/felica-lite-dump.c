@@ -51,6 +51,9 @@ main (void)
 	}
 
 	for (int i = 0; tags[i]; i++) {
+	    if (FELICA != freefare_get_tag_type (tags[i]))
+		continue;
+
 	    char *uid = freefare_get_tag_uid (tags[i]);
 	    printf ("Dumping %s tag %s\n", freefare_get_tag_friendly_name (tags[i]), uid);
 	    free (uid);
