@@ -261,7 +261,6 @@ struct mifare_ultralight_tag {
     /* mifare_ultralight_read() reads 4 pages at a time (wrapping) */
     MifareUltralightPage cache[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT + 3];
     uint8_t cached_pages[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT];
-    bool is_ultralightc;
 };
 
 /*

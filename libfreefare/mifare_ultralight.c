@@ -121,7 +121,6 @@ _mifare_ultralightc_tag_new (nfc_device *device, nfc_target target, bool is_ultr
     FreefareTag tag;
 
     if ((tag = malloc (sizeof (struct mifare_ultralight_tag)))) {
-	MIFARE_ULTRALIGHT(tag)->is_ultralightc = is_ultralightc;
 	tag->type = (is_ultralightc) ? MIFARE_ULTRALIGHT_C : MIFARE_ULTRALIGHT;
 	tag->free_tag = mifare_ultralightc_tag_free;
 	tag->device = device;
@@ -351,13 +350,13 @@ mifare_ultralightc_authenticate (FreefareTag tag, const MifareDESFireKey key)
 bool
 is_mifare_ultralight (FreefareTag tag)
 {
-    return !MIFARE_ULTRALIGHT(tag)->is_ultralightc;
+    return tag->type == MIFARE_ULTRALIGHT;
 }
 
 bool
 is_mifare_ultralightc (FreefareTag tag)
 {
-    return MIFARE_ULTRALIGHT(tag)->is_ultralightc;
+    return tag->type == MIFARE_ULTRALIGHT_C;
 }
 
 /*
