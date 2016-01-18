@@ -9,3 +9,8 @@
     up and is now between 25 and 100 lines of code (depending of my refactoring
     mood).  The main drawbacks are poor readability, redundant code in the
     binary, debuggers don't cope well with macros, and by design it sucks.
+[ ] Refactor examples and have consistent behavior.
+    Dump to stdout unless -o is specified;
+    Read from stdin unless a file is specified;
+    Humanize dumps with a -h flag;
+    Target aquisition is the same in all examples;
