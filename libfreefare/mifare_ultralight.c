@@ -45,7 +45,7 @@
 
 #define ASSERT_VALID_PAGE(tag, page, mode_write) \
     do { \
-	if (IS_MIFARE_ULTRALIGHT_C(tag)) { \
+	if (is_mifare_ultralightc (tag)) { \
 	    if (mode_write) { \
 		if (page >= MIFARE_ULTRALIGHT_C_PAGE_COUNT) return errno = EINVAL, -1; \
 	    } else { \
@@ -89,6 +89,24 @@
 	} \
     } while (0)
 
+static bool
+taste (nfc_target target)
+{
+    return target.nm.nmt == NMT_ISO14443A && target.nti.nai.btSak == 0x00;
+}
+
+bool
+mifare_ultralight_taste (nfc_device *device, nfc_target target)
+{
+    return taste (target) && !is_mifare_ultralightc_on_reader (device, target.nti.nai);
+}
+
+bool
+mifare_ultralightc_taste (nfc_device *device, nfc_target target)
+{
+    return taste (target) && is_mifare_ultralightc_on_reader (device, target.nti.nai);
+}
+
 
 /*
  * Memory management functions.
@@ -100,7 +118,21 @@
 FreefareTag
 mifare_ultralight_tag_new (void)
 {
-    return malloc (sizeof (struct mifare_ultralight_tag));
+    FreefareTag res;
+    if ((res = malloc (sizeof (struct mifare_ultralight_tag)))) {
+	MIFARE_ULTRALIGHT(res)->is_ultralightc = false;
+    }
+    return res;
+}
+
+FreefareTag
+mifare_ultralightc_tag_new (void)
+{
+    FreefareTag res;
+    if ((res = malloc (sizeof (struct mifare_ultralight_tag)))) {
+	MIFARE_ULTRALIGHT(res)->is_ultralightc = true;
+    }
+    return res;
 }
 
 /*
@@ -110,6 +142,12 @@ void
 mifare_ultralight_tag_free (FreefareTag tag)
 {
     free (tag);
+}
+
+void
+mifare_ultralightc_tag_free (FreefareTag tag)
+{
+    mifare_ultralight_tag_free (tag);
 }
 
 
@@ -129,7 +167,6 @@ int
 mifare_ultralight_connect (FreefareTag tag)
 {
     ASSERT_INACTIVE (tag);
-    ASSERT_MIFARE_ULTRALIGHT (tag);
 
     nfc_target pnti;
     nfc_modulation modulation = {
@@ -154,7 +191,6 @@ int
 mifare_ultralight_disconnect (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_ULTRALIGHT (tag);
 
     if (nfc_initiator_deselect_target (tag->device) >= 0) {
 	tag->active = 0;
@@ -180,7 +216,6 @@ int
 mifare_ultralight_read (FreefareTag tag, MifareUltralightPageNumber page, MifareUltralightPage *data)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_ULTRALIGHT (tag);
     ASSERT_VALID_PAGE (tag, page, false);
 
     if (!MIFARE_ULTRALIGHT(tag)->cached_pages[page]) {
@@ -194,7 +229,7 @@ mifare_ultralight_read (FreefareTag tag, MifareUltralightPageNumber page, Mifare
 
 	/* Handle wrapped pages */
 	int iPageCount;
-	if (IS_MIFARE_ULTRALIGHT_C(tag)) {
+	if (is_mifare_ultralightc (tag)) {
 	    iPageCount = MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ;
 	} else {
 	    iPageCount = MIFARE_ULTRALIGHT_PAGE_COUNT;
@@ -220,7 +255,6 @@ int
 mifare_ultralight_write (FreefareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_ULTRALIGHT (tag);
     ASSERT_VALID_PAGE (tag, page, true);
 
     BUFFER_INIT (cmd, 6);
@@ -245,7 +279,6 @@ int
 mifare_ultralightc_authenticate (FreefareTag tag, const MifareDESFireKey key)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_ULTRALIGHT_C (tag);
 
     BUFFER_INIT (cmd1, 2);
     BUFFER_INIT (res, 9);
@@ -304,6 +337,18 @@ mifare_ultralightc_authenticate (FreefareTag tag, const MifareDESFireKey key)
     }
     // XXX Should we store the state "authenticated" in the tag struct??
     return 0;
+}
+
+bool
+is_mifare_ultralight (FreefareTag tag)
+{
+    return !MIFARE_ULTRALIGHT(tag)->is_ultralightc;
+}
+
+bool
+is_mifare_ultralightc (FreefareTag tag)
+{
+    return MIFARE_ULTRALIGHT(tag)->is_ultralightc;
 }
 
 /*

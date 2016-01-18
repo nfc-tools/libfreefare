@@ -75,7 +75,7 @@ test_mifare_ultralight_invalid_page (void)
     MifareUltralightPage page = { 0x00, 0x00, 0x00, 0x00 };
 
     int invalid_page;
-    if (IS_MIFARE_ULTRALIGHT_C (tag)) {
+    if (is_mifare_ultralightc (tag)) {
       invalid_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT;
     } else {
       invalid_page = MIFARE_ULTRALIGHT_PAGE_COUNT;
@@ -130,7 +130,7 @@ test_mifare_ultralight_cache_wrap (void)
     int res;
     MifareUltralightPage page;
     int last_page;
-    if (IS_MIFARE_ULTRALIGHT_C (tag)) {
+    if (is_mifare_ultralightc (tag)) {
       // Last 4 blocks are for 3DES key and cannot be read, read will wrap from 0x2b
       last_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ -1;
       // Actually engineering samples require auth to read above page 0x28 so we skip the test entirely

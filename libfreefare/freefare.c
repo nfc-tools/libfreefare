@@ -92,8 +92,10 @@ freefare_tag_new (nfc_device *device, nfc_target target)
 	tag = mifare_desfire_tag_new ();
 	break;
     case MIFARE_ULTRALIGHT:
-    case MIFARE_ULTRALIGHT_C:
 	tag = mifare_ultralight_tag_new ();
+	break;
+    case MIFARE_ULTRALIGHT_C:
+	tag = mifare_ultralightc_tag_new ();
 	break;
     }
 

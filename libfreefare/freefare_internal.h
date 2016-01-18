@@ -110,6 +110,8 @@ FreefareTag	 mifare_desfire_tag_new (void);
 void		 mifare_desfire_tag_free (FreefareTag tags);
 FreefareTag	 mifare_ultralight_tag_new (void);
 void		 mifare_ultralight_tag_free (FreefareTag tag);
+FreefareTag	 mifare_ultralightc_tag_new (void);
+void		 mifare_ultralightc_tag_free (FreefareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
 
@@ -257,6 +259,7 @@ struct mifare_ultralight_tag {
     /* mifare_ultralight_read() reads 4 pages at a time (wrapping) */
     MifareUltralightPage cache[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT + 3];
     uint8_t cached_pages[MIFARE_ULTRALIGHT_MAX_PAGE_COUNT];
+    bool is_ultralightc;
 };
 
 /*
@@ -267,13 +270,6 @@ struct mifare_ultralight_tag {
  */
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
-
-#define ASSERT_FELICA(tag) do { if (tag->tag_info->type != FELICA) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != MIFARE_CLASSIC_1K) && (tag->tag_info->type != MIFARE_CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != MIFARE_DESFIRE) return errno = ENODEV, -1; } while (0)
-#define IS_MIFARE_ULTRALIGHT_C(tag) (tag->tag_info->type == MIFARE_ULTRALIGHT_C)
-#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if ((tag->tag_info->type != MIFARE_ULTRALIGHT) && (! IS_MIFARE_ULTRALIGHT_C(tag))) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_ULTRALIGHT_C(tag) do { if (! IS_MIFARE_ULTRALIGHT_C(tag)) return errno = ENODEV, -1; } while (0)
 
 /* 
  * FreefareTag cast macros

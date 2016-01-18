@@ -67,6 +67,10 @@ const char	*freefare_strerror (FreefareTag tag);
 int		 freefare_strerror_r (FreefareTag tag, char *buffer, size_t len);
 void		 freefare_perror (FreefareTag tag, const char *string);
 
+
+
+bool		 felica_taste (nfc_device *device, nfc_target target);
+
 #define FELICA_SC_RW 0x0009
 #define FELICA_SC_RO 0x000b
 
@@ -75,6 +79,11 @@ ssize_t		 felica_read_ex (FreefareTag tag, uint16_t service, uint8_t block_count
 ssize_t		 felica_write (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
 ssize_t		 felica_write_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
 
+
+
+bool		 mifare_ultralight_taste (nfc_device *device, nfc_target target);
+bool		 mifare_ultralightc_taste (nfc_device *device, nfc_target target);
+
 int		 mifare_ultralight_connect (FreefareTag tag);
 int		 mifare_ultralight_disconnect (FreefareTag tag);
 
@@ -82,7 +91,13 @@ int		 mifare_ultralight_read (FreefareTag tag, const MifareUltralightPageNumber 
 int		 mifare_ultralight_write (FreefareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
 
 int		 mifare_ultralightc_authenticate (FreefareTag tag, const MifareDESFireKey key);
+bool		 is_mifare_ultralight (FreefareTag tag);
+bool		 is_mifare_ultralightc (FreefareTag tag);
 bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai);
+
+
+
+bool		 mifare_classic_taste (nfc_device *device, nfc_target target);
 
 typedef unsigned char MifareClassicBlock[16];
 
@@ -184,6 +199,10 @@ ssize_t		 mifare_application_write (FreefareTag tag, Mad mad, const MadAid aid, 
 int		 mifare_application_free (Mad mad, const MadAid aid);
 
 MifareClassicSectorNumber *mifare_application_find (Mad mad, const MadAid aid);
+
+
+
+bool		 mifare_desfire_taste (nfc_device *device, nfc_target target);
 
 /* File types */
 
