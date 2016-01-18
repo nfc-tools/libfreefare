@@ -97,7 +97,8 @@ bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info n
 
 
 
-bool		 mifare_classic_taste (nfc_device *device, nfc_target target);
+bool		 mifare_classic1k_taste (nfc_device *device, nfc_target target);
+bool		 mifare_classic4k_taste (nfc_device *device, nfc_target target);
 
 typedef unsigned char MifareClassicBlock[16];
 

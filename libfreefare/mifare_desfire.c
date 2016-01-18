@@ -239,6 +239,16 @@ le24toh (uint8_t data[3])
     return (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
+bool
+mifare_desfire_taste (nfc_device *device, nfc_target target)
+{
+    (void) device;
+    return target.nm.nmt == NMT_ISO14443A &&
+	 target.nti.nai.btSak == 0x20 &&
+	 target.nti.nai.szAtsLen >= 5 &&
+	 memcmp (target.nti.nai.abtAts, "\x75\x77\x81\x02", 4) == 0;
+}
+
 
 /*
  * Memory management functions.
@@ -248,7 +258,7 @@ le24toh (uint8_t data[3])
  * Allocates and initialize a MIFARE DESFire tag.
  */
 FreefareTag
-mifare_desfire_tag_new (void)
+mifare_desfire_tag_new (nfc_device *device, nfc_target target)
 {
     FreefareTag tag;
     if ((tag= malloc (sizeof (struct mifare_desfire_tag)))) {
@@ -257,6 +267,11 @@ mifare_desfire_tag_new (void)
 	MIFARE_DESFIRE (tag)->session_key = NULL;
 	MIFARE_DESFIRE (tag)->crypto_buffer = NULL;
 	MIFARE_DESFIRE (tag)->crypto_buffer_size = 0;
+	tag->type = MIFARE_DESFIRE;
+	tag->free_tag = mifare_desfire_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
     }
     return tag;
 }

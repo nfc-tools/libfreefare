@@ -194,7 +194,7 @@ int		 get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber blo
  */
 
 bool
-mifare_classic_taste (nfc_device *device, nfc_target target)
+mifare_classic1k_taste (nfc_device *device, nfc_target target)
 {
     (void) device;
     return target.nm.nmt == NMT_ISO14443A &&
@@ -202,8 +202,18 @@ mifare_classic_taste (nfc_device *device, nfc_target target)
 	 target.nti.nai.btSak == 0x08 ||
 	 target.nti.nai.btSak == 0x28 ||
 	 target.nti.nai.btSak == 0x68 ||
-	 target.nti.nai.btSak == 0x88 ||
-	 target.nti.nai.btSak == 0x18
+	 target.nti.nai.btSak == 0x88
+	);
+}
+
+bool
+mifare_classic4k_taste (nfc_device *device, nfc_target target)
+{
+    (void) device;
+    return target.nm.nmt == NMT_ISO14443A &&
+	(
+	 target.nti.nai.btSak == 0x18 ||
+	 target.nti.nai.btSak == 0x38
 	);
 }
 
@@ -211,10 +221,32 @@ mifare_classic_taste (nfc_device *device, nfc_target target)
  * Allocates and initialize a MIFARE Classic tag.
  */
 
-FreefareTag
-mifare_classic_tag_new (void)
+static FreefareTag
+_mifare_classic_tag_new (nfc_device *device, nfc_target target, int tag_type)
 {
-    return malloc (sizeof (struct mifare_classic_tag));
+    FreefareTag tag;
+
+    if ((tag = malloc (sizeof (struct mifare_classic_tag)))) {
+	tag->type = tag_type;
+	tag->free_tag = mifare_classic_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
+    }
+
+    return tag;
+}
+
+FreefareTag
+mifare_classic1k_tag_new (nfc_device *device, nfc_target target)
+{
+    return _mifare_classic_tag_new (device, target, MIFARE_CLASSIC_1K);
+}
+
+FreefareTag
+mifare_classic4k_tag_new (nfc_device *device, nfc_target target)
+{
+    return _mifare_classic_tag_new (device, target, MIFARE_CLASSIC_4K);
 }
 
 /*

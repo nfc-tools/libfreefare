@@ -115,24 +115,33 @@ mifare_ultralightc_taste (nfc_device *device, nfc_target target)
 /*
  * Allocates and initialize a MIFARE UltraLight tag.
  */
-FreefareTag
-mifare_ultralight_tag_new (void)
+static FreefareTag
+_mifare_ultralightc_tag_new (nfc_device *device, nfc_target target, bool is_ultralightc)
 {
-    FreefareTag res;
-    if ((res = malloc (sizeof (struct mifare_ultralight_tag)))) {
-	MIFARE_ULTRALIGHT(res)->is_ultralightc = false;
+    FreefareTag tag;
+
+    if ((tag = malloc (sizeof (struct mifare_ultralight_tag)))) {
+	MIFARE_ULTRALIGHT(tag)->is_ultralightc = is_ultralightc;
+	tag->type = (is_ultralightc) ? MIFARE_ULTRALIGHT_C : MIFARE_ULTRALIGHT;
+	tag->free_tag = mifare_ultralightc_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
     }
-    return res;
+
+    return tag;
 }
 
 FreefareTag
-mifare_ultralightc_tag_new (void)
+mifare_ultralight_tag_new (nfc_device *device, nfc_target target)
 {
-    FreefareTag res;
-    if ((res = malloc (sizeof (struct mifare_ultralight_tag)))) {
-	MIFARE_ULTRALIGHT(res)->is_ultralightc = true;
-    }
-    return res;
+    return _mifare_ultralightc_tag_new (device, target, false);
+}
+
+FreefareTag
+mifare_ultralightc_tag_new (nfc_device *device, nfc_target target)
+{
+    return _mifare_ultralightc_tag_new (device, target, true);
 }
 
 /*

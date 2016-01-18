@@ -58,9 +58,19 @@ felica_taste (nfc_device *device, nfc_target target)
 }
 
 FreefareTag
-felica_tag_new (void)
+felica_tag_new (nfc_device *device, nfc_target target)
 {
-    return malloc (sizeof (struct felica_tag));
+    FreefareTag tag;
+
+    if ((tag = malloc (sizeof (struct felica_tag)))) {
+	tag->type = FELICA;
+	tag->free_tag = felica_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
+    }
+
+    return tag;
 }
 
 void

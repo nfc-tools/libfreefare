@@ -102,15 +102,16 @@ struct mad_sector_0x00;
 struct mad_sector_0x10;
 
 void		 nxp_crc (uint8_t *crc, const uint8_t value);
-FreefareTag	 felica_tag_new (void);
+FreefareTag	 felica_tag_new (nfc_device *device, nfc_target target);
 void		 felica_tag_free (FreefareTag tag);
-FreefareTag	 mifare_classic_tag_new (void);
+FreefareTag	 mifare_classic1k_tag_new (nfc_device *device, nfc_target target);
+FreefareTag	 mifare_classic4k_tag_new (nfc_device *device, nfc_target target);
 void		 mifare_classic_tag_free (FreefareTag tag);
-FreefareTag	 mifare_desfire_tag_new (void);
+FreefareTag	 mifare_desfire_tag_new (nfc_device *device, nfc_target target);
 void		 mifare_desfire_tag_free (FreefareTag tags);
-FreefareTag	 mifare_ultralight_tag_new (void);
+FreefareTag	 mifare_ultralight_tag_new (nfc_device *device, nfc_target target);
 void		 mifare_ultralight_tag_free (FreefareTag tag);
-FreefareTag	 mifare_ultralightc_tag_new (void);
+FreefareTag	 mifare_ultralightc_tag_new (nfc_device *device, nfc_target target);
 void		 mifare_ultralightc_tag_free (FreefareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
@@ -189,8 +190,9 @@ struct supported_tag {
 struct freefare_tag {
     nfc_device *device;
     nfc_target info;
-    const struct supported_tag *tag_info;
+    int type;
     int active;
+    void (*free_tag) (FreefareTag tag);
 };
 
 struct felica_tag {

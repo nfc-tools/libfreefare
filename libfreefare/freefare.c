@@ -49,67 +49,21 @@ struct supported_tag supported_tags[] = {
 FreefareTag
 freefare_tag_new (nfc_device *device, nfc_target target)
 {
-    bool found = false;
-    struct supported_tag *tag_info;
-    FreefareTag tag;
+    FreefareTag tag = NULL;
 
-    /* Ensure the target is supported */
-    for (size_t i = 0; i < sizeof (supported_tags) / sizeof (struct supported_tag); i++) {
-	if (target.nm.nmt != supported_tags[i].modulation_type)
-	    continue;
-
-	if (target.nm.nmt == NMT_FELICA) {
-	    tag_info = &(supported_tags[i]);
-	    found = true;
-	    break;
-	}
-	if ((target.nm.nmt == NMT_ISO14443A) && ((target.nti.nai.szUidLen == 4) || (target.nti.nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
-	    (target.nti.nai.btSak == supported_tags[i].SAK) &&
-	    (!supported_tags[i].ATS_min_length || ((target.nti.nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
-						   (0 == memcmp (target.nti.nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length)))) &&
-	    ((supported_tags[i].check_tag_on_reader == NULL) ||
-	     supported_tags[i].check_tag_on_reader(device, target.nti.nai))) {
-
-	    tag_info = &(supported_tags[i]);
-	    found = true;
-	    break;
-	}
+    if (felica_taste (device, target)) {
+	tag = felica_tag_new (device, target);
+    } else if (mifare_classic1k_taste (device, target)) {
+	tag = mifare_classic1k_tag_new (device, target);
+    } else if (mifare_classic4k_taste (device, target)) {
+	tag = mifare_classic4k_tag_new (device, target);
+    } else if (mifare_desfire_taste (device, target)) {
+	tag = mifare_desfire_tag_new (device, target);
+    } else if (mifare_ultralightc_taste (device, target)) {
+	tag = mifare_ultralightc_tag_new (device, target);
+    } else if (mifare_ultralight_taste (device, target)) {
+	tag = mifare_ultralight_tag_new (device, target);
     }
-
-    if (!found)
-	return NULL;
-
-    /* Allocate memory for the found MIFARE target */
-    switch (tag_info->type) {
-    case FELICA:
-	tag = felica_tag_new ();
-	break;
-    case MIFARE_CLASSIC_1K:
-    case MIFARE_CLASSIC_4K:
-	tag = mifare_classic_tag_new ();
-	break;
-    case MIFARE_DESFIRE:
-	tag = mifare_desfire_tag_new ();
-	break;
-    case MIFARE_ULTRALIGHT:
-	tag = mifare_ultralight_tag_new ();
-	break;
-    case MIFARE_ULTRALIGHT_C:
-	tag = mifare_ultralightc_tag_new ();
-	break;
-    }
-
-    if (!tag)
-	return NULL;
-
-    /*
-     * Initialize common fields
-     * (Target specific fields are initialized in mifare_*_tag_new())
-     */
-    tag->device = device;
-    tag->info = target;
-    tag->active = 0;
-    tag->tag_info = tag_info;
 
     return tag;
 }
@@ -204,7 +158,7 @@ freefare_get_tags (nfc_device *device)
 enum freefare_tag_type
 freefare_get_tag_type (FreefareTag tag)
 {
-    return tag->tag_info->type;
+    return tag->type;
 }
 
 /*
@@ -213,7 +167,22 @@ freefare_get_tag_type (FreefareTag tag)
 const char *
 freefare_get_tag_friendly_name (FreefareTag tag)
 {
-    return tag->tag_info->friendly_name;
+    switch (tag->type) {
+    case FELICA:
+	return "FeliCA";
+    case MIFARE_CLASSIC_1K:
+	return "Mifare Classic 1k";
+    case MIFARE_CLASSIC_4K:
+	return "Mifare Classic 4k";
+    case MIFARE_DESFIRE:
+	return "Mifare DESFire";
+    case MIFARE_ULTRALIGHT_C:
+	return "Mifare UltraLightC";
+    case MIFARE_ULTRALIGHT:
+	return "Mifare UltraLight";
+    default:
+	return "UNKNOWN";
+    }
 }
 
 /*
@@ -262,22 +231,7 @@ void
 freefare_free_tag (FreefareTag tag)
 {
     if (tag) {
-        switch (tag->tag_info->type) {
-	case FELICA:
-	    felica_tag_free (tag);
-	    break;
-        case MIFARE_CLASSIC_1K:
-        case MIFARE_CLASSIC_4K:
-            mifare_classic_tag_free (tag);
-            break;
-        case MIFARE_DESFIRE:
-            mifare_desfire_tag_free (tag);
-            break;
-        case MIFARE_ULTRALIGHT:
-        case MIFARE_ULTRALIGHT_C:
-            mifare_ultralight_tag_free (tag);
-            break;
-        }
+	tag->free_tag (tag);
     }
 }
 
@@ -288,7 +242,7 @@ freefare_strerror (FreefareTag tag)
     if (nfc_device_get_last_error (tag->device) < 0) {
       p = nfc_strerror (tag->device);
     } else {
-      if (tag->tag_info->type == MIFARE_DESFIRE) {
+      if (tag->type == MIFARE_DESFIRE) {
         if (MIFARE_DESFIRE (tag)->last_pcd_error) {
           p = mifare_desfire_error_lookup (MIFARE_DESFIRE (tag)->last_pcd_error);
         } else if (MIFARE_DESFIRE (tag)->last_picc_error) {
