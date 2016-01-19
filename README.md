@@ -1,5 +1,7 @@
 # Introduction
 
+[![Join the chat at https://gitter.im/nfc-tools/libfreefare](https://badges.gitter.im/nfc-tools/libfreefare.svg)](https://gitter.im/nfc-tools/libfreefare?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 The _libfreefare_ project provides a convenient API for MIFARE card manipulations.
 
 It is part of the _nfc-tools_, you can find more info on them on the [nfc-tools wiki](http://nfc-tools.org/).
