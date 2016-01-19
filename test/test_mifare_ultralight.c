@@ -75,7 +75,7 @@ test_mifare_ultralight_invalid_page (void)
     MifareUltralightPage page = { 0x00, 0x00, 0x00, 0x00 };
 
     int invalid_page;
-    if (IS_MIFARE_ULTRALIGHT_C (tag)) {
+    if (is_mifare_ultralightc (tag)) {
       invalid_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT;
     } else {
       invalid_page = MIFARE_ULTRALIGHT_PAGE_COUNT;
@@ -130,7 +130,7 @@ test_mifare_ultralight_cache_wrap (void)
     int res;
     MifareUltralightPage page;
     int last_page;
-    if (IS_MIFARE_ULTRALIGHT_C (tag)) {
+    if (is_mifare_ultralightc (tag)) {
       // Last 4 blocks are for 3DES key and cannot be read, read will wrap from 0x2b
       last_page = MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ -1;
       // Actually engineering samples require auth to read above page 0x28 so we skip the test entirely
@@ -178,7 +178,7 @@ test_mifare_ultralightc_authenticate (void)
     int res;
     MifareDESFireKey key;
 
-    if (tag->tag_info->type == MIFARE_ULTRALIGHT_C) {
+    if (is_mifare_ultralightc (tag)) {
 	uint8_t key1_3des_data[16] = { 0x49, 0x45, 0x4D, 0x4B, 0x41, 0x45, 0x52, 0x42, 0x21, 0x4E, 0x41, 0x43, 0x55, 0x4F, 0x59, 0x46 };
 	key = mifare_desfire_3des_key_new (key1_3des_data);
 	res = mifare_ultralightc_authenticate (tag, key);

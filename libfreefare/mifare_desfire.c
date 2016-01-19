@@ -239,6 +239,16 @@ le24toh (uint8_t data[3])
     return (data[2] << 16) | (data[1] << 8) | data[0];
 }
 
+bool
+mifare_desfire_taste (nfc_device *device, nfc_target target)
+{
+    (void) device;
+    return target.nm.nmt == NMT_ISO14443A &&
+	 target.nti.nai.btSak == 0x20 &&
+	 target.nti.nai.szAtsLen >= 5 &&
+	 memcmp (target.nti.nai.abtAts, "\x75\x77\x81\x02", 4) == 0;
+}
+
 
 /*
  * Memory management functions.
@@ -248,7 +258,7 @@ le24toh (uint8_t data[3])
  * Allocates and initialize a MIFARE DESFire tag.
  */
 FreefareTag
-mifare_desfire_tag_new (void)
+mifare_desfire_tag_new (nfc_device *device, nfc_target target)
 {
     FreefareTag tag;
     if ((tag= malloc (sizeof (struct mifare_desfire_tag)))) {
@@ -257,6 +267,11 @@ mifare_desfire_tag_new (void)
 	MIFARE_DESFIRE (tag)->session_key = NULL;
 	MIFARE_DESFIRE (tag)->crypto_buffer = NULL;
 	MIFARE_DESFIRE (tag)->crypto_buffer_size = 0;
+	tag->type = MIFARE_DESFIRE;
+	tag->free_tag = mifare_desfire_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
     }
     return tag;
 }
@@ -288,7 +303,6 @@ int
 mifare_desfire_connect (FreefareTag tag)
 {
     ASSERT_INACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     nfc_target pnti;
     nfc_modulation modulation = {
@@ -332,7 +346,6 @@ int
 mifare_desfire_disconnect (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     free (MIFARE_DESFIRE (tag)->session_key);
     MIFARE_DESFIRE(tag)->session_key = NULL;
@@ -353,7 +366,6 @@ static int
 authenticate (FreefareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     memset (MIFARE_DESFIRE (tag)->ivect, 0, MAX_CRYPTO_BLOCK_SIZE);
 
@@ -471,7 +483,6 @@ int
 mifare_desfire_change_key_settings (FreefareTag tag, uint8_t settings)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_AUTHENTICATED (tag);
 
     BUFFER_INIT (cmd, 9 + CMAC_LENGTH);
@@ -497,7 +508,6 @@ int
 mifare_desfire_get_key_settings (FreefareTag tag, uint8_t *settings, uint8_t *max_keys)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1);
     BUFFER_INIT (res, 3 + CMAC_LENGTH);
@@ -526,7 +536,6 @@ int
 mifare_desfire_change_key (FreefareTag tag, uint8_t key_no, MifareDESFireKey new_key, MifareDESFireKey old_key)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_AUTHENTICATED (tag);
 
     BUFFER_INIT (cmd, 42);
@@ -640,7 +649,6 @@ int
 mifare_desfire_get_key_version (FreefareTag tag, uint8_t key_no, uint8_t *version)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     ASSERT_NOT_NULL (version);
 
@@ -671,7 +679,6 @@ static int
 create_application (FreefareTag tag, MifareDESFireAID aid, uint8_t settings1, uint8_t settings2, int want_iso_application, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 22);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -743,7 +750,6 @@ int
 mifare_desfire_delete_application (FreefareTag tag, MifareDESFireAID aid)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 4 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -778,7 +784,6 @@ int
 mifare_desfire_get_application_ids (FreefareTag tag, MifareDESFireAID *aids[], size_t *count)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1);
     BUFFER_INIT (res, MAX_RAPDU_SIZE);
@@ -833,7 +838,6 @@ int
 mifare_desfire_get_df_names (FreefareTag tag, MifareDESFireDF *dfs[], size_t *count)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     *count = 0;
     *dfs = NULL;
@@ -882,7 +886,6 @@ int
 mifare_desfire_select_application (FreefareTag tag, MifareDESFireAID aid)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     struct mifare_desfire_aid null_aid = { .data = { 0x00, 0x00, 0x00 } };
 
@@ -921,7 +924,6 @@ int
 mifare_desfire_format_picc (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_AUTHENTICATED (tag);
 
     BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
@@ -953,7 +955,6 @@ int
 mifare_desfire_get_version (FreefareTag tag, struct mifare_desfire_version_info *version_info)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     ASSERT_NOT_NULL (version_info);
 
@@ -991,7 +992,6 @@ int
 mifare_desfire_free_mem (FreefareTag tag, uint32_t *size)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     ASSERT_NOT_NULL (size);
 
@@ -1019,7 +1019,6 @@ int
 mifare_desfire_set_configuration (FreefareTag tag, bool disable_format, bool enable_random_uid)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 10);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1045,7 +1044,6 @@ int
 mifare_desfire_set_default_key (FreefareTag tag, MifareDESFireKey key)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 34);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1085,7 +1083,6 @@ int
 mifare_desfire_set_ats (FreefareTag tag, uint8_t *ats)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 34);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1122,7 +1119,6 @@ int
 mifare_desfire_get_card_uid (FreefareTag tag, char **uid)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     ASSERT_NOT_NULL (uid);
 
@@ -1160,7 +1156,6 @@ int
 mifare_desfire_get_file_ids (FreefareTag tag, uint8_t **files, size_t *count)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
     BUFFER_INIT (res, 16 + CMAC_LENGTH);
@@ -1193,7 +1188,6 @@ int
 mifare_desfire_get_iso_file_ids (FreefareTag tag, uint16_t **files, size_t *count)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1);
     BUFFER_INIT (res, 2*27 + 1);
@@ -1241,7 +1235,6 @@ int
 mifare_desfire_get_file_settings (FreefareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     if (cached_file_settings_current[file_no]) {
 	*settings = cached_file_settings[file_no];
@@ -1300,7 +1293,6 @@ int
 mifare_desfire_change_file_settings (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     struct mifare_desfire_file_settings settings;
     int res = mifare_desfire_get_file_settings (tag, file_no, &settings);
@@ -1353,7 +1345,6 @@ static int
 create_file1 (FreefareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id,  uint8_t communication_settings, uint16_t access_rights, uint32_t file_size)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1409,7 +1400,6 @@ int
 mifare_desfire_create_value_file (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, int32_t lower_limit, int32_t upper_limit, int32_t value, uint8_t limited_credit_enable)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 18 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1442,7 +1432,6 @@ static int
 create_file2 (FreefareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 11 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1499,7 +1488,6 @@ int
 mifare_desfire_delete_file (FreefareTag tag, uint8_t file_no)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1531,7 +1519,6 @@ read_data (FreefareTag tag, uint8_t command, uint8_t file_no, off_t offset, size
     size_t bytes_received = 0;
 
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 8);
@@ -1654,7 +1641,6 @@ write_data (FreefareTag tag, uint8_t command, uint8_t file_no, off_t offset, siz
     size_t bytes_send = 0;
 
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 8 + length + CMAC_LENGTH);
@@ -1734,7 +1720,6 @@ mifare_desfire_get_value_ex (FreefareTag tag, uint8_t file_no, int32_t *value, i
 	return errno = EINVAL, -1;
 
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
@@ -1768,7 +1753,6 @@ int
 mifare_desfire_credit_ex (FreefareTag tag, uint8_t file_no, int32_t amount, int cs)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
@@ -1801,7 +1785,6 @@ int
 mifare_desfire_debit_ex (FreefareTag tag, uint8_t file_no, int32_t amount, int cs)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
@@ -1834,7 +1817,6 @@ int
 mifare_desfire_limited_credit_ex (FreefareTag tag, uint8_t file_no, int32_t amount, int cs)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
     ASSERT_CS (cs);
 
     BUFFER_INIT (cmd, 10 + CMAC_LENGTH);
@@ -1885,7 +1867,6 @@ int
 mifare_desfire_clear_record_file (FreefareTag tag, uint8_t file_no)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 2 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1912,7 +1893,6 @@ int
 mifare_desfire_commit_transaction (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);
@@ -1936,7 +1916,6 @@ int
 mifare_desfire_abort_transaction (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_DESFIRE (tag);
 
     BUFFER_INIT (cmd, 1 + CMAC_LENGTH);
     BUFFER_INIT (res, 1 + CMAC_LENGTH);

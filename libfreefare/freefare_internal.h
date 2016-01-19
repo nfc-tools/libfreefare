@@ -102,14 +102,6 @@ struct mad_sector_0x00;
 struct mad_sector_0x10;
 
 void		 nxp_crc (uint8_t *crc, const uint8_t value);
-FreefareTag	 felica_tag_new (void);
-void		 felica_tag_free (FreefareTag tag);
-FreefareTag	 mifare_classic_tag_new (void);
-void		 mifare_classic_tag_free (FreefareTag tag);
-FreefareTag	 mifare_desfire_tag_new (void);
-void		 mifare_desfire_tag_free (FreefareTag tags);
-FreefareTag	 mifare_ultralight_tag_new (void);
-void		 mifare_ultralight_tag_free (FreefareTag tag);
 uint8_t		 sector_0x00_crc8 (Mad mad);
 uint8_t		 sector_0x10_crc8 (Mad mad);
 
@@ -165,17 +157,6 @@ void		*assert_crypto_buffer_size (FreefareTag tag, size_t nbytes);
 // Max PAGE_COUNT of the Ultralight Family:
 #define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
 
-struct supported_tag {
-    enum freefare_tag_type type;
-    const char *friendly_name;
-    uint8_t modulation_type;
-    uint8_t SAK;
-    uint8_t ATS_min_length;
-    uint8_t ATS_compare_length;
-    uint8_t ATS[5];
-    bool (*check_tag_on_reader) (nfc_device *, nfc_iso14443a_info);
-};
-
 /*
  * This structure is common to all supported MIFARE targets but shall not be
  * used directly (it's some kind of abstract class).  All members in this
@@ -187,8 +168,9 @@ struct supported_tag {
 struct freefare_tag {
     nfc_device *device;
     nfc_target info;
-    const struct supported_tag *tag_info;
+    int type;
     int active;
+    void (*free_tag) (FreefareTag tag);
 };
 
 struct felica_tag {
@@ -267,13 +249,6 @@ struct mifare_ultralight_tag {
  */
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
-
-#define ASSERT_FELICA(tag) do { if (tag->tag_info->type != FELICA) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_CLASSIC(tag) do { if ((tag->tag_info->type != MIFARE_CLASSIC_1K) && (tag->tag_info->type != MIFARE_CLASSIC_4K)) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_DESFIRE(tag) do { if (tag->tag_info->type != MIFARE_DESFIRE) return errno = ENODEV, -1; } while (0)
-#define IS_MIFARE_ULTRALIGHT_C(tag) (tag->tag_info->type == MIFARE_ULTRALIGHT_C)
-#define ASSERT_MIFARE_ULTRALIGHT(tag) do { if ((tag->tag_info->type != MIFARE_ULTRALIGHT) && (! IS_MIFARE_ULTRALIGHT_C(tag))) return errno = ENODEV, -1; } while (0)
-#define ASSERT_MIFARE_ULTRALIGHT_C(tag) do { if (! IS_MIFARE_ULTRALIGHT_C(tag)) return errno = ENODEV, -1; } while (0)
 
 /* 
  * FreefareTag cast macros

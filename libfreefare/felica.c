@@ -50,10 +50,27 @@ ssize_t felica_transceive (FreefareTag tag, uint8_t *data_in, uint8_t *data_out,
     return res;
 }
 
-FreefareTag
-felica_tag_new (void)
+bool
+felica_taste (nfc_device *device, nfc_target target)
 {
-    return malloc (sizeof (struct felica_tag));
+    (void) device;
+    return target.nm.nmt == NMT_FELICA;
+}
+
+FreefareTag
+felica_tag_new (nfc_device *device, nfc_target target)
+{
+    FreefareTag tag;
+
+    if ((tag = malloc (sizeof (struct felica_tag)))) {
+	tag->type = FELICA;
+	tag->free_tag = felica_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
+    }
+
+    return tag;
 }
 
 void
@@ -67,8 +84,6 @@ felica_tag_free (FreefareTag tag)
 ssize_t
 felica_read_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length)
 {
-    ASSERT_FELICA (tag);
-
     assert (block_count <= MAX_BLOCK_COUNT);
     assert (length == 16 * block_count);
 
@@ -120,8 +135,6 @@ felica_read (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, si
 ssize_t
 felica_write_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length)
 {
-    ASSERT_FELICA (tag);
-
     DEBUG_FUNCTION();
 
     assert (block_count <= MAX_BLOCK_COUNT);

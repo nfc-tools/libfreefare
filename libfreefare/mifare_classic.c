@@ -193,14 +193,60 @@ int		 get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber blo
  * Memory management functions.
  */
 
+bool
+mifare_classic1k_taste (nfc_device *device, nfc_target target)
+{
+    (void) device;
+    return target.nm.nmt == NMT_ISO14443A &&
+	(
+	 target.nti.nai.btSak == 0x08 ||
+	 target.nti.nai.btSak == 0x28 ||
+	 target.nti.nai.btSak == 0x68 ||
+	 target.nti.nai.btSak == 0x88
+	);
+}
+
+bool
+mifare_classic4k_taste (nfc_device *device, nfc_target target)
+{
+    (void) device;
+    return target.nm.nmt == NMT_ISO14443A &&
+	(
+	 target.nti.nai.btSak == 0x18 ||
+	 target.nti.nai.btSak == 0x38
+	);
+}
+
 /*
  * Allocates and initialize a MIFARE Classic tag.
  */
 
-FreefareTag
-mifare_classic_tag_new (void)
+static FreefareTag
+_mifare_classic_tag_new (nfc_device *device, nfc_target target, int tag_type)
 {
-    return malloc (sizeof (struct mifare_classic_tag));
+    FreefareTag tag;
+
+    if ((tag = malloc (sizeof (struct mifare_classic_tag)))) {
+	tag->type = tag_type;
+	tag->free_tag = mifare_classic_tag_free;
+	tag->device = device;
+	tag->info = target;
+	tag->active = 0;
+    }
+
+    return tag;
+}
+
+FreefareTag
+mifare_classic1k_tag_new (nfc_device *device, nfc_target target)
+{
+    return _mifare_classic_tag_new (device, target, MIFARE_CLASSIC_1K);
+}
+
+FreefareTag
+mifare_classic4k_tag_new (nfc_device *device, nfc_target target)
+{
+    return _mifare_classic_tag_new (device, target, MIFARE_CLASSIC_4K);
 }
 
 /*
@@ -228,7 +274,6 @@ int
 mifare_classic_connect (FreefareTag tag)
 {
     ASSERT_INACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     nfc_target pnti;
     nfc_modulation modulation = {
@@ -251,7 +296,6 @@ int
 mifare_classic_disconnect (FreefareTag tag)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     if (nfc_initiator_deselect_target (tag->device) >= 0) {
 	tag->active = 0;
@@ -277,7 +321,6 @@ int
 mifare_classic_authenticate (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 12);
     BUFFER_INIT (res, 1);
@@ -308,7 +351,6 @@ int
 mifare_classic_read (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 2);
     BUFFER_ALIAS (res, data, sizeof(MifareClassicBlock));
@@ -377,7 +419,6 @@ int
 mifare_classic_write (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 2 + sizeof (MifareClassicBlock));
     BUFFER_INIT (res, 1);
@@ -399,7 +440,6 @@ int
 mifare_classic_increment (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 6);
     BUFFER_INIT (res, 1);
@@ -421,7 +461,6 @@ int
 mifare_classic_decrement (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 6);
     BUFFER_INIT (res, 1);
@@ -442,7 +481,6 @@ int
 mifare_classic_restore (FreefareTag tag, const MifareClassicBlockNumber block)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     /*
      * Same length as the increment and decrement commands but only the first
@@ -471,7 +509,6 @@ int
 mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block)
 {
     ASSERT_ACTIVE (tag);
-    ASSERT_MIFARE_CLASSIC (tag);
 
     BUFFER_INIT (cmd, 2);
     BUFFER_INIT (res, 1);
