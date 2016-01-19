@@ -27,6 +27,7 @@
 #define MAX_CANDIDATES 16
 
 #define NXP_MANUFACTURER_CODE 0x04
+#define RANDOM_UID 0x08
 
 struct supported_tag supported_tags[] = {
     { FELICA,              "FeliCA",                       NMT_FELICA,    0x00, 0, 0, { 0x00 }, NULL },
@@ -36,8 +37,8 @@ struct supported_tag supported_tags[] = {
     { MIFARE_CLASSIC_1K,   "Infineon Mifare Classic 1k",   NMT_ISO14443A, 0x88, 0, 0, { 0x00 }, NULL },
     { MIFARE_CLASSIC_4K,   "Mifare Classic 4k",            NMT_ISO14443A, 0x18, 0, 0, { 0x00 }, NULL },
     { MIFARE_CLASSIC_4K,   "Mifare Classic 4k (Emulated)", NMT_ISO14443A, 0x38, 0, 0, { 0x00 }, NULL },
-    { MIFARE_DESFIRE,      "Mifare DESFire",               NMT_ISO14443A, 0x20, 5, 4, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }, NULL},
-    { MIFARE_DESFIRE,      "Cyanogenmod card emulation",   NMT_ISO14443A, 0x60, 4, 3, { 0x78, 0x33, 0x88 /*, 0xXX */ }, NULL},
+    { MIFARE_DESFIRE,      "Mifare DESFire",               NMT_ISO14443A, 0x20, 4, 0, { 0x75, 0x77, 0x81, 0x02 /*, 0xXX */ }, NULL},
+    { MIFARE_DESFIRE,      "Cyanogemod card emulation",    NMT_ISO14443A, 0x20, 3, 3, { 0x78, 0x33, 0x88 /*, 0xXX */ }, NULL},
     { MIFARE_DESFIRE,      "Android HCE",                  NMT_ISO14443A, 0x60, 4, 3, { 0x78, 0x80, 0x70 /*, 0xXX */ }, NULL},
     { MIFARE_ULTRALIGHT_C, "Mifare UltraLightC",           NMT_ISO14443A, 0x00, 0, 0, { 0x00 }, is_mifare_ultralightc_on_reader },
     { MIFARE_ULTRALIGHT,   "Mifare UltraLight",            NMT_ISO14443A, 0x00, 0, 0, { 0x00 }, NULL },
@@ -63,7 +64,7 @@ freefare_tag_new (nfc_device *device, nfc_target target)
 	    found = true;
 	    break;
 	}
-	if ((target.nm.nmt == NMT_ISO14443A) && ((target.nti.nai.szUidLen == 4) || (target.nti.nai.abtUid[0] == NXP_MANUFACTURER_CODE)) &&
+	if ((target.nm.nmt == NMT_ISO14443A) && ((target.nti.nai.szUidLen == 4) || (target.nti.nai.abtUid[0] == NXP_MANUFACTURER_CODE) || (target.nti.nai.abtUid[0] == RANDOM_UID)) &&
 	    (target.nti.nai.btSak == supported_tags[i].SAK) &&
 	    (!supported_tags[i].ATS_min_length || ((target.nti.nai.szAtsLen >= supported_tags[i].ATS_min_length) &&
 						   (0 == memcmp (target.nti.nai.abtAts, supported_tags[i].ATS, supported_tags[i].ATS_compare_length)))) &&
