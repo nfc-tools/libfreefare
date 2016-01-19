@@ -157,17 +157,6 @@ void		*assert_crypto_buffer_size (FreefareTag tag, size_t nbytes);
 // Max PAGE_COUNT of the Ultralight Family:
 #define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
 
-struct supported_tag {
-    enum freefare_tag_type type;
-    const char *friendly_name;
-    uint8_t modulation_type;
-    uint8_t SAK;
-    uint8_t ATS_min_length;
-    uint8_t ATS_compare_length;
-    uint8_t ATS[5];
-    bool (*check_tag_on_reader) (nfc_device *, nfc_iso14443a_info);
-};
-
 /*
  * This structure is common to all supported MIFARE targets but shall not be
  * used directly (it's some kind of abstract class).  All members in this
