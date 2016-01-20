@@ -1,7 +1,7 @@
 #include <cutter.h>
 #include <freefare.h>
 
-#include "mifare_desfire_ev1_fixture.h"
+#include "fixture.h"
 
 static nfc_context *context;
 static nfc_device *device = NULL;

@@ -3,7 +3,7 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-#include "mifare_desfire_ev1_fixture.h"
+#include "fixture.h"
 #include "common/mifare_desfire_auto_authenticate.h"
 
 #define cut_assert_success(last_command) \

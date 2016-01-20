@@ -5,7 +5,7 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
-#include "mifare_classic_fixture.h"
+#include "fixture.h"
 
 void
 test_mifare_classic_authenticate(void)

@@ -2,7 +2,7 @@
 
 #include <freefare.h>
 
-#include "mifare_classic_fixture.h"
+#include "fixture.h"
 
 void
 test_mifare_classic_mad(void)
