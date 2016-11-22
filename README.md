@@ -19,7 +19,7 @@ If you are new to _libfreefare_ or the _nfc-tools_, you should collect useful in
 | MIFARE DESFire 4k   | Supported     |
 | MIFARE DESFire 8k   | Supported     |
 | MIFARE DESFire EV1  | Supported     |
-| MIFARE Mini         | Not supported |
+| MIFARE Mini         | Supported     |
 | MIFARE Plus S 2k    | Not supported |
 | MIFARE Plus S 4k    | Not supported |
 | MIFARE Plus X 2k    | Not supported |
