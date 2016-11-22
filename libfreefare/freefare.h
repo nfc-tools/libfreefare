@@ -104,8 +104,10 @@ bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info n
 
 
 
+bool             mifare_mini_taste (nfc_device *device, nfc_target target);
 bool		 mifare_classic1k_taste (nfc_device *device, nfc_target target);
 bool		 mifare_classic4k_taste (nfc_device *device, nfc_target target);
+FreefareTag      mifare_mini_tag_new (nfc_device *device, nfc_target target);
 FreefareTag	 mifare_classic1k_tag_new (nfc_device *device, nfc_target target);
 FreefareTag	 mifare_classic4k_tag_new (nfc_device *device, nfc_target target);
 void		 mifare_classic_tag_free (FreefareTag tag);
