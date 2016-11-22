@@ -38,6 +38,8 @@ freefare_tag_new (nfc_device *device, nfc_target target)
 
     if (felica_taste (device, target)) {
 	tag = felica_tag_new (device, target);
+    } else if (mifare_mini_taste (device, target)) {
+    tag = mifare_mini_tag_new (device, target);
     } else if (mifare_classic1k_taste (device, target)) {
 	tag = mifare_classic1k_tag_new (device, target);
     } else if (mifare_classic4k_taste (device, target)) {
@@ -155,6 +157,8 @@ freefare_get_tag_friendly_name (FreefareTag tag)
     switch (tag->type) {
     case FELICA:
 	return "FeliCA";
+    case MIFARE_MINI:
+    return "Mifare Mini 0.3k";
     case MIFARE_CLASSIC_1K:
 	return "Mifare Classic 1k";
     case MIFARE_CLASSIC_4K:

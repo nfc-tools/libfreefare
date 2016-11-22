@@ -194,6 +194,16 @@ int		 get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber blo
  */
 
 bool
+mifare_mini_taste (nfc_device *device, nfc_target target)
+{
+    (void) device;
+    return target.nm.nmt == NMT_ISO14443A &&
+    (
+     target.nti.nai.btSak == 0x09
+    );    
+}
+
+bool
 mifare_classic1k_taste (nfc_device *device, nfc_target target)
 {
     (void) device;
@@ -235,6 +245,13 @@ _mifare_classic_tag_new (nfc_device *device, nfc_target target, int tag_type)
     }
 
     return tag;
+}
+
+
+FreefareTag
+mifare_mini_tag_new (nfc_device *device, nfc_target target)
+{
+    return _mifare_classic_tag_new (device, target, MIFARE_MINI);
 }
 
 FreefareTag

@@ -30,7 +30,7 @@
 
 enum freefare_tag_type {
     FELICA,
-//    MIFARE_MINI,
+    MIFARE_MINI,
     MIFARE_CLASSIC_1K,
     MIFARE_CLASSIC_4K,
     MIFARE_DESFIRE,
