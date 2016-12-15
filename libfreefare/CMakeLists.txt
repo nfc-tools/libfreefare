@@ -1,4 +1,5 @@
 set(LIBRARY_SOURCES
+		felica
 		freefare
 		freefare_internal
 		mad
