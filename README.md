@@ -35,6 +35,9 @@ If you are new to _libfreefare_ or the _nfc-tools_, you should collect useful in
 | Mifare Application Directory (MAD) v3 | Supported (part of Mifare DESFire support) |
 
 # Installation
+
+## For *NIX systems
+
 You can use released version (see **Download** section) or development version:
 
 First, ensure all dependencies are installed:
@@ -63,6 +66,18 @@ You can now compile **libfreefare** the usual autotools way:
 make
 sudo make install
 ```
+## For Windows Systems
+
+### Requirements
+
+* cmake
+* make
+* mingw{32,64}-gcc
+
+### Building
+
+    mingw64-cmake -DLIBNFC_INCLUDE_DIRS=/path/to/libnfc-source/include  -DLIBNFC_LIBRARIES=/path/to/libnfc.dll
+    mingw64-make
 
 # Debug
 In order to debug using gdb, you should tune the CFLAGS:
