@@ -30,9 +30,14 @@
 #  include <endian.h>
 #endif
 
+#if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
+#  include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #include <nfc/nfc.h>
 
 #include <freefare.h>
+#include "../libfreefare/freefare_internal.h"
 
 #define NDEF_BUFFER_SIZE 512
 
