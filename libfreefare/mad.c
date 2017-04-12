@@ -27,7 +27,10 @@
  * Storing NFC Forum data in Mifare Standard 1k/4k
  * Rev. 1.1 - 21 August 2007
  */
-#include "config.h"
+
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #include <sys/types.h>
 

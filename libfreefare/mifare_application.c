@@ -21,7 +21,10 @@
  *
  * /dev/brain
  */
-#include "config.h"
+
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #include <errno.h>
 #include <string.h>

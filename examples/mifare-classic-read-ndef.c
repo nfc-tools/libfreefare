@@ -30,7 +30,9 @@
  *   Document Identifier 130410
  */
 
-#include "config.h"
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #include <err.h>
 #include <errno.h>

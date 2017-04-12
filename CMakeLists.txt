@@ -9,11 +9,22 @@ find_package(LIBNFC REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 IF(WIN32)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config_windows.h.cmake ${CMAKE_CURRENT_SOURCE_DIR}/config.h)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config_windows.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/contrib/win32)
   find_library(WINSOCK_LIB libws2_32.a)
   set(LIBS ${LIBS} ${WINSOCK_LIB})
+ELSE(WIN32)
+  include(CheckIncludeFiles)
+  check_include_files("sys/endian.h" HAVE_SYS_ENDIAN_H)
+  check_include_files("endian.h" HAVE_ENDIAN_H)
+  check_include_files("byteswap.h" HAVE_BYTESWAP_H)
+  check_include_files("CoreFoundation/CoreFoundation.h" HAVE_COREFOUNDATION_COREFOUNDATION_H)
+  set(_XOPEN_SOURCE 600)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/config_posix.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
 ENDIF(WIN32)
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/)
+add_definitions("-DHAVE_CONFIG_H")
 
 if(MINGW)
   # force MinGW-w64 in 32bit mode

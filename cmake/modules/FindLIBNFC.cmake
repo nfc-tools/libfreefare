@@ -9,7 +9,7 @@ message("libnfc install dir: " ${LIBNFC_INSTALL_DIR})
 find_path(LIBNFC_INCLUDE_DIRS NAMES nfc/nfc.h PATHS ${LIBNFC_INSTALL_DIR}/include)
 message("libnfc include dir found:  " ${LIBNFC_INCLUDE_DIRS})
 
-find_library(LIBNFC_LIBRARIES libnfc PATHS ${LIBNFC_INSTALL_DIR}/lib)
+find_library(LIBNFC_LIBRARIES nfc PATHS ${LIBNFC_INSTALL_DIR}/lib)
 message("libnfc library found:  " ${LIBNFC_LIBRARIES})
 
 INCLUDE(FindPackageHandleStandardArgs)
