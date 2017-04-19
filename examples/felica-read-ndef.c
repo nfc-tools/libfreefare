@@ -125,7 +125,7 @@ main (int argc, char *argv[])
 			payload_length = ndef_record[2];
 			payload_length_length = 1;
 		    } else {
-			payload_length = be32toh ((uint32_t) ndef_record + 2);
+			payload_length = be32toh (*(uint32_t *)(ndef_record + 2));
 			payload_length_length = 4;
 		    }
 		    ndef_record_length += payload_length_length;
