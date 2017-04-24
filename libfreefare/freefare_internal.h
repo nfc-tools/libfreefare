@@ -18,7 +18,9 @@
 #ifndef __FREEFARE_INTERNAL_H__
 #define __FREEFARE_INTERNAL_H__
 
-#include "config.h"
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #include <openssl/des.h>
 

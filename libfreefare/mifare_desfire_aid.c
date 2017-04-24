@@ -24,7 +24,9 @@
  * http://www.scnf.org.uk/smartstore/LASSeO%20docs/DESFIRE%20Specification%20V1%200.pdf
  */
 
-#include "config.h"
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #if defined(HAVE_SYS_TYPES_H)
 #  include <sys/types.h>

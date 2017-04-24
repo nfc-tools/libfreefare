@@ -26,7 +26,9 @@
  * March 2003
  */
 
-#include "config.h"
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #if defined(HAVE_SYS_TYPES_H)
 #  include <sys/types.h>

@@ -29,7 +29,9 @@
  * http://ridrix.wordpress.com/2009/09/19/mifare-desfire-communication-example/
  */
 
-#include "config.h"
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+#endif
 
 #if defined(HAVE_SYS_TYPES_H)
 #  include <sys/types.h>
