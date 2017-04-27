@@ -56,6 +56,7 @@
 #include <openssl/aes.h>
 #include <openssl/des.h>
 
+#include <stdlib.h>
 #include <err.h>
 #include <string.h>
 #include <strings.h>
@@ -422,12 +423,13 @@ mifare_cryto_preprocess_data (FreefareTag tag, void *data, size_t *nbytes, off_t
 	    mifare_cypher_blocks_chained (tag, NULL, NULL, res + offset, *nbytes - offset, MCD_SEND, (AS_NEW == MIFARE_DESFIRE (tag)->authentication_scheme) ? MCO_ENCYPHER : MCO_DECYPHER);
 	break;
     default:
-	warnx ("Unknown communication settings");
-#ifdef WITH_DEBUG
-	abort ();
-#endif
+	MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 	*nbytes = -1;
 	res = NULL;
+#ifdef WITH_DEBUG
+	warnx ("Unknown communication settings");
+	abort ();
+#endif
 	break;
     }
 
@@ -464,6 +466,7 @@ mifare_cryto_postprocess_data (FreefareTag tag, void *data, ssize_t *nbytes, int
 	    if (communication_settings & MAC_VERIFY) {
 		*nbytes -= key_macing_length (key);
 		if (*nbytes <= 0) {
+		    MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		    *nbytes = -1;
 		    res = NULL;
 #ifdef WITH_DEBUG
@@ -499,6 +502,7 @@ mifare_cryto_postprocess_data (FreefareTag tag, void *data, ssize_t *nbytes, int
 		break;
 	    if (communication_settings & CMAC_VERIFY) {
 		if (*nbytes < 9) {
+		    MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 		    *nbytes = -1;
 		    res = NULL;
 #ifdef WITH_DEBUG
@@ -654,12 +658,13 @@ mifare_cryto_postprocess_data (FreefareTag tag, void *data, ssize_t *nbytes, int
 
 	break;
     default:
-	warnx ("Unknown communication settings");
-#ifdef WITH_DEBUG
-	abort ();
-#endif
+	MIFARE_DESFIRE (tag)->last_pcd_error = CRYPTO_ERROR;
 	*nbytes = -1;
 	res = NULL;
+#ifdef WITH_DEBUG
+	warnx ("Unknown communication settings");
+	abort ();
+#endif
 	break;
 
     }
