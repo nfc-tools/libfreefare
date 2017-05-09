@@ -238,7 +238,7 @@ madame_soleil_get_write_communication_settings (FreefareTag tag, uint8_t file_no
 static int32_t
 le24toh (uint8_t data[3])
 {
-    return (data[2] << 16) | (data[1] << 8) | data[0];
+    return le32toh((data[2] << 16) | (data[1] << 8) | data[0]);
 }
 
 bool
