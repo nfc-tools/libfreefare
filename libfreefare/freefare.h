@@ -239,6 +239,22 @@ enum mifare_desfire_file_types {
 #define APPLICATION_CRYPTO_3K3DES 0x40
 #define APPLICATION_CRYPTO_AES    0x80
 
+/* Mifare DESFire Application settings
+ * bit 7 - 4: Number of key needed to change application keys (key 0 - 13; 0 = master key; 14 = key itself required for key change; 15 = all keys are frozen)
+ * bit 3: Application configuration frozen = 0; Application configuration changeable when authenticated with application master key = 1
+ * bit 2: Application master key authentication required for create/delete files = 0; Authentication not required = 1
+ * bit 1: GetFileIDs, GetFileSettings and GetKeySettings behavior: Master key authentication required = 0; No authentication required = 1
+ * bit 0 = Application master key frozen = 0; Application master key changeable = 1
+ */
+
+#define MDAPP_SETTINGS(key_no_for_key_changing,config_changeable,free_create_delete_files,free_listing_contents,app_master_key_changeable) ( \
+	(key_no_for_key_changing << 4) | \
+	(config_changeable << 3) | \
+	(free_listing_contents << 1) | \
+	(app_master_key_changeable) \
+	)
+
+
 /* Access right */
 
 #define MDAR(read,write,read_write,change_access_rights) ( \
