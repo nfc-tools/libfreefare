@@ -22,4 +22,4 @@ install:
   - ./.travis-ci-build libnfc
 script:
   - ./.travis-ci-build .
-  - if [ "$BLD" = autotools ]; then (cd build-autotools && cutter test); fi
+  - if [ "$BLD" = autotools ]; then (cd build-autotools && make check TESTS_ENVIRONMENT=SKIP_TESTS=1 && cutter test); fi
