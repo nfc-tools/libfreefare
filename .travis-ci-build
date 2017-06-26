@@ -6,7 +6,7 @@ if [ "$BLD" = autotools ]; then
 	autoreconf -vis
 	mkdir build-autotools
 	cd build-autotools
-	../configure --prefix=$HOME/.local
+	../configure --prefix=$HOME/.local CFLAGS="-I$HOME/.local/include" LDFLAGS="-L$HOME/.local/lib"
 	make
 	make install
 elif [ "$BLD" = cmake ]; then
