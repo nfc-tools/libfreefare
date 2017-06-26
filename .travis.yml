@@ -18,4 +18,6 @@ addons:
 install:
   - git clone https://github.com/nfc-tools/libnfc
   - ./.travis-ci-build libnfc
-script: ./.travis-ci-build .
+script:
+  - ./.travis-ci-build .
+  - if [ "$BLD" = autotools ]; then (cd build-autotools && cutter test); fi
