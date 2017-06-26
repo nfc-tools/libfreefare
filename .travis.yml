@@ -1,0 +1,18 @@
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - BLD=cmake
+  - BLD=autoconf
+
+addons:
+  apt:
+    packages:
+      - libusb-dev
+      - cmake
+      - libcutter-dev
+
+script: ./.travis-ci-build

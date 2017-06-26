@@ -1,0 +1,33 @@
+#!/bin/sh
+
+build_install()
+{
+	(
+		cd $1
+		if [ "$BLD" = autotools ]; then
+			set -x
+			autoreconf -vis
+			mkdir build-autotools
+			cd build-autotools
+			../configure --prefix=$HOME/.local
+			make
+			make install
+			set +x
+		elif [ "$BLD" = cmake ]; then
+			set -x
+			mkdir build-cmake
+			cd build-cmake
+			cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+			make
+			make install
+			set +x
+		else
+			echo "Unsupported build system: '$BLD'" >&2
+			exit 1
+		fi
+	)
+}
+
+git clone https://github.com/nfc-tools/libnfc
+build_install libnfc
+build_install .
