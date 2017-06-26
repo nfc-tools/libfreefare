@@ -26,6 +26,7 @@ If you are new to _libfreefare_ or the _nfc-tools_, you should collect useful in
 | MIFARE Plus X 4k    | Not supported |
 | MIFARE Ultralight   | Supported     |
 | MIFARE Ultralight C | Supported     |
+| NTAG21x             | Supported     |
 
 ## Specifications
 | Specification                         | Status    |
