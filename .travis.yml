@@ -6,7 +6,7 @@ compiler:
 
 env:
   - BLD=cmake
-  - BLD=autoconf
+  - BLD=autotools
 
 addons:
   apt:
@@ -15,4 +15,7 @@ addons:
       - cmake
       - libcutter-dev
 
-script: ./.travis-ci-build
+install:
+  - git clone https://github.com/nfc-tools/libnfc
+  - ./.travis-ci-build libnfc
+script: ./.travis-ci-build .
