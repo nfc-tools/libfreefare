@@ -10,10 +10,12 @@ env:
 
 addons:
   apt:
+    sources:
+      - sourceline: 'ppa:cutter-testing-framework/ppa'
     packages:
       - libusb-dev
       - cmake
-      - libcutter-dev
+      - cutter-testing-framework
 
 install:
   - git clone https://github.com/nfc-tools/libnfc
