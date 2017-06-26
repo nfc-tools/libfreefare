@@ -2,7 +2,7 @@
 cd $1
 
 if [ "$BLD" = autotools ]; then
-	set -x
+	set -ex
 	autoreconf -vis
 	mkdir build-autotools
 	cd build-autotools
@@ -10,7 +10,7 @@ if [ "$BLD" = autotools ]; then
 	make
 	make install
 elif [ "$BLD" = cmake ]; then
-	set -x
+	set -ex
 	mkdir build-cmake
 	cd build-cmake
 	cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
