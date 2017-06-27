@@ -1,0 +1,22 @@
+#!/bin/sh
+cd $1
+
+if [ "$BLD" = autotools ]; then
+	set -ex
+	autoreconf -vis
+	mkdir build-autotools
+	cd build-autotools
+	../configure --prefix=$HOME/.local LIBNFC_CFLAGS="-I$HOME/.local/include" LIBNFC_LIBS="-L$HOME/.local/lib -lnfc"
+	make
+	make install
+elif [ "$BLD" = cmake ]; then
+	set -ex
+	mkdir build-cmake
+	cd build-cmake
+	cmake -DCMAKE_INSTALL_PREFIX=$HOME/.local ..
+	make
+	make install
+else
+	echo "Unsupported build system: '$BLD'" >&2
+	exit 1
+fi

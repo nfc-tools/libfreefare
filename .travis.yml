@@ -1,0 +1,25 @@
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+env:
+  - BLD=cmake
+  - BLD=autotools
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:cutter-testing-framework/ppa'
+    packages:
+      - libusb-dev
+      - cmake
+      - cutter-testing-framework
+
+install:
+  - git clone https://github.com/nfc-tools/libnfc
+  - ./.travis-ci-build libnfc
+script:
+  - ./.travis-ci-build .
+  - if [ "$BLD" = autotools ]; then (cd build-autotools && make check TESTS_ENVIRONMENT=SKIP_TESTS=1 && cutter test); fi
