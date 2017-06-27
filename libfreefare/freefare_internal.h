@@ -248,21 +248,21 @@ struct mifare_ultralight_tag {
 */
 
 struct ntag21x_tag {
-  struct freefare_tag __tag;
+    struct freefare_tag __tag;
 
-  int subtype;
-  uint8_t vendor_id;
-  uint8_t product_type;
-  uint8_t product_subtype;
-  uint8_t major_product_version;
-  uint8_t minor_product_version;
-  uint8_t storage_size;
-  uint8_t protocol_type;
+    int subtype;
+    uint8_t vendor_id;
+    uint8_t product_type;
+    uint8_t product_subtype;
+    uint8_t major_product_version;
+    uint8_t minor_product_version;
+    uint8_t storage_size;
+    uint8_t protocol_type;
 };
 
 struct ntag21x_key {
-  uint8_t data[4]; // 4B key
-  uint8_t pack[2]; // 2B Password Acknowlege
+    uint8_t data[4]; // 4B key
+    uint8_t pack[2]; // 2B Password Acknowlege
 } ntag21x_key;
 
 /*
@@ -274,7 +274,7 @@ struct ntag21x_key {
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
-/*
+/* 
  * FreefareTag cast macros
  *
  * This macros are intended to provide a convenient way to cast abstract
@@ -303,7 +303,7 @@ struct ntag21x_key {
 
 /*
  * Buffer management macros.
- *
+ * 
  * The following macros ease setting-up and using buffers:
  * BUFFER_INIT (data, 5);      // data -> [ xx, xx, xx, xx, xx ]
  * BUFFER_SIZE (data);         // size -> 0

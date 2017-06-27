@@ -16,10 +16,10 @@ bin_PROGRAMS = felica-lite-dump \
 	       mifare-desfire-read-ndef \
 	       mifare-desfire-write-ndef \
 	       mifare-ultralight-info \
-				 ntag-detect \
-				 ntag-removeauth \
-				 ntag-setauth \
-				 ntag-write
+	       ntag-detect \
+	       ntag-removeauth \
+	       ntag-setauth \
+	       ntag-write
 
 felica_lite_dump_SOURCES = felica-lite-dump.c
 felica_lite_dump_LDADD = $(top_builddir)/libfreefare/libfreefare.la

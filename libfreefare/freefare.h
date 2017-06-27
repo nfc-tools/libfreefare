@@ -1,11 +1,11 @@
 /*-
  * Copyright (C) 2009, 2010, Romain Tartiere, Romuald Conty.
- *
+ * 
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
@@ -106,6 +106,10 @@ bool		 is_mifare_ultralight (FreefareTag tag);
 bool		 is_mifare_ultralightc (FreefareTag tag);
 bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai);
 
+
+
+bool		 ntag21x_taste (nfc_device *device, nfc_target target);
+
 /* NTAG21x access features */
 #define NTAG_PROT 0x80
 #define NTAG_CFGLCK 0x40
@@ -114,44 +118,45 @@ bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info n
 #define NTAG_AUTHLIM 0x07
 
 enum ntag_tag_subtype {
-  NTAG_213,
-  NTAG_215,
-  NTAG_216
+    NTAG_213,
+    NTAG_215,
+    NTAG_216
 };
 
-bool  ntag21x_taste (nfc_device *device, nfc_target target);
-FreefareTag ntag21x_tag_new (nfc_device *device, nfc_target target);
-FreefareTag ntag21x_tag_reuse (FreefareTag tag); /* Copy data from Ultralight tag to new NTAG21x, don't forget to free your old tag */
-NTAG21xKey  ntag21x_key_new (const uint8_t data[4],const uint8_t pack[2]); /* Create new key */
-void  ntag21x_key_free (NTAG21xKey key); /* Clear key from memory */
-void  ntag21x_tag_free (FreefareTag tag);
-int ntag21x_connect (FreefareTag tag);
-int ntag21x_disconnect (FreefareTag tag);
-int ntag21x_get_info (FreefareTag tag); /* Get all information about tag (size,vendor ...) */
+FreefareTag	 ntag21x_tag_new (nfc_device *device, nfc_target target);
+FreefareTag	 ntag21x_tag_reuse (FreefareTag tag); /* Copy data from Ultralight tag to new NTAG21x, don't forget to free your old tag */
+NTAG21xKey	 ntag21x_key_new (const uint8_t data[4],const uint8_t pack[2]); /* Create new key */
+void		 ntag21x_key_free (NTAG21xKey key); /* Clear key from memory */
+void		 ntag21x_tag_free (FreefareTag tag);
+int		 ntag21x_connect (FreefareTag tag);
+int		 ntag21x_disconnect (FreefareTag tag);
+int		 ntag21x_get_info (FreefareTag tag); /* Get all information about tag (size,vendor ...) */
 enum  ntag_tag_subtype ntag21x_get_subtype (FreefareTag tag); /* Get subtype of tag */
-uint8_t ntag21x_get_last_page (FreefareTag tag); /* Get last page address based on gathered info from function above */
-int ntag21x_read_signature (FreefareTag tag,uint8_t *data); /* Get tag signature */
-int ntag21x_set_pwd (FreefareTag tag, uint8_t data[4]); /* Set password */
-int ntag21x_set_pack (FreefareTag tag, uint8_t data[2]); /* Set pack */
-int ntag21x_set_key (FreefareTag tag,const NTAG21xKey key); /* Set key */
-int ntag21x_set_auth (FreefareTag tag,uint8_t byte); /* Set AUTH0 byte (from which page starts password protection) */
-int ntag21x_get_auth (FreefareTag tag,uint8_t *byte); /* Get AUTH0 byte */
-int ntag21x_access_enable (FreefareTag tag,uint8_t byte); /* Enable access feature in ACCESS byte */
-int ntag21x_access_disable (FreefareTag tag,uint8_t byte); /* Disable access feature in ACCESS byte */
-int ntag21x_get_access (FreefareTag tag,uint8_t *byte); /* Get ACCESS byte */
-int ntag21x_check_access (FreefareTag tag,uint8_t byte,bool *result); /* Check if access feature is enabled */
-int ntag21x_get_authentication_limit (FreefareTag tag,uint8_t *byte); /* Get authentication limit */
-int ntag21x_set_authentication_limit (FreefareTag tag,uint8_t byte); /* Set authentication limit (0x00 = disabled, [0x01,0x07] = valid range, > 0x07 invalid range) */
-int ntag21x_read (FreefareTag tag, uint8_t page,uint8_t *data); /* Read 16 bytes starting from page */
-int ntag21x_read4 (FreefareTag tag,uint8_t page,uint8_t *data); /* Read 4 bytes on page */
-int ntag21x_fast_read (FreefareTag tag, uint8_t start_page,uint8_t end_page, uint8_t *data); /* Read n*4 bytes from range [start_page,end_page] */
-int ntag21x_fast_read4 (FreefareTag tag,uint8_t page,uint8_t *data); /* Fast read certain page */
-int ntag21x_read_cnt (FreefareTag tag, uint8_t *data); /* Read 3-byte NFC counter if enabled else it returns error */
-int ntag21x_write (FreefareTag tag, uint8_t page, uint8_t data[4]); /* Write 4 bytes to page */
-int ntag21x_compatibility_write (FreefareTag tag, uint8_t page, uint8_t data[4]); /* Writes 4 bytes to page with mifare classic write */
-int ntag21x_authenticate (FreefareTag tag, const NTAG21xKey key); /* Authenticate with tag */
-bool  is_ntag21x (FreefareTag tag); /* Check if tag type is NTAG21x */
-bool  ntag21x_is_auth_supported (nfc_device *device, nfc_iso14443a_info nai); /* Check if tag supports 21x commands */
+uint8_t		 ntag21x_get_last_page (FreefareTag tag); /* Get last page address based on gathered info from function above */
+int		 ntag21x_read_signature (FreefareTag tag,uint8_t *data); /* Get tag signature */
+int		 ntag21x_set_pwd (FreefareTag tag, uint8_t data[4]); /* Set password */
+int		 ntag21x_set_pack (FreefareTag tag, uint8_t data[2]); /* Set pack */
+int		 ntag21x_set_key (FreefareTag tag,const NTAG21xKey key); /* Set key */
+int		 ntag21x_set_auth (FreefareTag tag,uint8_t byte); /* Set AUTH0 byte (from which page starts password protection) */
+int		 ntag21x_get_auth (FreefareTag tag,uint8_t *byte); /* Get AUTH0 byte */
+int		 ntag21x_access_enable (FreefareTag tag,uint8_t byte); /* Enable access feature in ACCESS byte */
+int		 ntag21x_access_disable (FreefareTag tag,uint8_t byte); /* Disable access feature in ACCESS byte */
+int		 ntag21x_get_access (FreefareTag tag,uint8_t *byte); /* Get ACCESS byte */
+int		 ntag21x_check_access (FreefareTag tag,uint8_t byte,bool *result); /* Check if access feature is enabled */
+int		 ntag21x_get_authentication_limit (FreefareTag tag,uint8_t *byte); /* Get authentication limit */
+int		 ntag21x_set_authentication_limit (FreefareTag tag,uint8_t byte); /* Set authentication limit (0x00 = disabled, [0x01,0x07] = valid range, > 0x07 invalid range) */
+int		 ntag21x_read (FreefareTag tag, uint8_t page,uint8_t *data); /* Read 16 bytes starting from page */
+int		 ntag21x_read4 (FreefareTag tag,uint8_t page,uint8_t *data); /* Read 4 bytes on page */
+int		 ntag21x_fast_read (FreefareTag tag, uint8_t start_page,uint8_t end_page, uint8_t *data); /* Read n*4 bytes from range [start_page,end_page] */
+int		 ntag21x_fast_read4 (FreefareTag tag,uint8_t page,uint8_t *data); /* Fast read certain page */
+int		 ntag21x_read_cnt (FreefareTag tag, uint8_t *data); /* Read 3-byte NFC counter if enabled else it returns error */
+int		 ntag21x_write (FreefareTag tag, uint8_t page, uint8_t data[4]); /* Write 4 bytes to page */
+int		 ntag21x_compatibility_write (FreefareTag tag, uint8_t page, uint8_t data[4]); /* Writes 4 bytes to page with mifare classic write */
+int		 ntag21x_authenticate (FreefareTag tag, const NTAG21xKey key); /* Authenticate with tag */
+bool		 is_ntag21x (FreefareTag tag); /* Check if tag type is NTAG21x */
+bool		 ntag21x_is_auth_supported (nfc_device *device, nfc_iso14443a_info nai); /* Check if tag supports 21x commands */
+
+
 
 bool             mifare_mini_taste (nfc_device *device, nfc_target target);
 bool		 mifare_classic1k_taste (nfc_device *device, nfc_target target);
