@@ -263,7 +263,7 @@ struct ntag21x_tag {
 struct ntag21x_key {
     uint8_t data[4]; // 4B key
     uint8_t pack[2]; // 2B Password Acknowlege
-} ntag21x_key;
+};
 
 /*
  * FreefareTag assertion macros
