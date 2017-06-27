@@ -36,6 +36,10 @@ examples/mifare-desfire-info
 examples/mifare-desfire-read-ndef
 examples/mifare-desfire-write-ndef
 examples/mifare-ultralight-info
+examples/ntag-detect
+examples/ntag-removeauth
+examples/ntag-setauth
+examples/ntag-write
 test/test-suite.log
 test/run-test.sh.log
 test/run-test.sh.trs

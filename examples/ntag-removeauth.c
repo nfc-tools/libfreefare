@@ -40,7 +40,7 @@ main(int argc, char *argv[])
     if (context == NULL)
 	errx(EXIT_FAILURE, "Unable to init libnfc (malloc)");
 
-    device_count = nfc_list_devices(context, devices, sizeof (devices) / sizeof (*devices));
+    device_count = nfc_list_devices(context, devices, sizeof(devices) / sizeof(*devices));
     if (device_count <= 0)
 	errx(EXIT_FAILURE, "No NFC device found");
 
@@ -71,14 +71,14 @@ main(int argc, char *argv[])
 	    if (ntag21x_connect(tag) < 0)
 		errx(EXIT_FAILURE, "Error connecting to tag.");
 
-	    uint8_t pwd[4] = {0xff,0xff,0xff,0xff};
-	    uint8_t pack[2] = {0xaa,0xaa};
-	    uint8_t pack_old[2] = {0x00,0x00};
+	    uint8_t pwd[4] = {0xff, 0xff, 0xff, 0xff};
+	    uint8_t pack[2] = {0xaa, 0xaa};
+	    uint8_t pack_old[2] = {0x00, 0x00};
 
 	    NTAG21xKey key;
 	    NTAG21xKey key_old;
-	    key = ntag21x_key_new(pwd,pack); // Creating key
-	    key_old = ntag21x_key_new(pwd,pack_old); // Creating key
+	    key = ntag21x_key_new(pwd, pack); // Creating key
+	    key_old = ntag21x_key_new(pwd, pack_old); // Creating key
 
 	    uint8_t auth0 = 0x00; // Buffer for auth0 byte
 
@@ -89,48 +89,48 @@ main(int argc, char *argv[])
 		   MUST do, because here we are recognizing tag subtype (NTAG213,NTAG215,NTAG216), and gathering all parameters
 		   */
 		res = ntag21x_get_info(tag);
-		if(res < 0) {
+		if (res < 0) {
 		    printf("Error getting info from tag\n");
 		    break;
 		}
 		// Authenticate with tag
-		res = ntag21x_authenticate(tag,key);
-		if(res < 0) {
+		res = ntag21x_authenticate(tag, key);
+		if (res < 0) {
 		    printf("Error getting info from tag\n");
 		    break;
 		}
 		// Get auth byte from tag
-		res = ntag21x_get_auth(tag,&auth0);
-		if(res < 0) {
+		res = ntag21x_get_auth(tag, &auth0);
+		if (res < 0) {
 		    printf("Error getting auth0 byte from tag\n");
 		    break;
 		}
-		printf("Old auth0: %#02x\n",auth0);
+		printf("Old auth0: %#02x\n", auth0);
 		// Set old key
-		res = ntag21x_set_key(tag,key_old);
-		if(res < 0) {
+		res = ntag21x_set_key(tag, key_old);
+		if (res < 0) {
 		    printf("Error setting key tag\n");
 		    break;
 		}
 		// Disable password protection (when auth0 byte > last page)
-		res = ntag21x_set_auth(tag,0xff);
-		if(res<0) {
+		res = ntag21x_set_auth(tag, 0xff);
+		if (res < 0) {
 		    printf("Error setting auth0 byte \n");
 		    break;
 		}
 		// Disable read & write pwd protection -> (default: write only protection)
-		res = ntag21x_access_disable(tag,NTAG_PROT);
-		if(res < 0) {
+		res = ntag21x_access_disable(tag, NTAG_PROT);
+		if (res < 0) {
 		    printf("Error setting access byte \n");
 		    break;
 		}
 		// Get auth byte from tag
-		res = ntag21x_get_auth(tag,&auth0);
-		if(res < 0) {
+		res = ntag21x_get_auth(tag, &auth0);
+		if (res < 0) {
 		    printf("Error getting auth0 byte from tag\n");
 		    break;
 		}
-		printf("New auth0: %#02x\n",auth0);
+		printf("New auth0: %#02x\n", auth0);
 	    }
 
 	    ntag21x_disconnect(tag);

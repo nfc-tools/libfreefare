@@ -1,6 +1,8 @@
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = contrib libfreefare test examples
+libfreefare_subdirs = libfreefare test examples
+
+SUBDIRS = contrib $(libfreefare_subdirs)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libfreefare.pc
@@ -39,3 +41,7 @@ svn-keywords:
 svn-keywords-check:
 	@echo "Files missing a '$$"Id"$$' vcs keyword:"
 	@$(SVN_KEYWORDS_FILES_LIST_CMD) | xargs grep -L '\$$Id[^$$]*\$$'
+
+style:
+	find ${libfreefare_subdirs} -name '*.[ch]' -exec perl -pi -e 's/[ \t]+$$//' {} \;
+	find ${libfreefare_subdirs} -name '*.[ch]' -exec astyle --style=linux --indent=force-tab-x --lineend=linux '{}' ';'

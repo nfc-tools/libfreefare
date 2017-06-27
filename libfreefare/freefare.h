@@ -1,11 +1,11 @@
 /*-
  * Copyright (C) 2009, 2010, Romain Tartiere, Romuald Conty.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by the
  * Free Software Foundation, either version 3 of the License, or (at your
  * option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
@@ -25,7 +25,7 @@
 #include <nfc/nfc.h>
 
 #ifdef __cplusplus
-    extern "C" {
+extern "C" {
 #endif // __cplusplus
 
 enum freefare_tag_type {
@@ -47,7 +47,7 @@ struct freefare_tag;
 typedef struct freefare_tag *FreefareTag;
 
 /* Replace any MifareTag by the generic FreefareTag. */
-typedef struct freefare_tag *MifareTag __attribute__ ((deprecated));
+typedef struct freefare_tag *MifareTag __attribute__((deprecated));
 
 struct mifare_desfire_key;
 typedef struct mifare_desfire_key *MifareDESFireKey;
@@ -58,57 +58,57 @@ typedef struct ntag21x_key *NTAG21xKey;
 typedef uint8_t MifareUltralightPageNumber;
 typedef unsigned char MifareUltralightPage[4];
 
-FreefareTag	*freefare_get_tags (nfc_device *device);
-FreefareTag	 freefare_tag_new (nfc_device *device, nfc_target target);
-enum freefare_tag_type freefare_get_tag_type (FreefareTag tag);
-const char	*freefare_get_tag_friendly_name (FreefareTag tag);
-char		*freefare_get_tag_uid (FreefareTag tag);
-void		 freefare_free_tag (FreefareTag tag);
-void		 freefare_free_tags (FreefareTag *tags);
+FreefareTag	*freefare_get_tags(nfc_device *device);
+FreefareTag	 freefare_tag_new(nfc_device *device, nfc_target target);
+enum freefare_tag_type freefare_get_tag_type(FreefareTag tag);
+const char	*freefare_get_tag_friendly_name(FreefareTag tag);
+char		*freefare_get_tag_uid(FreefareTag tag);
+void		 freefare_free_tag(FreefareTag tag);
+void		 freefare_free_tags(FreefareTag *tags);
 bool		 freefare_selected_tag_is_present(nfc_device *device);
 
-const char	*freefare_strerror (FreefareTag tag);
-int		 freefare_strerror_r (FreefareTag tag, char *buffer, size_t len);
-void		 freefare_perror (FreefareTag tag, const char *string);
+const char	*freefare_strerror(FreefareTag tag);
+int		 freefare_strerror_r(FreefareTag tag, char *buffer, size_t len);
+void		 freefare_perror(FreefareTag tag, const char *string);
 
 
 
-bool		 felica_taste (nfc_device *device, nfc_target target);
+bool		 felica_taste(nfc_device *device, nfc_target target);
 
 #define FELICA_SC_RW 0x0009
 #define FELICA_SC_RO 0x000b
 
-FreefareTag	 felica_tag_new (nfc_device *device, nfc_target target);
-void		 felica_tag_free (FreefareTag tag);
+FreefareTag	 felica_tag_new(nfc_device *device, nfc_target target);
+void		 felica_tag_free(FreefareTag tag);
 
-ssize_t		 felica_read (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
-ssize_t		 felica_read_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
-ssize_t		 felica_write (FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
-ssize_t		 felica_write_ex (FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
-
-
-
-bool		 mifare_ultralight_taste (nfc_device *device, nfc_target target);
-bool		 mifare_ultralightc_taste (nfc_device *device, nfc_target target);
-FreefareTag	 mifare_ultralight_tag_new (nfc_device *device, nfc_target target);
-FreefareTag	 mifare_ultralightc_tag_new (nfc_device *device, nfc_target target);
-void		 mifare_ultralight_tag_free (FreefareTag tag);
-void		 mifare_ultralightc_tag_free (FreefareTag tag);
-
-int		 mifare_ultralight_connect (FreefareTag tag);
-int		 mifare_ultralight_disconnect (FreefareTag tag);
-
-int		 mifare_ultralight_read (FreefareTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
-int		 mifare_ultralight_write (FreefareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
-
-int		 mifare_ultralightc_authenticate (FreefareTag tag, const MifareDESFireKey key);
-bool		 is_mifare_ultralight (FreefareTag tag);
-bool		 is_mifare_ultralightc (FreefareTag tag);
-bool		 is_mifare_ultralightc_on_reader (nfc_device *device, nfc_iso14443a_info nai);
+ssize_t		 felica_read(FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
+ssize_t		 felica_read_ex(FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
+ssize_t		 felica_write(FreefareTag tag, uint16_t service, uint8_t block, uint8_t *data, size_t length);
+ssize_t		 felica_write_ex(FreefareTag tag, uint16_t service, uint8_t block_count, uint8_t blocks[], uint8_t *data, size_t length);
 
 
 
-bool		 ntag21x_taste (nfc_device *device, nfc_target target);
+bool		 mifare_ultralight_taste(nfc_device *device, nfc_target target);
+bool		 mifare_ultralightc_taste(nfc_device *device, nfc_target target);
+FreefareTag	 mifare_ultralight_tag_new(nfc_device *device, nfc_target target);
+FreefareTag	 mifare_ultralightc_tag_new(nfc_device *device, nfc_target target);
+void		 mifare_ultralight_tag_free(FreefareTag tag);
+void		 mifare_ultralightc_tag_free(FreefareTag tag);
+
+int		 mifare_ultralight_connect(FreefareTag tag);
+int		 mifare_ultralight_disconnect(FreefareTag tag);
+
+int		 mifare_ultralight_read(FreefareTag tag, const MifareUltralightPageNumber page, MifareUltralightPage *data);
+int		 mifare_ultralight_write(FreefareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
+
+int		 mifare_ultralightc_authenticate(FreefareTag tag, const MifareDESFireKey key);
+bool		 is_mifare_ultralight(FreefareTag tag);
+bool		 is_mifare_ultralightc(FreefareTag tag);
+bool		 is_mifare_ultralightc_on_reader(nfc_device *device, nfc_iso14443a_info nai);
+
+
+
+bool		 ntag21x_taste(nfc_device *device, nfc_target target);
 
 /* NTAG21x access features */
 #define NTAG_PROT 0x80
@@ -123,48 +123,48 @@ enum ntag_tag_subtype {
     NTAG_216
 };
 
-FreefareTag	 ntag21x_tag_new (nfc_device *device, nfc_target target);
-FreefareTag	 ntag21x_tag_reuse (FreefareTag tag); /* Copy data from Ultralight tag to new NTAG21x, don't forget to free your old tag */
-NTAG21xKey	 ntag21x_key_new (const uint8_t data[4],const uint8_t pack[2]); /* Create new key */
-void		 ntag21x_key_free (NTAG21xKey key); /* Clear key from memory */
-void		 ntag21x_tag_free (FreefareTag tag);
-int		 ntag21x_connect (FreefareTag tag);
-int		 ntag21x_disconnect (FreefareTag tag);
-int		 ntag21x_get_info (FreefareTag tag); /* Get all information about tag (size,vendor ...) */
-enum  ntag_tag_subtype ntag21x_get_subtype (FreefareTag tag); /* Get subtype of tag */
-uint8_t		 ntag21x_get_last_page (FreefareTag tag); /* Get last page address based on gathered info from function above */
-int		 ntag21x_read_signature (FreefareTag tag,uint8_t *data); /* Get tag signature */
-int		 ntag21x_set_pwd (FreefareTag tag, uint8_t data[4]); /* Set password */
-int		 ntag21x_set_pack (FreefareTag tag, uint8_t data[2]); /* Set pack */
-int		 ntag21x_set_key (FreefareTag tag,const NTAG21xKey key); /* Set key */
-int		 ntag21x_set_auth (FreefareTag tag,uint8_t byte); /* Set AUTH0 byte (from which page starts password protection) */
-int		 ntag21x_get_auth (FreefareTag tag,uint8_t *byte); /* Get AUTH0 byte */
-int		 ntag21x_access_enable (FreefareTag tag,uint8_t byte); /* Enable access feature in ACCESS byte */
-int		 ntag21x_access_disable (FreefareTag tag,uint8_t byte); /* Disable access feature in ACCESS byte */
-int		 ntag21x_get_access (FreefareTag tag,uint8_t *byte); /* Get ACCESS byte */
-int		 ntag21x_check_access (FreefareTag tag,uint8_t byte,bool *result); /* Check if access feature is enabled */
-int		 ntag21x_get_authentication_limit (FreefareTag tag,uint8_t *byte); /* Get authentication limit */
-int		 ntag21x_set_authentication_limit (FreefareTag tag,uint8_t byte); /* Set authentication limit (0x00 = disabled, [0x01,0x07] = valid range, > 0x07 invalid range) */
-int		 ntag21x_read (FreefareTag tag, uint8_t page,uint8_t *data); /* Read 16 bytes starting from page */
-int		 ntag21x_read4 (FreefareTag tag,uint8_t page,uint8_t *data); /* Read 4 bytes on page */
-int		 ntag21x_fast_read (FreefareTag tag, uint8_t start_page,uint8_t end_page, uint8_t *data); /* Read n*4 bytes from range [start_page,end_page] */
-int		 ntag21x_fast_read4 (FreefareTag tag,uint8_t page,uint8_t *data); /* Fast read certain page */
-int		 ntag21x_read_cnt (FreefareTag tag, uint8_t *data); /* Read 3-byte NFC counter if enabled else it returns error */
-int		 ntag21x_write (FreefareTag tag, uint8_t page, uint8_t data[4]); /* Write 4 bytes to page */
-int		 ntag21x_compatibility_write (FreefareTag tag, uint8_t page, uint8_t data[4]); /* Writes 4 bytes to page with mifare classic write */
-int		 ntag21x_authenticate (FreefareTag tag, const NTAG21xKey key); /* Authenticate with tag */
-bool		 is_ntag21x (FreefareTag tag); /* Check if tag type is NTAG21x */
-bool		 ntag21x_is_auth_supported (nfc_device *device, nfc_iso14443a_info nai); /* Check if tag supports 21x commands */
+FreefareTag	 ntag21x_tag_new(nfc_device *device, nfc_target target);
+FreefareTag	 ntag21x_tag_reuse(FreefareTag tag);  /* Copy data from Ultralight tag to new NTAG21x, don't forget to free your old tag */
+NTAG21xKey	 ntag21x_key_new(const uint8_t data[4], const uint8_t pack[2]); /* Create new key */
+void		 ntag21x_key_free(NTAG21xKey key);  /* Clear key from memory */
+void		 ntag21x_tag_free(FreefareTag tag);
+int		 ntag21x_connect(FreefareTag tag);
+int		 ntag21x_disconnect(FreefareTag tag);
+int		 ntag21x_get_info(FreefareTag tag);  /* Get all information about tag (size,vendor ...) */
+enum  ntag_tag_subtype ntag21x_get_subtype(FreefareTag tag);  /* Get subtype of tag */
+uint8_t		 ntag21x_get_last_page(FreefareTag tag);  /* Get last page address based on gathered info from function above */
+int		 ntag21x_read_signature(FreefareTag tag, uint8_t *data); /* Get tag signature */
+int		 ntag21x_set_pwd(FreefareTag tag, uint8_t data[4]);  /* Set password */
+int		 ntag21x_set_pack(FreefareTag tag, uint8_t data[2]);  /* Set pack */
+int		 ntag21x_set_key(FreefareTag tag, const NTAG21xKey key); /* Set key */
+int		 ntag21x_set_auth(FreefareTag tag, uint8_t byte); /* Set AUTH0 byte (from which page starts password protection) */
+int		 ntag21x_get_auth(FreefareTag tag, uint8_t *byte); /* Get AUTH0 byte */
+int		 ntag21x_access_enable(FreefareTag tag, uint8_t byte); /* Enable access feature in ACCESS byte */
+int		 ntag21x_access_disable(FreefareTag tag, uint8_t byte); /* Disable access feature in ACCESS byte */
+int		 ntag21x_get_access(FreefareTag tag, uint8_t *byte); /* Get ACCESS byte */
+int		 ntag21x_check_access(FreefareTag tag, uint8_t byte, bool *result); /* Check if access feature is enabled */
+int		 ntag21x_get_authentication_limit(FreefareTag tag, uint8_t *byte); /* Get authentication limit */
+int		 ntag21x_set_authentication_limit(FreefareTag tag, uint8_t byte); /* Set authentication limit (0x00 = disabled, [0x01,0x07] = valid range, > 0x07 invalid range) */
+int		 ntag21x_read(FreefareTag tag, uint8_t page, uint8_t *data); /* Read 16 bytes starting from page */
+int		 ntag21x_read4(FreefareTag tag, uint8_t page, uint8_t *data); /* Read 4 bytes on page */
+int		 ntag21x_fast_read(FreefareTag tag, uint8_t start_page, uint8_t end_page, uint8_t *data); /* Read n*4 bytes from range [start_page,end_page] */
+int		 ntag21x_fast_read4(FreefareTag tag, uint8_t page, uint8_t *data); /* Fast read certain page */
+int		 ntag21x_read_cnt(FreefareTag tag, uint8_t *data);  /* Read 3-byte NFC counter if enabled else it returns error */
+int		 ntag21x_write(FreefareTag tag, uint8_t page, uint8_t data[4]);  /* Write 4 bytes to page */
+int		 ntag21x_compatibility_write(FreefareTag tag, uint8_t page, uint8_t data[4]);  /* Writes 4 bytes to page with mifare classic write */
+int		 ntag21x_authenticate(FreefareTag tag, const NTAG21xKey key);  /* Authenticate with tag */
+bool		 is_ntag21x(FreefareTag tag);  /* Check if tag type is NTAG21x */
+bool		 ntag21x_is_auth_supported(nfc_device *device, nfc_iso14443a_info nai);  /* Check if tag supports 21x commands */
 
 
 
-bool             mifare_mini_taste (nfc_device *device, nfc_target target);
-bool		 mifare_classic1k_taste (nfc_device *device, nfc_target target);
-bool		 mifare_classic4k_taste (nfc_device *device, nfc_target target);
-FreefareTag      mifare_mini_tag_new (nfc_device *device, nfc_target target);
-FreefareTag	 mifare_classic1k_tag_new (nfc_device *device, nfc_target target);
-FreefareTag	 mifare_classic4k_tag_new (nfc_device *device, nfc_target target);
-void		 mifare_classic_tag_free (FreefareTag tag);
+bool             mifare_mini_taste(nfc_device *device, nfc_target target);
+bool		 mifare_classic1k_taste(nfc_device *device, nfc_target target);
+bool		 mifare_classic4k_taste(nfc_device *device, nfc_target target);
+FreefareTag      mifare_mini_tag_new(nfc_device *device, nfc_target target);
+FreefareTag	 mifare_classic1k_tag_new(nfc_device *device, nfc_target target);
+FreefareTag	 mifare_classic4k_tag_new(nfc_device *device, nfc_target target);
+void		 mifare_classic_tag_free(FreefareTag tag);
 
 typedef unsigned char MifareClassicBlock[16];
 
@@ -177,31 +177,31 @@ typedef unsigned char MifareClassicKey[6];
 /* NFC Forum public key */
 extern const MifareClassicKey mifare_classic_nfcforum_public_key_a;
 
-int		 mifare_classic_connect (FreefareTag tag);
-int		 mifare_classic_disconnect (FreefareTag tag);
+int		 mifare_classic_connect(FreefareTag tag);
+int		 mifare_classic_disconnect(FreefareTag tag);
 
-int		 mifare_classic_authenticate (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type);
-int		 mifare_classic_read (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data);
-int		 mifare_classic_init_value (FreefareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr);
-int		 mifare_classic_read_value (FreefareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr);
-int		 mifare_classic_write (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data);
+int		 mifare_classic_authenticate(FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type);
+int		 mifare_classic_read(FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data);
+int		 mifare_classic_init_value(FreefareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr);
+int		 mifare_classic_read_value(FreefareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr);
+int		 mifare_classic_write(FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data);
 
-int		 mifare_classic_increment (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
-int		 mifare_classic_decrement (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
-int		 mifare_classic_restore (FreefareTag tag, const MifareClassicBlockNumber block);
-int		 mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block);
+int		 mifare_classic_increment(FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
+int		 mifare_classic_decrement(FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount);
+int		 mifare_classic_restore(FreefareTag tag, const MifareClassicBlockNumber block);
+int		 mifare_classic_transfer(FreefareTag tag, const MifareClassicBlockNumber block);
 
-int		 mifare_classic_get_trailer_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
-int		 mifare_classic_get_data_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
+int		 mifare_classic_get_trailer_block_permission(FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type);
+int		 mifare_classic_get_data_block_permission(FreefareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type);
 
-int		 mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber sector);
+int		 mifare_classic_format_sector(FreefareTag tag, const MifareClassicSectorNumber sector);
 
-void		 mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
+void		 mifare_classic_trailer_block(MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b);
 
-MifareClassicSectorNumber mifare_classic_block_sector (MifareClassicBlockNumber block);
-MifareClassicBlockNumber  mifare_classic_sector_first_block (MifareClassicSectorNumber sector);
-size_t		 mifare_classic_sector_block_count (MifareClassicSectorNumber sector);
-MifareClassicBlockNumber  mifare_classic_sector_last_block (MifareClassicSectorNumber sector);
+MifareClassicSectorNumber mifare_classic_block_sector(MifareClassicBlockNumber block);
+MifareClassicBlockNumber  mifare_classic_sector_first_block(MifareClassicSectorNumber sector);
+size_t		 mifare_classic_sector_block_count(MifareClassicSectorNumber sector);
+MifareClassicBlockNumber  mifare_classic_sector_last_block(MifareClassicSectorNumber sector);
 
 #define C_000 0
 #define C_001 1
@@ -248,28 +248,28 @@ extern const MadAid mad_not_applicable_aid;
 /* NFC Forum AID */
 extern const MadAid mad_nfcforum_aid;
 
-Mad		 mad_new (const uint8_t version);
-Mad		 mad_read (FreefareTag tag);
-int		 mad_write (FreefareTag tag, Mad mad, const MifareClassicKey key_b_sector_00, const MifareClassicKey key_b_sector_10);
-int		 mad_get_version (Mad mad);
-void		 mad_set_version (Mad mad, const uint8_t version);
-MifareClassicSectorNumber mad_get_card_publisher_sector (Mad mad);
-int		 mad_set_card_publisher_sector (Mad mad, const MifareClassicSectorNumber cps);
-int		 mad_get_aid (Mad mad, const MifareClassicSectorNumber sector, MadAid *aid);
-int		 mad_set_aid (Mad mad, const MifareClassicSectorNumber sector, MadAid aid);
-bool		 mad_sector_reserved (const MifareClassicSectorNumber sector);
-void		 mad_free (Mad mad);
+Mad		 mad_new(const uint8_t version);
+Mad		 mad_read(FreefareTag tag);
+int		 mad_write(FreefareTag tag, Mad mad, const MifareClassicKey key_b_sector_00, const MifareClassicKey key_b_sector_10);
+int		 mad_get_version(Mad mad);
+void		 mad_set_version(Mad mad, const uint8_t version);
+MifareClassicSectorNumber mad_get_card_publisher_sector(Mad mad);
+int		 mad_set_card_publisher_sector(Mad mad, const MifareClassicSectorNumber cps);
+int		 mad_get_aid(Mad mad, const MifareClassicSectorNumber sector, MadAid *aid);
+int		 mad_set_aid(Mad mad, const MifareClassicSectorNumber sector, MadAid aid);
+bool		 mad_sector_reserved(const MifareClassicSectorNumber sector);
+void		 mad_free(Mad mad);
 
-MifareClassicSectorNumber *mifare_application_alloc (Mad mad, const MadAid aid, const size_t size);
-ssize_t		 mifare_application_read (FreefareTag tag, Mad mad, const MadAid aid, void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
-ssize_t		 mifare_application_write (FreefareTag tag, Mad mad, const MadAid aid, const void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
-int		 mifare_application_free (Mad mad, const MadAid aid);
+MifareClassicSectorNumber *mifare_application_alloc(Mad mad, const MadAid aid, const size_t size);
+ssize_t		 mifare_application_read(FreefareTag tag, Mad mad, const MadAid aid, void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
+ssize_t		 mifare_application_write(FreefareTag tag, Mad mad, const MadAid aid, const void *buf, size_t nbytes, const MifareClassicKey key, const MifareClassicKeyType key_type);
+int		 mifare_application_free(Mad mad, const MadAid aid);
 
-MifareClassicSectorNumber *mifare_application_find (Mad mad, const MadAid aid);
+MifareClassicSectorNumber *mifare_application_find(Mad mad, const MadAid aid);
 
 
 
-bool		 mifare_desfire_taste (nfc_device *device, nfc_target target);
+bool		 mifare_desfire_taste(nfc_device *device, nfc_target target);
 
 /* File types */
 
@@ -302,21 +302,21 @@ enum mifare_desfire_file_types {
  */
 
 #define MDAPP_SETTINGS(key_no_for_key_changing,config_changeable,free_create_delete_files,free_listing_contents,app_master_key_changeable) ( \
-	(key_no_for_key_changing << 4) | \
-	(config_changeable << 3) | \
-	(free_listing_contents << 1) | \
-	(app_master_key_changeable) \
-	)
+        (key_no_for_key_changing << 4) | \
+        (config_changeable << 3) | \
+        (free_listing_contents << 1) | \
+        (app_master_key_changeable) \
+                                                                                                                                           )
 
 
 /* Access right */
 
 #define MDAR(read,write,read_write,change_access_rights) ( \
-	(read << 12) | \
-	(write << 8) | \
-	(read_write << 4) | \
-	(change_access_rights) \
-	)
+                                                           (read << 12) | \
+                                                           (write << 8) | \
+                                                           (read_write << 4) | \
+                                                           (change_access_rights) \
+                                                         )
 #define MDAR_READ(ar)       (((ar) >> 12) & 0x0f)
 #define MDAR_WRITE(ar)      (((ar) >>  8) & 0x0f)
 #define MDAR_READ_WRITE(ar) (((ar) >>  4) & 0x0f)
@@ -379,12 +379,12 @@ struct mifare_desfire_df {
 };
 typedef struct mifare_desfire_df MifareDESFireDF;
 
-MifareDESFireAID mifare_desfire_aid_new (uint32_t aid);
-MifareDESFireAID mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n);
-uint32_t	 mifare_desfire_aid_get_aid (MifareDESFireAID aid);
+MifareDESFireAID mifare_desfire_aid_new(uint32_t aid);
+MifareDESFireAID mifare_desfire_aid_new_with_mad_aid(MadAid mad_aid, uint8_t n);
+uint32_t	 mifare_desfire_aid_get_aid(MifareDESFireAID aid);
 
-uint8_t		 mifare_desfire_last_pcd_error (FreefareTag tag);
-uint8_t		 mifare_desfire_last_picc_error (FreefareTag tag);
+uint8_t		 mifare_desfire_last_pcd_error(FreefareTag tag);
+uint8_t		 mifare_desfire_last_picc_error(FreefareTag tag);
 
 #pragma pack (push)
 #pragma pack (1)
@@ -436,93 +436,93 @@ struct mifare_desfire_file_settings {
     } settings;
 };
 
-FreefareTag	 mifare_desfire_tag_new (nfc_device *device, nfc_target target);
-void		 mifare_desfire_tag_free (FreefareTag tags);
+FreefareTag	 mifare_desfire_tag_new(nfc_device *device, nfc_target target);
+void		 mifare_desfire_tag_free(FreefareTag tags);
 
-int		 mifare_desfire_connect (FreefareTag tag);
-int		 mifare_desfire_disconnect (FreefareTag tag);
+int		 mifare_desfire_connect(FreefareTag tag);
+int		 mifare_desfire_disconnect(FreefareTag tag);
 
-int		 mifare_desfire_authenticate (FreefareTag tag, uint8_t key_no, MifareDESFireKey key);
-int		 mifare_desfire_authenticate_iso (FreefareTag tag, uint8_t key_no, MifareDESFireKey key);
-int		 mifare_desfire_authenticate_aes (FreefareTag tag, uint8_t key_no, MifareDESFireKey key);
-int		 mifare_desfire_change_key_settings (FreefareTag tag, uint8_t settings);
-int		 mifare_desfire_get_key_settings (FreefareTag tag, uint8_t *settings, uint8_t *max_keys);
-int		 mifare_desfire_change_key (FreefareTag tag, uint8_t key_no, MifareDESFireKey new_key, MifareDESFireKey old_key);
-int		 mifare_desfire_get_key_version (FreefareTag tag, uint8_t key_no, uint8_t *version);
-int		 mifare_desfire_create_application (FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
-int		 mifare_desfire_create_application_3k3des (FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
-int		 mifare_desfire_create_application_aes (FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
+int		 mifare_desfire_authenticate(FreefareTag tag, uint8_t key_no, MifareDESFireKey key);
+int		 mifare_desfire_authenticate_iso(FreefareTag tag, uint8_t key_no, MifareDESFireKey key);
+int		 mifare_desfire_authenticate_aes(FreefareTag tag, uint8_t key_no, MifareDESFireKey key);
+int		 mifare_desfire_change_key_settings(FreefareTag tag, uint8_t settings);
+int		 mifare_desfire_get_key_settings(FreefareTag tag, uint8_t *settings, uint8_t *max_keys);
+int		 mifare_desfire_change_key(FreefareTag tag, uint8_t key_no, MifareDESFireKey new_key, MifareDESFireKey old_key);
+int		 mifare_desfire_get_key_version(FreefareTag tag, uint8_t key_no, uint8_t *version);
+int		 mifare_desfire_create_application(FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
+int		 mifare_desfire_create_application_3k3des(FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
+int		 mifare_desfire_create_application_aes(FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no);
 
-int		 mifare_desfire_create_application_iso (FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
-int		 mifare_desfire_create_application_3k3des_iso (FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
-int		 mifare_desfire_create_application_aes_iso (FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
+int		 mifare_desfire_create_application_iso(FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
+int		 mifare_desfire_create_application_3k3des_iso(FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
+int		 mifare_desfire_create_application_aes_iso(FreefareTag tag, MifareDESFireAID aid, uint8_t settings, uint8_t key_no, int want_iso_file_identifiers, uint16_t iso_file_id, uint8_t *iso_file_name, size_t iso_file_name_len);
 
-int		 mifare_desfire_delete_application (FreefareTag tag, MifareDESFireAID aid);
-int		 mifare_desfire_get_application_ids (FreefareTag tag, MifareDESFireAID *aids[], size_t *count);
-int		 mifare_desfire_get_df_names (FreefareTag tag, MifareDESFireDF *dfs[], size_t *count);
-void		 mifare_desfire_free_application_ids (MifareDESFireAID aids[]);
-int		 mifare_desfire_select_application (FreefareTag tag, MifareDESFireAID aid);
-int		 mifare_desfire_format_picc (FreefareTag tag);
-int		 mifare_desfire_get_version (FreefareTag tag, struct mifare_desfire_version_info *version_info);
-int		 mifare_desfire_free_mem (FreefareTag tag, uint32_t *size);
-int		 mifare_desfire_set_configuration (FreefareTag tag, bool disable_format, bool enable_random_uid);
-int		 mifare_desfire_set_default_key (FreefareTag tag, MifareDESFireKey key);
-int		 mifare_desfire_set_ats (FreefareTag tag, uint8_t *ats);
-int		 mifare_desfire_get_card_uid (FreefareTag tag, char **uid);
-int		 mifare_desfire_get_file_ids (FreefareTag tag, uint8_t **files, size_t *count);
-int		 mifare_desfire_get_iso_file_ids (FreefareTag tag, uint16_t **files, size_t *count);
-int		 mifare_desfire_get_file_settings (FreefareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings);
-int		 mifare_desfire_change_file_settings (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights);
-int		 mifare_desfire_create_std_data_file (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
-int		 mifare_desfire_create_std_data_file_iso (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id);
-int		 mifare_desfire_create_backup_data_file (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
-int		 mifare_desfire_create_backup_data_file_iso (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id);
-int		 mifare_desfire_create_value_file (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, int32_t lower_limit, int32_t upper_limit, int32_t value, uint8_t limited_credit_enable);
-int		 mifare_desfire_create_linear_record_file (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
-int		 mifare_desfire_create_linear_record_file_iso (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id);
-int		 mifare_desfire_create_cyclic_record_file (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
-int		 mifare_desfire_create_cyclic_record_file_iso (FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id);
-int		 mifare_desfire_delete_file (FreefareTag tag, uint8_t file_no);
+int		 mifare_desfire_delete_application(FreefareTag tag, MifareDESFireAID aid);
+int		 mifare_desfire_get_application_ids(FreefareTag tag, MifareDESFireAID *aids[], size_t *count);
+int		 mifare_desfire_get_df_names(FreefareTag tag, MifareDESFireDF *dfs[], size_t *count);
+void		 mifare_desfire_free_application_ids(MifareDESFireAID aids[]);
+int		 mifare_desfire_select_application(FreefareTag tag, MifareDESFireAID aid);
+int		 mifare_desfire_format_picc(FreefareTag tag);
+int		 mifare_desfire_get_version(FreefareTag tag, struct mifare_desfire_version_info *version_info);
+int		 mifare_desfire_free_mem(FreefareTag tag, uint32_t *size);
+int		 mifare_desfire_set_configuration(FreefareTag tag, bool disable_format, bool enable_random_uid);
+int		 mifare_desfire_set_default_key(FreefareTag tag, MifareDESFireKey key);
+int		 mifare_desfire_set_ats(FreefareTag tag, uint8_t *ats);
+int		 mifare_desfire_get_card_uid(FreefareTag tag, char **uid);
+int		 mifare_desfire_get_file_ids(FreefareTag tag, uint8_t **files, size_t *count);
+int		 mifare_desfire_get_iso_file_ids(FreefareTag tag, uint16_t **files, size_t *count);
+int		 mifare_desfire_get_file_settings(FreefareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings);
+int		 mifare_desfire_change_file_settings(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights);
+int		 mifare_desfire_create_std_data_file(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
+int		 mifare_desfire_create_std_data_file_iso(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id);
+int		 mifare_desfire_create_backup_data_file(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
+int		 mifare_desfire_create_backup_data_file_iso(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size, uint16_t iso_file_id);
+int		 mifare_desfire_create_value_file(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, int32_t lower_limit, int32_t upper_limit, int32_t value, uint8_t limited_credit_enable);
+int		 mifare_desfire_create_linear_record_file(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
+int		 mifare_desfire_create_linear_record_file_iso(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id);
+int		 mifare_desfire_create_cyclic_record_file(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
+int		 mifare_desfire_create_cyclic_record_file_iso(FreefareTag tag, uint8_t file_no, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records, uint16_t iso_file_id);
+int		 mifare_desfire_delete_file(FreefareTag tag, uint8_t file_no);
 
-ssize_t		 mifare_desfire_read_data (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);
-ssize_t		 mifare_desfire_read_data_ex (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
-ssize_t		 mifare_desfire_write_data (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, const void *data);
-ssize_t		 mifare_desfire_write_data_ex (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, const void *data, int cs);
-int		 mifare_desfire_get_value (FreefareTag tag, uint8_t file_no, int32_t *value);
-int		 mifare_desfire_get_value_ex (FreefareTag tag, uint8_t file_no, int32_t *value, int cs);
-int		 mifare_desfire_credit (FreefareTag tag, uint8_t file_no, int32_t amount);
-int		 mifare_desfire_credit_ex (FreefareTag tag, uint8_t file_no, int32_t amount, int cs);
-int		 mifare_desfire_debit (FreefareTag tag, uint8_t file_no, int32_t amount);
-int		 mifare_desfire_debit_ex (FreefareTag tag, uint8_t file_no, int32_t amount, int cs);
-int		 mifare_desfire_limited_credit (FreefareTag tag, uint8_t file_no, int32_t amount);
-int		 mifare_desfire_limited_credit_ex (FreefareTag tag, uint8_t file_no, int32_t amount, int cs);
-ssize_t		 mifare_desfire_write_record (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);
-ssize_t		 mifare_desfire_write_record_ex (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
-ssize_t		 mifare_desfire_read_records (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);
-ssize_t		 mifare_desfire_read_records_ex (FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
-int		 mifare_desfire_clear_record_file (FreefareTag tag, uint8_t file_no);
-int		 mifare_desfire_commit_transaction (FreefareTag tag);
-int		 mifare_desfire_abort_transaction (FreefareTag tag);
+ssize_t		 mifare_desfire_read_data(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);
+ssize_t		 mifare_desfire_read_data_ex(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
+ssize_t		 mifare_desfire_write_data(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, const void *data);
+ssize_t		 mifare_desfire_write_data_ex(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, const void *data, int cs);
+int		 mifare_desfire_get_value(FreefareTag tag, uint8_t file_no, int32_t *value);
+int		 mifare_desfire_get_value_ex(FreefareTag tag, uint8_t file_no, int32_t *value, int cs);
+int		 mifare_desfire_credit(FreefareTag tag, uint8_t file_no, int32_t amount);
+int		 mifare_desfire_credit_ex(FreefareTag tag, uint8_t file_no, int32_t amount, int cs);
+int		 mifare_desfire_debit(FreefareTag tag, uint8_t file_no, int32_t amount);
+int		 mifare_desfire_debit_ex(FreefareTag tag, uint8_t file_no, int32_t amount, int cs);
+int		 mifare_desfire_limited_credit(FreefareTag tag, uint8_t file_no, int32_t amount);
+int		 mifare_desfire_limited_credit_ex(FreefareTag tag, uint8_t file_no, int32_t amount, int cs);
+ssize_t		 mifare_desfire_write_record(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);
+ssize_t		 mifare_desfire_write_record_ex(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
+ssize_t		 mifare_desfire_read_records(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data);
+ssize_t		 mifare_desfire_read_records_ex(FreefareTag tag, uint8_t file_no, off_t offset, size_t length, void *data, int cs);
+int		 mifare_desfire_clear_record_file(FreefareTag tag, uint8_t file_no);
+int		 mifare_desfire_commit_transaction(FreefareTag tag);
+int		 mifare_desfire_abort_transaction(FreefareTag tag);
 
-MifareDESFireKey mifare_desfire_des_key_new (const uint8_t value[8]);
-MifareDESFireKey mifare_desfire_3des_key_new (const uint8_t value[16]);
-MifareDESFireKey mifare_desfire_des_key_new_with_version (const uint8_t value[8]);
-MifareDESFireKey mifare_desfire_3des_key_new_with_version (const uint8_t value[16]);
-MifareDESFireKey mifare_desfire_3k3des_key_new (const uint8_t value[24]);
-MifareDESFireKey mifare_desfire_3k3des_key_new_with_version (const uint8_t value[24]);
-MifareDESFireKey mifare_desfire_aes_key_new (const uint8_t value[16]);
-MifareDESFireKey mifare_desfire_aes_key_new_with_version (const uint8_t value[16], uint8_t version);
-uint8_t		 mifare_desfire_key_get_version (MifareDESFireKey key);
-void		 mifare_desfire_key_set_version (MifareDESFireKey key, uint8_t version);
-void		 mifare_desfire_key_free (MifareDESFireKey key);
+MifareDESFireKey mifare_desfire_des_key_new(const uint8_t value[8]);
+MifareDESFireKey mifare_desfire_3des_key_new(const uint8_t value[16]);
+MifareDESFireKey mifare_desfire_des_key_new_with_version(const uint8_t value[8]);
+MifareDESFireKey mifare_desfire_3des_key_new_with_version(const uint8_t value[16]);
+MifareDESFireKey mifare_desfire_3k3des_key_new(const uint8_t value[24]);
+MifareDESFireKey mifare_desfire_3k3des_key_new_with_version(const uint8_t value[24]);
+MifareDESFireKey mifare_desfire_aes_key_new(const uint8_t value[16]);
+MifareDESFireKey mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version);
+uint8_t		 mifare_desfire_key_get_version(MifareDESFireKey key);
+void		 mifare_desfire_key_set_version(MifareDESFireKey key, uint8_t version);
+void		 mifare_desfire_key_free(MifareDESFireKey key);
 
-uint8_t		*tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
-uint8_t		*tlv_decode (const uint8_t *istream, uint8_t *type, uint16_t *size);
-size_t		tlv_record_length (const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
-uint8_t		*tlv_append (uint8_t *a, uint8_t *b);
+uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
+uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
+size_t		tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
+uint8_t		*tlv_append(uint8_t *a, uint8_t *b);
 
 #ifdef __cplusplus
-    }
+}
 #endif // __cplusplus
 
 #endif /* !__FREEFARE_H__ */
