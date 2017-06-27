@@ -11,6 +11,7 @@ set(LIBRARY_SOURCES
 		mifare_desfire_error
 		mifare_desfire_key
 		mifare_ultralight
+		ntag21x
 		tlv
 		../contrib/libutil/hexdump
 		)

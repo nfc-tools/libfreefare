@@ -244,6 +244,28 @@ struct mifare_ultralight_tag {
 };
 
 /*
+  NTAG section
+*/
+
+struct ntag21x_tag {
+    struct freefare_tag __tag;
+
+    int subtype;
+    uint8_t vendor_id;
+    uint8_t product_type;
+    uint8_t product_subtype;
+    uint8_t major_product_version;
+    uint8_t minor_product_version;
+    uint8_t storage_size;
+    uint8_t protocol_type;
+};
+
+struct ntag21x_key {
+    uint8_t data[4]; // 4B key
+    uint8_t pack[2]; // 2B Password Acknowlege
+} ntag21x_key;
+
+/*
  * FreefareTag assertion macros
  *
  * This macros provide a simple and unified way to perform various tests at the
@@ -262,6 +284,7 @@ struct mifare_ultralight_tag {
 #define MIFARE_CLASSIC(tag) ((struct mifare_classic_tag *) tag)
 #define MIFARE_DESFIRE(tag) ((struct mifare_desfire_tag *) tag)
 #define MIFARE_ULTRALIGHT(tag) ((struct mifare_ultralight_tag *) tag)
+#define NTAG_21x(tag) ((struct ntag21x_tag *) tag)
 
 /*
  * Access bits manipulation macros

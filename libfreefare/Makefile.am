@@ -14,6 +14,7 @@ libfreefare_la_SOURCES = felica.c \
 			 mifare_desfire_key.c \
 			 mad.c \
 			 mifare_application.c \
+			 ntag21x.c \
 			 tlv.c
 libfreefare_la_LIBADD =
 
@@ -39,6 +40,7 @@ man_MANS = freefare.3 \
 	   mifare_desfire_aid.3 \
 	   mifare_desfire_key.3 \
 	   mifare_ultralight.3 \
+	   ntag21x.3 \
 	   tlv.3
 
 linkedman = \
