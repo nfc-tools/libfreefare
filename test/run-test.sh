@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ -n "${SKIP_TESTS}" ]; then
+	exit 0
+fi
+
 export BASE_DIR="`dirname $0`"
 
 if test -z "$NO_MAKE"; then
