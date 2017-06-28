@@ -287,6 +287,21 @@ enum mifare_desfire_file_types {
 #define MDCM_MACED      0x01
 #define MDCM_ENCIPHERED 0x03
 
+/* Mifare DESFire master key settings
+bit 7 - 4: Always 0.
+bit 3: PICC master key settings frozen = 0 (WARNING - this is irreversible); PICC master key settings changeable when authenticated with PICC master key = 1
+bit 2: PICC master key authentication required for creating or deleting applications = 0; Authentication not required = 1
+bit 1: PICC master key authentication required for listing of applications or reading key settings = 0; Free listing of applications and reading key settings = 1
+bit 0: PICC master key frozen (reversible with configuration change or when formatting card) = 0; PICC master key changeable = 1
+*/
+
+#define MDMK_SETTINGS(picc_master_key_settings_changeable,free_create_delete_application,free_listing_apps_and_key_settings,picc_master_key_changeable) ( \
+	(picc_master_key_settings_changeable << 3) | \
+	(free_create_delete_application << 2) | \
+        (free_listing_apps_and_key_settings << 1) | \
+	(picc_master_key_changeable) \
+	)
+
 /* Mifare DESFire EV1 Application crypto operations */
 
 #define APPLICATION_CRYPTO_DES    0x00
@@ -302,12 +317,12 @@ enum mifare_desfire_file_types {
  */
 
 #define MDAPP_SETTINGS(key_no_for_key_changing,config_changeable,free_create_delete_files,free_listing_contents,app_master_key_changeable) ( \
-        (key_no_for_key_changing << 4) | \
-        (config_changeable << 3) | \
-        (free_listing_contents << 1) | \
-        (app_master_key_changeable) \
-                                                                                                                                           )
-
+	(key_no_for_key_changing << 4) | \
+	(config_changeable << 3) | \
+        (free_create_delete_files << 2) | \
+	(free_listing_contents << 1) | \
+	(app_master_key_changeable) \
+	)
 
 /* Access right */
 
