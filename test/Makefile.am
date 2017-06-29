@@ -37,7 +37,7 @@ AM_LDFLAGS = -module -rpath $(libdir) -avoid-version -no-undefined
 
 test_felica_la_SOURCES = test_felica.c \
 			 felica_fixture.c \
-			 felica_fixture.h
+			 fixture.h
 test_felica_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_freefare_la_SOURCES = test_freefare.c
@@ -52,7 +52,7 @@ test_mifare_application_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 test_mifare_classic_la_SOURCES = test_mifare_classic.c \
 				 test_mifare_classic_mad.c \
 				 mifare_classic_fixture.c \
-				 mifare_classic_fixture.h
+				 fixture.h
 test_mifare_classic_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_classic_create_trailer_block_la_SOURCES = test_mifare_classic_create_trailer_block.c
@@ -63,7 +63,7 @@ test_mifare_classic_sector_boundaries_la_LIBADD = $(top_builddir)/libfreefare/li
 
 test_mifare_desfire_la_SOURCES = test_mifare_desfire.c \
 				 mifare_desfire_fixture.c \
-				 mifare_desfire_fixture.h
+				 fixture.h
 test_mifare_desfire_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
 				$(top_builddir)/test/common/libtestcommon.la
 
@@ -82,7 +82,7 @@ test_mifare_desfire_ev1_la_SOURCES = test_mifare_desfire_ev1.c \
 				     test_mifare_desfire_ev1_aes.c \
 				     test_mifare_desfire_ev1_iso.c \
 				     mifare_desfire_ev1_fixture.c \
-				     mifare_desfire_ev1_fixture.h
+				     fixture.h
 test_mifare_desfire_ev1_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
 				    $(top_builddir)/test/common/libtestcommon.la
 
@@ -91,7 +91,7 @@ test_mifare_desfire_key_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_ultralight_la_SOURCES = test_mifare_ultralight.c \
 				    mifare_ultralight_fixture.c \
-				    mifare_ultralight_fixture.h
+				    fixture.h
 test_mifare_ultralight_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_tlv_la_SOURCES = test_tlv.c

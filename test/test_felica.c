@@ -2,7 +2,7 @@
 
 #include <freefare.h>
 
-#include "felica_fixture.h"
+#include "fixture.h"
 
 void
 test_felica_read_without_encryption(void)
