@@ -1,5 +1,6 @@
 # Introduction
 
+[![Build Status](https://travis-ci.org/nfc-tools/libfreefare.svg?branch=master)](https://travis-ci.org/nfc-tools/libfreefare)
 [![Join the chat at https://gitter.im/nfc-tools/libfreefare](https://badges.gitter.im/nfc-tools/libfreefare.svg)](https://gitter.im/nfc-tools/libfreefare?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 The _libfreefare_ project provides a convenient API for MIFARE card manipulations.
