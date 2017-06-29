@@ -44,4 +44,4 @@ svn-keywords-check:
 
 style:
 	find ${libfreefare_subdirs} -name '*.[ch]' -exec perl -pi -e 's/[ \t]+$$//' {} \;
-	find ${libfreefare_subdirs} -name '*.[ch]' -exec astyle --style=linux --indent=force-tab-x --lineend=linux '{}' ';'
+	find ${libfreefare_subdirs} -name '*.[ch]' -print0 | xargs -0 astyle --style=linux --indent=force-tab-x --lineend=linux --indent-preproc-define --indent-preproc-block
