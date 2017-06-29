@@ -13,27 +13,27 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #if defined(HAVE_SYS_TYPES_H)
-#  include <sys/types.h>
+    #include <sys/types.h>
 #endif
 
 #if defined(HAVE_SYS_ENDIAN_H)
-#  include <sys/endian.h>
+    #include <sys/endian.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)
-#  include <endian.h>
+    #include <endian.h>
 #endif
 
 #if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  include <CoreFoundation/CoreFoundation.h>
+    #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #if defined(HAVE_BYTESWAP_H)
-#  include <byteswap.h>
+    #include <byteswap.h>
 #endif
 
 #include <errno.h>
@@ -42,7 +42,7 @@
 #include <strings.h>
 
 #ifdef WITH_DEBUG
-#  include <libutil.h>
+    #include <libutil.h>
 #endif
 
 #include <openssl/rand.h>
@@ -93,9 +93,9 @@ static ssize_t	 read_data(FreefareTag tag, uint8_t command, uint8_t file_no, off
 
 #define ASSERT_AUTHENTICATED(tag) \
     do { \
-        if (MIFARE_DESFIRE (tag)->authenticated_key_no == NOT_YET_AUTHENTICATED) { \
-            return errno = EINVAL, -1;\
-        } \
+	if (MIFARE_DESFIRE (tag)->authenticated_key_no == NOT_YET_AUTHENTICATED) { \
+	    return errno = EINVAL, -1;\
+	} \
     } while (0)
 
 /*
@@ -104,20 +104,20 @@ static ssize_t	 read_data(FreefareTag tag, uint8_t command, uint8_t file_no, off
  */
 #define ASSERT_CS(cs) \
     do { \
-        if (cs < 0) { \
-            return errno = EINVAL, -1; \
-        } else if (cs == 0x02) { \
-            return errno = EINVAL, -1; \
-        } else if (cs > 0x03) { \
-            return errno = EINVAL, -1; \
-        } \
+	if (cs < 0) { \
+	    return errno = EINVAL, -1; \
+	} else if (cs == 0x02) { \
+	    return errno = EINVAL, -1; \
+	} else if (cs > 0x03) { \
+	    return errno = EINVAL, -1; \
+	} \
     } while (0)
 
 #define ASSERT_NOT_NULL(argument) \
     do { \
-        if (!argument) { \
-            return errno = EINVAL, -1; \
-        } \
+	if (!argument) { \
+	    return errno = EINVAL, -1; \
+	} \
     } while (0)
 
 
@@ -149,38 +149,38 @@ static ssize_t	 read_data(FreefareTag tag, uint8_t command, uint8_t file_no, off
  */
 #define DESFIRE_TRANSCEIVE2(tag, msg, msg_len, res) \
     do { \
-        DEBUG_FUNCTION(); \
-        static uint8_t __msg[MAX_CAPDU_SIZE + 5] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 }; \
-        /*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/ \
-        static uint8_t __res[MAX_RAPDU_SIZE + 1]; \
-        size_t __len = 5; \
-        errno = 0; \
-        if (!msg) return errno = EINVAL, -1; \
-        __msg[1] = msg[0]; \
-        if (msg_len > 1) { \
-            __len += msg_len; \
-            __msg[4] = msg_len - 1; \
-            memcpy (__msg + 5, msg + 1, msg_len - 1); \
-        } \
-        /* reply length */ \
-        __msg[__len-1] = 0x00; \
-        MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
-        MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
-        DEBUG_XFER (__msg, __len, "===> "); \
-        int _res; \
-        if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
-            return errno = EIO, -1; \
-        } \
-        __##res##_n = _res; \
-        DEBUG_XFER (__res, __##res##_n, "<=== "); \
-        res[__##res##_n-2] = __res[__##res##_n-1]; \
-        __##res##_n--; \
-        if ((1 == __##res##_n) && (ADDITIONAL_FRAME != res[__##res##_n-1]) && (OPERATION_OK != res[__##res##_n-1])) { \
-            if (res[0] == AUTHENTICATION_ERROR) \
-                errno = EACCES; \
-            return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
-        } \
-        memcpy (res, __res, __##res##_n - 1); \
+	DEBUG_FUNCTION(); \
+	static uint8_t __msg[MAX_CAPDU_SIZE + 5] = { 0x90, 0x00, 0x00, 0x00, 0x00, /* ..., */ 0x00 }; \
+	/*                                       CLA   INS   P1    P2    Lc    PAYLOAD    LE*/ \
+	static uint8_t __res[MAX_RAPDU_SIZE + 1]; \
+	size_t __len = 5; \
+	errno = 0; \
+	if (!msg) return errno = EINVAL, -1; \
+	__msg[1] = msg[0]; \
+	if (msg_len > 1) { \
+	    __len += msg_len; \
+	    __msg[4] = msg_len - 1; \
+	    memcpy (__msg + 5, msg + 1, msg_len - 1); \
+	} \
+	/* reply length */ \
+	__msg[__len-1] = 0x00; \
+	MIFARE_DESFIRE (tag)->last_picc_error = OPERATION_OK; \
+	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
+	DEBUG_XFER (__msg, __len, "===> "); \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 0)) < 0) { \
+	    return errno = EIO, -1; \
+	} \
+	__##res##_n = _res; \
+	DEBUG_XFER (__res, __##res##_n, "<=== "); \
+	res[__##res##_n-2] = __res[__##res##_n-1]; \
+	__##res##_n--; \
+	if ((1 == __##res##_n) && (ADDITIONAL_FRAME != res[__##res##_n-1]) && (OPERATION_OK != res[__##res##_n-1])) { \
+	    if (res[0] == AUTHENTICATION_ERROR) \
+		errno = EACCES; \
+	    return MIFARE_DESFIRE (tag)->last_picc_error = res[0], -1; \
+	} \
+	memcpy (res, __res, __##res##_n - 1); \
     } while (0)
 
 

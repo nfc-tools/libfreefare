@@ -20,27 +20,27 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #if defined(HAVE_SYS_TYPES_H)
-#  include <sys/types.h>
+    #include <sys/types.h>
 #endif
 
 #if defined(HAVE_SYS_ENDIAN_H)
-#  include <sys/endian.h>
+    #include <sys/endian.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)
-#  include <endian.h>
+    #include <endian.h>
 #endif
 
 #if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  include <CoreFoundation/CoreFoundation.h>
+    #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #if defined(HAVE_BYTESWAP_H)
-#  include <byteswap.h>
+    #include <byteswap.h>
 #endif
 
 #include <errno.h>
@@ -49,7 +49,7 @@
 #include <strings.h>
 
 #ifdef WITH_DEBUG
-#  include <libutil.h>
+    #include <libutil.h>
 #endif
 
 #include <freefare.h>
@@ -70,19 +70,19 @@
 
 #define CLASSIC_TRANSCEIVE_EX(tag, msg, res, disconnect) \
     do { \
-        errno = 0; \
-        DEBUG_XFER (msg, __##msg##_n, "===> "); \
-        int _res; \
-        if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
-            if (disconnect) { \
-                tag->active = false; \
-            } \
-            if (_res == NFC_EMFCAUTHFAIL) \
-                return errno = EACCES, -1; \
-            return errno = EIO, -1; \
-        } \
-        __##res##_n = _res; \
-        DEBUG_XFER (res, __##res##_n, "<=== "); \
+	errno = 0; \
+	DEBUG_XFER (msg, __##msg##_n, "===> "); \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
+	    if (disconnect) { \
+		tag->active = false; \
+	    } \
+	    if (_res == NFC_EMFCAUTHFAIL) \
+		return errno = EACCES, -1; \
+	    return errno = EIO, -1; \
+	} \
+	__##res##_n = _res; \
+	DEBUG_XFER (res, __##res##_n, "<=== "); \
     } while (0)
 
 

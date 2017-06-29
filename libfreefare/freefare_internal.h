@@ -2,7 +2,7 @@
 #define __FREEFARE_INTERNAL_H__
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #include <openssl/des.h>
@@ -25,55 +25,55 @@
  */
 
 #if !defined(le32toh) && defined(letoh32)
-#  define le32toh(x) letoh32(x)
-#  define be32toh(x) betoh32(x)
+    #define le32toh(x) letoh32(x)
+    #define be32toh(x) betoh32(x)
 #endif
 
 #if !defined(le16toh) && defined(letoh16)
-#  define le16toh(x) letoh16(x)
-#  define be16toh(x) betoh16(x)
+    #define le16toh(x) letoh16(x)
+    #define be16toh(x) betoh16(x)
 #endif
 
 #if !defined(le32toh) && defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  define be32toh(x) CFSwapInt32BigToHost(x)
-#  define htobe32(x) CFSwapInt32HostToBig(x)
-#  define le32toh(x) CFSwapInt32LittleToHost(x)
-#  define htole32(x) CFSwapInt32HostToLittle(x)
+    #define be32toh(x) CFSwapInt32BigToHost(x)
+    #define htobe32(x) CFSwapInt32HostToBig(x)
+    #define le32toh(x) CFSwapInt32LittleToHost(x)
+    #define htole32(x) CFSwapInt32HostToLittle(x)
 #endif
 
 #if !defined(le16toh) && defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  define be16toh(x) CFSwapInt16BigToHost(x)
-#  define htobe16(x) CFSwapInt16HostToBig(x)
-#  define le16toh(x) CFSwapInt16LittleToHost(x)
-#  define htole16(x) CFSwapInt16HostToLittle(x)
+    #define be16toh(x) CFSwapInt16BigToHost(x)
+    #define htobe16(x) CFSwapInt16HostToBig(x)
+    #define le16toh(x) CFSwapInt16LittleToHost(x)
+    #define htole16(x) CFSwapInt16HostToLittle(x)
 #endif
 
 #if !defined(le32toh) && defined(bswap_32)
-#  if BYTE_ORDER == LITTLE_ENDIAN
-#    define be32toh(x) bswap_32(x)
-#    define htobe32(x) bswap_32(x)
-#    define le32toh(x) (x)
-#    define htole32(x) (x)
-#  else
-#    define be32toh(x) (x)
-#    define htobe32(x) (x)
-#    define le32toh(x) bswap_32(x)
-#    define htole32(x) bswap_32(x)
-#  endif
+    #if BYTE_ORDER == LITTLE_ENDIAN
+	#define be32toh(x) bswap_32(x)
+	#define htobe32(x) bswap_32(x)
+	#define le32toh(x) (x)
+	#define htole32(x) (x)
+    #else
+	#define be32toh(x) (x)
+	#define htobe32(x) (x)
+	#define le32toh(x) bswap_32(x)
+	#define htole32(x) bswap_32(x)
+    #endif
 #endif
 
 #if !defined(htole16) && defined(bswap_16)
-#  if BYTE_ORDER == LITTLE_ENDIAN
-#    define be16toh(x) (bswap_16(x))
-#    define htobe16(x) (bswap_16(x))
-#    define htole16(x) (x)
-#    define le16toh(x) (x)
-#  else
-#    define be16toh(x) (x)
-#    define htobe16(x) (x)
-#    define htole16(x) (bswap_16(x))
-#    define le16toh(x) (bswap_16(x))
-#  endif
+    #if BYTE_ORDER == LITTLE_ENDIAN
+	#define be16toh(x) (bswap_16(x))
+	#define htobe16(x) (bswap_16(x))
+	#define htole16(x) (x)
+	#define le16toh(x) (x)
+    #else
+	#define be16toh(x) (x)
+	#define htobe16(x) (x)
+	#define htole16(x) (bswap_16(x))
+	#define le16toh(x) (bswap_16(x))
+    #endif
 #endif
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -276,11 +276,11 @@ struct ntag21x_key {
 #define TB_AB(ab) ((ab == C_DEFAULT) ? C_100 : ab)
 
 #ifdef WITH_DEBUG
-#define DEBUG_FUNCTION() do { printf("*** \033[033;1m%s\033[0m ***\n", __FUNCTION__); } while (0)
-#define DEBUG_XFER(data, nbytes, hint) do { hexdump (data, nbytes, hint, 0); } while (0)
+    #define DEBUG_FUNCTION() do { printf("*** \033[033;1m%s\033[0m ***\n", __FUNCTION__); } while (0)
+    #define DEBUG_XFER(data, nbytes, hint) do { hexdump (data, nbytes, hint, 0); } while (0)
 #else
-#define DEBUG_FUNCTION() do {} while (0)
-#define DEBUG_XFER(data, nbytes, hint) do {} while (0)
+    #define DEBUG_FUNCTION() do {} while (0)
+    #define DEBUG_XFER(data, nbytes, hint) do {} while (0)
 #endif
 
 
@@ -328,7 +328,7 @@ struct ntag21x_key {
  */
 #define BUFFER_APPEND(buffer_name, data) \
     do { \
-        buffer_name[__##buffer_name##_n++] = data; \
+	buffer_name[__##buffer_name##_n++] = data; \
     } while (0)
 
 /*
@@ -336,10 +336,10 @@ struct ntag21x_key {
  */
 #define BUFFER_APPEND_BYTES(buffer_name, data, size) \
     do { \
-        size_t __n = 0; \
-        while (__n < size) { \
-            buffer_name[__##buffer_name##_n++] = ((uint8_t *)data)[__n++]; \
-        } \
+	size_t __n = 0; \
+	while (__n < size) { \
+	    buffer_name[__##buffer_name##_n++] = ((uint8_t *)data)[__n++]; \
+	} \
     } while (0)
 
 /*
@@ -354,17 +354,17 @@ struct ntag21x_key {
 #if defined(_BYTE_ORDER) && (_BYTE_ORDER != _LITTLE_ENDIAN)
 #define BUFFER_APPEND_LE(buffer, data, data_size, field_size) \
     do { \
-        size_t __data_size = data_size; \
-        size_t __field_size = field_size; \
-        while (__field_size--, __data_size--) { \
-            buffer[__##buffer##_n++] = ((uint8_t *)&data)[__field_size]; \
-        } \
+	size_t __data_size = data_size; \
+	size_t __field_size = field_size; \
+	while (__field_size--, __data_size--) { \
+	    buffer[__##buffer##_n++] = ((uint8_t *)&data)[__field_size]; \
+	} \
     } while (0)
 #else
 #define BUFFER_APPEND_LE(buffer, data, data_size, field_size) \
     do { \
-        memcpy (buffer + __##buffer##_n, &data, data_size); \
-        __##buffer##_n += data_size; \
+	memcpy (buffer + __##buffer##_n, &data, data_size); \
+	__##buffer##_n += data_size; \
     } while (0)
 #endif
 

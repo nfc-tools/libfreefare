@@ -8,7 +8,7 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #include <assert.h>
@@ -18,7 +18,7 @@
 #include <sys/types.h>
 
 #ifdef WITH_DEBUG
-#  include <libutil.h>
+    #include <libutil.h>
 #endif
 
 #include <freefare.h>

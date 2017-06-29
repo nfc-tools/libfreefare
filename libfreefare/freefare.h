@@ -279,11 +279,11 @@ bit 0: PICC master key frozen (reversible with configuration change or when form
 */
 
 #define MDMK_SETTINGS(picc_master_key_settings_changeable,free_create_delete_application,free_listing_apps_and_key_settings,picc_master_key_changeable) ( \
-    (picc_master_key_settings_changeable << 3) | \
-    (free_create_delete_application << 2) | \
-    (free_listing_apps_and_key_settings << 1) | \
-    (picc_master_key_changeable) \
-)
+	(picc_master_key_settings_changeable << 3) | \
+	(free_create_delete_application << 2) | \
+	(free_listing_apps_and_key_settings << 1) | \
+	(picc_master_key_changeable) \
+																			)
 
 /* Mifare DESFire EV1 Application crypto operations */
 
@@ -300,21 +300,21 @@ bit 0: PICC master key frozen (reversible with configuration change or when form
  */
 
 #define MDAPP_SETTINGS(key_no_for_key_changing,config_changeable,free_create_delete_files,free_listing_contents,app_master_key_changeable) ( \
-    (key_no_for_key_changing << 4) | \
-    (config_changeable << 3) | \
-    (free_create_delete_files << 2) | \
-    (free_listing_contents << 1) | \
-    (app_master_key_changeable) \
-)
+	(key_no_for_key_changing << 4) | \
+	(config_changeable << 3) | \
+	(free_create_delete_files << 2) | \
+	(free_listing_contents << 1) | \
+	(app_master_key_changeable) \
+																	   )
 
 /* Access right */
 
 #define MDAR(read,write,read_write,change_access_rights) ( \
-    (read << 12) | \
-    (write << 8) | \
-    (read_write << 4) | \
-    (change_access_rights) \
-)
+	(read << 12) | \
+	(write << 8) | \
+	(read_write << 4) | \
+	(change_access_rights) \
+							 )
 
 #define MDAR_READ(ar)       (((ar) >> 12) & 0x0f)
 #define MDAR_WRITE(ar)      (((ar) >>  8) & 0x0f)

@@ -10,11 +10,11 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #if defined(HAVE_SYS_TYPES_H)
-#  include <sys/types.h>
+    #include <sys/types.h>
 #endif
 
 #include <errno.h>
@@ -22,7 +22,7 @@
 #include <string.h>
 
 #ifdef WITH_DEBUG
-#  include <libutil.h>
+    #include <libutil.h>
 #endif
 
 #include <freefare.h>
@@ -30,48 +30,48 @@
 
 #define ASSERT_VALID_PAGE(tag, page, mode_write) \
     do { \
-        if (is_mifare_ultralightc (tag)) { \
-            if (mode_write) { \
-                if (page >= MIFARE_ULTRALIGHT_C_PAGE_COUNT) return errno = EINVAL, -1; \
-            } else { \
-                if (page >= MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ) return errno = EINVAL, -1; \
-            } \
-        } else { \
-            if (page >= MIFARE_ULTRALIGHT_PAGE_COUNT) return errno = EINVAL, -1; \
-        } \
+	if (is_mifare_ultralightc (tag)) { \
+	    if (mode_write) { \
+		if (page >= MIFARE_ULTRALIGHT_C_PAGE_COUNT) return errno = EINVAL, -1; \
+	    } else { \
+		if (page >= MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ) return errno = EINVAL, -1; \
+	    } \
+	} else { \
+	    if (page >= MIFARE_ULTRALIGHT_PAGE_COUNT) return errno = EINVAL, -1; \
+	} \
     } while (0)
 
 #define ULTRALIGHT_TRANSCEIVE(tag, msg, res) \
     do { \
-        errno = 0; \
-        DEBUG_XFER (msg, __##msg##_n, "===> "); \
-        int _res; \
-        if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
-            return errno = EIO, -1; \
-        } \
-        __##res##_n = _res; \
-        DEBUG_XFER (res, __##res##_n, "<=== "); \
+	errno = 0; \
+	DEBUG_XFER (msg, __##msg##_n, "===> "); \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
+	    return errno = EIO, -1; \
+	} \
+	__##res##_n = _res; \
+	DEBUG_XFER (res, __##res##_n, "<=== "); \
     } while (0)
 
 #define ULTRALIGHT_TRANSCEIVE_RAW(tag, msg, res) \
     do { \
-        errno = 0; \
-        if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, false) < 0) { \
-            errno = EIO; \
-            return -1; \
-        } \
-        DEBUG_XFER (msg, __##msg##_n, "===> "); \
-        int _res; \
-        if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
-            nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true); \
-            return errno = EIO, -1; \
-        } \
-        __##res##_n = _res; \
-        DEBUG_XFER (res, __##res##_n, "<=== "); \
-        if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true) < 0) { \
-            errno = EIO; \
-            return -1; \
-        } \
+	errno = 0; \
+	if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, false) < 0) { \
+	    errno = EIO; \
+	    return -1; \
+	} \
+	DEBUG_XFER (msg, __##msg##_n, "===> "); \
+	int _res; \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, msg, __##msg##_n, res, __##res##_size, 0)) < 0) { \
+	    nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true); \
+	    return errno = EIO, -1; \
+	} \
+	__##res##_n = _res; \
+	DEBUG_XFER (res, __##res##_n, "<=== "); \
+	if (nfc_device_set_property_bool (tag->device, NP_EASY_FRAMING, true) < 0) { \
+	    errno = EIO; \
+	    return -1; \
+	} \
     } while (0)
 
 static bool
