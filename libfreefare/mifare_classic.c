@@ -526,7 +526,7 @@ mifare_classic_transfer(FreefareTag tag, const MifareClassicBlockNumber block)
      * meaning that the action was performed correctly (e.g. Snapper Feeder,
      * SCL 3711).
      */
-    if (!BUFFER_SIZE(res) || ((BUFFER_SIZE(res) == 1) && (res[0] = MC_OK)))
+    if (!BUFFER_SIZE(res) || ((BUFFER_SIZE(res) == 1) && (res[0] == MC_OK)))
 	return 0;
     else
 	return res[0];
