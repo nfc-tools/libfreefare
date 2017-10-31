@@ -1199,13 +1199,17 @@ mifare_desfire_get_iso_file_ids(FreefareTag tag, uint16_t **files, size_t *count
     ssize_t sn = offset;
     p = mifare_cryto_postprocess_data(tag, data, &sn, MDCM_PLAIN | CMAC_COMMAND);
 
-    if (!p)
+    if (!p) {
+	free(data);
 	return errno = EINVAL, -1;
+    }
 
     *count = sn / 2;
     *files = malloc(sizeof(**files) * *count);
-    if (!*files)
+    if (!*files) {
+	free(data);
 	return -1;
+    }
 
     for (size_t i = 0; i < *count; i++) {
 	(*files)[i] = le16toh(*(uint16_t *)(p + (2 * i)));
