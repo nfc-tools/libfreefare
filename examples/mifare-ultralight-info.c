@@ -59,7 +59,28 @@ main(int argc, char *argv[])
 		if (mifare_ultralight_connect(tag) < 0)
 		    errx(EXIT_FAILURE, "Error connecting to tag.");
 		res = mifare_ultralightc_authenticate(tag, key);
-		printf("Authentication with default key: %s\n", res ? "fail" : "success");
+		if (res != 0) {
+		    MifareDESFireKey diversified_key = NULL;
+		    MifareKeyDeriver deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_2K3DES);
+
+		    mifare_key_deriver_begin(deriver);
+		    mifare_key_deriver_update_uid(deriver, tag);
+		    diversified_key = mifare_key_deriver_end(deriver);
+
+		    // Disconnect and reconnect.
+		    mifare_ultralight_disconnect(tag);
+		    if (mifare_ultralight_connect(tag) < 0)
+			errx(EXIT_FAILURE, "Error connecting to tag.");
+
+		    res = mifare_ultralightc_authenticate(tag, diversified_key);
+
+		    printf("Authentication with default key: %s\n", res ? "fail" : "success (diversified)");
+
+		    mifare_desfire_key_free(diversified_key);
+		    mifare_key_deriver_free(deriver);
+		} else {
+		    printf("Authentication with default key: success\n");
+		}
 		mifare_desfire_key_free(key);
 		mifare_ultralight_disconnect(tag);
 	    }

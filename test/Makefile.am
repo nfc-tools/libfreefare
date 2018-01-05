@@ -24,6 +24,7 @@ cutter_unit_test_libs = \
 			test_mifare_desfire_des.la \
 			test_mifare_desfire_ev1.la \
 			test_mifare_desfire_key.la \
+			test_mifare_key_deriver_an10922.la \
 			test_mifare_ultralight.la \
 			test_tlv.la
 
@@ -88,6 +89,9 @@ test_mifare_desfire_ev1_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la \
 
 test_mifare_desfire_key_la_SOURCES = test_mifare_desfire_key.c
 test_mifare_desfire_key_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
+
+test_mifare_key_deriver_an10922_la_SOURCES = test_mifare_key_deriver_an10922.c
+test_mifare_key_deriver_an10922_la_LIBADD = $(top_builddir)/libfreefare/libfreefare.la
 
 test_mifare_ultralight_la_SOURCES = test_mifare_ultralight.c \
 				    mifare_ultralight_fixture.c \

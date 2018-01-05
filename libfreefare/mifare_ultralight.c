@@ -340,7 +340,7 @@ mifare_ultralightc_set_key(FreefareTag tag, MifareDESFireKey key)
 {
     MifareUltralightPage data;
 
-    if (key->type != T_3DES) {
+    if (key->type != MIFARE_KEY_2K3DES) {
 	errno = EINVAL;
 	return -1;
     }

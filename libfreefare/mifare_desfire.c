@@ -437,14 +437,14 @@ int
 mifare_desfire_authenticate(FreefareTag tag, uint8_t key_no, MifareDESFireKey key)
 {
     switch (key->type) {
-    case T_DES:
-    case T_3DES:
+    case MIFARE_KEY_DES:
+    case MIFARE_KEY_2K3DES:
 	return authenticate(tag, AUTHENTICATE_LEGACY, key_no, key);
 	break;
-    case T_3K3DES:
+    case MIFARE_KEY_3K3DES:
 	return authenticate(tag, AUTHENTICATE_ISO, key_no, key);
 	break;
-    case T_AES:
+    case MIFARE_KEY_AES128:
 	return authenticate(tag, AUTHENTICATE_AES, key_no, key);
 	break;
     }
@@ -534,13 +534,13 @@ mifare_desfire_change_key(FreefareTag tag, uint8_t key_no, MifareDESFireKey new_
      */
     if (0x000000 == MIFARE_DESFIRE(tag)->selected_application) {
 	switch (new_key->type) {
-	case T_DES:
-	case T_3DES:
+	case MIFARE_KEY_DES:
+	case MIFARE_KEY_2K3DES:
 	    break;
-	case T_3K3DES:
+	case MIFARE_KEY_3K3DES:
 	    key_no |= 0x40;
 	    break;
-	case T_AES:
+	case MIFARE_KEY_AES128:
 	    key_no |= 0x80;
 	    break;
 	}
@@ -551,12 +551,12 @@ mifare_desfire_change_key(FreefareTag tag, uint8_t key_no, MifareDESFireKey new_
 
     int new_key_length;
     switch (new_key->type) {
-    case T_DES:
-    case T_3DES:
-    case T_AES:
+    case MIFARE_KEY_DES:
+    case MIFARE_KEY_2K3DES:
+    case MIFARE_KEY_AES128:
 	new_key_length = 16;
 	break;
-    case T_3K3DES:
+    case MIFARE_KEY_3K3DES:
 	new_key_length = 24;
 	break;
     }
@@ -573,7 +573,7 @@ mifare_desfire_change_key(FreefareTag tag, uint8_t key_no, MifareDESFireKey new_
 
     __cmd_n += new_key_length;
 
-    if (new_key->type == T_AES)
+    if (new_key->type == MIFARE_KEY_AES128)
 	cmd[__cmd_n++] = new_key->aes_version;
 
     if ((MIFARE_DESFIRE(tag)->authenticated_key_no & 0x0f) != (key_no & 0x0f)) {
@@ -1037,12 +1037,12 @@ mifare_desfire_set_default_key(FreefareTag tag, MifareDESFireKey key)
     BUFFER_APPEND(cmd, 0x01);
     size_t key_data_length;
     switch (key->type) {
-    case T_DES:
-    case T_3DES:
-    case T_AES:
+    case MIFARE_KEY_DES:
+    case MIFARE_KEY_2K3DES:
+    case MIFARE_KEY_AES128:
 	key_data_length = 16;
 	break;
-    case T_3K3DES:
+    case MIFARE_KEY_3K3DES:
 	key_data_length = 24;
 	break;
     }
@@ -1101,7 +1101,7 @@ mifare_desfire_set_ats(FreefareTag tag, uint8_t *ats)
 }
 
 int
-mifare_desfire_get_card_uid(FreefareTag tag, char **uid)
+mifare_desfire_get_card_uid_raw(FreefareTag tag, uint8_t uid[])
 {
     ASSERT_ACTIVE(tag);
 
@@ -1121,6 +1121,20 @@ mifare_desfire_get_card_uid(FreefareTag tag, char **uid)
 
     if (!p)
 	return errno = EINVAL, -1;
+
+    memcpy(uid, p, 7);
+
+    return 0;
+}
+
+int
+mifare_desfire_get_card_uid(FreefareTag tag, char **uid)
+{
+    uint8_t p[7];
+
+    if (mifare_desfire_get_card_uid_raw(tag, p) < 0) {
+	return -1;
+    }
 
     if (!(*uid = malloc(2 * 7 + 1))) {
 	return -1;

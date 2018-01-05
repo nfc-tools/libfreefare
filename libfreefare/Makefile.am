@@ -12,6 +12,7 @@ libfreefare_la_SOURCES = felica.c \
 			 mifare_desfire_crypto.c \
 			 mifare_desfire_error.c \
 			 mifare_desfire_key.c \
+			 mifare_key_deriver.c \
 			 mad.c \
 			 mifare_application.c \
 			 ntag21x.c \
@@ -39,6 +40,7 @@ man_MANS = freefare.3 \
 	   mifare_desfire.3 \
 	   mifare_desfire_aid.3 \
 	   mifare_desfire_key.3 \
+	   mifare_key_deriver.3 \
 	   mifare_ultralight.3 \
 	   ntag21x.3 \
 	   tlv.3

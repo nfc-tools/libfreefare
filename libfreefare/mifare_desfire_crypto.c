@@ -184,12 +184,12 @@ key_block_size(const MifareDESFireKey key)
     size_t block_size;
 
     switch (key->type) {
-    case T_DES:
-    case T_3DES:
-    case T_3K3DES:
+    case MIFARE_KEY_DES:
+    case MIFARE_KEY_2K3DES:
+    case MIFARE_KEY_3K3DES:
 	block_size = 8;
 	break;
-    case T_AES:
+    case MIFARE_KEY_AES128:
 	block_size = 16;
 	break;
     }
@@ -206,12 +206,12 @@ key_macing_length(const MifareDESFireKey key)
     size_t mac_length;
 
     switch (key->type) {
-    case T_DES:
-    case T_3DES:
+    case MIFARE_KEY_DES:
+    case MIFARE_KEY_2K3DES:
 	mac_length = MAC_LENGTH;
 	break;
-    case T_3K3DES:
-    case T_AES:
+    case MIFARE_KEY_3K3DES:
+    case MIFARE_KEY_AES128:
 	mac_length = CMAC_LENGTH;
 	break;
     }
@@ -669,7 +669,7 @@ mifare_cypher_single_block(MifareDESFireKey key, uint8_t *data, uint8_t *ivect, 
     uint8_t edata[MAX_CRYPTO_BLOCK_SIZE];
 
     switch (key->type) {
-    case T_DES:
+    case MIFARE_KEY_DES:
 	switch (operation) {
 	case MCO_ENCYPHER:
 	    DES_ecb_encrypt((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
@@ -679,7 +679,7 @@ mifare_cypher_single_block(MifareDESFireKey key, uint8_t *data, uint8_t *ivect, 
 	    break;
 	}
 	break;
-    case T_3DES:
+    case MIFARE_KEY_2K3DES:
 	switch (operation) {
 	case MCO_ENCYPHER:
 	    DES_ecb_encrypt((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
@@ -693,7 +693,7 @@ mifare_cypher_single_block(MifareDESFireKey key, uint8_t *data, uint8_t *ivect, 
 	    break;
 	}
 	break;
-    case T_3K3DES:
+    case MIFARE_KEY_3K3DES:
 	switch (operation) {
 	case MCO_ENCYPHER:
 	    DES_ecb_encrypt((DES_cblock *) data, (DES_cblock *) edata, &(key->ks1), DES_ENCRYPT);
@@ -707,7 +707,7 @@ mifare_cypher_single_block(MifareDESFireKey key, uint8_t *data, uint8_t *ivect, 
 	    break;
 	}
 	break;
-    case T_AES:
+    case MIFARE_KEY_AES128:
 	switch (operation) {
 	case MCO_ENCYPHER:
 	    AES_set_encrypt_key(key->data, 8 * 16, &k);

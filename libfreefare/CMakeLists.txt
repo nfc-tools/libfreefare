@@ -10,6 +10,7 @@ set(LIBRARY_SOURCES
 		mifare_desfire_crypto
 		mifare_desfire_error
 		mifare_desfire_key
+		mifare_key_deriver
 		mifare_ultralight
 		ntag21x
 		tlv
