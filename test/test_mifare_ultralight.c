@@ -176,3 +176,51 @@ test_mifare_ultralightc_authenticate(void)
 	cut_omit("mifare_ultralightc_authenticate() skipped on Ultralight");
     }
 }
+
+void
+test_mifare_ultralightc_set_key(void)
+{
+    int res;
+    const uint8_t default_key_data[16] = { 0x49, 0x45, 0x4D, 0x4B, 0x41, 0x45, 0x52, 0x42, 0x21, 0x4E, 0x41, 0x43, 0x55, 0x4F, 0x59, 0x46 };
+    const uint8_t test_key_data[16] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0XEE, 0xFF };
+    MifareDESFireKey default_key;
+    MifareDESFireKey test_key;
+
+    if (is_mifare_ultralightc(tag)) {
+	default_key = mifare_desfire_3des_key_new(default_key_data);
+	test_key = mifare_desfire_3des_key_new(test_key_data);
+
+	// Change the key to the new key
+	res = mifare_ultralightc_set_key(tag, test_key);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralightc_set_key() failed"));
+
+	res = mifare_ultralight_disconnect(tag);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralight_disconnect() failed"));
+
+	res = mifare_ultralight_connect(tag);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralight_connect() failed"));
+
+	// Test the new key
+	res = mifare_ultralightc_authenticate(tag, test_key);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralightc_authenticate() failed"));
+
+	// Change the key back to the default key
+	res = mifare_ultralightc_set_key(tag, default_key);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralightc_set_key() failed"));
+
+	res = mifare_ultralight_disconnect(tag);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralight_disconnect() failed"));
+
+	res = mifare_ultralight_connect(tag);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralight_connect() failed"));
+
+	// Test the default key
+	res = mifare_ultralightc_authenticate(tag, default_key);
+	cut_assert_equal_int(0, res, cut_message("mifare_ultralightc_authenticate() failed"));
+
+	mifare_desfire_key_free(default_key);
+	mifare_desfire_key_free(test_key);
+    } else {
+	cut_omit("mifare_ultralightc_set_key() skipped on Ultralight");
+    }
+}

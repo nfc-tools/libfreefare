@@ -332,6 +332,58 @@ mifare_ultralightc_authenticate(FreefareTag tag, const MifareDESFireKey key)
     return 0;
 }
 
+/*
+ * Set the authentication key for the provided MIFARE tag.
+ */
+int
+mifare_ultralightc_set_key(FreefareTag tag, MifareDESFireKey key)
+{
+    MifareUltralightPage data;
+
+    if (key->type != T_3DES) {
+	errno = EINVAL;
+	return -1;
+    }
+
+    data[0] = key->data[7];
+    data[1] = key->data[6];
+    data[2] = key->data[5];
+    data[3] = key->data[4];
+
+    if (mifare_ultralight_write(tag, 0x2C, data)<0) {
+	return -1;
+    }
+
+    data[0] = key->data[3];
+    data[1] = key->data[2];
+    data[2] = key->data[1];
+    data[3] = key->data[0];
+
+    if (mifare_ultralight_write(tag, 0x2D, data)<0) {
+	return -1;
+    }
+
+    data[0] = key->data[15];
+    data[1] = key->data[14];
+    data[2] = key->data[13];
+    data[3] = key->data[12];
+
+    if (mifare_ultralight_write(tag, 0x2E, data)<0) {
+	return -1;
+    }
+
+    data[0] = key->data[11];
+    data[1] = key->data[10];
+    data[2] = key->data[9];
+    data[3] = key->data[8];
+
+    if (mifare_ultralight_write(tag, 0x2F, data)<0) {
+	return -1;
+    }
+
+    return 0;
+}
+
 bool
 is_mifare_ultralight(FreefareTag tag)
 {
