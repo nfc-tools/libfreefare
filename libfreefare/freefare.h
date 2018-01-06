@@ -85,6 +85,7 @@ int		 mifare_ultralight_read(FreefareTag tag, const MifareUltralightPageNumber p
 int		 mifare_ultralight_write(FreefareTag tag, const MifareUltralightPageNumber page, const MifareUltralightPage data);
 
 int		 mifare_ultralightc_authenticate(FreefareTag tag, const MifareDESFireKey key);
+int		 mifare_ultralightc_set_key(FreefareTag tag, MifareDESFireKey key);
 bool		 is_mifare_ultralight(FreefareTag tag);
 bool		 is_mifare_ultralightc(FreefareTag tag);
 bool		 is_mifare_ultralightc_on_reader(nfc_device *device, nfc_iso14443a_info nai);
