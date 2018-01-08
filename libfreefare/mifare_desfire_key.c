@@ -114,6 +114,9 @@ mifare_desfire_key_get_version(MifareDESFireKey key)
 {
     uint8_t version = 0;
 
+    if (key->type == T_AES)
+	return key->aes_version;
+
     for (int n = 0; n < 8; n++) {
 	version |= ((key->data[n] & 1) << (7 - n));
     }
@@ -124,16 +127,42 @@ mifare_desfire_key_get_version(MifareDESFireKey key)
 void
 mifare_desfire_key_set_version(MifareDESFireKey key, uint8_t version)
 {
+    if (key->type == T_AES) {
+	key->aes_version = version;
+	return;
+    }
+
     for (int n = 0; n < 8; n++) {
 	uint8_t version_bit = ((version & (1 << (7 - n))) >> (7 - n));
 	key->data[n] &= 0xfe;
 	key->data[n] |= version_bit;
-	if (key->type == T_DES) {
+	switch (key->type) {
+	case T_DES:
+		// DESFire cards always treat DES keys as special cases of 2K3DES
+		// keys. The DESFire functional specification explicitly points
+		// out that if the subkeys of a 2K3DES key are exactly identical
+		// (including parity bits), then (and only then) is the key treated
+		// as a DES key for authentication purposes. Specifically, the
+		// version/parity bits must be idential, as well as the rest of the
+		// key, otherwise the PICC will treat it as a 2K3DES key.  This
+		// next line ensure that.
 	    key->data[n + 8] = key->data[n];
-	} else {
-	    // Write ~version to avoid turning a 3DES key into a DES key
+	    break;
+	case T_3DES:
+		// But what if we really did want the PICC to treat the key as a
+		// real 2K3DES key, even if the actual 56 bits of the subkeys did
+		// match? To ensure that such as case still works (largely because
+		// the datasheet implies authentication would behave differently
+		// otherwise), we need to ensure that the parity bits on the subkeys
+		// explicitly do not match. The easiest way to ensure that is to
+		// always write the bits of `~version` to the parity bits of the
+		// second subkey. Note that this would only have an effect at the
+		// PICC level if the subkeys were otherwise identical.
 	    key->data[n + 8] &= 0xfe;
-	    key->data[n + 8] |= ~version_bit;
+	    key->data[n + 8] |= !version_bit;
+	    break;
+	default:
+	    break;
 	}
     }
 }
