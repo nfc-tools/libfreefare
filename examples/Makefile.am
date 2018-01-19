@@ -16,6 +16,7 @@ bin_PROGRAMS = felica-lite-dump \
 	       mifare-desfire-read-ndef \
 	       mifare-desfire-write-ndef \
 	       mifare-ultralight-info \
+	       mifare-ultralightc-diversify \
 	       ntag-detect \
 	       ntag-removeauth \
 	       ntag-setauth \
@@ -65,6 +66,9 @@ mifare_desfire_write_ndef_LDADD = $(top_builddir)/libfreefare/libfreefare.la
 
 mifare_ultralight_info_SOURCES = mifare-ultralight-info.c
 mifare_ultralight_info_LDADD = $(top_builddir)/libfreefare/libfreefare.la
+
+mifare_ultralightc_diversify_SOURCES = mifare-ultralightc-diversify.c
+mifare_ultralightc_diversify_LDADD = $(top_builddir)/libfreefare/libfreefare.la
 
 ntag_detect_SOURCES = ntag-detect.c
 ntag_detect_LDADD = $(top_builddir)/libfreefare/libfreefare.la

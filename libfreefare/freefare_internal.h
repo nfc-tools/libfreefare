@@ -185,12 +185,7 @@ struct mifare_desfire_aid {
 
 struct mifare_desfire_key {
     uint8_t data[24];
-    enum {
-	T_DES,
-	T_3DES,
-	T_3K3DES,
-	T_AES
-    } type;
+    MifareKeyType type;
     DES_key_schedule ks1;
     DES_key_schedule ks2;
     DES_key_schedule ks3;
@@ -213,6 +208,13 @@ struct mifare_desfire_tag {
     uint8_t *crypto_buffer;
     size_t crypto_buffer_size;
     uint32_t selected_application;
+};
+
+struct mifare_key_deriver {
+    MifareDESFireKey master_key;
+    MifareKeyType output_key_type;
+    uint8_t m[48];
+    int len;
 };
 
 MifareDESFireKey mifare_desfire_session_key_new(const uint8_t rnda[], const uint8_t rndb[], MifareDESFireKey authentication_key);

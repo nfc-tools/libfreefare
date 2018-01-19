@@ -469,6 +469,7 @@ int		 mifare_desfire_set_configuration(FreefareTag tag, bool disable_format, boo
 int		 mifare_desfire_set_default_key(FreefareTag tag, MifareDESFireKey key);
 int		 mifare_desfire_set_ats(FreefareTag tag, uint8_t *ats);
 int		 mifare_desfire_get_card_uid(FreefareTag tag, char **uid);
+int		 mifare_desfire_get_card_uid_raw(FreefareTag tag, uint8_t uid[7]);
 int		 mifare_desfire_get_file_ids(FreefareTag tag, uint8_t **files, size_t *count);
 int		 mifare_desfire_get_iso_file_ids(FreefareTag tag, uint16_t **files, size_t *count);
 int		 mifare_desfire_get_file_settings(FreefareTag tag, uint8_t file_no, struct mifare_desfire_file_settings *settings);
@@ -520,6 +521,28 @@ uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize,
 uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
 size_t		tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
 uint8_t		*tlv_append(uint8_t *a, uint8_t *b);
+
+typedef enum mifare_key_type {
+    MIFARE_KEY_DES,
+    MIFARE_KEY_2K3DES,
+    MIFARE_KEY_3K3DES,
+    MIFARE_KEY_AES128,
+
+    MIFARE_KEY_LAST = MIFARE_KEY_AES128
+} MifareKeyType;
+
+struct mifare_key_deriver;
+typedef struct mifare_key_deriver *MifareKeyDeriver;
+
+MifareKeyDeriver mifare_key_deriver_new_an10922(MifareDESFireKey master_key, MifareKeyType output_key_type);
+int		 mifare_key_deriver_begin(MifareKeyDeriver deriver);
+int		 mifare_key_deriver_update_data(MifareKeyDeriver deriver, const uint8_t *data, size_t len);
+int		 mifare_key_deriver_update_uid(MifareKeyDeriver deriver, FreefareTag tag);
+int		 mifare_key_deriver_update_aid(MifareKeyDeriver deriver, MifareDESFireAID aid);
+int		 mifare_key_deriver_update_cstr(MifareKeyDeriver deriver, const char *cstr);
+MifareDESFireKey mifare_key_deriver_end(MifareKeyDeriver deriver);
+int		 mifare_key_deriver_end_raw(MifareKeyDeriver deriver, uint8_t* diversified_bytes, size_t data_max_len);
+void		 mifare_key_deriver_free(MifareKeyDeriver state);
 
 #ifdef __cplusplus
 }
