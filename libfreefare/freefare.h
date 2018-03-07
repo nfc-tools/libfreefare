@@ -102,6 +102,7 @@ bool		 ntag21x_taste(nfc_device *device, nfc_target target);
 #define NTAG_AUTHLIM 0x07
 
 enum ntag_tag_subtype {
+	NTAG_UNKNOWN,
     NTAG_213,
     NTAG_215,
     NTAG_216
@@ -114,7 +115,7 @@ void		 ntag21x_key_free(NTAG21xKey key);  /* Clear key from memory */
 void		 ntag21x_tag_free(FreefareTag tag);
 int		 ntag21x_connect(FreefareTag tag);
 int		 ntag21x_disconnect(FreefareTag tag);
-int		 ntag21x_get_info(FreefareTag tag);  /* Get all information about tag (size,vendor ...) */
+int		 ntag21x_get_info(FreefareTag tag);  /* MUST BE CALLED AFTER CONNECT, so everything works, Get all information about tag (size,vendor ...) */
 enum  ntag_tag_subtype ntag21x_get_subtype(FreefareTag tag);  /* Get subtype of tag */
 uint8_t		 ntag21x_get_last_page(FreefareTag tag);  /* Get last page address based on gathered info from function above */
 int		 ntag21x_read_signature(FreefareTag tag, uint8_t *data); /* Get tag signature */

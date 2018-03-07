@@ -113,14 +113,14 @@ _ntag21x_tag_new(nfc_device *device, nfc_target target)
 	tag->device = device;
 	tag->info = target;
 	tag->active = 0;
-	NTAG_21x(tag)->subtype = NTAG_213; // Set tag subtype
-	NTAG_21x(tag)->vendor_id = 0x04;
-	NTAG_21x(tag)->product_type = 0x04;
-	NTAG_21x(tag)->product_subtype = 0x02;
-	NTAG_21x(tag)->major_product_version = 0x01;
+	NTAG_21x(tag)->subtype = NTAG_UNKNOWN; // Set tag subtype to unknown
+	NTAG_21x(tag)->vendor_id = 0x00;
+	NTAG_21x(tag)->product_type = 0x00;
+	NTAG_21x(tag)->product_subtype = 0x00;
+	NTAG_21x(tag)->major_product_version = 0x00;
 	NTAG_21x(tag)->minor_product_version = 0x00;
-	NTAG_21x(tag)->storage_size = 0x0f;
-	NTAG_21x(tag)->protocol_type = 0x03;
+	NTAG_21x(tag)->storage_size = 0x00;
+	NTAG_21x(tag)->protocol_type = 0x00;
     }
 
     return tag;
@@ -137,14 +137,14 @@ _ntag21x_tag_reuse(FreefareTag old_tag)
 	tag->device = old_tag->device;
 	tag->info = old_tag->info;
 	tag->active = 0;
-	NTAG_21x(tag)->subtype = NTAG_213; // Set tag subtype
-	NTAG_21x(tag)->vendor_id = 0x04;
-	NTAG_21x(tag)->product_type = 0x04;
-	NTAG_21x(tag)->product_subtype = 0x02;
-	NTAG_21x(tag)->major_product_version = 0x01;
-	NTAG_21x(tag)->minor_product_version = 0x00;
-	NTAG_21x(tag)->storage_size = 0x0f;
-	NTAG_21x(tag)->protocol_type = 0x03;
+	NTAG_21x(tag)->subtype = NTAG_21x(old_tag)->subtype; // Get from old tag
+	NTAG_21x(tag)->vendor_id = NTAG_21x(old_tag)->vendor_id; // Get from old tag
+	NTAG_21x(tag)->product_type = NTAG_21x(old_tag)->product_type; // Get from old tag
+	NTAG_21x(tag)->product_subtype = NTAG_21x(old_tag)->product_subtype; // Get from old tag
+	NTAG_21x(tag)->major_product_version = NTAG_21x(old_tag)->major_product_version; // Get from old tag
+	NTAG_21x(tag)->minor_product_version = NTAG_21x(old_tag)->minor_product_version; // Get from old tag
+	NTAG_21x(tag)->storage_size = NTAG_21x(old_tag)->storage_size; // Get from old tag
+	NTAG_21x(tag)->protocol_type = NTAG_21x(old_tag)->protocol_type; // Get from old tag
     }
 
     return tag;
@@ -282,7 +282,7 @@ ntag21x_get_info(FreefareTag tag)
 	NTAG_21x(tag)->subtype = NTAG_216;
 	break;
     default:
-	NTAG_21x(tag)->subtype = NTAG_213;
+	NTAG_21x(tag)->subtype = NTAG_UNKNOWN;
     }
     return 0;
 }
