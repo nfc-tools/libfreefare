@@ -37,6 +37,8 @@ that you don't have to care about indentation anymore. For more details, please
 read the [style(9) man page from FreeBSD's
 website](http://www.freebsd.org/cgi/man.cgi?query=style).
 
+For style correction install package `astyle`. Then run `make style`.
+
 ## Write tests
 
 I already told you cutter is lovely, so you really should use it!  If you want

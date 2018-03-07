@@ -13,6 +13,7 @@ set(LIBRARY_SOURCES
 		mifare_key_deriver
 		mifare_ultralight
 		ntag21x
+		ntag21x_error
 		tlv
 		../contrib/libutil/hexdump
 		)
