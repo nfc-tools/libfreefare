@@ -44,12 +44,16 @@
 	    {return errno = EINVAL, -1;} \
 	    else if(NTAG_21x(tag)->subtype == NTAG_216&&page>0xE6) \
 	    {return errno = EINVAL, -1;} \
+	    else if(NTAG_21x(tag)->subtype == NTAG_UNKNOWN) \
+	    {return errno = EINVAL, -1;} \
 	} else { \
 	    if(NTAG_21x(tag)->subtype == NTAG_213&&page>0x2C) \
 	    {return errno = EINVAL, -1;} \
 	    else if(NTAG_21x(tag)->subtype == NTAG_215&&page>0x86) \
 	    {return errno = EINVAL, -1;} \
 	    else if(NTAG_21x(tag)->subtype == NTAG_216&&page>0xE6) \
+	    {return errno = EINVAL, -1;} \
+	    else if(NTAG_21x(tag)->subtype == NTAG_UNKNOWN) \
 	    {return errno = EINVAL, -1;} \
 	} \
     } while (0)
