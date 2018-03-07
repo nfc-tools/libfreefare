@@ -102,7 +102,7 @@ bool		 ntag21x_taste(nfc_device *device, nfc_target target);
 #define NTAG_AUTHLIM 0x07
 
 enum ntag_tag_subtype {
-	NTAG_UNKNOWN,
+    NTAG_UNKNOWN,
     NTAG_213,
     NTAG_215,
     NTAG_216
