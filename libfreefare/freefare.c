@@ -225,7 +225,9 @@ freefare_strerror(FreefareTag tag)
 	    } else if (MIFARE_DESFIRE(tag)->last_picc_error) {
 		p = mifare_desfire_error_lookup(MIFARE_DESFIRE(tag)->last_picc_error);
 	    }
-	}
+    } else if (tag->type == NTAG_21x) {
+        p = ntag21x_error_lookup(NTAG_21x(tag)->last_error);
+    }
     }
     return p;
 }
