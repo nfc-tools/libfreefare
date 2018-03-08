@@ -285,8 +285,6 @@ ntag21x_get_info(FreefareTag tag)
     case 0x13:
 	NTAG_21x(tag)->subtype = NTAG_216;
 	break;
-    default:
-	NTAG_21x(tag)->subtype = NTAG_UNKNOWN;
     }
     return 0;
 }
