@@ -252,7 +252,7 @@ struct ntag21x_key {
     uint8_t pack[2]; // 2B Password Acknowlege
 };
 
-const char *ntag21x_error_lookup(uint8_t code);
+const char      *ntag21x_error_lookup(uint8_t code);
 
 /*
  * FreefareTag assertion macros

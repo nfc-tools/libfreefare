@@ -93,7 +93,7 @@ bool		 is_mifare_ultralightc_on_reader(nfc_device *device, nfc_iso14443a_info na
 
 
 bool		 ntag21x_taste(nfc_device *device, nfc_target target);
-uint8_t	ntag21x_last_error(FreefareTag tag);
+uint8_t		 ntag21x_last_error(FreefareTag tag);
 
 /* NTAG21x access features */
 #define NTAG_PROT 0x80
