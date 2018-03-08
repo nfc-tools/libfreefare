@@ -35,7 +35,7 @@ uint8_t
 ntag21x_last_error(FreefareTag tag)
 {
     if (tag->type != NTAG_21x)
-	    return 0;
+        return 0;
 
     return NTAG_21x(tag)->last_error;
 }
