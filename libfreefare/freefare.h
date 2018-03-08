@@ -93,6 +93,7 @@ bool		 is_mifare_ultralightc_on_reader(nfc_device *device, nfc_iso14443a_info na
 
 
 bool		 ntag21x_taste(nfc_device *device, nfc_target target);
+uint8_t	ntag21x_last_error(FreefareTag tag);
 
 /* NTAG21x access features */
 #define NTAG_PROT 0x80
@@ -115,7 +116,7 @@ void		 ntag21x_key_free(NTAG21xKey key);  /* Clear key from memory */
 void		 ntag21x_tag_free(FreefareTag tag);
 int		 ntag21x_connect(FreefareTag tag);
 int		 ntag21x_disconnect(FreefareTag tag);
-int		 ntag21x_get_info(FreefareTag tag);  /* MUST BE CALLED AFTER CONNECT, so everything works, Get all information about tag (size,vendor ...) */
+int		 ntag21x_get_info(FreefareTag tag);  /* Get all information about tag (size,vendor ...) */
 enum  ntag_tag_subtype ntag21x_get_subtype(FreefareTag tag);  /* Get subtype of tag */
 uint8_t		 ntag21x_get_last_page(FreefareTag tag);  /* Get last page address based on gathered info from function above */
 int		 ntag21x_read_signature(FreefareTag tag, uint8_t *data); /* Get tag signature */
@@ -368,6 +369,8 @@ bit 0: PICC master key frozen (reversible with configuration change or when form
 /* Error code managed by the library */
 
 #define CRYPTO_ERROR            0x01
+#define TAG_INFO_MISSING_ERROR	0xBA
+#define UNKNOWN_TAG_TYPE_ERROR	0xBB
 
 struct mifare_desfire_aid;
 typedef struct mifare_desfire_aid *MifareDESFireAID;
