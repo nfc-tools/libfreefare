@@ -16,6 +16,7 @@ libfreefare_la_SOURCES = felica.c \
 			 mad.c \
 			 mifare_application.c \
 			 ntag21x.c \
+			 ntag21x_error.c \
 			 tlv.c
 libfreefare_la_LIBADD =
 

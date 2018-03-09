@@ -243,12 +243,16 @@ struct ntag21x_tag {
     uint8_t minor_product_version;
     uint8_t storage_size;
     uint8_t protocol_type;
+
+    uint8_t last_error;
 };
 
 struct ntag21x_key {
     uint8_t data[4]; // 4B key
     uint8_t pack[2]; // 2B Password Acknowlege
 };
+
+const char      *ntag21x_error_lookup(uint8_t code);
 
 /*
  * FreefareTag assertion macros
