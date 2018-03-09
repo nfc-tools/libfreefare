@@ -357,8 +357,8 @@ int
 ntag21x_set_pwd(FreefareTag tag, uint8_t data[4]) // Set password
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     uint8_t page = ntag21x_get_last_page(tag) - 1; // PWD page is located 1 before last page
     int res = ntag21x_write(tag, page, data);
@@ -369,8 +369,8 @@ int
 ntag21x_set_pack(FreefareTag tag, uint8_t data[2]) // Set pack
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(buff, 4);
     BUFFER_APPEND_BYTES(buff, data, 2);
@@ -399,8 +399,8 @@ int
 ntag21x_set_auth(FreefareTag tag, uint8_t byte) // Set AUTH0 byte (from which page starts password protection)
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(cdata, 4);
     int page = ntag21x_get_last_page(tag) - 3; // AUTH0 byte is on 4th page from back
@@ -417,8 +417,8 @@ int
 ntag21x_get_auth(FreefareTag tag, uint8_t *byte) // Get AUTH0 byte
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(cdata, 4);
     int page = ntag21x_get_last_page(tag) - 3; // AUTH0 byte is on 4th page from back
@@ -434,8 +434,8 @@ int
 ntag21x_access_enable(FreefareTag tag, uint8_t byte) // Enable access feature in ACCESS byte
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(cdata, 4);
     int page = ntag21x_get_last_page(tag) - 2; // ACCESS byte is on 3th page from back
@@ -452,8 +452,8 @@ int
 ntag21x_access_disable(FreefareTag tag, uint8_t byte) // Disable access feature in ACCESS byte
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(cdata, 4);
     int page = ntag21x_get_last_page(tag) - 2; // ACCESS byte is on 3th page from back
@@ -470,8 +470,8 @@ int
 ntag21x_get_access(FreefareTag tag, uint8_t *byte) // Get ACCESS byte
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(cdata, 4);
     uint8_t page = ntag21x_get_last_page(tag) - 2; // ACCESS byte is on 3th page from back
@@ -501,8 +501,8 @@ int
 ntag21x_get_authentication_limit(FreefareTag tag, uint8_t *byte) // Get authentication limit
 {
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
     BUFFER_INIT(cdata, 4);
     uint8_t page = ntag21x_get_last_page(tag) - 2; // ACCESS byte is on 3th page from back
@@ -521,8 +521,8 @@ ntag21x_set_authentication_limit(FreefareTag tag, uint8_t byte) // Set authentic
     if (byte > 7) // Check for invalid range of auth limit
 	return -1;
     if (NTAG_21x(tag)->subtype == NTAG_UNKNOWN) {
-        NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
-        return -1;
+	NTAG_21x(tag)->last_error = TAG_INFO_MISSING_ERROR;
+	return -1;
     }
 
     BUFFER_INIT(cdata, 4);

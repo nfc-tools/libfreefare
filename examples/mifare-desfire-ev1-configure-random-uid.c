@@ -153,8 +153,8 @@ main(int argc, char *argv[])
 		    }
 		}
 		break;
-	    case 4: // Random UID
-	    {} // Compilation fails if label is directly followed by the declaration rather than a statement
+	    case 4: { // Random UID
+	    } // Compilation fails if label is directly followed by the declaration rather than a statement
 	    MifareDESFireKey key_picc = mifare_desfire_des_key_new_with_version(key_data_picc);
 	    res = mifare_desfire_authenticate(tags[i], 0, key_picc);
 	    if (res < 0) {

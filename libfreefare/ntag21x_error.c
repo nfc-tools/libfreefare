@@ -23,9 +23,9 @@ ntag21x_error_lookup(uint8_t code)
 {
     struct ntag21x_error_message *e = ntag21x_error_messages;
     while (e->message) {
-    if (e->code == code)
-        return (e->message);
-    e++;
+	if (e->code == code)
+	    return (e->message);
+	e++;
     }
 
     return "Invalid error code";
@@ -35,7 +35,7 @@ uint8_t
 ntag21x_last_error(FreefareTag tag)
 {
     if (tag->type != NTAG_21x)
-        return 0;
+	return 0;
 
     return NTAG_21x(tag)->last_error;
 }
