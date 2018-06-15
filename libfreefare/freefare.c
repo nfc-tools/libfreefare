@@ -103,10 +103,21 @@ freefare_get_tags(nfc_device *device)
 	}
     }
 
-    // Poll for a FELICA tag
+    // Poll for a FELICA 424 kbit tag
     modulation.nmt = NMT_FELICA;
-    modulation.nbr = NBR_424; // FIXME NBR_212 should also be supported
-    if ((candidates_count = nfc_initiator_list_passive_targets(device, modulation, candidates, MAX_CANDIDATES)) < 0)
+    modulation.nbr = NBR_424;
+
+    candidates_count = nfc_initiator_list_passive_targets(device, modulation, candidates, MAX_CANDIDATES);
+    if (candidates_count < 0)
+	return NULL;
+
+    // Poll for a FELICA 212 kbit tag (only if no 424 kbit tag was found)
+    modulation.nbr = NBR_212;
+
+    if (!candidates_count)
+	candidates_count = nfc_initiator_list_passive_targets(device, modulation, candidates, MAX_CANDIDATES);
+
+    if (candidates_count < 0)
 	return NULL;
 
     for (int c = 0; c < candidates_count; c++) {
