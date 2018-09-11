@@ -133,13 +133,7 @@ mifare_key_deriver_update_uid(MifareKeyDeriver deriver, FreefareTag tag)
 	uid_data = tag->info.nti.nai.abtUid;
 	uid_len = tag->info.nti.nai.szUidLen;
 	break;
-    case NMT_DEP:
-    case NMT_ISO14443B2CT:
-    case NMT_ISO14443B2SR:
-    case NMT_ISO14443B:
-    case NMT_ISO14443BI:
-    case NMT_JEWEL:
-    case NMT_BARCODE:
+    default:
 	ret = -1;
 	errno = EINVAL;
 	break;
