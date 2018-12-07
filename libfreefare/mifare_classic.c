@@ -1,20 +1,3 @@
-/*-
- * Copyright (C) 2009, 2010, Romain Tartiere, Romuald Conty.
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 /*
  * This implementation was written based on information provided by the
  * following documents:
@@ -37,27 +20,27 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #if defined(HAVE_SYS_TYPES_H)
-#  include <sys/types.h>
+    #include <sys/types.h>
 #endif
 
 #if defined(HAVE_SYS_ENDIAN_H)
-#  include <sys/endian.h>
+    #include <sys/endian.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)
-#  include <endian.h>
+    #include <endian.h>
 #endif
 
 #if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  include <CoreFoundation/CoreFoundation.h>
+    #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #if defined(HAVE_BYTESWAP_H)
-#  include <byteswap.h>
+    #include <byteswap.h>
 #endif
 
 #include <errno.h>
@@ -66,7 +49,7 @@
 #include <strings.h>
 
 #ifdef WITH_DEBUG
-#  include <libutil.h>
+    #include <libutil.h>
 #endif
 
 #include <freefare.h>
@@ -187,8 +170,8 @@ uint16_t mifare_trailer_access_permissions[] = {
  * Private functions
  */
 
-int		 get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockNumber trailer);
-int		 get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits);
+int		 get_block_access_bits_shift(MifareClassicBlockNumber block, MifareClassicBlockNumber trailer);
+int		 get_block_access_bits(FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits);
 
 
 /*
@@ -196,37 +179,37 @@ int		 get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber blo
  */
 
 bool
-mifare_mini_taste (nfc_device *device, nfc_target target)
+mifare_mini_taste(nfc_device *device, nfc_target target)
 {
     (void) device;
     return target.nm.nmt == NMT_ISO14443A &&
-    (
-     target.nti.nai.btSak == 0x09
-    );    
+	   (
+	       target.nti.nai.btSak == 0x09
+	   );
 }
 
 bool
-mifare_classic1k_taste (nfc_device *device, nfc_target target)
+mifare_classic1k_taste(nfc_device *device, nfc_target target)
 {
     (void) device;
     return target.nm.nmt == NMT_ISO14443A &&
-	(
-	 target.nti.nai.btSak == 0x08 ||
-	 target.nti.nai.btSak == 0x28 ||
-	 target.nti.nai.btSak == 0x68 ||
-	 target.nti.nai.btSak == 0x88
-	);
+	   (
+	       target.nti.nai.btSak == 0x08 ||
+	       target.nti.nai.btSak == 0x28 ||
+	       target.nti.nai.btSak == 0x68 ||
+	       target.nti.nai.btSak == 0x88
+	   );
 }
 
 bool
-mifare_classic4k_taste (nfc_device *device, nfc_target target)
+mifare_classic4k_taste(nfc_device *device, nfc_target target)
 {
     (void) device;
     return target.nm.nmt == NMT_ISO14443A &&
-	(
-	 target.nti.nai.btSak == 0x18 ||
-	 target.nti.nai.btSak == 0x38
-	);
+	   (
+	       target.nti.nai.btSak == 0x18 ||
+	       target.nti.nai.btSak == 0x38
+	   );
 }
 
 /*
@@ -234,11 +217,11 @@ mifare_classic4k_taste (nfc_device *device, nfc_target target)
  */
 
 static FreefareTag
-_mifare_classic_tag_new (nfc_device *device, nfc_target target, int tag_type)
+_mifare_classic_tag_new(nfc_device *device, nfc_target target, int tag_type)
 {
     FreefareTag tag;
 
-    if ((tag = malloc (sizeof (struct mifare_classic_tag)))) {
+    if ((tag = malloc(sizeof(struct mifare_classic_tag)))) {
 	tag->type = tag_type;
 	tag->free_tag = mifare_classic_tag_free;
 	tag->device = device;
@@ -251,30 +234,30 @@ _mifare_classic_tag_new (nfc_device *device, nfc_target target, int tag_type)
 
 
 FreefareTag
-mifare_mini_tag_new (nfc_device *device, nfc_target target)
+mifare_mini_tag_new(nfc_device *device, nfc_target target)
 {
-    return _mifare_classic_tag_new (device, target, MIFARE_MINI);
+    return _mifare_classic_tag_new(device, target, MIFARE_MINI);
 }
 
 FreefareTag
-mifare_classic1k_tag_new (nfc_device *device, nfc_target target)
+mifare_classic1k_tag_new(nfc_device *device, nfc_target target)
 {
-    return _mifare_classic_tag_new (device, target, MIFARE_CLASSIC_1K);
+    return _mifare_classic_tag_new(device, target, MIFARE_CLASSIC_1K);
 }
 
 FreefareTag
-mifare_classic4k_tag_new (nfc_device *device, nfc_target target)
+mifare_classic4k_tag_new(nfc_device *device, nfc_target target)
 {
-    return _mifare_classic_tag_new (device, target, MIFARE_CLASSIC_4K);
+    return _mifare_classic_tag_new(device, target, MIFARE_CLASSIC_4K);
 }
 
 /*
  * Free the provided tag.
  */
 void
-mifare_classic_tag_free (FreefareTag tag)
+mifare_classic_tag_free(FreefareTag tag)
 {
-    free (tag);
+    free(tag);
 }
 
 
@@ -290,16 +273,16 @@ mifare_classic_tag_free (FreefareTag tag)
  * Establish connection to the provided tag.
  */
 int
-mifare_classic_connect (FreefareTag tag)
+mifare_classic_connect(FreefareTag tag)
 {
-    ASSERT_INACTIVE (tag);
+    ASSERT_INACTIVE(tag);
 
     nfc_target pnti;
     nfc_modulation modulation = {
 	.nmt = NMT_ISO14443A,
 	.nbr = NBR_106
     };
-    if (nfc_initiator_select_passive_target (tag->device, modulation, tag->info.nti.nai.abtUid, tag->info.nti.nai.szUidLen, &pnti) >= 0) {
+    if (nfc_initiator_select_passive_target(tag->device, modulation, tag->info.nti.nai.abtUid, tag->info.nti.nai.szUidLen, &pnti) >= 0) {
 	tag->active = 1;
     } else {
 	errno = EIO;
@@ -312,11 +295,11 @@ mifare_classic_connect (FreefareTag tag)
  * Terminate connection with the provided tag.
  */
 int
-mifare_classic_disconnect (FreefareTag tag)
+mifare_classic_disconnect(FreefareTag tag)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    if (nfc_initiator_deselect_target (tag->device) >= 0) {
+    if (nfc_initiator_deselect_target(tag->device) >= 0) {
 	tag->active = 0;
     } else {
 	errno = EIO;
@@ -337,57 +320,57 @@ mifare_classic_disconnect (FreefareTag tag)
  * Send an authentification command to the provided MIFARE target.
  */
 int
-mifare_classic_authenticate (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type)
+mifare_classic_authenticate(FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicKey key, const MifareClassicKeyType key_type)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    BUFFER_INIT (cmd, 12);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT(cmd, 12);
+    BUFFER_INIT(res, 1);
 
     if (key_type == MFC_KEY_A)
-	BUFFER_APPEND (cmd, MC_AUTH_A);
+	BUFFER_APPEND(cmd, MC_AUTH_A);
     else
-	BUFFER_APPEND (cmd, MC_AUTH_B);
+	BUFFER_APPEND(cmd, MC_AUTH_B);
 
     BUFFER_APPEND(cmd, block);
-    BUFFER_APPEND_BYTES (cmd, key, 6);
+    BUFFER_APPEND_BYTES(cmd, key, 6);
     // To support both 4-byte & 7-byte UID cards:
-    BUFFER_APPEND_BYTES (cmd, tag->info.nti.nai.abtUid + tag->info.nti.nai.szUidLen - 4, 4);
+    BUFFER_APPEND_BYTES(cmd, tag->info.nti.nai.abtUid + tag->info.nti.nai.szUidLen - 4, 4);
 
-    CLASSIC_TRANSCEIVE_EX (tag, cmd, res, 1);
+    CLASSIC_TRANSCEIVE_EX(tag, cmd, res, 1);
 
     MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number = -1;
     MIFARE_CLASSIC(tag)->cached_access_bits.sector_access_bits = 0x00;
     MIFARE_CLASSIC(tag)->last_authentication_key_type = key_type;
 
-    return (BUFFER_SIZE (res) == 0) ? 0 : res[0];
+    return (BUFFER_SIZE(res) == 0) ? 0 : res[0];
 }
 
 /*
  * Read data from the provided MIFARE target.
  */
 int
-mifare_classic_read (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data)
+mifare_classic_read(FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicBlock *data)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    BUFFER_INIT (cmd, 2);
-    BUFFER_ALIAS (res, data, sizeof(MifareClassicBlock));
+    BUFFER_INIT(cmd, 2);
+    BUFFER_ALIAS(res, data, sizeof(MifareClassicBlock));
 
-    BUFFER_APPEND (cmd, MC_READ);
-    BUFFER_APPEND (cmd, block);
+    BUFFER_APPEND(cmd, MC_READ);
+    BUFFER_APPEND(cmd, block);
 
-    CLASSIC_TRANSCEIVE (tag, cmd, res);
+    CLASSIC_TRANSCEIVE(tag, cmd, res);
 
     return 0;
 }
 
 int
-mifare_classic_init_value (FreefareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr)
+mifare_classic_init_value(FreefareTag tag, const MifareClassicBlockNumber block, const int32_t value, const MifareClassicBlockNumber adr)
 {
     union mifare_classic_block b;
 
-    uint32_t le_value = htole32 ((uint32_t)value);
+    uint32_t le_value = htole32((uint32_t)value);
 
     b.value.value = le_value;
     b.value.value_ = ~le_value;
@@ -398,18 +381,18 @@ mifare_classic_init_value (FreefareTag tag, const MifareClassicBlockNumber block
     b.value.address__ = adr;
     b.value.address___ = ~adr;
 
-    if (mifare_classic_write (tag, block, b.data) < 0)
+    if (mifare_classic_write(tag, block, b.data) < 0)
 	return -1;
 
     return 0;
 }
 
 int
-mifare_classic_read_value (FreefareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr)
+mifare_classic_read_value(FreefareTag tag, const MifareClassicBlockNumber block, int32_t *value, MifareClassicBlockNumber *adr)
 {
     union mifare_classic_block b;
 
-    if (mifare_classic_read (tag, block, &b.data) < 0)
+    if (mifare_classic_read(tag, block, &b.data) < 0)
 	return -1;
 
     if ((b.value.value ^ (uint32_t)~b.value.value_) || (b.value.value != b.value.value__)) {
@@ -423,7 +406,7 @@ mifare_classic_read_value (FreefareTag tag, const MifareClassicBlockNumber block
     }
 
     if (value)
-	*value = le32toh (b.value.value);
+	*value = le32toh(b.value.value);
 
     if (adr)
 	*adr =  b.value.address;
@@ -435,20 +418,20 @@ mifare_classic_read_value (FreefareTag tag, const MifareClassicBlockNumber block
  * Write data to the provided MIFARE target.
  */
 int
-mifare_classic_write (FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data)
+mifare_classic_write(FreefareTag tag, const MifareClassicBlockNumber block, const MifareClassicBlock data)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    BUFFER_INIT (cmd, 2 + sizeof (MifareClassicBlock));
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT(cmd, 2 + sizeof(MifareClassicBlock));
+    BUFFER_INIT(res, 1);
 
-    BUFFER_APPEND (cmd, MC_WRITE);
-    BUFFER_APPEND (cmd, block);
-    BUFFER_APPEND_BYTES (cmd, data, sizeof (MifareClassicBlock));
+    BUFFER_APPEND(cmd, MC_WRITE);
+    BUFFER_APPEND(cmd, block);
+    BUFFER_APPEND_BYTES(cmd, data, sizeof(MifareClassicBlock));
 
-    CLASSIC_TRANSCEIVE (tag, cmd, res);
+    CLASSIC_TRANSCEIVE(tag, cmd, res);
 
-    return (BUFFER_SIZE (res) == 0) ? 0 : res[0];
+    return (BUFFER_SIZE(res) == 0) ? 0 : res[0];
 }
 
 /*
@@ -456,20 +439,20 @@ mifare_classic_write (FreefareTag tag, const MifareClassicBlockNumber block, con
  * data register.
  */
 int
-mifare_classic_increment (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
+mifare_classic_increment(FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    BUFFER_INIT (cmd, 6);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT(cmd, 6);
+    BUFFER_INIT(res, 1);
 
-    BUFFER_APPEND (cmd, MC_INCREMENT);
-    BUFFER_APPEND (cmd, block);
-    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (amount));
+    BUFFER_APPEND(cmd, MC_INCREMENT);
+    BUFFER_APPEND(cmd, block);
+    BUFFER_APPEND_LE(cmd, amount, 4, sizeof(amount));
 
-    CLASSIC_TRANSCEIVE (tag, cmd, res);
+    CLASSIC_TRANSCEIVE(tag, cmd, res);
 
-    return (BUFFER_SIZE (res) == 0) ? 0 : res[0];
+    return (BUFFER_SIZE(res) == 0) ? 0 : res[0];
 }
 
 /*
@@ -477,65 +460,65 @@ mifare_classic_increment (FreefareTag tag, const MifareClassicBlockNumber block,
  * data register.
  */
 int
-mifare_classic_decrement (FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
+mifare_classic_decrement(FreefareTag tag, const MifareClassicBlockNumber block, const uint32_t amount)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    BUFFER_INIT (cmd, 6);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT(cmd, 6);
+    BUFFER_INIT(res, 1);
 
-    BUFFER_APPEND (cmd, MC_DECREMENT);
-    BUFFER_APPEND (cmd, block);
-    BUFFER_APPEND_LE (cmd, amount, 4, sizeof (amount));
+    BUFFER_APPEND(cmd, MC_DECREMENT);
+    BUFFER_APPEND(cmd, block);
+    BUFFER_APPEND_LE(cmd, amount, 4, sizeof(amount));
 
-    CLASSIC_TRANSCEIVE (tag, cmd, res);
+    CLASSIC_TRANSCEIVE(tag, cmd, res);
 
-    return (BUFFER_SIZE (res) == 0) ? 0 : res[0];
+    return (BUFFER_SIZE(res) == 0) ? 0 : res[0];
 }
 
 /*
  * Store the provided block to the internal data register.
  */
 int
-mifare_classic_restore (FreefareTag tag, const MifareClassicBlockNumber block)
+mifare_classic_restore(FreefareTag tag, const MifareClassicBlockNumber block)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
     /*
      * Same length as the increment and decrement commands but only the first
      * two bytes are actually used.  The 4 bytes after the block number are
      * meaningless but required (NULL-filled).
      */
-    BUFFER_INIT (cmd, 6);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT(cmd, 6);
+    BUFFER_INIT(res, 1);
 
-    BUFFER_APPEND (cmd, MC_RESTORE);
-    BUFFER_APPEND (cmd, block);
-    BUFFER_APPEND (cmd, 0x00);
-    BUFFER_APPEND (cmd, 0x00);
-    BUFFER_APPEND (cmd, 0x00);
-    BUFFER_APPEND (cmd, 0x00);
+    BUFFER_APPEND(cmd, MC_RESTORE);
+    BUFFER_APPEND(cmd, block);
+    BUFFER_APPEND(cmd, 0x00);
+    BUFFER_APPEND(cmd, 0x00);
+    BUFFER_APPEND(cmd, 0x00);
+    BUFFER_APPEND(cmd, 0x00);
 
-    CLASSIC_TRANSCEIVE (tag, cmd, res);
+    CLASSIC_TRANSCEIVE(tag, cmd, res);
 
-    return (BUFFER_SIZE (res) == 0) ? 0 : res[0];
+    return (BUFFER_SIZE(res) == 0) ? 0 : res[0];
 }
 
 /*
  * Store the internal data register to the provided block.
  */
 int
-mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block)
+mifare_classic_transfer(FreefareTag tag, const MifareClassicBlockNumber block)
 {
-    ASSERT_ACTIVE (tag);
+    ASSERT_ACTIVE(tag);
 
-    BUFFER_INIT (cmd, 2);
-    BUFFER_INIT (res, 1);
+    BUFFER_INIT(cmd, 2);
+    BUFFER_INIT(res, 1);
 
-    BUFFER_APPEND (cmd, MC_TRANSFER);
-    BUFFER_APPEND (cmd, block);
+    BUFFER_APPEND(cmd, MC_TRANSFER);
+    BUFFER_APPEND(cmd, block);
 
-    CLASSIC_TRANSCEIVE (tag, cmd, res);
+    CLASSIC_TRANSCEIVE(tag, cmd, res);
 
     /*
      * Depending on the device we are using, on success, the TRANSFER command
@@ -543,7 +526,7 @@ mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block)
      * meaning that the action was performed correctly (e.g. Snapper Feeder,
      * SCL 3711).
      */
-    if (!BUFFER_SIZE (res) || ((BUFFER_SIZE (res) == 1) && (res[0] = MC_OK)))
+    if (!BUFFER_SIZE(res) || ((BUFFER_SIZE(res) == 1) && (res[0] == MC_OK)))
 	return 0;
     else
 	return res[0];
@@ -576,7 +559,7 @@ mifare_classic_transfer (FreefareTag tag, const MifareClassicBlockNumber block)
  *
  */
 int
-get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockNumber trailer)
+get_block_access_bits_shift(MifareClassicBlockNumber block, MifareClassicBlockNumber trailer)
 {
     if (block == trailer) {
 	return 3;
@@ -593,7 +576,7 @@ get_block_access_bits_shift (MifareClassicBlockNumber block, MifareClassicBlockN
  * block.
  */
 int
-get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits)
+get_block_access_bits(FreefareTag tag, const MifareClassicBlockNumber block, MifareClassicAccessBits *block_access_bits)
 {
     /*
      * The first block which holds the manufacturer block seems to have
@@ -606,7 +589,7 @@ get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, Mi
 
     uint16_t sector_access_bits, sector_access_bits_;
 
-    MifareClassicBlockNumber trailer = mifare_classic_sector_last_block (mifare_classic_block_sector (block));
+    MifareClassicBlockNumber trailer = mifare_classic_sector_last_block(mifare_classic_block_sector(block));
 
     /*
      * The trailer block contains access bits for the whole sector in a 3 bytes
@@ -623,7 +606,7 @@ get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, Mi
     } else {
 
 	MifareClassicBlock trailer_data;
-	if (mifare_classic_read (tag, trailer, &trailer_data) < 0) {
+	if (mifare_classic_read(tag, trailer, &trailer_data) < 0) {
 	    return -1;
 	}
 
@@ -653,7 +636,7 @@ get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, Mi
 	 *                                   |,------C2
 	 *                                   ||,---- C1
 	 *                                   |||                     */
-	uint16_t block_access_bits_mask = 0x0111 << get_block_access_bits_shift (block, trailer);
+	uint16_t block_access_bits_mask = 0x0111 << get_block_access_bits_shift(block, trailer);
 	/*                                   |||
 	 *                                   ||`---------------.
 	 *                                   |`---------------.|
@@ -674,10 +657,10 @@ get_block_access_bits (FreefareTag tag, const MifareClassicBlockNumber block, Mi
  * Get information about the trailer block.
  */
 int
-mifare_classic_get_trailer_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type)
+mifare_classic_get_trailer_block_permission(FreefareTag tag, const MifareClassicBlockNumber block, const uint16_t permission, const MifareClassicKeyType key_type)
 {
     MifareClassicAccessBits access_bits;
-    if (get_block_access_bits (tag, block, &access_bits) < 0) {
+    if (get_block_access_bits(tag, block, &access_bits) < 0) {
 	return -1;
     }
 
@@ -693,15 +676,15 @@ mifare_classic_get_trailer_block_permission (FreefareTag tag, const MifareClassi
  * Get information about data blocks.
  */
 int
-mifare_classic_get_data_block_permission (FreefareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type)
+mifare_classic_get_data_block_permission(FreefareTag tag, const MifareClassicBlockNumber block, const unsigned char permission, const MifareClassicKeyType key_type)
 {
     MifareClassicAccessBits access_bits;
-    if (get_block_access_bits (tag, block, &access_bits) < 0) {
+    if (get_block_access_bits(tag, block, &access_bits) < 0) {
 	return -1;
     }
 
     if (MIFARE_CLASSIC(tag)->cached_access_bits.sector_trailer_block_number != block) {
-	return ((mifare_data_access_permissions[access_bits] & (permission << ( (key_type == MFC_KEY_A) ? 4 : 0 ))) ? 1 : 0);
+	return ((mifare_data_access_permissions[access_bits] & (permission << ((key_type == MFC_KEY_A) ? 4 : 0))) ? 1 : 0);
     } else {
 	errno = EINVAL;
 	return -1;
@@ -717,12 +700,12 @@ mifare_classic_get_data_block_permission (FreefareTag tag, const MifareClassicBl
  * Reset a MIFARE target sector to factory default.
  */
 int
-mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber sector)
+mifare_classic_format_sector(FreefareTag tag, const MifareClassicSectorNumber sector)
 {
-    MifareClassicBlockNumber first_sector_block = mifare_classic_sector_first_block (sector);
-    MifareClassicBlockNumber last_sector_block = mifare_classic_sector_last_block (sector);
+    MifareClassicBlockNumber first_sector_block = mifare_classic_sector_first_block(sector);
+    MifareClassicBlockNumber last_sector_block = mifare_classic_sector_last_block(sector);
 
-    /* 
+    /*
      * Check that the current key allow us to rewrite data and trailer blocks.
      */
 
@@ -743,7 +726,7 @@ mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber s
     }
 
     MifareClassicBlock empty_data_block;
-    memset (empty_data_block, 0, sizeof (empty_data_block));
+    memset(empty_data_block, 0, sizeof(empty_data_block));
 
     MifareClassicBlock default_trailer_block = {
 	0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  /* Key A */
@@ -753,11 +736,11 @@ mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber s
     };
 
     for (int n = first_sector_block; n < last_sector_block; n++) {
-	if (mifare_classic_write (tag, n, empty_data_block) < 0) {
+	if (mifare_classic_write(tag, n, empty_data_block) < 0) {
 	    return errno = EIO,  -1;
 	}
     }
-    if (mifare_classic_write (tag, last_sector_block, default_trailer_block) < 0) {
+    if (mifare_classic_write(tag, last_sector_block, default_trailer_block) < 0) {
 	return errno = EIO,  -1;
     }
 
@@ -765,14 +748,14 @@ mifare_classic_format_sector (FreefareTag tag, const MifareClassicSectorNumber s
 }
 
 MifareClassicSectorNumber
-mifare_classic_block_sector (MifareClassicBlockNumber block)
+mifare_classic_block_sector(MifareClassicBlockNumber block)
 {
     MifareClassicSectorNumber res;
 
     if (block < 32 * 4)
 	res = block / 4;
     else
-	res = 32 + ( (block - (32 * 4)) / 16 );
+	res = 32 + ((block - (32 * 4)) / 16);
 
     return res;
 }
@@ -781,7 +764,7 @@ mifare_classic_block_sector (MifareClassicBlockNumber block)
  * Get the sector's first block number
  */
 MifareClassicBlockNumber
-mifare_classic_sector_first_block (MifareClassicSectorNumber sector)
+mifare_classic_sector_first_block(MifareClassicSectorNumber sector)
 {
     int res;
     if (sector < 32) {
@@ -794,7 +777,7 @@ mifare_classic_sector_first_block (MifareClassicSectorNumber sector)
 }
 
 size_t
-mifare_classic_sector_block_count (MifareClassicSectorNumber sector)
+mifare_classic_sector_block_count(MifareClassicSectorNumber sector)
 {
     return (sector < 32) ? 4 : 16 ;
 }
@@ -803,17 +786,17 @@ mifare_classic_sector_block_count (MifareClassicSectorNumber sector)
  * Get the sector's last block number (aka trailer block)
  */
 MifareClassicBlockNumber
-mifare_classic_sector_last_block (MifareClassicSectorNumber sector)
+mifare_classic_sector_last_block(MifareClassicSectorNumber sector)
 {
-    return mifare_classic_sector_first_block (sector) +
-	mifare_classic_sector_block_count (sector) - 1;
+    return mifare_classic_sector_first_block(sector) +
+	   mifare_classic_sector_block_count(sector) - 1;
 }
 
 /*
  * Generates a MIFARE trailer block.
  */
 void
-mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b)
+mifare_classic_trailer_block(MifareClassicBlock *block, const MifareClassicKey key_a, uint8_t ab_0, uint8_t ab_1, uint8_t ab_2, uint8_t ab_tb, const uint8_t gpb, const MifareClassicKey key_b)
 {
     union mifare_classic_block *b = (union mifare_classic_block *)block; // *((union mifare_classic_block *)(&block));
 
@@ -822,9 +805,9 @@ mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey 
     ab_2 = DB_AB(ab_2);
     ab_tb = TB_AB(ab_tb);
 
-    memcpy (b->trailer.key_a, key_a, sizeof (MifareClassicKey));
+    memcpy(b->trailer.key_a, key_a, sizeof(MifareClassicKey));
 
-    uint32_t access_bits = ((((( ab_0  & 0x4) >> 2) << 8) | (((ab_0  & 0x2) >> 1) << 4) | (ab_0  & 0x1)) |
+    uint32_t access_bits = (((((ab_0  & 0x4) >> 2) << 8) | (((ab_0  & 0x2) >> 1) << 4) | (ab_0  & 0x1)) |
 			    (((((ab_1  & 0x4) >> 2) << 8) | (((ab_1  & 0x2) >> 1) << 4) | (ab_1  & 0x1)) << 1) |
 			    (((((ab_2  & 0x4) >> 2) << 8) | (((ab_2  & 0x2) >> 1) << 4) | (ab_2  & 0x1)) << 2) |
 			    (((((ab_tb & 0x4) >> 2) << 8) | (((ab_tb & 0x2) >> 1) << 4) | (ab_tb & 0x1)) << 3));
@@ -832,8 +815,8 @@ mifare_classic_trailer_block (MifareClassicBlock *block, const MifareClassicKey 
     uint32_t access_bits_ = ((~access_bits) & 0x00000fff);
 
     uint32_t ab = htole32(((access_bits << 12) | access_bits_));
-    memcpy (&(b->trailer.access_bits), &ab, 3);
+    memcpy(&(b->trailer.access_bits), &ab, 3);
     b->trailer.gpb = gpb;
 
-    memcpy (b->trailer.key_b, key_b, sizeof (MifareClassicKey));
+    memcpy(b->trailer.key_b, key_b, sizeof(MifareClassicKey));
 }

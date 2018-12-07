@@ -1,20 +1,3 @@
-/*-
- * Copyright (C) 2010, Romain Tartiere, Romuald Conty.
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 /*
  * This implementation was written based on information provided by the
  * following documents:
@@ -25,27 +8,27 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #if defined(HAVE_SYS_TYPES_H)
-#  include <sys/types.h>
+    #include <sys/types.h>
 #endif
 
 #if defined(HAVE_SYS_ENDIAN_H)
-#  include <sys/endian.h>
+    #include <sys/endian.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)
-#  include <endian.h>
+    #include <endian.h>
 #endif
 
 #if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  include <CoreFoundation/CoreFoundation.h>
+    #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #if defined(HAVE_BYTESWAP_H)
-#  include <byteswap.h>
+    #include <byteswap.h>
 #endif
 
 #include <stdlib.h>
@@ -57,9 +40,9 @@
 
 #define TLV_TERMINATOR 0xFE
 
-size_t		 tlv_record_length (const uint8_t *stream, size_t *field_length_size, size_t *field_value_size);
-uint8_t		*tlv_next (uint8_t *stream);
-size_t		 tlv_sequence_length (uint8_t *stream);
+size_t		 tlv_record_length(const uint8_t *stream, size_t *field_length_size, size_t *field_value_size);
+uint8_t		*tlv_next(uint8_t *stream);
+size_t		 tlv_sequence_length(uint8_t *stream);
 
 /*
  * TLV (Type Length Value) Manipulation Functions.
@@ -69,7 +52,7 @@ size_t		 tlv_sequence_length (uint8_t *stream);
  * Encode data stream into TLV.
  */
 uint8_t *
-tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize)
+tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize)
 {
     uint8_t *res;
     off_t n = 0;
@@ -80,20 +63,20 @@ tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *
     if (isize == 0xffff) /* RFU */
 	return NULL;
 
-    if ((res = malloc (1 + ((isize > 254) ? 3 : 1) + isize + 1))) {
+    if ((res = malloc(1 + ((isize > 254) ? 3 : 1) + isize + 1))) {
 	/* type + size + payload + terminator */
 	res[n++] = type;
 
 	if (isize > 254) {
 	    res[n++] = 0xff;
-	    uint16_t size_be = htobe16 (isize);
-	    memcpy (res + n, &size_be, sizeof (uint16_t));
+	    uint16_t size_be = htobe16(isize);
+	    memcpy(res + n, &size_be, sizeof(uint16_t));
 	    n += 2;
 	} else {
 	    res[n++] = (uint8_t)isize;
 	}
 
-	memcpy (res + n, istream, isize);
+	memcpy(res + n, istream, isize);
 
 	n += isize;
 	res[n++] = TLV_TERMINATOR;
@@ -108,7 +91,7 @@ tlv_encode (const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *
  * Decode TLV from data stream.
  */
 uint8_t *
-tlv_decode (const uint8_t *istream, uint8_t *type, uint16_t *size)
+tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size)
 {
     size_t fls = 0;
     size_t fvs = 0;
@@ -117,14 +100,14 @@ tlv_decode (const uint8_t *istream, uint8_t *type, uint16_t *size)
     if (type)
 	*type = istream[0];
 
-    tlv_record_length (istream, &fls, &fvs);
+    tlv_record_length(istream, &fls, &fvs);
 
     if (size) {
 	*size = fvs;
     }
 
-    if ((res = malloc (fvs))) {
-	memcpy (res, istream + 1 + fls, fvs);
+    if ((res = malloc(fvs))) {
+	memcpy(res, istream + 1 + fls, fvs);
     }
     return res;
 }
@@ -133,7 +116,7 @@ tlv_decode (const uint8_t *istream, uint8_t *type, uint16_t *size)
  * Length of a TLV field
  */
 size_t
-tlv_record_length (const uint8_t *stream, size_t *field_length_size, size_t *field_value_size)
+tlv_record_length(const uint8_t *stream, size_t *field_length_size, size_t *field_value_size)
 {
     size_t fls = 0;
     size_t fvs = 0;
@@ -148,7 +131,7 @@ tlv_record_length (const uint8_t *stream, size_t *field_length_size, size_t *fie
     default: // FIXME Not supported.
 	if (stream[1] == 0xff) {
 	    uint16_t be_size;
-	    memcpy (&be_size, stream + 2, sizeof (uint16_t));
+	    memcpy(&be_size, stream + 2, sizeof(uint16_t));
 	    fls = 3;
 	    fvs = be16toh(be_size);
 	} else {
@@ -176,11 +159,11 @@ tlv_record_length (const uint8_t *stream, size_t *field_length_size, size_t *fie
  * Fourth call NULL
  */
 uint8_t *
-tlv_next (uint8_t *stream)
+tlv_next(uint8_t *stream)
 {
     uint8_t *res = NULL;
     if (stream[0] != TLV_TERMINATOR)
-	res = stream + tlv_record_length (stream, NULL, NULL);
+	res = stream + tlv_record_length(stream, NULL, NULL);
 
     return res;
 }
@@ -189,13 +172,13 @@ tlv_next (uint8_t *stream)
  * Full-length of all TLV fields.
  */
 size_t
-tlv_sequence_length (uint8_t *stream)
+tlv_sequence_length(uint8_t *stream)
 {
     size_t res = 0;
 
     do {
-	res += tlv_record_length (stream, NULL, NULL);
-    } while ((stream = tlv_next (stream)));
+	res += tlv_record_length(stream, NULL, NULL);
+    } while ((stream = tlv_next(stream)));
 
     return res;
 }
@@ -205,14 +188,14 @@ tlv_sequence_length (uint8_t *stream)
  * Append two TLV.  Acts like realloc(3).
  */
 uint8_t *
-tlv_append (uint8_t *a, uint8_t *b)
+tlv_append(uint8_t *a, uint8_t *b)
 {
-    size_t a_size = tlv_sequence_length (a);
-    size_t b_size = tlv_sequence_length (b);
+    size_t a_size = tlv_sequence_length(a);
+    size_t b_size = tlv_sequence_length(b);
     size_t new_size = a_size + b_size - 1;
 
-    if ((a = realloc (a, new_size))) {
-	memcpy (a + a_size - 1, b, b_size);
+    if ((a = realloc(a, new_size))) {
+	memcpy(a + a_size - 1, b, b_size);
     }
 
     return a;

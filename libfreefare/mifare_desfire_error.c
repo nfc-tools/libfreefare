@@ -1,21 +1,3 @@
-/*-
- * Copyright (C) 2010, Romain Tartiere, Romuald Conty.
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
-
 #include <sys/types.h>
 
 #include <stdlib.h>
@@ -57,7 +39,7 @@ static struct error_message {
 };
 
 const char *
-mifare_desfire_error_lookup (uint8_t code)
+mifare_desfire_error_lookup(uint8_t code)
 {
     struct error_message *e = error_messages;
     while (e->message) {
@@ -70,19 +52,19 @@ mifare_desfire_error_lookup (uint8_t code)
 }
 
 uint8_t
-mifare_desfire_last_pcd_error (FreefareTag tag)
+mifare_desfire_last_pcd_error(FreefareTag tag)
 {
     if (tag->type != MIFARE_DESFIRE)
 	return 0;
 
-    return MIFARE_DESFIRE (tag)->last_pcd_error;
+    return MIFARE_DESFIRE(tag)->last_pcd_error;
 }
 
 uint8_t
-mifare_desfire_last_picc_error (FreefareTag tag)
+mifare_desfire_last_picc_error(FreefareTag tag)
 {
     if (tag->type != MIFARE_DESFIRE)
 	return 0;
 
-    return MIFARE_DESFIRE (tag)->last_picc_error;
+    return MIFARE_DESFIRE(tag)->last_picc_error;
 }

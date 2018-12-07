@@ -1,20 +1,3 @@
-/*-
- * Copyright (C) 2010, Romain Tartiere, Romuald Conty.
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 /*
  * These tests implement examples provided in the following documents:
  *
@@ -38,7 +21,7 @@ uint8_t key_data[] = {
 
 
 void
-test_mifare_desfire_aes_generate_subkeys (void)
+test_mifare_desfire_aes_generate_subkeys(void)
 {
     uint8_t sk1[] = {
 	0xfb, 0xee, 0xd6, 0x18,
@@ -54,23 +37,23 @@ test_mifare_desfire_aes_generate_subkeys (void)
 	0xe4, 0x6d, 0x51, 0x3b
     };
 
-    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data);
-    cmac_generate_subkeys (key);
+    MifareDESFireKey key = mifare_desfire_aes_key_new(key_data);
+    cmac_generate_subkeys(key);
 
-    cut_assert_equal_memory (sk1, 16, key->cmac_sk1, 16, cut_message ("Wrong sub-key 1"));
-    cut_assert_equal_memory (sk2, 16, key->cmac_sk2, 16, cut_message ("Wrong sub-key 2"));
+    cut_assert_equal_memory(sk1, 16, key->cmac_sk1, 16, cut_message("Wrong sub-key 1"));
+    cut_assert_equal_memory(sk2, 16, key->cmac_sk2, 16, cut_message("Wrong sub-key 2"));
 
-    mifare_desfire_key_free (key);
+    mifare_desfire_key_free(key);
 }
 
 void
-test_mifare_desfire_aes_cmac_empty (void)
+test_mifare_desfire_aes_cmac_empty(void)
 {
-    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data);
-    cmac_generate_subkeys (key);
+    MifareDESFireKey key = mifare_desfire_aes_key_new(key_data);
+    cmac_generate_subkeys(key);
 
     uint8_t ivect[16];
-    memset (ivect, 0, sizeof (ivect));
+    memset(ivect, 0, sizeof(ivect));
 
     uint8_t expected_cmac[] = {
 	0xbb, 0x1d, 0x69, 0x29,
@@ -80,21 +63,21 @@ test_mifare_desfire_aes_cmac_empty (void)
     };
 
     uint8_t my_cmac[16];
-    cmac (key, ivect, NULL, 0, my_cmac);
+    cmac(key, ivect, NULL, 0, my_cmac);
 
-    cut_assert_equal_memory (expected_cmac, 16, my_cmac, 16, cut_message ("Wrong CMAC"));
+    cut_assert_equal_memory(expected_cmac, 16, my_cmac, 16, cut_message("Wrong CMAC"));
 
-    mifare_desfire_key_free (key);
+    mifare_desfire_key_free(key);
 }
 
 void
-test_mifare_desfire_aes_cmac_128 (void)
+test_mifare_desfire_aes_cmac_128(void)
 {
-    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data);
-    cmac_generate_subkeys (key);
+    MifareDESFireKey key = mifare_desfire_aes_key_new(key_data);
+    cmac_generate_subkeys(key);
 
     uint8_t ivect[16];
-    memset (ivect, 0, sizeof (ivect));
+    memset(ivect, 0, sizeof(ivect));
 
     uint8_t message[] = {
 	0x6b, 0xc1, 0xbe, 0xe2,
@@ -111,21 +94,21 @@ test_mifare_desfire_aes_cmac_128 (void)
     };
 
     uint8_t my_cmac[16];
-    cmac (key, ivect, message, 16, my_cmac);
+    cmac(key, ivect, message, 16, my_cmac);
 
-    cut_assert_equal_memory (expected_cmac, 16, my_cmac, sizeof (message), cut_message ("Wrong CMAC"));
+    cut_assert_equal_memory(expected_cmac, 16, my_cmac, sizeof(message), cut_message("Wrong CMAC"));
 
-    mifare_desfire_key_free (key);
+    mifare_desfire_key_free(key);
 }
 
 void
-test_mifare_desfire_aes_cmac_320 (void)
+test_mifare_desfire_aes_cmac_320(void)
 {
-    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data);
-    cmac_generate_subkeys (key);
+    MifareDESFireKey key = mifare_desfire_aes_key_new(key_data);
+    cmac_generate_subkeys(key);
 
     uint8_t ivect[16];
-    memset (ivect, 0, sizeof (ivect));
+    memset(ivect, 0, sizeof(ivect));
 
     uint8_t message[] = {
 	0x6b, 0xc1, 0xbe, 0xe2,
@@ -148,21 +131,21 @@ test_mifare_desfire_aes_cmac_320 (void)
     };
 
     uint8_t my_cmac[16];
-    cmac (key, ivect, message, sizeof (message), my_cmac);
+    cmac(key, ivect, message, sizeof(message), my_cmac);
 
-    cut_assert_equal_memory (expected_cmac, 16, my_cmac, 16, cut_message ("Wrong CMAC"));
+    cut_assert_equal_memory(expected_cmac, 16, my_cmac, 16, cut_message("Wrong CMAC"));
 
-    mifare_desfire_key_free (key);
+    mifare_desfire_key_free(key);
 }
 
 void
-test_mifare_desfire_aes_cmac_512 (void)
+test_mifare_desfire_aes_cmac_512(void)
 {
-    MifareDESFireKey key = mifare_desfire_aes_key_new (key_data);
-    cmac_generate_subkeys (key);
+    MifareDESFireKey key = mifare_desfire_aes_key_new(key_data);
+    cmac_generate_subkeys(key);
 
     uint8_t ivect[16];
-    memset (ivect, 0, sizeof (ivect));
+    memset(ivect, 0, sizeof(ivect));
 
     uint8_t message[] = {
 	0x6b, 0xc1, 0xbe, 0xe2,
@@ -191,9 +174,9 @@ test_mifare_desfire_aes_cmac_512 (void)
     };
 
     uint8_t my_cmac[16];
-    cmac (key, ivect, message, sizeof (message), my_cmac);
+    cmac(key, ivect, message, sizeof(message), my_cmac);
 
-    cut_assert_equal_memory (expected_cmac, 16, my_cmac, 16, cut_message ("Wrong CMAC"));
+    cut_assert_equal_memory(expected_cmac, 16, my_cmac, 16, cut_message("Wrong CMAC"));
 
-    mifare_desfire_key_free (key);
+    mifare_desfire_key_free(key);
 }

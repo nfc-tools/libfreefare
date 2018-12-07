@@ -12,6 +12,10 @@ set(EXAMPLES-SOURCES
         mifare-desfire-ev1-configure-default-key
         mifare-desfire-ev1-configure-random-uid
         mifare-ultralight-info
+        ntag-detect
+        ntag-removeauth
+        ntag-setauth
+        ntag-write
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../libfreefare)

@@ -26,7 +26,7 @@ ENDIF(WIN32)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/)
 add_definitions("-DHAVE_CONFIG_H")
 
-if(MINGW)
+if(MINGW AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
   # force MinGW-w64 in 32bit mode
   add_definitions("-m32")
   add_definitions("-DNOCRYPT")

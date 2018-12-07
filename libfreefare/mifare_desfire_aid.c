@@ -1,20 +1,3 @@
-/*-
- * Copyright (C) 2010, Romain Tartiere.
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 /*
  * This implementation was written based on information provided by the
  * following document:
@@ -25,27 +8,27 @@
  */
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #if defined(HAVE_SYS_TYPES_H)
-#  include <sys/types.h>
+    #include <sys/types.h>
 #endif
 
 #if defined(HAVE_SYS_ENDIAN_H)
-#  include <sys/endian.h>
+    #include <sys/endian.h>
 #endif
 
 #if defined(HAVE_ENDIAN_H)
-#  include <endian.h>
+    #include <endian.h>
 #endif
 
 #if defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  include <CoreFoundation/CoreFoundation.h>
+    #include <CoreFoundation/CoreFoundation.h>
 #endif
 
 #if defined(HAVE_BYTESWAP_H)
-#  include <byteswap.h>
+    #include <byteswap.h>
 #endif
 
 #include <errno.h>
@@ -57,16 +40,16 @@
 
 // Theorically, it should be an uint24_t ...
 MifareDESFireAID
-mifare_desfire_aid_new (uint32_t aid)
+mifare_desfire_aid_new(uint32_t aid)
 {
     if (aid > 0x00ffffff)
 	return errno = EINVAL, NULL;
 
     MifareDESFireAID res;
-    uint32_t aid_le = htole32 (aid);
+    uint32_t aid_le = htole32(aid);
 
-    if ((res = malloc (sizeof (*res)))) {
-	memcpy(res->data, ((uint8_t*)&aid_le), 3);
+    if ((res = malloc(sizeof(*res)))) {
+	memcpy(res->data, ((uint8_t *)&aid_le), 3);
     }
 
     return res;
@@ -74,16 +57,16 @@ mifare_desfire_aid_new (uint32_t aid)
 
 // This function ease the MifareDESFireAID creation using a Mifare Classic AID (see MIFARE Application Directory document - section 3.10 MAD and MIFARE DESFire)
 MifareDESFireAID
-mifare_desfire_aid_new_with_mad_aid (MadAid mad_aid, uint8_t n)
+mifare_desfire_aid_new_with_mad_aid(MadAid mad_aid, uint8_t n)
 {
     if (n > 0x0f)
 	return errno = EINVAL, NULL;
 
-    return mifare_desfire_aid_new (0xf00000 | (mad_aid.function_cluster_code << 12) | (mad_aid.application_code << 4) | n);
+    return mifare_desfire_aid_new(0xf00000 | (mad_aid.function_cluster_code << 12) | (mad_aid.application_code << 4) | n);
 }
 
 uint32_t
-mifare_desfire_aid_get_aid (MifareDESFireAID aid)
+mifare_desfire_aid_get_aid(MifareDESFireAID aid)
 {
     return aid->data[0] | (aid->data[1] << 8) | (aid->data[2] << 16);
 }

@@ -1,25 +1,8 @@
-/*-
- * Copyright (C) 2010, Romain Tartiere, Romuald Conty.
- *
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 #ifndef __FREEFARE_INTERNAL_H__
 #define __FREEFARE_INTERNAL_H__
 
 #if defined(HAVE_CONFIG_H)
-#  include "config.h"
+    #include "config.h"
 #endif
 
 #include <openssl/des.h>
@@ -42,55 +25,55 @@
  */
 
 #if !defined(le32toh) && defined(letoh32)
-#  define le32toh(x) letoh32(x)
-#  define be32toh(x) betoh32(x)
+    #define le32toh(x) letoh32(x)
+    #define be32toh(x) betoh32(x)
 #endif
 
 #if !defined(le16toh) && defined(letoh16)
-#  define le16toh(x) letoh16(x)
-#  define be16toh(x) betoh16(x)
+    #define le16toh(x) letoh16(x)
+    #define be16toh(x) betoh16(x)
 #endif
 
 #if !defined(le32toh) && defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  define be32toh(x) CFSwapInt32BigToHost(x)
-#  define htobe32(x) CFSwapInt32HostToBig(x)
-#  define le32toh(x) CFSwapInt32LittleToHost(x)
-#  define htole32(x) CFSwapInt32HostToLittle(x)
+    #define be32toh(x) CFSwapInt32BigToHost(x)
+    #define htobe32(x) CFSwapInt32HostToBig(x)
+    #define le32toh(x) CFSwapInt32LittleToHost(x)
+    #define htole32(x) CFSwapInt32HostToLittle(x)
 #endif
 
 #if !defined(le16toh) && defined(HAVE_COREFOUNDATION_COREFOUNDATION_H)
-#  define be16toh(x) CFSwapInt16BigToHost(x)
-#  define htobe16(x) CFSwapInt16HostToBig(x)
-#  define le16toh(x) CFSwapInt16LittleToHost(x)
-#  define htole16(x) CFSwapInt16HostToLittle(x)
+    #define be16toh(x) CFSwapInt16BigToHost(x)
+    #define htobe16(x) CFSwapInt16HostToBig(x)
+    #define le16toh(x) CFSwapInt16LittleToHost(x)
+    #define htole16(x) CFSwapInt16HostToLittle(x)
 #endif
 
 #if !defined(le32toh) && defined(bswap_32)
-#  if BYTE_ORDER == LITTLE_ENDIAN
-#    define be32toh(x) bswap_32(x)
-#    define htobe32(x) bswap_32(x)
-#    define le32toh(x) (x)
-#    define htole32(x) (x)
-#  else
-#    define be32toh(x) (x)
-#    define htobe32(x) (x)
-#    define le32toh(x) bswap_32(x)
-#    define htole32(x) bswap_32(x)
-#  endif
+    #if BYTE_ORDER == LITTLE_ENDIAN
+	#define be32toh(x) bswap_32(x)
+	#define htobe32(x) bswap_32(x)
+	#define le32toh(x) (x)
+	#define htole32(x) (x)
+    #else
+	#define be32toh(x) (x)
+	#define htobe32(x) (x)
+	#define le32toh(x) bswap_32(x)
+	#define htole32(x) bswap_32(x)
+    #endif
 #endif
 
 #if !defined(htole16) && defined(bswap_16)
-#  if BYTE_ORDER == LITTLE_ENDIAN
-#    define be16toh(x) (bswap_16(x))
-#    define htobe16(x) (bswap_16(x))
-#    define htole16(x) (x)
-#    define le16toh(x) (x)
-#  else
-#    define be16toh(x) (x)
-#    define htobe16(x) (x)
-#    define htole16(x) (bswap_16(x))
-#    define le16toh(x) (bswap_16(x))
-#  endif
+    #if BYTE_ORDER == LITTLE_ENDIAN
+	#define be16toh(x) (bswap_16(x))
+	#define htobe16(x) (bswap_16(x))
+	#define htole16(x) (x)
+	#define le16toh(x) (x)
+    #else
+	#define be16toh(x) (x)
+	#define htobe16(x) (x)
+	#define htole16(x) (bswap_16(x))
+	#define le16toh(x) (bswap_16(x))
+    #endif
 #endif
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -98,14 +81,14 @@
 
 #define MAX_CRYPTO_BLOCK_SIZE 16
 
-void		*memdup (const void *p, const size_t n);
+void		*memdup(const void *p, const size_t n);
 
 struct mad_sector_0x00;
 struct mad_sector_0x10;
 
-void		 nxp_crc (uint8_t *crc, const uint8_t value);
-uint8_t		 sector_0x00_crc8 (Mad mad);
-uint8_t		 sector_0x10_crc8 (Mad mad);
+void		 nxp_crc(uint8_t *crc, const uint8_t value);
+uint8_t		 sector_0x00_crc8(Mad mad);
+uint8_t		 sector_0x10_crc8(Mad mad);
 
 typedef enum {
     MCD_SEND,
@@ -137,21 +120,21 @@ typedef enum {
 #define MAC_MASK   0x0F0
 #define CMAC_MACK  0xF00
 
-void		*mifare_cryto_preprocess_data (FreefareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
-void		*mifare_cryto_postprocess_data (FreefareTag tag, void *data, ssize_t *nbytes, int communication_settings);
-void		 mifare_cypher_single_block (MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDirection direction, MifareCryptoOperation operation, size_t block_size);
-void		 mifare_cypher_blocks_chained (FreefareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation);
-void		 rol (uint8_t *data, const size_t len);
-void		 desfire_crc32 (const uint8_t *data, const size_t len, uint8_t *crc);
-void		 desfire_crc32_append (uint8_t *data, const size_t len);
-size_t		 key_block_size (const MifareDESFireKey key);
-size_t		 padded_data_length (const size_t nbytes, const size_t block_size);
-size_t		 maced_data_length (const MifareDESFireKey key, const size_t nbytes);
-size_t		 enciphered_data_length (const FreefareTag tag, const size_t nbytes, int communication_settings);
+void		*mifare_cryto_preprocess_data(FreefareTag tag, void *data, size_t *nbytes, off_t offset, int communication_settings);
+void		*mifare_cryto_postprocess_data(FreefareTag tag, void *data, ssize_t *nbytes, int communication_settings);
+void		 mifare_cypher_single_block(MifareDESFireKey key, uint8_t *data, uint8_t *ivect, MifareCryptoDirection direction, MifareCryptoOperation operation, size_t block_size);
+void		 mifare_cypher_blocks_chained(FreefareTag tag, MifareDESFireKey key, uint8_t *ivect, uint8_t *data, size_t data_size, MifareCryptoDirection direction, MifareCryptoOperation operation);
+void		 rol(uint8_t *data, const size_t len);
+void		 desfire_crc32(const uint8_t *data, const size_t len, uint8_t *crc);
+void		 desfire_crc32_append(uint8_t *data, const size_t len);
+size_t		 key_block_size(const MifareDESFireKey key);
+size_t		 padded_data_length(const size_t nbytes, const size_t block_size);
+size_t		 maced_data_length(const MifareDESFireKey key, const size_t nbytes);
+size_t		 enciphered_data_length(const FreefareTag tag, const size_t nbytes, int communication_settings);
 
-void		 cmac_generate_subkeys (MifareDESFireKey key);
-void		 cmac (const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
-void		*assert_crypto_buffer_size (FreefareTag tag, size_t nbytes);
+void		 cmac_generate_subkeys(MifareDESFireKey key);
+void		 cmac(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
+void		*assert_crypto_buffer_size(FreefareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT  0x10
 #define MIFARE_ULTRALIGHT_C_PAGE_COUNT 0x30
@@ -172,7 +155,7 @@ struct freefare_tag {
     nfc_target info;
     int type;
     int active;
-    void (*free_tag) (FreefareTag tag);
+    void (*free_tag)(FreefareTag tag);
 };
 
 struct felica_tag {
@@ -189,10 +172,10 @@ struct mifare_classic_tag {
      * address and avoid false cache hit with inconsistent data.
      */
     struct {
-      int16_t sector_trailer_block_number;
-      uint16_t sector_access_bits;
-      int16_t block_number;
-      uint8_t block_access_bits;
+	int16_t sector_trailer_block_number;
+	uint16_t sector_access_bits;
+	int16_t block_number;
+	uint8_t block_access_bits;
     } cached_access_bits;
 };
 
@@ -202,12 +185,7 @@ struct mifare_desfire_aid {
 
 struct mifare_desfire_key {
     uint8_t data[24];
-    enum {
-	T_DES,
-	T_3DES,
-	T_3K3DES,
-	T_AES
-    } type;
+    MifareKeyType type;
     DES_key_schedule ks1;
     DES_key_schedule ks2;
     DES_key_schedule ks3;
@@ -232,8 +210,15 @@ struct mifare_desfire_tag {
     uint32_t selected_application;
 };
 
-MifareDESFireKey mifare_desfire_session_key_new (const uint8_t rnda[], const uint8_t rndb[], MifareDESFireKey authentication_key);
-const char	*mifare_desfire_error_lookup (uint8_t error);
+struct mifare_key_deriver {
+    MifareDESFireKey master_key;
+    MifareKeyType output_key_type;
+    uint8_t m[48];
+    int len;
+};
+
+MifareDESFireKey mifare_desfire_session_key_new(const uint8_t rnda[], const uint8_t rndb[], MifareDESFireKey authentication_key);
+const char	*mifare_desfire_error_lookup(uint8_t error);
 
 struct mifare_ultralight_tag {
     struct freefare_tag __tag;
@@ -244,6 +229,32 @@ struct mifare_ultralight_tag {
 };
 
 /*
+  NTAG section
+*/
+
+struct ntag21x_tag {
+    struct freefare_tag __tag;
+
+    int subtype;
+    uint8_t vendor_id;
+    uint8_t product_type;
+    uint8_t product_subtype;
+    uint8_t major_product_version;
+    uint8_t minor_product_version;
+    uint8_t storage_size;
+    uint8_t protocol_type;
+
+    uint8_t last_error;
+};
+
+struct ntag21x_key {
+    uint8_t data[4]; // 4B key
+    uint8_t pack[2]; // 2B Password Acknowlege
+};
+
+const char      *ntag21x_error_lookup(uint8_t code);
+
+/*
  * FreefareTag assertion macros
  *
  * This macros provide a simple and unified way to perform various tests at the
@@ -252,7 +263,7 @@ struct mifare_ultralight_tag {
 #define ASSERT_ACTIVE(tag) do { if (!tag->active) return errno = ENXIO, -1; } while (0)
 #define ASSERT_INACTIVE(tag) do { if (tag->active) return errno = ENXIO, -1; } while (0)
 
-/* 
+/*
  * FreefareTag cast macros
  *
  * This macros are intended to provide a convenient way to cast abstract
@@ -262,6 +273,7 @@ struct mifare_ultralight_tag {
 #define MIFARE_CLASSIC(tag) ((struct mifare_classic_tag *) tag)
 #define MIFARE_DESFIRE(tag) ((struct mifare_desfire_tag *) tag)
 #define MIFARE_ULTRALIGHT(tag) ((struct mifare_ultralight_tag *) tag)
+#define NTAG_21x(tag) ((struct ntag21x_tag *) tag)
 
 /*
  * Access bits manipulation macros
@@ -270,17 +282,17 @@ struct mifare_ultralight_tag {
 #define TB_AB(ab) ((ab == C_DEFAULT) ? C_100 : ab)
 
 #ifdef WITH_DEBUG
-#define DEBUG_FUNCTION() do { printf("*** \033[033;1m%s\033[0m ***\n", __FUNCTION__); } while (0)
-#define DEBUG_XFER(data, nbytes, hint) do { hexdump (data, nbytes, hint, 0); } while (0)
+    #define DEBUG_FUNCTION() do { printf("*** \033[033;1m%s\033[0m ***\n", __FUNCTION__); } while (0)
+    #define DEBUG_XFER(data, nbytes, hint) do { hexdump (data, nbytes, hint, 0); } while (0)
 #else
-#define DEBUG_FUNCTION() do {} while (0)
-#define DEBUG_XFER(data, nbytes, hint) do {} while (0)
+    #define DEBUG_FUNCTION() do {} while (0)
+    #define DEBUG_XFER(data, nbytes, hint) do {} while (0)
 #endif
 
 
 /*
  * Buffer management macros.
- * 
+ *
  * The following macros ease setting-up and using buffers:
  * BUFFER_INIT (data, 5);      // data -> [ xx, xx, xx, xx, xx ]
  * BUFFER_SIZE (data);         // size -> 0

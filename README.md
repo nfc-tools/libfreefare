@@ -1,5 +1,6 @@
 # Introduction
 
+[![Build Status](https://travis-ci.org/nfc-tools/libfreefare.svg?branch=master)](https://travis-ci.org/nfc-tools/libfreefare)
 [![Join the chat at https://gitter.im/nfc-tools/libfreefare](https://badges.gitter.im/nfc-tools/libfreefare.svg)](https://gitter.im/nfc-tools/libfreefare?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 The _libfreefare_ project provides a convenient API for MIFARE card manipulations.
@@ -26,6 +27,7 @@ If you are new to _libfreefare_ or the _nfc-tools_, you should collect useful in
 | MIFARE Plus X 4k    | Not supported |
 | MIFARE Ultralight   | Supported     |
 | MIFARE Ultralight C | Supported     |
+| NTAG21x             | Supported     |
 
 ## Specifications
 | Specification                         | Status    |
@@ -35,6 +37,9 @@ If you are new to _libfreefare_ or the _nfc-tools_, you should collect useful in
 | Mifare Application Directory (MAD) v3 | Supported (part of Mifare DESFire support) |
 
 # Installation
+
+## For *NIX systems
+
 You can use released version (see **Download** section) or development version:
 
 First, ensure all dependencies are installed:
@@ -63,6 +68,18 @@ You can now compile **libfreefare** the usual autotools way:
 make
 sudo make install
 ```
+## For Windows Systems
+
+### Requirements
+
+* cmake
+* make
+* mingw{32,64}-gcc
+
+### Building
+
+    mingw64-cmake -DLIBNFC_INCLUDE_DIRS=/path/to/libnfc-source/include  -DLIBNFC_LIBRARIES=/path/to/libnfc.dll
+    mingw64-make
 
 # Debug
 In order to debug using gdb, you should tune the CFLAGS:

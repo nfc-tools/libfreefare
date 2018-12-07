@@ -1,74 +1,57 @@
-/*-
- * Copyright (C) 2009, 2010, Romain Tartiere, Romuald Conty.
- * 
- * This program is free software: you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by the
- * Free Software Foundation, either version 3 of the License, or (at your
- * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
- * more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>
- */
-
 #include <cutter.h>
 
 #include <freefare.h>
 #include "freefare_internal.h"
 
 void
-test_mad (void)
+test_mad(void)
 {
     int res;
 
-    Mad mad = mad_new (1);
-    cut_assert_not_null (mad, cut_message ("Can create a new MAD"));
+    Mad mad = mad_new(1);
+    cut_assert_not_null(mad, cut_message("Can create a new MAD"));
 
-    cut_assert_equal_int (1, mad_get_version (mad), cut_message ("Wrong default MAD version"));
-    mad_set_version (mad, 2);
-    cut_assert_equal_int (2, mad_get_version (mad), cut_message ("Can't change MAD version"));
+    cut_assert_equal_int(1, mad_get_version(mad), cut_message("Wrong default MAD version"));
+    mad_set_version(mad, 2);
+    cut_assert_equal_int(2, mad_get_version(mad), cut_message("Can't change MAD version"));
 
-    cut_assert_equal_int (0, mad_get_card_publisher_sector (mad), cut_message ("Wrong default MAD publisher"));
+    cut_assert_equal_int(0, mad_get_card_publisher_sector(mad), cut_message("Wrong default MAD publisher"));
 
-    res = mad_set_card_publisher_sector (mad, 13);
-    cut_assert_equal_int (0, res, cut_message ("mad_set_card_publisher_sector() returned an error."));
-    cut_assert_equal_int (13, mad_get_card_publisher_sector (mad), cut_message ("Wrong publisher sector"));
+    res = mad_set_card_publisher_sector(mad, 13);
+    cut_assert_equal_int(0, res, cut_message("mad_set_card_publisher_sector() returned an error."));
+    cut_assert_equal_int(13, mad_get_card_publisher_sector(mad), cut_message("Wrong publisher sector"));
 
-    res = mad_set_card_publisher_sector (mad, 0xff);
-    cut_assert_equal_int (-1, res, cut_message ("Invalid sector"));
-    cut_assert_equal_int (13, mad_get_card_publisher_sector (mad), cut_message ("Previous publisher sector value"));
+    res = mad_set_card_publisher_sector(mad, 0xff);
+    cut_assert_equal_int(-1, res, cut_message("Invalid sector"));
+    cut_assert_equal_int(13, mad_get_card_publisher_sector(mad), cut_message("Previous publisher sector value"));
 
     MadAid aid = {
 	.function_cluster_code = 0,
 	.application_code = 0
     };
 
-    res = mad_get_aid (mad, 3, &aid);
-    cut_assert_equal_int (0, res, cut_message ("mad_get_aid() failed"));
-    cut_assert_equal_int (0, aid.function_cluster_code, cut_message ("Invalid default value"));
-    cut_assert_equal_int (0, aid.application_code, cut_message ("Invalid default value"));
+    res = mad_get_aid(mad, 3, &aid);
+    cut_assert_equal_int(0, res, cut_message("mad_get_aid() failed"));
+    cut_assert_equal_int(0, aid.function_cluster_code, cut_message("Invalid default value"));
+    cut_assert_equal_int(0, aid.application_code, cut_message("Invalid default value"));
 
     aid.function_cluster_code = 0xc0;
     aid.application_code = 0x42;
-    res = mad_set_aid (mad, 3, aid);
-    cut_assert_equal_int (0, res, cut_message ("mad_set_aid() failed"));
+    res = mad_set_aid(mad, 3, aid);
+    cut_assert_equal_int(0, res, cut_message("mad_set_aid() failed"));
 
-    res = mad_get_aid (mad, 3, &aid);
-    cut_assert_equal_int (0, res, cut_message ("mad_get_aid() failed"));
-    cut_assert_equal_int (0xC0, aid.function_cluster_code, cut_message ("Invalid value"));
-    cut_assert_equal_int (0x42, aid.application_code, cut_message ("Invalid value"));
+    res = mad_get_aid(mad, 3, &aid);
+    cut_assert_equal_int(0, res, cut_message("mad_get_aid() failed"));
+    cut_assert_equal_int(0xC0, aid.function_cluster_code, cut_message("Invalid value"));
+    cut_assert_equal_int(0x42, aid.application_code, cut_message("Invalid value"));
 
-    mad_free (mad);
+    mad_free(mad);
 }
 
 #define CRC_PRESET 0xc7
 
 void
-test_mad_crc8_basic (void)
+test_mad_crc8_basic(void)
 {
     uint8_t crc;
     const uint8_t crc_value = 0x42;
@@ -81,14 +64,14 @@ test_mad_crc8_basic (void)
     crc = CRC_PRESET;
     nxp_crc(&crc, crc_value);
     nxp_crc(&crc, save);
-    cut_assert_equal_int (0x00, crc, cut_message ("CRC should verify crc(message + crc(message)) = 0"));
+    cut_assert_equal_int(0x00, crc, cut_message("CRC should verify crc(message + crc(message)) = 0"));
 }
 
 /*
  * The following MAD values where extracted from documentation.
  */
 void
-test_mad_crc8_doc_example (void)
+test_mad_crc8_doc_example(void)
 {
     /* Preset */
     uint8_t crc = CRC_PRESET;
@@ -134,14 +117,14 @@ test_mad_crc8_doc_example (void)
 
     /* Append zeros of augmented message */
 
-    cut_assert_equal_int (0x89, crc, cut_message ("Sample CRC should match"));
+    cut_assert_equal_int(0x89, crc, cut_message("Sample CRC should match"));
 }
 
 /*
  * The following MAD values where extracted from a MIFARE dump.
  */
 void
-test_mad_crc8_real_example_1 (void)
+test_mad_crc8_real_example_1(void)
 {
     /* Preset */
     uint8_t crc = CRC_PRESET;
@@ -187,14 +170,14 @@ test_mad_crc8_real_example_1 (void)
 
     /* Append zeros of augmented message */
 
-    cut_assert_equal_int (0xc4, crc, cut_message ("Read example 1 CRC should match"));
+    cut_assert_equal_int(0xc4, crc, cut_message("Read example 1 CRC should match"));
 }
 
 /*
  * The following MAD values where extracted from a MIFARE dump.
  */
 void
-test_mad_crc8_real_example_2 (void)
+test_mad_crc8_real_example_2(void)
 {
     /* Preset */
     uint8_t crc = CRC_PRESET;
@@ -240,48 +223,48 @@ test_mad_crc8_real_example_2 (void)
 
     /* Append zeros of augmented message */
 
-    cut_assert_equal_int (0xab, crc, cut_message ("Read example 1 CRC should match"));
+    cut_assert_equal_int(0xab, crc, cut_message("Read example 1 CRC should match"));
 }
 
 void
-test_mad_sector_0x00_crc8 (void)
+test_mad_sector_0x00_crc8(void)
 {
     int res;
-    Mad mad = mad_new (1);
-    cut_assert_not_null (mad, cut_message ("mad_new() failed"));
+    Mad mad = mad_new(1);
+    cut_assert_not_null(mad, cut_message("mad_new() failed"));
 
-    res = mad_set_card_publisher_sector (mad, 0x01);
+    res = mad_set_card_publisher_sector(mad, 0x01);
 
     /* Block 1 */
     MadAid aid1 = { 0x01, 0x08 };
-    mad_set_aid (mad, 1, aid1);
-    mad_set_aid (mad, 2, aid1);
-    mad_set_aid (mad, 3, aid1);
+    mad_set_aid(mad, 1, aid1);
+    mad_set_aid(mad, 2, aid1);
+    mad_set_aid(mad, 3, aid1);
 
     /* Block 2 */
     MadAid empty_aid = { 0x00, 0x00 };
-    mad_set_aid (mad, 4, empty_aid);
-    mad_set_aid (mad, 5, empty_aid);
-    mad_set_aid (mad, 6, empty_aid);
+    mad_set_aid(mad, 4, empty_aid);
+    mad_set_aid(mad, 5, empty_aid);
+    mad_set_aid(mad, 6, empty_aid);
     MadAid aid2 = { 0x04, 0x00 };
-    mad_set_aid (mad, 7, aid2);
+    mad_set_aid(mad, 7, aid2);
 
     /* Block 3 */
     MadAid aid3 = { 0x03, 0x10 };
-    mad_set_aid (mad, 8, aid3);
-    mad_set_aid (mad, 9, aid3);
+    mad_set_aid(mad, 8, aid3);
+    mad_set_aid(mad, 9, aid3);
     MadAid aid4 = { 0x02, 0x10 };
-    mad_set_aid (mad, 10, aid4);
-    mad_set_aid (mad, 11, aid4);
+    mad_set_aid(mad, 10, aid4);
+    mad_set_aid(mad, 11, aid4);
 
-    mad_set_aid (mad, 12, empty_aid);
-    mad_set_aid (mad, 13, empty_aid);
-    mad_set_aid (mad, 14, empty_aid);
+    mad_set_aid(mad, 12, empty_aid);
+    mad_set_aid(mad, 13, empty_aid);
+    mad_set_aid(mad, 14, empty_aid);
     MadAid aid5 = { 0x11, 0x30 };
-    mad_set_aid (mad, 15, aid5);
+    mad_set_aid(mad, 15, aid5);
 
-    res = sector_0x00_crc8 (mad);
-    cut_assert_equal_int(0x89, res, cut_message ("Sample CRC should match"));
+    res = sector_0x00_crc8(mad);
+    cut_assert_equal_int(0x89, res, cut_message("Sample CRC should match"));
 
-    mad_free (mad);
+    mad_free(mad);
 }
