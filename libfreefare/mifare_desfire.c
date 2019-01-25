@@ -168,7 +168,7 @@ static ssize_t	 read_data(FreefareTag tag, uint8_t command, uint8_t file_no, off
 	MIFARE_DESFIRE (tag)->last_pcd_error = OPERATION_OK; \
 	DEBUG_XFER (__msg, __len, "===> "); \
 	int _res; \
-	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, 500)) < 0) { \
+	if ((_res = nfc_initiator_transceive_bytes (tag->device, __msg, __len, __res, __##res##_size + 1, tag->timeout)) < 0) { \
 	    return errno = (errno == ETIMEDOUT) ? errno : EIO, -1; \
 	} \
 	__##res##_n = _res; \
@@ -306,7 +306,7 @@ mifare_desfire_connect(FreefareTag tag)
 	uint8_t AID[] = { 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x00};
 	BUFFER_APPEND(cmd, sizeof(AID));
 	BUFFER_APPEND_BYTES(cmd, AID, sizeof(AID));
-	if ((nfc_initiator_transceive_bytes(tag->device, cmd, BUFFER_SIZE(cmd), res, BUFFER_MAXSIZE(cmd), 500) < 0) || (res[0] != 0x90 || res[1] != 0x00)) {
+	if ((nfc_initiator_transceive_bytes(tag->device, cmd, BUFFER_SIZE(cmd), res, BUFFER_MAXSIZE(cmd), tag->timeout) < 0) || (res[0] != 0x90 || res[1] != 0x00)) {
 	    errno = (errno == ETIMEDOUT) ? errno : EIO;
 	    return -1;
 	}

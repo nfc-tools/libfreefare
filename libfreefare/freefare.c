@@ -39,6 +39,10 @@ freefare_tag_new(nfc_device *device, nfc_target target)
 	tag = mifare_ultralight_tag_new(device, target);
     }
 
+	// Set default timeout
+	if (tag)
+		tag->timeout = MIFARE_DEFAULT_TIMEOUT;
+
     return tag;
 }
 
@@ -199,6 +203,17 @@ freefare_get_tag_uid(FreefareTag tag)
 bool freefare_selected_tag_is_present(nfc_device *device)
 {
     return (nfc_initiator_target_is_present(device, NULL) == NFC_SUCCESS);
+}
+
+/*
+ * Set NFC operation timeout
+ */
+void
+freefare_set_tag_timeout(FreefareTag tag, int timeout)
+{
+    if (tag) {
+        tag->timeout = timeout < 0 ? 0 : timeout;
+    }
 }
 
 /*

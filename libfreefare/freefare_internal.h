@@ -141,6 +141,8 @@ void		*assert_crypto_buffer_size(FreefareTag tag, size_t nbytes);
 #define MIFARE_ULTRALIGHT_C_PAGE_COUNT_READ 0x2C
 // Max PAGE_COUNT of the Ultralight Family:
 #define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
+// Default timeout (ms) for tag operations
+#define MIFARE_DEFAULT_TIMEOUT 500
 
 /*
  * This structure is common to all supported MIFARE targets but shall not be
@@ -155,6 +157,7 @@ struct freefare_tag {
     nfc_target info;
     int type;
     int active;
+    int timeout;
     void (*free_tag)(FreefareTag tag);
 };
 

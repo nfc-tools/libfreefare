@@ -111,6 +111,10 @@ main(int argc, char *argv[])
 	    if (format) {
 		int res;
 
+		// Sometimes format takes a bit longer
+		// Call prior to connect to allow tag to rescue from failed format
+		freefare_set_tag_timeout(tags[i], 1500);
+
 		res = mifare_desfire_connect(tags[i]);
 		if (res < 0) {
 		    warnx("Can't connect to Mifare DESFire target.");

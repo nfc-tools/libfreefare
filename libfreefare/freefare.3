@@ -27,6 +27,7 @@
 .Nm freefare_get_tag_type ,
 .Nm freefare_get_tag_friendly_name ,
 .Nm freefare_get_tag_uid ,
+.Nm freefare_set_tag_timeout ,
 .Nm freefare_free_tag ,
 .Nm freefare_free_tags
 .Nd Generic target manipulation functions
@@ -65,6 +66,8 @@ enum freefare_tag_type {
 .Fn freefare_get_tag_friendly_name "FreefareTag tag"
 .Ft "char *"
 .Fn freefare_get_tag_uid "FreefareTag tag"
+.Ft "void"
+.Fn freefare_set_tag_timeout "FreefareTag tag" "int timeout"
 .Ft "void"
 .Fn freefare_free_tag "FreefareTag tags"
 .Ft "void"
@@ -117,6 +120,9 @@ can be gathered using the
 and
 .Fn freefare_get_tag_friendly_name
 functions.
+.Pp
+.Fn freefare_set_tag_timeout
+allows to set the timeout for a given NFC operation. Default value is 500ms.
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
