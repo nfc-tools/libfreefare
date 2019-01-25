@@ -28,7 +28,8 @@
 .Nm freefare_get_tag_friendly_name ,
 .Nm freefare_get_tag_uid ,
 .Nm freefare_free_tag ,
-.Nm freefare_free_tags
+.Nm freefare_free_tags ,
+.Nm freefare_version
 .Nd Generic target manipulation functions
 .\"  _     _ _
 .\" | |   (_) |__  _ __ __ _ _ __ _   _
@@ -69,6 +70,8 @@ enum freefare_tag_type {
 .Fn freefare_free_tag "FreefareTag tags"
 .Ft "void"
 .Fn freefare_free_tags "FreefareTag *tags"
+.Ft "const char *"
+.Fn freefare_version
 .\"  ____                      _       _   _
 .\" |  _ \  ___  ___  ___ _ __(_)_ __ | |_(_) ___  _ __
 .\" | | | |/ _ \/ __|/ __| '__| | '_ \| __| |/ _ \| '_ \
@@ -117,6 +120,10 @@ can be gathered using the
 and
 .Fn freefare_get_tag_friendly_name
 functions.
+.Pp
+Use
+.Fn freefare_version
+to obtain a library version string
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
