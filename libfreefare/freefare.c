@@ -218,11 +218,7 @@ freefare_free_tag(FreefareTag tag)
 const char *
 freefare_version(void)
 {
-#ifdef GIT_REVISION
-    return GIT_REVISION;
-#else
     return PACKAGE_VERSION;
-#endif // GIT_REVISION
 }
 
 
