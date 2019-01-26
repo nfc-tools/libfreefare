@@ -211,9 +211,7 @@ bool freefare_selected_tag_is_present(nfc_device *device)
 void
 freefare_set_tag_timeout(FreefareTag tag, int timeout)
 {
-    if (tag) {
-        tag->timeout = timeout < 0 ? 0 : timeout;
-    }
+    tag->timeout = timeout;
 }
 
 /*

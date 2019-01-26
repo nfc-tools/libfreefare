@@ -121,8 +121,13 @@ and
 .Fn freefare_get_tag_friendly_name
 functions.
 .Pp
+The
 .Fn freefare_set_tag_timeout
-allows to set the timeout for a given NFC operation. Default value is 500ms.
+function is used to set the maximum duration for a single NFC operation to
+.Fa timeout
+mili-seconds. Setting
+.Fa timeout
+to 0 disables the timeout feature. By default, a timeout of 500 is configured.
 .\"  ____      _                                 _
 .\" |  _ \ ___| |_ _   _ _ __ _ __   __   ____ _| |_   _  ___  ___
 .\" | |_) / _ \ __| | | | '__| '_ \  \ \ / / _` | | | | |/ _ \/ __|
