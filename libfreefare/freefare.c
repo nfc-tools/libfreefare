@@ -188,6 +188,7 @@ freefare_get_tag_uid(FreefareTag tag)
     case NMT_ISO14443B:
     case NMT_ISO14443BI:
     case NMT_JEWEL:
+    case NMT_BARCODE:
 	res = strdup("UNKNOWN");
     }
     return res;
