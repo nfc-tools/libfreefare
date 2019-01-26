@@ -121,11 +121,15 @@ static ssize_t	 read_data(FreefareTag tag, uint8_t command, uint8_t file_no, off
 	} \
     } while (0)
 
-/*
- * Convenience macros.
- */
 
-/* Max APDU sizes to be ISO encapsulated by DESFIRE_TRANSCEIVE()
+
+
+/* Native DESFire APDUs will be wrapped in ISO7816-4 APDUs:
+
+   CAPDUs will be 5 bytes longer (CLA+P1+P2+Lc+Le)
+   RAPDUs will be 1 byte longer  (SW1 SW2 instead of 1 status byte)
+
+   Max APDU sizes to be ISO encapsulated by desfire_transceive()
    From MIFARE DESFire Functional specification:
    MAX_CAPDU_SIZE:   "The length of the total wrapped DESFire
                       command is not longer than 55 byte long."
@@ -204,6 +208,11 @@ desfire_transceive(FreefareTag tag, const char *msg, size_t msg_len, char *res, 
 	errno = 0;
 	return 0;
 }
+
+
+/*
+ * Convenience macros.
+ */
 
 #ifdef WITH_DEBUG
 	// define a small but cute wrapper to allow debug output
