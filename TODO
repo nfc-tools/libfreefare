@@ -3,12 +3,6 @@
     mifare_classic_authenticate() with a NULL key).
 [ ] MAD and MifareApplication functions are tied to mifare_clasic_* ones and
     some refactoring is required to have a consistent API.
-[ ] The DESFIRE_TRANSCEIVE macro should be replaced by a function
-    DESFIRE_TRANSCEIVE was originaly a macro to enclose a nfc_initiator_trans-
-    ceive_bytes() call with debug lines.  The functions has unexpectedly grown
-    up and is now between 25 and 100 lines of code (depending of my refactoring
-    mood).  The main drawbacks are poor readability, redundant code in the
-    binary, debuggers don't cope well with macros, and by design it sucks.
 [ ] Refactor examples and have consistent behavior.
     Dump to stdout unless -o is specified;
     Read from stdin unless a file is specified;
