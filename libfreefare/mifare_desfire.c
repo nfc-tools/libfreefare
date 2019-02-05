@@ -83,7 +83,7 @@ struct mifare_desfire_raw_file_settings {
 static struct mifare_desfire_file_settings cached_file_settings[MAX_FILE_COUNT];
 static bool cached_file_settings_current[MAX_FILE_COUNT];
 
-static int	 desfire_transceive(FreefareTag tag, const char *msg, size_t msg_len, char *res, size_t res_size, size_t *res_len);
+static int	 desfire_transceive(FreefareTag tag, const uint8_t *msg, size_t msg_len, uint8_t *res, size_t res_size, size_t *res_len);
 static int	 authenticate(FreefareTag tag, uint8_t cmd, uint8_t key_no, MifareDESFireKey key);
 static int	 create_file1(FreefareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t file_size);
 static int	 create_file2(FreefareTag tag, uint8_t command, uint8_t file_no, int has_iso_file_id, uint16_t iso_file_id, uint8_t communication_settings, uint16_t access_rights, uint32_t record_size, uint32_t max_number_of_records);
@@ -146,7 +146,7 @@ static ssize_t	 read_data(FreefareTag tag, uint8_t command, uint8_t file_no, off
  * response is copied at the beginning to match the PICC documentation.
  */
 static int
-desfire_transceive(FreefareTag tag, const char *msg, size_t msg_len, char *res, size_t res_size, size_t *res_len)
+desfire_transceive(FreefareTag tag, const uint8_t *msg, size_t msg_len, uint8_t *res, size_t res_size, size_t *res_len)
 {
 	uint8_t msg_buf[MAX_CAPDU_SIZE + 5];
 	uint8_t res_buf[MAX_RAPDU_SIZE + 1];
@@ -183,7 +183,7 @@ desfire_transceive(FreefareTag tag, const char *msg, size_t msg_len, char *res, 
 	DEBUG_XFER (res_buf, rc, "<=== ");
 
 	rc--;
-	if (rc > res_size) {
+	if (rc > (int)res_size) {
 		errno = ENOBUFS;
 		return -1;
 	}
@@ -523,7 +523,7 @@ mifare_desfire_change_key_settings(FreefareTag tag, uint8_t settings)
     BUFFER_APPEND(cmd, 0x54);
     BUFFER_APPEND(cmd, settings);
 
-    char *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 1, MDCM_ENCIPHERED | ENC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 1, MDCM_ENCIPHERED | ENC_COMMAND);
 
     if ((rc = MIFARE_DESFIRE_TRANSCEIVE(tag, p, __cmd_n, res, __res_size, &__res_n)) < 0)
        return rc;
@@ -549,7 +549,7 @@ mifare_desfire_get_key_settings(FreefareTag tag, uint8_t *settings, uint8_t *max
 
     BUFFER_APPEND(cmd, 0x45);
 
-    char *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 1, MDCM_PLAIN | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 1, MDCM_PLAIN | CMAC_COMMAND);
 
     if ((rc = MIFARE_DESFIRE_TRANSCEIVE(tag, cmd, __cmd_n, res, __res_size, &__res_n)) < 0)
         return rc;
@@ -1470,7 +1470,7 @@ create_file1(FreefareTag tag, uint8_t command, uint8_t file_no, int has_iso_file
     BUFFER_APPEND_LE(cmd, access_rights, 2, sizeof(uint16_t));
     BUFFER_APPEND_LE(cmd, file_size, 3, sizeof(uint32_t));
 
-    char *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
     if ((rc = MIFARE_DESFIRE_TRANSCEIVE(tag, p, __cmd_n, res, __res_size, &__res_n)) < 0)
         return rc;
@@ -1529,7 +1529,7 @@ mifare_desfire_create_value_file(FreefareTag tag, uint8_t file_no, uint8_t commu
     BUFFER_APPEND_LE(cmd, value, 4, sizeof(int32_t));
     BUFFER_APPEND(cmd, limited_credit_enable);
 
-    char *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
     if ((rc = MIFARE_DESFIRE_TRANSCEIVE(tag, p, __cmd_n, res, __res_size, &__res_n)) < 0)
         return rc;
@@ -1564,7 +1564,7 @@ create_file2(FreefareTag tag, uint8_t command, uint8_t file_no, int has_iso_file
     BUFFER_APPEND_LE(cmd, record_size, 3, sizeof(uint32_t));
     BUFFER_APPEND_LE(cmd, max_number_of_records, 3, sizeof(uint32_t));
 
-    char *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
+    uint8_t *p = mifare_cryto_preprocess_data(tag, cmd, &__cmd_n, 0, MDCM_PLAIN | CMAC_COMMAND);
 
     if ((rc = MIFARE_DESFIRE_TRANSCEIVE(tag, p, __cmd_n, res, __res_size, &__res_n)) < 0)
         return rc;
