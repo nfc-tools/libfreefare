@@ -712,7 +712,7 @@ bool
 ntag21x_is_auth_supported(nfc_device *device, nfc_iso14443a_info nai)
 {
     int ret;
-    uint8_t cmd_step1[1];
+    uint8_t cmd_step1[2];
     uint8_t res_step1[8];
     cmd_step1[0] = 0x60;
     cmd_step1[1] = 0x00;
