@@ -39,9 +39,9 @@ freefare_tag_new(nfc_device *device, nfc_target target)
 	tag = mifare_ultralight_tag_new(device, target);
     }
 
-	// Set default timeout
-	if (tag)
-		tag->timeout = MIFARE_DEFAULT_TIMEOUT;
+    // Set default timeout
+    if (tag)
+	tag->timeout = MIFARE_DEFAULT_TIMEOUT;
 
     return tag;
 }

@@ -142,7 +142,7 @@ void		*assert_crypto_buffer_size(FreefareTag tag, size_t nbytes);
 // Max PAGE_COUNT of the Ultralight Family:
 #define MIFARE_ULTRALIGHT_MAX_PAGE_COUNT 0x30
 // Default timeout (ms) for tag operations
-#define MIFARE_DEFAULT_TIMEOUT 500
+#define MIFARE_DEFAULT_TIMEOUT 2000
 
 /*
  * This structure is common to all supported MIFARE targets but shall not be
