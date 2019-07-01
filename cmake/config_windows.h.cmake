@@ -30,4 +30,10 @@
 
 #define ENOTSUP WSAEOPNOTSUPP
 
+#cmakedefine PACKAGE_NAME "@PACKAGE_NAME@"
+#cmakedefine PACKAGE_VERSION "@PACKAGE_VERSION@"
+#cmakedefine PACKAGE_STRING "@PACKAGE_STRING@"
+#cmakedefine _XOPEN_SOURCE @_XOPEN_SOURCE@
+#cmakedefine SYSCONFDIR "@SYSCONFDIR@"
+
 #endif /* !__CONFIG_WINDOWS_H__ */
