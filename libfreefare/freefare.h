@@ -50,6 +50,8 @@ void		 freefare_free_tag(FreefareTag tag);
 void		 freefare_free_tags(FreefareTag *tags);
 bool		 freefare_selected_tag_is_present(nfc_device *device);
 
+const char	*freefare_version(void);
+
 const char	*freefare_strerror(FreefareTag tag);
 int		 freefare_strerror_r(FreefareTag tag, char *buffer, size_t len);
 void		 freefare_perror(FreefareTag tag, const char *string);
