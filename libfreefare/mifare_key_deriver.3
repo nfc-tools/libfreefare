@@ -50,7 +50,7 @@ Mifare card manipulation library (libfreefare, \-lfreefare)
 .Sh SYNOPSIS
 .In freefare.h
 .Ft MifareKeyDeriver
-.Fn mifare_key_deriver_new_an10922 "MifareDESFireKey master_key" "MifareKeyType output_key_type"
+.Fn mifare_key_deriver_new_an10922 "MifareDESFireKey master_key" "MifareKeyType output_key_type" "int flags"
 .Ft int
 .Fn mifare_key_deriver_begin "MifareKeyDeriver deriver"
 .Ft int
@@ -83,7 +83,11 @@ The
 function alocates a new key deriver object which can be used to generate
 diversified keys from
 .Va master_key
-in accordinance with AN10922.
+in accordinance with AN10922 when the flags field is is set to AN10922_FLAG_DEFAULT.
+When the flags field is set to AN10922_FLAG_EMULATE_ISSUE_91, the resulting key
+deriver will use the non-AN10922-compliant key derivation that was originally being
+used by this API. All new deployments should use AN10922_FLAG_DEFAULT. See issue #91 for
+more information.
 .Pp
 The
 .Fn mifare_key_deriver_begin

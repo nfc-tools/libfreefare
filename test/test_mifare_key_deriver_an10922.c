@@ -22,7 +22,7 @@ test_mifare_key_deriver_an10922_aes128(void)
     version = mifare_desfire_key_get_version(key);
     cut_assert_equal_int(key1_aes128_version, version, cut_message("Wrong master key version"));
 
-    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_AES128);
+    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_AES128, AN10922_FLAG_DEFAULT);
 
     ret = mifare_key_deriver_begin(deriver);
     cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_begin failed"));
@@ -34,6 +34,93 @@ test_mifare_key_deriver_an10922_aes128(void)
     cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_update failed"));
 
     ret = mifare_key_deriver_update_cstr(deriver, "NXP Abu");
+    cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_update failed"));
+
+    derived_key = mifare_key_deriver_end(deriver);
+    cut_assert_not_null(derived_key, cut_message("mifare_key_deriver_end failed"));
+
+    cut_assert_equal_memory(key1_aes128_check_m, sizeof(key1_aes128_check_m), deriver->m, deriver->len, cut_message("Wrong CMAC message"));
+
+    version = mifare_desfire_key_get_version(derived_key);
+    cut_assert_equal_int(key1_aes128_version, version, cut_message("Wrong derived key version"));
+
+    cut_assert_equal_int(derived_key->type, MIFARE_KEY_AES128, cut_message("Wrong derived key type"));
+
+    cut_assert_equal_memory(key1_aes128_derived_data, sizeof(key1_aes128_derived_data), derived_key->data, sizeof(key1_aes128_derived_data), cut_message("Wrong derived key"));
+    mifare_key_deriver_free(deriver);
+    mifare_desfire_key_free(derived_key);
+    mifare_desfire_key_free(key);
+}
+
+void
+test_mifare_key_deriver_an10922_aes128_short_m(void)
+{
+    MifareDESFireKey key = NULL;
+    MifareDESFireKey derived_key = NULL;
+    MifareKeyDeriver deriver = NULL;
+    int version, ret;
+
+    // These test vectors came from AN10957, pages 13-14
+    uint8_t key1_aes128_data[16] = { 0xf3, 0xf9, 0x37, 0x76, 0x98, 0x70, 0x7b, 0x68, 0x8e, 0xaf, 0x84, 0xab, 0xe3, 0x9e, 0x37, 0x91 };
+    uint8_t key1_aes128_version = 16;
+    uint8_t key1_aes128_derived_data[16] = { 0x0b, 0xb4, 0x08, 0xba, 0xff, 0x98, 0xb6, 0xee, 0x9f, 0x2e, 0x15, 0x85, 0x77, 0x7f, 0x6a, 0x51 };
+    uint8_t key1_aes128_check_m[] = { 0x01, 0x04, 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed };
+
+    key = mifare_desfire_aes_key_new_with_version(key1_aes128_data, key1_aes128_version);
+
+    version = mifare_desfire_key_get_version(key);
+    cut_assert_equal_int(key1_aes128_version, version, cut_message("Wrong master key version"));
+
+    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_AES128, AN10922_FLAG_DEFAULT);
+
+    ret = mifare_key_deriver_begin(deriver);
+    cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_begin failed"));
+
+    ret = mifare_key_deriver_update_cstr(deriver, "\x04\xde\xad\xbe\xef\xfe\xed");
+    cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_update failed"));
+
+    derived_key = mifare_key_deriver_end(deriver);
+    cut_assert_not_null(derived_key, cut_message("mifare_key_deriver_end failed"));
+
+    cut_assert_equal_memory(key1_aes128_check_m, sizeof(key1_aes128_check_m), deriver->m, deriver->len, cut_message("Wrong CMAC message"));
+
+    version = mifare_desfire_key_get_version(derived_key);
+    cut_assert_equal_int(key1_aes128_version, version, cut_message("Wrong derived key version"));
+
+    cut_assert_equal_int(derived_key->type, MIFARE_KEY_AES128, cut_message("Wrong derived key type"));
+
+    cut_assert_equal_memory(key1_aes128_derived_data, sizeof(key1_aes128_derived_data), derived_key->data, sizeof(key1_aes128_derived_data), cut_message("Wrong derived key"));
+    mifare_key_deriver_free(deriver);
+    mifare_desfire_key_free(derived_key);
+    mifare_desfire_key_free(key);
+}
+
+void
+test_mifare_key_deriver_an10922_aes128_issue_91(void)
+{
+    MifareDESFireKey key = NULL;
+    MifareDESFireKey derived_key = NULL;
+    MifareKeyDeriver deriver = NULL;
+    int version, ret;
+
+    // These test vectors came from AN10957, pages 13-14; EXCEPT that the derived
+    // data reflects the use of the AN10922_FLAG_EMULATE_ISSUE_91 flag.
+    uint8_t key1_aes128_data[16] = { 0xf3, 0xf9, 0x37, 0x76, 0x98, 0x70, 0x7b, 0x68, 0x8e, 0xaf, 0x84, 0xab, 0xe3, 0x9e, 0x37, 0x91 };
+    uint8_t key1_aes128_version = 16;
+    uint8_t key1_aes128_derived_data[16] = { 0x72, 0x1e, 0x2c, 0x01, 0xe8, 0x1a, 0xf8, 0x5d, 0x81, 0x56, 0x33, 0x96, 0x9c, 0xea, 0x26, 0x07 };
+    uint8_t key1_aes128_check_m[] = { 0x01, 0x04, 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed };
+
+    key = mifare_desfire_aes_key_new_with_version(key1_aes128_data, key1_aes128_version);
+
+    version = mifare_desfire_key_get_version(key);
+    cut_assert_equal_int(key1_aes128_version, version, cut_message("Wrong master key version"));
+
+    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_AES128, AN10922_FLAG_EMULATE_ISSUE_91);
+
+    ret = mifare_key_deriver_begin(deriver);
+    cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_begin failed"));
+
+    ret = mifare_key_deriver_update_cstr(deriver, "\x04\xde\xad\xbe\xef\xfe\xed");
     cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_update failed"));
 
     derived_key = mifare_key_deriver_end(deriver);
@@ -67,7 +154,7 @@ test_mifare_key_deriver_an10922_2k3des(void)
 
     key = mifare_desfire_3des_key_new_with_version(key1_2k3des_data);
 
-    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_2K3DES);
+    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_2K3DES, AN10922_FLAG_DEFAULT);
 
     ret = mifare_key_deriver_begin(deriver);
     cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_begin failed"));
@@ -112,7 +199,7 @@ test_mifare_key_deriver_an10922_3k3des(void)
 
     key = mifare_desfire_3k3des_key_new_with_version(key1_3k3des_data);
 
-    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_3K3DES);
+    deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_3K3DES, AN10922_FLAG_DEFAULT);
 
     ret = mifare_key_deriver_begin(deriver);
     cut_assert_equal_int(ret, 0, cut_message("mifare_key_deriver_begin failed"));
