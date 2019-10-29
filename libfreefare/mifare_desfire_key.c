@@ -208,6 +208,12 @@ mifare_desfire_session_key_new(const uint8_t rnda[], const uint8_t rndb[], Mifar
     return key;
 }
 
+MifareKeyType
+mifare_desfire_key_get_type(MifareDESFireKey key)
+{
+    return key->type;
+}
+
 void
 mifare_desfire_key_free(MifareDESFireKey key)
 {
