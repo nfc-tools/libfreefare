@@ -150,6 +150,40 @@ cmac(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len
     free(buffer);
 }
 
+void
+cmac_an10922(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac)
+{
+    int kbs = key_block_size(key);
+    int buffer_len = kbs*2;
+
+    // Contract for this function requires that the data fit in two blocks.
+    if (len > buffer_len)
+	abort();
+
+    uint8_t *buffer = malloc(buffer_len);
+
+    if (!buffer)
+	abort();
+
+    memcpy(buffer, data, len);
+
+    if (len != buffer_len) {
+	buffer[len++] = 0x80;
+	while (len != buffer_len) {
+	    buffer[len++] = 0x00;
+	}
+	xor(key->cmac_sk2, buffer + len - kbs, kbs);
+    } else {
+	xor(key->cmac_sk1, buffer + len - kbs, kbs);
+    }
+
+    mifare_cypher_blocks_chained(NULL, key, ivect, buffer, len, MCD_SEND, MCO_ENCYPHER);
+
+    memcpy(cmac, ivect, kbs);
+
+    free(buffer);
+}
+
 #define CRC32_PRESET 0xFFFFFFFF
 
 static void

@@ -213,6 +213,16 @@ freefare_free_tag(FreefareTag tag)
     }
 }
 
+/*
+ * Return lib version
+ */
+const char *
+freefare_version(void)
+{
+    return PACKAGE_VERSION;
+}
+
+
 const char *
 freefare_strerror(FreefareTag tag)
 {
