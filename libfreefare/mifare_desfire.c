@@ -175,7 +175,7 @@ desfire_transceive(FreefareTag tag, const uint8_t *msg, size_t msg_len, uint8_t 
 
 	DEBUG_XFER (msg_buf, len, "===> ");
 
-	if ((rc = nfc_initiator_transceive_bytes (tag->device, msg_buf, len, res_buf, sizeof(res_buf), 500)) < 2) {
+	if ((rc = nfc_initiator_transceive_bytes (tag->device, msg_buf, len, res_buf, sizeof(res_buf), tag->timeout)) < 2) {
 		errno = (errno == ETIMEDOUT) ? errno : EIO;
 	    return -1;
 	}
@@ -348,7 +348,7 @@ mifare_desfire_connect(FreefareTag tag)
 	uint8_t AID[] = { 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x00};
 	BUFFER_APPEND(cmd, sizeof(AID));
 	BUFFER_APPEND_BYTES(cmd, AID, sizeof(AID));
-	if ((nfc_initiator_transceive_bytes(tag->device, cmd, BUFFER_SIZE(cmd), res, BUFFER_MAXSIZE(cmd), 500) < 0) || (res[0] != 0x90 || res[1] != 0x00)) {
+	if ((nfc_initiator_transceive_bytes(tag->device, cmd, BUFFER_SIZE(cmd), res, BUFFER_MAXSIZE(cmd), tag->timeout) < 0) || (res[0] != 0x90 || res[1] != 0x00)) {
 	    errno = (errno == ETIMEDOUT) ? errno : EIO;
 	    return -1;
 	}
