@@ -49,6 +49,7 @@ char		*freefare_get_tag_uid(FreefareTag tag);
 void		 freefare_free_tag(FreefareTag tag);
 void		 freefare_free_tags(FreefareTag *tags);
 bool		 freefare_selected_tag_is_present(nfc_device *device);
+void		 freefare_set_tag_timeout(FreefareTag tag, int timeout);
 
 const char	*freefare_version(void);
 

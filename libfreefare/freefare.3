@@ -27,6 +27,7 @@
 .Nm freefare_get_tag_type ,
 .Nm freefare_get_tag_friendly_name ,
 .Nm freefare_get_tag_uid ,
+.Nm freefare_set_tag_timeout ,
 .Nm freefare_free_tag ,
 .Nm freefare_free_tags ,
 .Nm freefare_version
@@ -66,6 +67,8 @@ enum freefare_tag_type {
 .Fn freefare_get_tag_friendly_name "FreefareTag tag"
 .Ft "char *"
 .Fn freefare_get_tag_uid "FreefareTag tag"
+.Ft "void"
+.Fn freefare_set_tag_timeout "FreefareTag tag" "int timeout"
 .Ft "void"
 .Fn freefare_free_tag "FreefareTag tags"
 .Ft "void"
@@ -122,6 +125,12 @@ and
 functions.
 .Pp
 The
+.Fn freefare_set_tag_timeout
+function is used to set the maximum duration for a single NFC operation to
+.Fa timeout
+mili-seconds. Setting
+.Fa timeout
+to 0 disables the timeout feature. By default, a timeout of 2000 is configured.
 .Fn freefare_version
 function returns the version of the library.
 .\"  ____      _                                 _
