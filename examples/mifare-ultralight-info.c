@@ -61,7 +61,7 @@ main(int argc, char *argv[])
 		res = mifare_ultralightc_authenticate(tag, key);
 		if (res != 0) {
 		    MifareDESFireKey diversified_key = NULL;
-		    MifareKeyDeriver deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_2K3DES);
+		    MifareKeyDeriver deriver = mifare_key_deriver_new_an10922(key, MIFARE_KEY_2K3DES, AN10922_FLAG_DEFAULT);
 
 		    mifare_key_deriver_begin(deriver);
 		    mifare_key_deriver_update_uid(deriver, tag);

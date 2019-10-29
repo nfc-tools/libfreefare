@@ -134,6 +134,7 @@ size_t		 enciphered_data_length(const FreefareTag tag, const size_t nbytes, int 
 
 void		 cmac_generate_subkeys(MifareDESFireKey key);
 void		 cmac(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
+void		 cmac_an10922(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac);
 void		*assert_crypto_buffer_size(FreefareTag tag, size_t nbytes);
 
 #define MIFARE_ULTRALIGHT_PAGE_COUNT  0x10
@@ -216,8 +217,9 @@ struct mifare_desfire_tag {
 struct mifare_key_deriver {
     MifareDESFireKey master_key;
     MifareKeyType output_key_type;
-    uint8_t m[48];
+    uint8_t m[32];
     int len;
+    int flags;
 };
 
 MifareDESFireKey mifare_desfire_session_key_new(const uint8_t rnda[], const uint8_t rndb[], MifareDESFireKey authentication_key);
