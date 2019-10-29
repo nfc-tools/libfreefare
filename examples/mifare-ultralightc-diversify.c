@@ -30,7 +30,7 @@ main(int argc, char *argv[])
     uint8_t key1_3des_data[16] = { 0x49, 0x45, 0x4D, 0x4B, 0x41, 0x45, 0x52, 0x42, 0x21, 0x4E, 0x41, 0x43, 0x55, 0x4F, 0x59, 0x46 };
     MifareDESFireKey master_key = mifare_desfire_3des_key_new(key1_3des_data);
     MifareDESFireKey derived_key = NULL;
-    MifareKeyDeriver deriver = mifare_key_deriver_new_an10922(master_key, MIFARE_KEY_2K3DES);
+    MifareKeyDeriver deriver = mifare_key_deriver_new_an10922(master_key, MIFARE_KEY_2K3DES, AN10922_FLAG_DEFAULT);
     bool undiversify = (argc == 2 && strcmp("--undiversify",argv[1]) == 0);
 
     if (argc > 2 || (argc == 2 && strcmp("--undiversify",argv[1]) != 0)) {
