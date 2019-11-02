@@ -70,8 +70,8 @@ void
 rol(uint8_t *data, const size_t len)
 {
     if (len == 0)
-        return;
-    
+	return;
+
     uint8_t first = data[0];
     for (size_t i = 0; i < len - 1; i++) {
 	data[i] = data[i + 1];
@@ -83,8 +83,8 @@ void
 lsl(uint8_t *data, size_t len)
 {
     if (len == 0)
-        return;
-    
+	return;
+
     for (size_t n = 0; n < len - 1; n++) {
 	data[n] = (data[n] << 1) | (data[n + 1] >> 7);
     }
