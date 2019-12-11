@@ -113,6 +113,9 @@ mad_new(uint8_t version)
 void
 nxp_crc(uint8_t *crc, const uint8_t value)
 {
+    /* the original code, which used a bitwise method for calculating CRC, has
+     * since been replaced by this lookup table. the original implementation can
+     * be found in test_mad.c */
     /* x^8 + x^4 + x^3 + x^2 + 1 => 0x11d */
     static const uint8_t nxp_crc_lut[] = {
 	0x00, 0x1D, 0x3A, 0x27, 0x74, 0x69, 0x4E, 0x53, 0xE8, 0xF5, 0xD2, 0xCF,
