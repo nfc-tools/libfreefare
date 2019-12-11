@@ -69,6 +69,9 @@ xor(const uint8_t *ivect, uint8_t *data, const size_t len)
 void
 rol(uint8_t *data, const size_t len)
 {
+    if (len == 0)
+	return;
+
     uint8_t first = data[0];
     for (size_t i = 0; i < len - 1; i++) {
 	data[i] = data[i + 1];
@@ -79,6 +82,9 @@ rol(uint8_t *data, const size_t len)
 void
 lsl(uint8_t *data, size_t len)
 {
+    if (len == 0)
+	return;
+
     for (size_t n = 0; n < len - 1; n++) {
 	data[n] = (data[n] << 1) | (data[n + 1] >> 7);
     }
@@ -130,6 +136,40 @@ cmac(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len
     if ((!len) || (len % kbs)) {
 	buffer[len++] = 0x80;
 	while (len % kbs) {
+	    buffer[len++] = 0x00;
+	}
+	xor(key->cmac_sk2, buffer + len - kbs, kbs);
+    } else {
+	xor(key->cmac_sk1, buffer + len - kbs, kbs);
+    }
+
+    mifare_cypher_blocks_chained(NULL, key, ivect, buffer, len, MCD_SEND, MCO_ENCYPHER);
+
+    memcpy(cmac, ivect, kbs);
+
+    free(buffer);
+}
+
+void
+cmac_an10922(const MifareDESFireKey key, uint8_t *ivect, const uint8_t *data, size_t len, uint8_t *cmac)
+{
+    int kbs = key_block_size(key);
+    int buffer_len = kbs*2;
+
+    // Contract for this function requires that the data fit in two blocks.
+    if (len > buffer_len)
+	abort();
+
+    uint8_t *buffer = malloc(buffer_len);
+
+    if (!buffer)
+	abort();
+
+    memcpy(buffer, data, len);
+
+    if (len != buffer_len) {
+	buffer[len++] = 0x80;
+	while (len != buffer_len) {
 	    buffer[len++] = 0x00;
 	}
 	xor(key->cmac_sk2, buffer + len - kbs, kbs);

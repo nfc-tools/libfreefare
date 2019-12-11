@@ -52,6 +52,7 @@ linkedman = \
 	    freefare.3 freefare_get_tag_type.3 \
 	    freefare.3 freefare_get_tag_uid.3 \
 	    freefare.3 freefare_get_tags.3 \
+	    freefare.3 freefare_set_tag_timeout.3 \
 	    freefare.3 freefare_version.3 \
 	    freefare_error.3 freefare_perror.3 \
 	    freefare_error.3 freefare_strerror.3 \

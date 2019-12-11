@@ -17,7 +17,7 @@
 #define AN10922_DIV_3K3DES_3	0x33
 
 MifareKeyDeriver
-mifare_key_deriver_new_an10922(MifareDESFireKey master_key, MifareKeyType output_key_type)
+mifare_key_deriver_new_an10922(MifareDESFireKey master_key, MifareKeyType output_key_type, int flags)
 {
     MifareKeyDeriver deriver = NULL;
     const int master_key_block_size = key_block_size(master_key);
@@ -57,6 +57,7 @@ mifare_key_deriver_new_an10922(MifareDESFireKey master_key, MifareKeyType output
 	deriver->master_key = master_key;
 	deriver->output_key_type = output_key_type;
 	cmac_generate_subkeys(deriver->master_key);
+	deriver->flags = flags;
     }
 
     return deriver;
@@ -91,7 +92,7 @@ mifare_key_deriver_update_data(MifareKeyDeriver deriver, const uint8_t *data, si
 	return -1;
     }
 
-    if (len > sizeof(deriver->m) - deriver->len) {
+    if (len > key_block_size(deriver->master_key) * 2 - deriver->len) {
 	deriver->len = 0; // Remember that we have an error.
 	errno = EOVERFLOW;
 	return -1;
@@ -167,7 +168,13 @@ deriver_cmac(MifareKeyDeriver deriver, uint8_t* output)
 {
     uint8_t ivect[24];
     memset(ivect, 0, sizeof(ivect));
-    cmac(deriver->master_key, ivect, deriver->m, deriver->len, output);
+    if (deriver->flags & AN10922_FLAG_EMULATE_ISSUE_91) {
+	// Restores the old non-AN10922-compiant derivation
+	// that was fixed by issue #91.
+	cmac(deriver->master_key, ivect, deriver->m, deriver->len, output);
+    } else {
+	cmac_an10922(deriver->master_key, ivect, deriver->m, deriver->len, output);
+    }
 }
 
 static uint8_t
