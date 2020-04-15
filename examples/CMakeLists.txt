@@ -1,6 +1,6 @@
 set(EXAMPLES-SOURCES
-	felica-lite-dump
-	felica-read-ndef
+        felica-lite-dump
+        felica-read-ndef
         mifare-classic-format
         mifare-classic-read-ndef
         mifare-classic-write-ndef
