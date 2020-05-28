@@ -355,13 +355,14 @@ mifare_classic_read(FreefareTag tag, const MifareClassicBlockNumber block, Mifar
     ASSERT_ACTIVE(tag);
 
     BUFFER_INIT(cmd, 2);
-    BUFFER_ALIAS(res, data, sizeof(MifareClassicBlock));
-
+    //For PC/SC reader, need give SW1SW2
+    BUFFER_ALIAS(res, data, sizeof(MifareClassicBlock)+2);
+    
     BUFFER_APPEND(cmd, MC_READ);
     BUFFER_APPEND(cmd, block);
 
     CLASSIC_TRANSCEIVE(tag, cmd, res);
-
+    
     return 0;
 }
 
