@@ -271,11 +271,19 @@ le24toh(uint8_t data[3])
 bool
 mifare_desfire_taste(nfc_device *device, nfc_target target)
 {
+    // We have two different ATS prefixes to
+    // check for, standalone and JCOP.
+    static const char STANDALONE_DESFIRE[] = { 0x75, 0x77, 0x81, 0x02};
+    static const char JCOP_DESFIRE[] = { 0x75, 0xf7, 0xb1, 0x02 };
+
     (void) device;
+
     return target.nm.nmt == NMT_ISO14443A &&
 	   target.nti.nai.btSak == 0x20 &&
-	   target.nti.nai.szAtsLen >= 5 &&
-	   memcmp(target.nti.nai.abtAts, "\x75\x77\x81\x02", 4) == 0;
+	   target.nti.nai.szAtsLen >= 5 && (
+	       memcmp(target.nti.nai.abtAts, STANDALONE_DESFIRE, sizeof(STANDALONE_DESFIRE)) == 0 ||
+	       memcmp(target.nti.nai.abtAts, JCOP_DESFIRE, sizeof(JCOP_DESFIRE)) == 0
+	   );
 }
 
 /*
