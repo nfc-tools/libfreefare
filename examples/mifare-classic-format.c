@@ -83,28 +83,35 @@ try_format_sector(FreefareTag tag, MifareClassicSectorNumber sector)
 {
     display_progress();
     for (size_t i = 0; i < (sizeof(default_keys) / sizeof(MifareClassicKey)); i++) {
-	MifareClassicBlockNumber block = mifare_classic_sector_last_block(sector);
-	if ((0 == mifare_classic_connect(tag)) && (0 == mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_A))) {
-	    if (0 == mifare_classic_format_sector(tag, sector)) {
-		mifare_classic_disconnect(tag);
-		return 1;
-	    } else if (EIO == errno) {
-		err(EXIT_FAILURE, "sector %d", sector);
-	    }
-	    mifare_classic_disconnect(tag);
-	}
-
-	if ((0 == mifare_classic_connect(tag)) && (0 == mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_B))) {
-	    if (0 == mifare_classic_format_sector(tag, sector)) {
-		mifare_classic_disconnect(tag);
-		return 1;
-	    } else if (EIO == errno) {
-		err(EXIT_FAILURE, "sector %d", sector);
-	    }
-	    mifare_classic_disconnect(tag);
-	}
+        MifareClassicBlockNumber block = mifare_classic_sector_last_block(sector);
+        // The disconnect event only execute after connected
+        if (0 == mifare_classic_connect(tag)) {
+            int ret = mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_A);
+            if ((0x00 == ret) || (0x90 == ret)) {
+                if (0 == mifare_classic_format_sector(tag, sector)) {
+                    mifare_classic_disconnect(tag);
+                    return 1;
+                } else if (EIO == errno) {
+                    err(EXIT_FAILURE, "sector %d", sector);
+                }
+            }
+            mifare_classic_disconnect(tag);
+        }
+        //With PC/SC reader, it has SW1SW2
+        if (0 == mifare_classic_connect(tag)) {
+            int ret = mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_B);
+            if ((0x00 == ret) || (0x90 == ret)) {
+                if (0 == mifare_classic_format_sector(tag, sector)) {
+                    mifare_classic_disconnect(tag);
+                    return 1;
+                } else if (EIO == errno) {
+                    err(EXIT_FAILURE, "sector %d", sector);
+                }
+            }
+            mifare_classic_disconnect(tag);
+        }
     }
-
+    
     warnx("No known authentication key for sector %d", sector);
     return 0;
 }

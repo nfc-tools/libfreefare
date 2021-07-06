@@ -62,29 +62,37 @@ search_sector_key(FreefareTag tag, MifareClassicSectorNumber sector, MifareClass
      */
     mifare_classic_disconnect(tag);
     for (size_t i = 0; i < (sizeof(default_keys) / sizeof(MifareClassicKey)); i++) {
-	if ((0 == mifare_classic_connect(tag)) && (0 == mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_A))) {
-	    if ((1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYA, MFC_KEY_A)) &&
-		(1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A)) &&
-		(1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYB, MFC_KEY_A))) {
-		memcpy(key, &default_keys[i], sizeof(MifareClassicKey));
-		*key_type = MFC_KEY_A;
-		return 1;
-	    }
-	}
-	mifare_classic_disconnect(tag);
-
-	if ((0 == mifare_classic_connect(tag)) && (0 == mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_B))) {
-	    if ((1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYA, MFC_KEY_B)) &&
-		(1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_ACCESS_BITS, MFC_KEY_B)) &&
-		(1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYB, MFC_KEY_B))) {
-		memcpy(key, &default_keys[i], sizeof(MifareClassicKey));
-		*key_type = MFC_KEY_B;
-		return 1;
-	    }
-	}
-	mifare_classic_disconnect(tag);
+        //The disconnect event only execute after connected
+    if (0 == mifare_classic_connect(tag)){
+        int ret = mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_A);
+        if (0x00 == ret || 0x90 == ret) {
+            if ((1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYA, MFC_KEY_A)) &&
+            (1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_ACCESS_BITS, MFC_KEY_A)) &&
+            (1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYB, MFC_KEY_A))) {
+                memcpy(key, &default_keys[i], sizeof(MifareClassicKey));
+                *key_type = MFC_KEY_A;
+                return 1;
+            }
+        }
+        mifare_classic_disconnect(tag);
     }
-
+    
+    //With PC/SC reader, it has SW1SW2
+    if (0 == mifare_classic_connect(tag)) {
+        int ret = mifare_classic_authenticate(tag, block, default_keys[i], MFC_KEY_B);
+        if (0x00 == ret || 0x90 == ret) {
+            if ((1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYA, MFC_KEY_B)) &&
+            (1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_ACCESS_BITS, MFC_KEY_B)) &&
+            (1 == mifare_classic_get_trailer_block_permission(tag, block, MCAB_WRITE_KEYB, MFC_KEY_B))) {
+                memcpy(key, &default_keys[i], sizeof(MifareClassicKey));
+                *key_type = MFC_KEY_B;
+                return 1;
+            }
+        }
+        mifare_classic_disconnect(tag);
+    }
+    
+    }
     warnx("No known authentication key for sector 0x%02x\n", sector);
     return 0;
 }
