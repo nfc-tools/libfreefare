@@ -512,6 +512,15 @@ int		 mifare_desfire_clear_record_file(FreefareTag tag, uint8_t file_no);
 int		 mifare_desfire_commit_transaction(FreefareTag tag);
 int		 mifare_desfire_abort_transaction(FreefareTag tag);
 
+typedef enum mifare_key_type {
+    MIFARE_KEY_DES,
+    MIFARE_KEY_2K3DES,
+    MIFARE_KEY_3K3DES,
+    MIFARE_KEY_AES128,
+
+    MIFARE_KEY_LAST = MIFARE_KEY_AES128
+} MifareKeyType;
+
 MifareDESFireKey mifare_desfire_des_key_new(const uint8_t value[8]);
 MifareDESFireKey mifare_desfire_3des_key_new(const uint8_t value[16]);
 MifareDESFireKey mifare_desfire_des_key_new_with_version(const uint8_t value[8]);
@@ -522,21 +531,13 @@ MifareDESFireKey mifare_desfire_aes_key_new(const uint8_t value[16]);
 MifareDESFireKey mifare_desfire_aes_key_new_with_version(const uint8_t value[16], uint8_t version);
 uint8_t		 mifare_desfire_key_get_version(MifareDESFireKey key);
 void		 mifare_desfire_key_set_version(MifareDESFireKey key, uint8_t version);
+MifareKeyType	 mifare_desfire_key_get_type(MifareDESFireKey key);
 void		 mifare_desfire_key_free(MifareDESFireKey key);
 
 uint8_t		*tlv_encode(const uint8_t type, const uint8_t *istream, uint16_t isize, size_t *osize);
 uint8_t		*tlv_decode(const uint8_t *istream, uint8_t *type, uint16_t *size);
 size_t		tlv_record_length(const uint8_t *istream, size_t *field_length_size, size_t *field_value_size);
 uint8_t		*tlv_append(uint8_t *a, uint8_t *b);
-
-typedef enum mifare_key_type {
-    MIFARE_KEY_DES,
-    MIFARE_KEY_2K3DES,
-    MIFARE_KEY_3K3DES,
-    MIFARE_KEY_AES128,
-
-    MIFARE_KEY_LAST = MIFARE_KEY_AES128
-} MifareKeyType;
 
 struct mifare_key_deriver;
 typedef struct mifare_key_deriver *MifareKeyDeriver;

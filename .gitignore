@@ -28,6 +28,7 @@ examples/mifare-classic-read-ndef
 examples/mifare-classic-write-ndef
 examples/mifare-desfire-access
 examples/mifare-desfire-create-ndef
+examples/mifare-desfire-ev1-change-picc-key
 examples/mifare-desfire-ev1-configure-ats
 examples/mifare-desfire-ev1-configure-default-key
 examples/mifare-desfire-ev1-configure-random-uid
@@ -36,6 +37,7 @@ examples/mifare-desfire-info
 examples/mifare-desfire-read-ndef
 examples/mifare-desfire-write-ndef
 examples/mifare-ultralight-info
+examples/mifare-ultralightc-diversify
 examples/ntag-detect
 examples/ntag-removeauth
 examples/ntag-setauth
