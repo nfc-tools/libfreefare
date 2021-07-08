@@ -1,4 +1,6 @@
 set(EXAMPLES-SOURCES
+        felica-lite-dump
+        felica-read-ndef
         mifare-classic-format
         mifare-classic-read-ndef
         mifare-classic-write-ndef
@@ -12,6 +14,7 @@ set(EXAMPLES-SOURCES
         mifare-desfire-ev1-configure-default-key
         mifare-desfire-ev1-configure-random-uid
         mifare-ultralight-info
+        mifare-ultralightc-diversify
         ntag-detect
         ntag-removeauth
         ntag-setauth

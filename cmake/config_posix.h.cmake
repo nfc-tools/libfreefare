@@ -15,5 +15,9 @@
 #cmakedefine _XOPEN_SOURCE @_XOPEN_SOURCE@
 #cmakedefine SYSCONFDIR "@SYSCONFDIR@"
 
+#ifdef HAVE_ENDIAN_H
+	#define _DEFAULT_SOURCE
+#endif
+
 #endif /* !__CONFIG_POSIX_H__ */
 
