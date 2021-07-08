@@ -1,4 +1,5 @@
 AC_INIT([libfreefare],[0.4.0])
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -47,9 +48,6 @@ if test $ac_cv_header_endian_h = "no" -a $ac_cv_header_sys_endian_h = "no" -a $a
 fi
 
 AC_CHECK_HEADERS([byteswap.h])
-
-AC_DEFINE([_XOPEN_SOURCE], [600], [Define to 500 if Single Unix conformance is wanted, 600 for sixth revision.])
-AC_DEFINE([_BSD_SOURCE], [1], [Define on BSD to activate all library features])
 
 CFLAGS="$CFLAGS -std=c99"
 
