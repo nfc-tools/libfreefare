@@ -17,6 +17,7 @@
  * NFC Forum Type 4 Tag Extensions for Mifare DESFire
  * Rev. 1.1 - 21 August 2007
  * Rev. 2.2 - 4 January 2012
+ * Rev. 2.4 - 22 May 2013
  *
  */
 
@@ -208,13 +209,13 @@ main(int argc, char *argv[])
 		    if (res < 0)
 			errx(EXIT_FAILURE, "CreateStdDataFile failed");
 		    // Mifare DESFire WriteData to write the content of the CC File with CClEN equal to 000Fh,
-		    // Mapping Version equal to 10h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
+		    // Mapping Version equal to 10h,MLe equal to 003Ah, MLc equal to 0034h, and NDEF File Control TLV
 		    // equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0E E0 (NDEF File size =3808 Bytes) 00 (free read access)
 		    // 00 free write access
 		    uint8_t capability_container_file_content[15] = {
 			0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
 			0x10,                       // Mapping version
-			0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
+			0x00, 0x3A,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
 			0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
 			0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
 			0xE1, 0x04,                 //   File Identifier of NDEF File
@@ -255,13 +256,13 @@ main(int argc, char *argv[])
 		    if (res < 0)
 			errx(EXIT_FAILURE, "CreateStdDataFileIso failed");
 		    // Mifare DESFire WriteData to write the content of the CC File with CClEN equal to 000Fh,
-		    // Mapping Version equal to 20h,MLe equal to 003Bh, MLc equal to 0034h, and NDEF File Control TLV
+		    // Mapping Version equal to 20h,MLe equal to 003Ah, MLc equal to 0034h, and NDEF File Control TLV
 		    // equal to T =04h, L=06h, V=E1 04 (NDEF ISO FID=E104h) 0xNNNN (NDEF File size = 0x0800/0x1000/0x1E00 bytes)
 		    // 00 (free read access) 00 free write access
 		    uint8_t capability_container_file_content[15] = {
 			0x00, 0x0F,                 // CCLEN: Size of this capability container.CCLEN values are between 000Fh and FFFEh
 			0x20,                       // Mapping version
-			0x00, 0x3B,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
+			0x00, 0x3A,                 // MLe: Maximum data size that can be read using a single ReadBinary command. MLe = 000Fh-FFFFh
 			0x00, 0x34,                 // MLc: Maximum data size that can be sent using a single UpdateBinary command. MLc = 0001h-FFFFh
 			0x04, 0x06,                 // T & L of NDEF File Control TLV, followed by 6 bytes of V:
 			0xE1, 0x04,                 //   File Identifier of NDEF File
