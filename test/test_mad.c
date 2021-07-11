@@ -3,6 +3,29 @@
 #include <freefare.h>
 #include "freefare_internal.h"
 
+static void
+nxp_crc_bitwise(uint8_t *crc, const uint8_t value)
+{
+    const uint8_t poly = 0x1d;
+
+    *crc ^= value;
+    for (int current_bit = 7; current_bit >= 0; current_bit--) {
+        int bit_out = (*crc) & 0x80;
+        *crc <<= 1;
+        if (bit_out)
+            *crc ^= poly;
+    }
+}
+
+static void
+nxp_crc_wrapper(uint8_t *crc, const uint8_t value)
+{
+    uint8_t res_bitwise = *crc;
+    nxp_crc_bitwise(&res_bitwise, value);
+    nxp_crc(crc, value);
+    cut_assert_equal_uint(*crc, res_bitwise, cut_message("Bitwise and bytewise CRC calculation result not equal!"));
+}
+
 void
 test_mad(void)
 {
@@ -58,12 +81,12 @@ test_mad_crc8_basic(void)
 
     /* Check integrity */
     crc = CRC_PRESET;
-    nxp_crc(&crc, crc_value);
+    nxp_crc_wrapper(&crc, crc_value);
     uint8_t save = crc;
 
     crc = CRC_PRESET;
-    nxp_crc(&crc, crc_value);
-    nxp_crc(&crc, save);
+    nxp_crc_wrapper(&crc, crc_value);
+    nxp_crc_wrapper(&crc, save);
     cut_assert_equal_int(0x00, crc, cut_message("CRC should verify crc(message + crc(message)) = 0"));
 }
 
@@ -77,43 +100,43 @@ test_mad_crc8_doc_example(void)
     uint8_t crc = CRC_PRESET;
 
     /* Block 1 -- 0x01 - 0x07 */
-    nxp_crc(&crc, 0x01);
-    nxp_crc(&crc, 0x01);
-    nxp_crc(&crc, 0x08);
-    nxp_crc(&crc, 0x01);
-    nxp_crc(&crc, 0x08);
-    nxp_crc(&crc, 0x01);
-    nxp_crc(&crc, 0x08);
+    nxp_crc_wrapper(&crc, 0x01);
+    nxp_crc_wrapper(&crc, 0x01);
+    nxp_crc_wrapper(&crc, 0x08);
+    nxp_crc_wrapper(&crc, 0x01);
+    nxp_crc_wrapper(&crc, 0x08);
+    nxp_crc_wrapper(&crc, 0x01);
+    nxp_crc_wrapper(&crc, 0x08);
 
     /* Block 2 -- 0x08 - 0x0f */
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x04);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x04);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Block 3 -- 0x00 - 0x07 */
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0x10);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0x10);
-    nxp_crc(&crc, 0x02);
-    nxp_crc(&crc, 0x10);
-    nxp_crc(&crc, 0x02);
-    nxp_crc(&crc, 0x10);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0x10);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0x10);
+    nxp_crc_wrapper(&crc, 0x02);
+    nxp_crc_wrapper(&crc, 0x10);
+    nxp_crc_wrapper(&crc, 0x02);
+    nxp_crc_wrapper(&crc, 0x10);
 
     /* Block 3 -- 0x08 - 0x0f */
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x11);
-    nxp_crc(&crc, 0x30);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x11);
+    nxp_crc_wrapper(&crc, 0x30);
 
     /* Append zeros of augmented message */
 
@@ -130,43 +153,43 @@ test_mad_crc8_real_example_1(void)
     uint8_t crc = CRC_PRESET;
 
     /* Block 1 -- 0x01 - 0x07 */
-    nxp_crc(&crc, 0x01);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x01);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
 
     /* Block 2 -- 0x08 - 0x0f */
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Block 3 -- 0x00 - 0x07 */
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Block 3 -- 0x08 - 0x0f */
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Append zeros of augmented message */
 
@@ -183,43 +206,43 @@ test_mad_crc8_real_example_2(void)
     uint8_t crc = CRC_PRESET;
 
     /* Block 1 -- 0x01 - 0x07 */
-    nxp_crc(&crc, 0x01);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x01);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
 
     /* Block 2 -- 0x08 - 0x0f */
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x03);
-    nxp_crc(&crc, 0xe1);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x03);
+    nxp_crc_wrapper(&crc, 0xe1);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Block 3 -- 0x00 - 0x07 */
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Block 3 -- 0x08 - 0x0f */
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
-    nxp_crc(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
+    nxp_crc_wrapper(&crc, 0x00);
 
     /* Append zeros of augmented message */
 
