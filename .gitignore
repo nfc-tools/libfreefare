@@ -11,6 +11,7 @@ Makefile.in
 INSTALL
 aclocal.m4
 ar-lib
+build
 compile
 config.*
 configure
