@@ -26,7 +26,7 @@ if HAS_LIBUTIL
     libfreefare_la_LIBADD += -lutil
 else # HAS_LIBUTIL
     libfreefare_la_LIBADD += $(top_builddir)/contrib/libutil/libutil.la
-    AM_CFLAGS += -I$(top_builddir)/contrib/libutil/
+    AM_CFLAGS += -I$(top_srcdir)/contrib/libutil/
 endif # !HAS_LIBUTIL
 endif # WITH_DEBUG
 
